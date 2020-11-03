@@ -1,0 +1,554 @@
+﻿@model InspectionProductCriteriaModel
+
+
+
+<h2>Product criteria</h2>
+
+<div ng-app="cwApp">
+
+    <div ng-controller="cwController">
+        
+        <div style="border: 1px solid black;position: relative">
+            <div style="display: table-row">
+                <div style="display:table-cell">Client:</div>
+                <div style="display:table-cell"><select ng-model="client_id" ng-options="c.id as c.value for c in Clients | orderBy:'value'" ng-change="loadProducts()"></select></div>
+            </div>
+            <div style="display: table-row">
+                <div style="display:table-cell">Factory:</div>
+                <div style="display:table-cell">
+                    <select ng-model="factory_id" ng-options="f.id as f.value for f in Factories | orderBy: 'value'" ng-change="loadProducts()">
+                        <option value="">(All)</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: table-row">
+                <div style="display:table-cell">Name or code:</div>
+                <div style="display:table-cell"><input type="text" ng-model="searchText" /></div>
+            </div>
+        </div>
+        <div style="border: 1px solid black;height:300px">
+            <div us-spinner spinner-key="spinner-1"></div>
+            <div ng-show="!inSearch" style="height: 250px;overflow:auto">
+                <table style="width: 95%">
+                    <tr>
+                        <td>Code</td>
+                        <td>Name</td>
+                        <td style="width: 30px"><input type="checkbox" ng-click="toggleSelection()" ng-model="selectAll"/></td>
+                        <td style="width:50px">Template(s)</td>
+                        <td style="width:50px"></td>
+                    </tr>
+                    <tbody ng-repeat="p in FoundProducts | filter:FoundProductFilter(searchText)" ng-class-even="'tablerow_alt'" ng-class-odd="'tablerow'">
+                        
+                        <tr>
+                            <td>{{p.cprod_code1}}</td>
+                            <td>{{p.cprod_name}}</td>
+                            <td><input ng-model="p.selected" type="checkbox" /></td>
+                            <td>{{GetTemplates(p)}}</td>
+                            <td><img src="/Images/menus/Delete.gif" style="cursor: pointer" ng-click="removeSelection(p)" title="Add" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div ng-show="FoundProducts.length > 0 && !CheckTemplates()">Customization not possible because nothing selected or selected products belong to different templates. Select only products that belong to the same template.</div>
+        <div ng-show="CheckTemplates()">
+            <input type="button" ng-click="save()" value="Save"/>
+            <div>Assign template: <select ng-model="template_id" ng-options="t.id as t.name for t in Templates" ng-change="assignTemplate()"></select></div>
+            <div us-spinner spinner-key="spinner-2"></div>
+            <div ng-show="showCriteria">
+                <div style="font-weight: bold;font-size: 14px">Criteria</div>
+                <div style="text-align: right"><a style="cursor: pointer" ng-click="addNewCriteria()">+ add new</a></div>
+                <div>
+                    <table class="table" style="width:100%">
+                        <tr class="table_headerrow">
+                            <td>Category</td>
+                            <td>Number</td>
+                            <td>Point</td>
+                            <td>Requirement (en)</td>
+                            <td>Requirement (cn)</td>
+                            <td>Importance</td>
+                            <td></td>
+                            <td style="width:60px"></td>
+                            <td style="width:60px"></td>
+                        </tr>
+
+                        <tbody ng-repeat="c in Criteria | filter:{IsDeleted:false} | orderBy:['category_id','number']" ng-class-even="'tablerow_alt'" ng-class-odd="'tablerow'">
+                            <tr ng-if="editId != c.unique_id">
+                                <td ng-style="CheckDiff(c,'category_id')">{{GetCategory(c.category_id)}}</td>
+                                <td>{{c.number}}</td>
+                                <td ng-style="CheckDiff(c,'point_id')">{{GetPoint(c.point_id)}}</td>
+                                <td ng-style="CheckDiff(c,'requirements')">{{c.requirements}}</td>
+                                <td ng-style="CheckDiff(c,'requirements_cn')">{{c.requirements_cn}}</td>
+                                <td ng-style="CheckDiff(c,'importance')">{{GetImportance(c.importance)}}</td>
+                                <td>{{c.type}}</td>
+                                <td><input type=button id="editRowBtn{{c.id}}" value="edit" ng-click="startEdit(c.unique_id)"></td>
+                                <td><input type=button id="deleteRowBtn{{c.id}}" value="delete" ng-click="DeleteCriteria(c)"></td>
+                            </tr>
+                            <tr ng-show="editId===c.unique_id" ng-if="editId===c.unique_id">
+                                <td><select ng-model="editedRow.category_id" ng-options="c.id as c.name for c in Categories"></select></td>
+                                <td><input type="text" ng-model="editedRow.number" style="max-width: 50px" /></td>
+                                <td><select ng-model="editedRow.point_id" ng-options="p.id as p.name for p in Points"></select></td>
+                                <td><textarea ng-model="editedRow.requirements" rows="3"></textarea></td>
+                                <td><textarea ng-model="editedRow.requirements_cn" rows="3"></textarea></td>
+                                <td><select ng-model="editedRow.importance" ng-options="p.id as p.name for p in Importances"></select></td>
+                                <td></td>
+                                <td><input type=button id="saveRowBtn{{c.id}}" value="save" ng-click="saveCriteria(c.unique_id)"></td>
+                                <td><input type=button id="cancelRowBtn{{c.id}}" value="cancel" ng-click="cancel(c.id)"></td>
+                            </tr>
+                        </tbody>
+                        <tr ng-show="editId<0" ng-if="editId<0">
+                            <td><select ng-model="editedRow.category_id" ng-options="c.id as c.name for c in Categories"></select></td>
+                            <td><input type="text" ng-model="editedRow.number" style="max-width: 50px" /></td>
+                            <td><select ng-model="editedRow.point_id" ng-options="p.id as p.name for p in Points"></select></td>
+                            <td><textarea ng-model="editedRow.requirements" rows="3"></textarea></td>
+                            <td><textarea ng-model="editedRow.requirements_cn" rows="3"></textarea></td>
+                            <td><select ng-model="editedRow.importance" ng-options="p.id as p.name for p in Importances"></select></td>
+                            <td></td>
+                            <td><input type=button id="saveRowBtn{{c.id}}" value="save" ng-click="saveCriteria(editId)"></td>
+                            <td><input type=button id="cancelRowBtn{{c.id}}" value="cancel" ng-click="cancel(editId)"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+</div>
+ </div>
+@section scripts2
+{
+    @Scripts.Render("~/bundles/angular")
+
+    <script src="~/Scripts/spin.min.js"></script>
+    <script src="~/Scripts/angular-spinner.min.js"></script>
+    <script src="~/Scripts/lodash.min.js"></script>
+    <script type="text/javascript">
+        var cwApp = angular.module('cwApp', ['angularSpinner']);
+        var model = @Html.Raw(WebUtilities.JsonSerialize(Model));
+
+        cwApp.controller('cwController', [
+            '$scope', '$http', 'usSpinnerService',
+            function($scope, $http, usSpinnerService) {
+                $scope.Clients = model.Clients;
+                $scope.Factories = model.Factories;
+                $scope.Points = model.Points;
+                $scope.Categories = model.Categories;
+                $scope.Templates = model.Templates;
+                $scope.Criteria = [];
+                $scope.Importances = [{ id: 1, name: 'CIR' }, { id: 2, name: 'MAJ' }, { id: 3, name: 'MIJ' }];
+                $scope.factory_id = null;
+                $scope.client_id = null;
+                $scope.searchText = '';
+                $scope.editedRow = {};
+                $scope.FoundProducts = [];
+                $scope.DeletedCriteria = [];
+                $scope.showCriteria = false;
+                $scope.template_id = null;
+                $scope.selectionTemplateId = null;
+                $scope.selectAll = false;
+                $scope.CustomCriteria = [];
+                $scope.TemplateCriteria = [];
+                $scope.CachedProductIds = [];
+                $scope.minId = -1;
+
+                $scope.startEdit = function(pid) {
+
+                    var c = _.filter($scope.Criteria, { unique_id: pid });
+                    if (c.length > 0) {
+                        var crit = c[0];
+                        $scope.editedRow.unique_id = crit.unique_id;
+                        $scope.editedRow.category_id = crit.category_id;
+                        $scope.editedRow.number = crit.number;
+                        $scope.editedRow.point_id = crit.point_id;
+                        $scope.editedRow.requirements = crit.requirements;
+                        $scope.editedRow.requirements_cn = crit.requirements_cn;
+                        $scope.editedRow.importance = crit.importance;
+                    } else {
+                        $scope.editedRow.unique_id = pid;
+                        $scope.editedRow.category_id = 1;
+                        $scope.editedRow.number = 0;
+                        $scope.editedRow.point_id = null;
+                        $scope.editedRow.requirements = '';
+                        $scope.editedRow.requirements_cn = '';
+                        $scope.editedRow.importance = 3;
+                    }
+                    $scope.editId = pid;
+
+                }
+
+                $scope.addNewCriteria = function() {
+                    $scope.startEdit($scope.minId);
+                }
+
+                $scope.FoundProductFilter = function(searchText) {
+                    return function(p) {
+                        return $scope.CheckFoundProduct(searchText, p);
+                    };
+                }
+
+                $scope.CheckFoundProduct = function(searchText, p) {
+                    if (p != null)
+                        return (searchText.length == 0 || p.cprod_name.indexOf(searchText) >= 0 || p.cprod_code1.indexOf(searchText) >= 0);
+                    return false;
+                }
+
+                $scope.CheckDiff = function(c, field) {
+                    if (_.indexOf(c.diffFields, field) >= 0)
+                        return { color: "red" };
+                    return {};
+                }
+
+                $scope.saveCriteria = function(id) {
+                    var crit = null;
+
+                    var c = _.filter($scope.Criteria, { unique_id: id });
+                    if (c.length > 0) {
+                        crit = c[0];
+                        if (crit.criteria_id == null) {
+                            crit.criteria_id = crit.id; //template record becomes custom
+                            crit.id = null;
+                            crit.type = 'C';
+                        }
+
+                    }
+                    if (crit == null) {
+                        crit = { id: -1 };
+                        $scope.Criteria.push(crit);
+                        $scope.minId--;
+                        crit.type = 'C';
+                        crit.IsNew = true;
+                        crit.IsDeleted = false;
+                    }
+
+                    crit.unique_id = $scope.editedRow.unique_id;
+                    crit.category_id = $scope.editedRow.category_id;
+                    crit.Category = null;
+                    crit.number = $scope.editedRow.number;
+                    crit.point_id = $scope.editedRow.point_id;
+                    crit.Point = null;
+                    crit.requirements = $scope.editedRow.requirements;
+                    crit.requirements_cn = $scope.editedRow.requirements_cn;
+                    crit.importance = $scope.editedRow.importance;
+                    crit.IsModified = true;
+
+                    $scope.editId = 0;
+                }
+
+                $scope.DeleteCriteria = function(c) {
+
+                    if (c.type == 'T') {
+                        //_.forEach($scope.SelectedProductIds(), function(id) {
+                        //    $scope.CustomCriteria.push({ criteria_id: c.id, IsDeleted: true, cprod_id: id });
+                        //});
+                        //_.remove($scope.Criteria, { unique_id: c.unique_id });
+                        c.IsDeleted = true;
+                    } else {
+                        //Removing custom row restores template row
+                        if (c.unique_id > 0) {
+                            if (c.criteria_id != null) {
+                                _.forEach(_.filter($scope.CustomCriteria, { criteria_id: c.criteria_id }), function(elem) {
+                                    $scope.DeletedCriteria.push(elem.id);
+                                });
+                                _.remove($scope.CustomCriteria, { criteria_id: c.criteria_id });
+                            } else {
+                                //custom criteria not related to template, we must seach on number and category_id
+                                _.forEach(_.filter($scope.CustomCriteria, function(elem) {
+                                    return $scope.GetCustomCriteriaKey(elem) == $scope.GetCustomCriteriaKey(c);
+                                } ), function(elem) {
+                                    $scope.DeletedCriteria.push(elem.id);
+                                });
+                                _.remove($scope.CustomCriteria, function(elem) {
+                                    return $scope.GetCustomCriteriaKey(elem) == $scope.GetCustomCriteriaKey(c);
+                                });
+                                
+                            }
+                            $scope.Criteria = $scope.MergeCriteria($scope.TemplateCriteria, $scope.CustomCriteria);
+
+                            //$scope.DeletedCriteria.push(c.criteria_id);
+                        }
+
+                    }
+
+                }
+
+                $scope.cancel = function(id) {
+                    $scope.editId = 0;
+                }
+
+                $scope.GetPoint = function(point_id) {
+                    var f = _.filter($scope.Points, { id: point_id });
+                    if (f.length > 0)
+                        return f[0].name;
+                    return null;
+                }
+
+                $scope.GetCategory = function(cat_id) {
+                    var f = _.filter($scope.Categories, { id: cat_id });
+                    if (f.length > 0)
+                        return f[0].name;
+                    return null;
+                }
+
+                $scope.GetImportance = function(importance_id) {
+                    var f = _.filter($scope.Importances, { id: importance_id });
+                    if (f.length > 0)
+                        return f[0].name;
+                    return null;
+                }
+
+                $scope.GetTemplates = function(p) {
+                    if (p.Inspv2Templates != null) {
+                        return _.map(p.Inspv2Templates, 'name').join(',');
+                    }
+                    return '';
+                }
+
+
+                $scope.CheckTemplates = function() {
+                    var g = _.groupBy($scope.SelectedProducts(), function(elem) { return $scope.GetTemplates(elem); });
+                    if (Object.keys(g).length == 1) {
+                        var firstProd = g[Object.keys(g)[0]][0];
+                        var oldValue = $scope.selectionTemplateId;
+                        $scope.selectionTemplateId = firstProd.Inspv2Templates != null && firstProd.Inspv2Templates.length > 0 ? firstProd.Inspv2Templates[0].id : null;
+                        if (oldValue != $scope.selectionTemplateId) {
+                            $scope.LoadCriteria($scope.selectionTemplateId);
+                        } else {
+                            //compare ids
+                            var selectedIds = $scope.SelectedProductIds();
+
+                            if (selectedIds.length > $scope.CachedProductIds.length) {
+                                //Added product
+                                var diff = _.difference(selectedIds, $scope.CachedProductIds);
+                                $http.post('@Url.Action("GetCustomCriteria")', { ids: [diff[0]] }).
+                                    success(function(data, status, headers, config) {
+                                        _.forEach(data, function(elem) {
+                                            //elem.IsDeleted = false;
+                                            $scope.CustomCriteria.push(elem);
+                                        });
+                                        $scope.Criteria = $scope.MergeCriteria($scope.TemplateCriteria, $scope.CustomCriteria);
+
+                                    }).
+                                    error(function(data, status, headers, config) {
+                                        //alert(status);
+                                    });
+
+                            } else if ($scope.CachedProductIds.length > selectedIds) {
+                                //Removed products
+                                var diff = _.difference($scope.CachedProductIds, selectedIds);
+                                _.remove($scope.CustomCriteria, { cprod_id: diff[0] });
+                                $scope.Criteria = $scope.MergeCriteria($scope.TemplateCriteria, $scope.CustomCriteria);
+                            }
+                        }
+                        $scope.CachedProductIds = $scope.SelectedProductIds();
+
+                        return true;
+                    }
+                    return false;
+                }
+
+                $scope.SelectedProductIds = function() {
+                    return _.map($scope.SelectedProducts(), "cprod_id");
+                }
+
+                $scope.getParameters = function(template_id) {
+                    return {
+                        ids: _.map($scope.SelectedProducts(), "cprod_id"),
+                        template_id: template_id
+                    };
+                }
+
+                $scope.assignTemplate = function() {
+                    var template = _.find($scope.Templates, { id: $scope.template_id });
+
+                    _.forEach($scope.SelectedProducts(), function(p) {
+                        if (p.Inspv2Templates == null) {
+                            p.Inspv2Templates = [template];
+                        } else {
+                            var t = _.find(p.Inspv2Templates, { id: $scope.template_id });
+                            if (t == null)
+                                p.Inspv2Templates.push(template);
+                        }
+
+                    });
+
+                    usSpinnerService.spin('spinner-2');
+                    $http.post('@Url.Action("AssignTemplate")', $scope.getParameters($scope.template_id)).
+                        success(function(data, status, headers, config) {
+                            usSpinnerService.stop('spinner-2');
+                            $scope.LoadCriteria($scope.template_id);
+                        }).
+                        error(function(data, status, headers, config) {
+                            //alert(status);
+                        });
+                }
+
+                $scope.LoadCriteria = function(template_id) {
+                    usSpinnerService.spin('spinner-2');
+                    $http.post('@Url.Action("GetProductSelectionCriteria")', $scope.getParameters(template_id)).
+                        success(function(data, status, headers, config) {
+                            $scope.TemplateCriteria = data.TemplateCriteria;
+                            //_.forEach(data.CustomCriteria, function(elem) {
+                            //    elem.IsDeleted = false;
+                            //});
+                            $scope.CustomCriteria = data.CustomCriteria;
+                            $scope.showCriteria = true;
+                            $scope.Criteria = $scope.MergeCriteria(data.TemplateCriteria, data.CustomCriteria);
+                            usSpinnerService.stop('spinner-2');
+                        }).
+                        error(function(data, status, headers, config) {
+                            //alert(status);
+                        });
+                }
+
+                $scope.MergeCriteria = function(templateCriteria, customCriteria) {
+                    var counter = 1;
+                    var result = [];
+                    _.forEach(templateCriteria, function(elem) {
+                        var customRecords = _.filter(customCriteria, { criteria_id: elem.id });
+                        if (customRecords != null && customRecords.length > 0) {
+                            var normalRecords = _.filter(customRecords, { IsDeleted: false });
+                            if (normalRecords.length > 0) {
+                                //There are some records that are not deleted
+                                var rec = normalRecords[0];
+                                rec.diffFields = $scope.CheckDifference(normalRecords);
+                                rec.type = 'C';
+                                rec.unique_id = counter;
+                                result.push(rec);
+                            } else {
+                                var deletedRecordIds = _.map(_.filter(customRecords, 'IsDeleted'), 'cprod_id');
+                                //TODO: Check if all selected in deleted, if not retain template record, if yes, remove it
+                                if (!_.isEqual(deletedRecordIds, $scope.SelectedProductIds())) {
+                                    elem.criteria_id = null;
+                                    elem.type = 'T';
+                                    elem.diffFields = [];
+                                    result.push(elem);
+                                }
+                            }
+
+
+                        } else {
+                            elem.criteria_id = null;
+                            elem.type = 'T';
+                            result.push(elem);
+                            elem.diffFields = [];
+                        }
+                        elem.unique_id = counter;
+                        counter++;
+                    });
+                    //New custom criteria
+                    var newCriteria = _.groupBy(_.filter(customCriteria, { criteria_id: null }),
+                        function(c) {
+                            return $scope.GetCustomCriteriaKey(c);
+                        });
+                    _.forEach(Object.keys(newCriteria), function(k) {
+                        newCriteria[k][0].type = 'C';
+                        newCriteria[k][0].unique_id = counter;
+                        result.push(newCriteria[k][0]);
+                        counter++;
+                    });
+
+                    return result;
+                }
+
+                $scope.GetCustomCriteriaKey = function(c) {
+                    return c.category_id.toString() + ',' + c.number.toString();
+                }
+
+                $scope.CheckDifference = function(customRecords) {
+                    //Checks if all records in the set have same value, returns fields that differ
+                    var result = [];
+                    var first = customRecords[0];
+                    var fields = {
+                        'category_id': first.category_id,
+                        'point_id': first.point_id,
+                        'requirements': first.requirements,
+                        'requirements_cn': first.requirements_cn,
+                        'importance': first.importance,
+                        'number': first.number
+                    };
+                    for (var i = 1; i < customRecords.length; i++) {
+                        var c = customRecords[i];
+                        _.forEach(Object.keys(fields), function(k) {
+                            if (c[k] != fields[k]) {
+                                if (result.indexOf(k) < 0)
+                                    result.push(k);
+                            }
+                        });
+                    }
+                    return result;
+
+                }
+
+                $scope.loadProducts = function() {
+                    $scope.inSearch = true;
+                    usSpinnerService.spin('spinner-1');
+                    var obj = { factory_id: $scope.factory_id, client_id: $scope.client_id, includeTemplates: true };
+                    $http.post('@Url.Action("SearchProducts")', obj).
+                        success(function(data, status, headers, config) {
+
+                            _.forEach(data, function(elem) {
+                                elem.selected = false;
+                            });
+                            $scope.FoundProducts = data;
+
+                            usSpinnerService.stop('spinner-1');
+                            //SetupMap(data);
+                            $scope.inSearch = false;
+                        }).
+                        error(function(data, status, headers, config) {
+                            //alert(status);
+                        });
+                }
+
+                $scope.SelectedProducts = function() {
+                    return _.filter($scope.FoundProducts, 'selected');
+                }
+
+                $scope.removeSelection = function(p) {
+                    _.remove($scope.FoundProducts, { cprod_id: p.cprod_id });
+                }
+
+                $scope.toggleSelection = function() {
+                    _.forEach($scope.FoundProducts, function(elem) {
+                        elem.selected = $scope.selectAll;
+                    });
+                }
+
+                $scope.save = function() {
+                    var customCriteria = _.filter($scope.Criteria, function(c) {
+                        return c.unique_id < 0 || (c.criteria_id != null && c.IsModified) || (c.criteria_id == null && c.IsDeleted);
+                    });
+                    _.forEach(_.filter(customCriteria, { IsDeleted: true }), function(elem) {
+                        elem.criteria_id = elem.id;
+                    });
+
+                    var obj = { customCriteria: customCriteria, deletedCriteria: $scope.DeletedCriteria, productIds: $scope.SelectedProductIds() };
+                    $http.post('@Url.Action("SaveProductCriteria")', obj).
+                        success(function(data, status, headers, config) {
+
+                        }).
+                        error(function(data, status, headers, config) {
+                            //alert(status);
+                        });
+                }
+
+            }
+        ]);
+    </script>
+}
+    
+@section head
+{
+    <style>
+        input[type=text] {
+            width: auto;
+        }
+
+        select {
+            max-width: 150px;
+        }
+
+        textarea {
+            width: auto;
+        }
+    </style>
+}

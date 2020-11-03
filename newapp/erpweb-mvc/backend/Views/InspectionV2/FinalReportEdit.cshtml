@@ -1,0 +1,799 @@
+﻿@model FinalInspectionV2ReportModel
+@{
+    ViewBag.Title = "FinalReportEdit";
+}
+
+@{
+    Layout = null;
+}
+
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Final inspection report</title>
+    <link href="/Content/inspection/main_report.css" rel="stylesheet" type="text/css">
+    <style>
+        body {
+            background: #fff;
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: arial;
+        }
+
+        img {
+            border: 0px;
+        }
+
+        .container {
+            /*height: 600px;*/
+
+            width: 1000px;
+            background: #FFF;
+            overflow: hidden;
+            border: 2px solid #f4f4f4;
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
+            margin: 10px auto;
+            /*margin-bottom: -100px;*/
+
+
+        }
+
+
+
+        .logo {
+            /*height: 90px;*/
+            width: 1000px;
+            /*background:#999;*/
+            /*float: left;*/
+        }
+
+        .logo img {
+
+            margin: 10px 0 0 20px;
+        }
+
+
+
+        .main {
+            width: 980px;
+
+            margin-left: 10px;
+
+            margin-bottom: 20px;
+            font-size: 12px;
+
+
+
+        }
+
+
+
+        .inspection_title {
+            font-size: 28px;
+            width: 100%;
+            text-align: center;
+            color: #4E9BEF;
+            margin: 10px 0 0 10px;
+            letter-spacing: 3px;
+            /*float: left;*/
+        }
+
+        .gpc_title {
+            width: 99%;
+            height: 18px;
+            background: #4E9BEF;
+            color: #fff;
+            text-align: center;
+            font-size: 16px;
+            /*float: left;*/
+            line-height: 18px;
+            padding: 5px;
+            margin-top: 10px;
+        }
+
+        .table_general {
+            margin: 2px 0 0 0;
+            float: left;
+            border: 3px solid #e4e4e4;
+            width: 100%;
+        }
+
+        .table_general img {
+            width: 430px;
+            /*height: 322px;*/
+        }
+
+        .first_row {
+            background: #f4f4f4;
+        }
+
+        .dotted_row {
+            border-bottom: 1px dotted #e4e4e4;
+            text-align: right;
+        }
+
+        .text_area {
+            margin: 3px;
+            border: 3px solid #e4e4e4;
+            padding: 2px;
+        }
+
+        .unpacked {
+            background: #E5E5E5;
+            text-align: right;
+        }
+
+        .packed {
+            background: #CFCFCF;
+            text-align: right;
+        }
+
+        .sub_title {
+            font-size: 14px;
+            font-weight: bolder;
+        }
+
+        .imageHolder {
+            position: relative;
+            height: 230px;
+            border: 1px solid black;
+            display: table-cell;
+            vertical-align: middle;
+            width: 330px;
+        }
+
+        .imageBox {
+            width: 300px; 
+            margin-right: 20px; 
+            margin-top: 5px;
+            float: left;
+            position: relative;
+        }
+
+        .imageBoxEx {
+            width: 300px; 
+            margin-right: 20px; 
+            margin-top: 5px;
+            float: left;
+            position: relative;
+        }
+
+        .container {
+            height: auto;
+            width: 1150px;
+        }
+
+        .data_holder input[type="text"], .data_holder2 input[type="text"] {
+            width: 30px;
+            font-size: 9px;
+            text-align: right;
+        }
+
+        .button {
+            height: 30px;
+            width: 120px;
+            font-weight: bold;
+        }
+        .summary_cell {
+            text-align: center;
+            border-bottom: 1px dotted #e4e4e4;
+        }
+        .summary_cell_code {
+            text-align: left;
+            border-bottom: 1px dotted #e4e4e4;
+        }
+        textarea {
+            width: 95%;
+        }
+    </style>
+</head>
+
+<body>
+
+@{
+    var insp = Model.Inspection;
+}
+
+<div id="app" ng-app="app">
+    
+    <div id="controller" ng-controller="controller">
+        @Html.Partial("_FinalReportHeader", insp)
+
+        <div class="main">
+            <table class="gpc_title"><tr><td>Part 2 - SUMMARY INFORMATION</td></tr></table><!--gpc_title-->
+
+            <table class="table_general" width="100%" border="0" cellspacing="1" cellpadding="1">
+                <thead>
+                    <tr class="first_row">
+                        <td>Ref.</td>
+                        <td style="width:15%">Qty</td>
+                        <td style ="width: 15%;text-align: center">Inspected Qty</td>
+                        <td>Appearance</td>
+                        <td>Dimension</td>
+                        <td>Function</td>
+                        <td>Material</td>
+                        <td>Packaging</td>
+                        <td>CA Required</td>
+                    </tr>
+                </thead>
+                <tbody ng-repeat="l in Inspection.Lines">
+                    <tr>
+                        <td class="summary_cell_code"> {{l.insp_custproduct_code}}</td>
+                        <td class="summary_cell">{{GetQty(l)}}</td>
+                        <td class="summary_cell" style="text-align: center;font-size: 12px"><input type="text" ng-model="l.inspected_qty" style="text-align: right;width:60px"/></td>
+                        <td class="summary_cell"><input type="checkbox" ng-model="l.acceptanceFlags[@((int) InspectionV2ImageType.Appearance)]" ng-checked="l.acceptanceFlags[@((int) InspectionV2ImageType.Appearance)]" ng-click="ToggleReject(l,@((int) InspectionV2ImageType.Appearance))" /></td>
+                        <td class="summary_cell"><input type="checkbox" ng-model="l.acceptanceFlags[@((int) InspectionV2ImageType.Dimension)]" ng-checked="l.acceptanceFlags[@((int) InspectionV2ImageType.Dimension)]" ng-click="ToggleReject(l,@((int) InspectionV2ImageType.Dimension))" /></td>
+                        <td class="summary_cell"><input type="checkbox" ng-model="l.acceptanceFlags[@((int) InspectionV2ImageType.Function)] " ng-checked="l.acceptanceFlags[@((int) InspectionV2ImageType.Function)] " ng-click="ToggleReject(l,@((int) InspectionV2ImageType.Function))" /></td>
+                        <td class="summary_cell"><input type="checkbox" ng-model="l.acceptanceFlags[@((int) InspectionV2ImageType.Material)]" ng-checked="l.acceptanceFlags[@((int) InspectionV2ImageType.Material)]" ng-click="ToggleReject(l,@((int) InspectionV2ImageType.Material))" /></td>
+                        <td class="summary_cell"><input type="checkbox" ng-model="l.acceptanceFlags[@((int) InspectionV2ImageType.Packaging)]" ng-checked="l.acceptanceFlags[@((int) InspectionV2ImageType.Packaging)]" ng-click="ToggleReject(l,@((int) InspectionV2ImageType.Packaging))" /></td>
+                        <td class="summary_cell"><input type="checkbox" ng-model="l.ca" ng-checked="l.ca" ng-show="CAVisibility(l)" ng-click="ToggleCA(l)" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="main">
+            <table class="gpc_title"><tr><td>Part 3 - CORRECTIVE ACTION</td></tr></table><!--gpc_title-->
+            <div class="table_general">
+                <span ng-show="!CheckCASectionVisibility()">No Corrective actions required</span>
+                <div ng-show="CheckCASectionVisibility()">
+                    <div style="clear: both" ng-repeat="r in AllRejections | filter: {ca: true, isDeleted: false}">
+                        <div>
+                            <div class="text_area">
+                                {{r.Line.insp_custproduct_code}} {{r.Line.insp_mastproduct_code}} {{r.Line.insp_custproduct_name}} <input type="text" ng-model="r.comments"/> <input type="text" ng-model="r.document"/>
+                            </div>
+
+                            <div class="sub_title">Rejection</div>
+                            <div>
+                                <textarea ng-model="r.rejection"></textarea>
+                            </div>
+
+                            <div class="sub_title">Reason</div>
+                            <div>
+                                <textarea ng-model="r.reason"></textarea>
+                            </div>
+
+                            <div class="sub_title">Action</div>
+                            <div>
+                                <textarea ng-model="r.action"></textarea>
+                            </div>
+                            <div class="sub_title">Permanent Action</div>
+                            <div>
+                                <textarea ng-model="r.permanentaction"></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="imageBox" ng-repeat="im in $parent.AllImages | filter: {insp_line: r.line_id}" ng-style="{clear: ($index)%3 == 0 ? 'left' :'none' }">
+                            <img ng-src="{{GetInspectionImageUrl(im)}}" ng-show="GetInspectionImageUrl(im)" style="width: 100%" />
+                            <a id="deleteInspImage" ng-click="DeleteInspectionImage(im)" ng-show="GetInspectionImageUrl(im)" style="position: absolute; top: 2px; right: 2px"><img src="/Images/inspection/status-remove.png" style="width: 32px" /></a>
+                        </div>
+                        
+                        <input type="button" plupload="fileUpload.url" style="clear: both;float:left"
+                               plupload-options="fileUpload.options"
+                               plupload-callbacks="GetRejectionCallbacks(r.Line.id,r.type)" value="Upload images..." />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="main">
+
+            <table class="gpc_title"><tr><td>Part 4 - REJECTED UNITS</td></tr></table><!--gpc_title-->
+
+            <div style="clear: both" ng-repeat="r in AllRejections | filter: {ca: false, isDeleted: false}">
+                <div class="text_area">
+                    {{r.Line.insp_custproduct_code}} {{r.Line.insp_mastproduct_code}} {{r.Line.insp_custproduct_name}} <input type="text" ng-model="r.comments" /> <input type="text" ng-model="r.document" />
+                </div>
+                <div class="imageBox" ng-repeat="im in $parent.AllImages | filter: {insp_line: r.line_id}" ng-style="{clear: ($index)%3 == 0 ? 'left' :'none' }">
+                    <img ng-src="{{GetInspectionImageUrl(im)}}" ng-show="GetInspectionImageUrl(im)" style="width: 100%"/>
+                    <a ng-click="DeleteInspectionImage(im)" ng-show="GetInspectionImageUrl(im)" style="position: absolute; top: 2px; right: 2px"><img src="/Images/inspection/status-remove.png" style="width: 32px"/></a>
+                </div>
+                <input type="button" plupload="fileUpload.url" style="clear: both; float: left"
+                       plupload-options="fileUpload.options"
+                       plupload-callbacks="GetRejectionCallbacks(r.Line.id,r.type)" value="Upload images..."/>
+            </div>
+        </div>
+
+        <div class="main">
+
+            <table class="gpc_title"><tr><td>Part 5 - APPEARANCE</td></tr></table><!--gpc_title-->
+
+            <div class="table_general">
+                <div ng-repeat="im in AllImages | filter: {type_id: @((int) InspectionV2ImageType.Appearance),rej_flag: false}">
+                    <div class="imageBoxEx">
+                        <div class="text_area">
+                            <select ng-model="im.insp_line" style="width: 100%">
+                                <option ng-repeat="l in Inspection.Lines" value="{{l.id}}" ng-selected="{{im.insp_line == l.id}}">{{l.insp_custproduct_code}} {{l.insp_mastproduct_code}} {{l.insp_custproduct_name}}</option>
+                            </select>
+                        </div>
+                        <div class="imageBox">
+                            <img ng-src="{{GetInspectionImageUrl(im)}}" ng-show="GetInspectionImageUrl(im)" style="width: 100%"/>
+                            <a ng-click="DeleteInspectionImage(im)" ng-show="GetInspectionImageUrl(im)" style="position: absolute; top: 2px; right: 2px"><img src="/Images/inspection/status-remove.png" style="width: 32px"/></a>
+                        </div>
+
+                        <div style="width: 100%; clear: both">
+                            <textarea ng-model="im.comments" style="width: 100%"></textarea>
+                        </div>
+                    </div>
+
+                </div>
+                <input type="button" plupload="fileUpload.url" style="clear: both; float: left"
+                       plupload-options="fileUpload.options"
+                       plupload-callbacks="GetCallbacks(@((int) InspectionV2ImageType.Appearance))" value="Upload images..."/>
+
+            </div>
+        </div>
+
+        <div class="main">
+
+            <table class="gpc_title"><tr><td>Part 6 - DIMENSION</td></tr></table><!--gpc_title-->
+
+            <div class="table_general">
+                <div ng-repeat="im in AllImages | filter: {type_id: @((int) InspectionV2ImageType.Dimension),rej_flag: false}">
+                    <div class="imageBoxEx">
+                        <div class="text_area">
+                            <select ng-model="im.insp_line" style="width: 100%">
+                                <option ng-repeat="l in Inspection.Lines" value="{{l.id}}" ng-selected="{{im.insp_line == l.id}}">{{l.insp_custproduct_code}} {{l.insp_mastproduct_code}} {{l.insp_custproduct_name}}</option>
+                            </select>
+                        </div>
+                        <div class="imageBox">
+                            <img ng-src="{{GetInspectionImageUrl(im)}}" ng-show="GetInspectionImageUrl(im)" style="width: 100%"/>
+                            <a ng-click="DeleteInspectionImage(im)" ng-show="GetInspectionImageUrl(im)" style="position: absolute; top: 2px; right: 2px"><img src="/Images/inspection/status-remove.png" style="width: 32px"/></a>
+                        </div>
+
+                        <div style="width: 100%; clear: both">
+                            <textarea ng-model="im.comments" style="width: 100%"></textarea>
+                        </div>
+                    </div>
+
+                </div>
+                <input type="button" plupload="fileUpload.url" style="clear: both; float: left"
+                       plupload-options="fileUpload.options"
+                       plupload-callbacks="GetCallbacks(@((int) InspectionV2ImageType.Dimension))" value="Upload images..."/>
+
+            </div>
+        </div>
+
+        <div class="main">
+
+            <table class="gpc_title"><tr><td>Part 7 - FUNCTION</td></tr></table><!--gpc_title-->
+
+            <div class="table_general">
+                <div ng-repeat="im in AllImages | filter: {type_id: @((int) InspectionV2ImageType.Function),rej_flag: false}">
+                    <div class="imageBoxEx">
+                        <div class="text_area">
+                            <select ng-model="im.insp_line" style="width: 100%">
+                                <option ng-repeat="l in Inspection.Lines" value="{{l.id}}" ng-selected="{{im.insp_line == l.id}}">{{l.insp_custproduct_code}} {{l.insp_mastproduct_code}} {{l.insp_custproduct_name}}</option>
+                            </select>
+                        </div>
+                        <div class="imageBox">
+                            <img ng-src="{{GetInspectionImageUrl(im)}}" ng-show="GetInspectionImageUrl(im)" style="width: 100%" />
+                            <a ng-click="DeleteInspectionImage(im)" ng-show="GetInspectionImageUrl(im)" style="position: absolute; top: 2px; right: 2px"><img src="/Images/inspection/status-remove.png" style="width: 32px" /></a>
+                        </div>
+
+                        <div style="width: 100%;clear:both">
+                            <textarea ng-model="im.comments" style="width: 100%"></textarea>
+                        </div>
+                    </div>
+
+                </div>
+                <input type="button" plupload="fileUpload.url" style="clear: both; float: left"
+                       plupload-options="fileUpload.options"
+                       plupload-callbacks="GetCallbacks(@((int) InspectionV2ImageType.Function))" value="Upload images..." />
+
+            </div>
+        </div>
+
+    <div class="main">
+
+        <table class="gpc_title"><tr><td>Part 8 - MATERIAL</td></tr></table><!--gpc_title-->
+
+        <div class="table_general">
+            <div ng-repeat="im in AllImages | filter: {type_id: @((int) InspectionV2ImageType.Material),rej_flag: false}">
+                <div class="imageBoxEx">
+                    <div class="text_area">
+                        <select ng-model="im.insp_line" style="width: 100%">
+                            <option ng-repeat="l in Inspection.Lines" value="{{l.id}}" ng-selected="{{im.insp_line == l.id}}">{{l.insp_custproduct_code}} {{l.insp_mastproduct_code}} {{l.insp_custproduct_name}}</option>
+                        </select>
+                    </div>
+                    <div class="imageBox">
+                        <img ng-src="{{GetInspectionImageUrl(im)}}" ng-show="GetInspectionImageUrl(im)" style="width: 100%"/>
+                        <a ng-click="DeleteInspectionImage(im)" ng-show="GetInspectionImageUrl(im)" style="position: absolute; top: 2px; right: 2px"><img src="/Images/inspection/status-remove.png" style="width: 32px"/></a>
+                    </div>
+
+                    <div style="width: 100%; clear: both">
+                        <textarea ng-model="im.comments" style="width: 100%"></textarea>
+                    </div>
+                </div>
+
+            </div>
+            <input type="button" plupload="fileUpload.url" style="clear: both; float: left"
+                   plupload-options="fileUpload.options"
+                   plupload-callbacks="GetCallbacks(@((int) InspectionV2ImageType.Material))" value="Upload images..."/>
+
+        </div>
+    </div>
+
+        <div class="main">
+
+            <table class="gpc_title"><tr><td>Part 9 - PACKAGING</td></tr></table><!--gpc_title-->
+
+            <div class="table_general">
+                <div ng-repeat="im in AllImages | filter: {type_id: @((int) InspectionV2ImageType.Material),rej_flag: false}">
+                    <div class="imageBoxEx">
+                        <div class="text_area">
+                            <select ng-model="im.insp_line" style="width: 100%">
+                                <option ng-repeat="l in Inspection.Lines" value="{{l.id}}" ng-selected="{{im.insp_line == l.id}}">{{l.insp_custproduct_code}} {{l.insp_mastproduct_code}} {{l.insp_custproduct_name}}</option>
+                            </select>
+                        </div>
+                        <div class="imageBox">
+                            <img ng-src="{{GetInspectionImageUrl(im)}}" ng-show="GetInspectionImageUrl(im)" style="width: 100%" />
+                            <a ng-click="DeleteInspectionImage(im)" ng-show="GetInspectionImageUrl(im)" style="position: absolute; top: 2px; right: 2px"><img src="/Images/inspection/status-remove.png" style="width: 32px" /></a>
+                        </div>
+
+                        <div style="width: 100%;clear:both">
+                            <textarea ng-model="im.comments" style="width: 100%"></textarea>
+                        </div>
+                    </div>
+
+                </div>
+                <input type="button" plupload="fileUpload.url" style="clear: both; float: left"
+                       plupload-options="fileUpload.options"
+                       plupload-callbacks="GetCallbacks(@((int) InspectionV2ImageType.Material))" value="Upload images..." />
+
+            </div>
+        </div>
+
+    <div style="clear: both">
+            <div id="confirmMsg" style="color: green; display: none; font-size: 12px; float: left">The inspection has been updated</div>
+            <div id="wait" style="display: none">
+                <img src="/images/Spinning_wheel_throbber.gif" />
+            </div>
+            <div style="clear: both">
+                <input type="button" value="Update" ng-click="Update()" />
+            </div>    
+        </div>
+        
+        
+    </div>
+</div>
+
+            @Scripts.Render("~/bundles/jquery")
+            @Scripts.Render("~/bundles/jqueryui")
+            @Scripts.Render("~/bundles/globalize")
+            @Scripts.Render("~/bundles/angular")
+            @Scripts.Render("~/bundles/plupload2")
+            @Scripts.Render("~/bundles/jqueryval")
+
+            <script src="~/Scripts/autocomplete.js"></script>
+            <script src="~/Scripts/lodash.js"></script>
+            <script src="~/Scripts/functions.js"></script>
+
+
+            <script src="~/Scripts/angular-plupload/angular-plupload.js"></script>
+            <script type="text/javascript">
+    var app = angular.module('app', ['ngSanitize', 'angular-plupload'])
+        .config(function(pluploadOptionProvider) {
+            // global setting
+            pluploadOptionProvider.setOptions({
+                flash_swf_url: '/Scripts/plupload-2.0.0/js/Moxie.swf',
+                silverlight_xap_url: '/Scripts/plupload-2.0.0/js//Moxie.xap',
+                max_file_size: '10mb'
+            });
+        });
+
+
+    var imagesPerRow = 3;
+    var nextNewImageId = -1;
+
+    var model = @Html.Raw(WebUtilities.JsonSerialize(Model.EditModel));
+
+    SetAcceptanceFlags(model.Inspection);
+
+    //PrepareInspectionImages(model.AllImages, model.Inspection.Lines.length > 0 ? model.Inspection.Lines[0].id : null);
+
+    app.controller('controller', [
+        '$scope', '$http', '$timeout',
+        function($scope, $http, $timeout) {
+
+            $scope.Inspection = model.Inspection;
+
+            $scope.AllImages = model.AllImages;
+            
+            $scope.AllRejections = BuildAllRejectionsList(model.Inspection.Lines);
+            CheckRejectedImages($scope.AllImages, $scope.AllRejections);
+
+            $scope.uploader = null;
+            $scope.ImageTypes = model.ImageTypes;
+            $scope.uploadedInspectionFiles = {};
+            $scope.uploadInProgress = false;
+
+            
+            $scope.ToggleReject = function(line, image_type) {
+                var r = _.find($scope.AllRejections, { line_id: line.id, type: image_type });
+                if (!line.acceptanceFlags[image_type]) {
+                    if ($scope.AllRejections == null)
+                        $scope.AllRejections = [];
+
+                    if (r != null) {
+                        r.ca = line.ca;
+                        r.isDeleted = false;
+                        return;
+                    }
+                    r = @Html.Raw(WebUtilities.JsonSerialize(new Inspection_v2_line_rejection()));
+                    r.line_id = line.id;
+                    r.ca = line.ca;
+                    r.type = image_type;
+                    r.isDeleted = false;
+                    r.Line = line;
+
+                    $scope.AllRejections.push(r);
+                    $scope.AddUploadCallback(r);
+                } else {
+                    if (r != null)
+                        r.isDeleted = true;
+                }
+            }
+
+            $scope.CAVisibility = function(line) {
+                return _.some($scope.AllRejections, { line_id: line.id, isDeleted: false });
+            }
+
+            $scope.ToggleCA = function(line) {
+                var rejections = _.filter($scope.AllRejections, { line_id: line.id});
+                rejections.forEach(function(r) {
+                    r.ca = line.ca;
+                });
+            }
+
+            $scope.CheckCASectionVisibility = function() {
+                return _.some($scope.AllRejections, { ca: true, isDeleted: false });
+            }
+
+            $scope.GetQty = function(line) {
+                return GetQty(line);
+            }
+
+            $scope.Update = function() {
+
+                
+                var data = {};
+                data.insp = JSON.parse(JSON.stringify($scope.Inspection));
+                data.insp.Lines.forEach(function(l) {
+                    if (l.Rejections != null) {
+                        l.Rejections.forEach(function(r) {
+                            r.Line = null;
+                        });
+                    }
+                });
+                delete data.insp.AllLoadings;
+                delete data.insp.AllImages;
+                data.images = $scope.AllImages;
+                $('#wait').show();
+                $scope.AllRejections.forEach(function(r) {
+                    if (!r.isDeleted) {
+                        var line = _.find(data.insp.Lines, { id: r.line_id });
+                        if (line != null) {
+                            if (line.Rejections == null)
+                                line.Rejections = [];
+                            _.remove(line.Rejections, { type: r.type });
+                            var rej = JSON.parse(JSON.stringify(r));
+                            rej.Line = null;
+                            line.Rejections.push(rej);
+                        }
+                    }
+
+                });
+                data.insp.Lines.forEach(function(l) {
+                    l.OrderLine = null;
+                });
+
+                $http.post('@Url.Action("UpdateFinal")', data).
+                    success(function(data, status, headers, config) {
+                        $scope.statusMessage = 'The record was successfully updated';
+
+                        $('#wait').hide();
+                        $('#confirmMsg').show();
+                        setTimeout(function() {
+                            $('#confirmMsg').hide();
+                        }, 2000);
+
+                        SetAcceptanceFlags(data.Inspection);
+                        $scope.Inspection = data.Inspection;
+
+                        $scope.AllImages = data.AllImages;
+                        $scope.AllRejections = BuildAllRejectionsList(data.Inspection.Lines);
+                        CheckRejectedImages($scope.AllImages, $scope.AllRejections);
+
+                    }).
+                    error(function(data, status, headers, config) {
+                        //alert(status);
+                        $('#wait').hide();
+                    });
+
+            }
+
+            $scope.fileUpload = {
+                url: '@Url.Action("FinalInspectionFiles")',
+                options: {
+                    multi_selection: true,
+                    max_file_size: '32mb',
+                    resize: { width: 800, height: 600, quality: 90 },
+                    filters: [
+                        {
+                            extensions: 'jpg,png'
+                        }
+                    ]
+                },
+                callbacks: {},
+                rejectionCallbacks: {}
+            };
+
+            $scope.ImageTypes.forEach(function(it) {
+
+                $scope.fileUpload.callbacks[it.id] =
+                    {
+                        filesAdded: function(uploader, files) {
+                            $scope.uploadInProgress = true;
+                            if(!_.has($scope.uploadedInspectionFiles,it.id))
+                                $scope.uploadedInspectionFiles[it.id] = {};
+                            files.forEach(function(elem) {
+                                //initial progress value
+                                //var file = new File(elem.name, 0, elem.size);
+                                $scope.uploadedInspectionFiles[it.id][elem.id] = elem;
+                            });
+                            $timeout(function() {
+                                uploader.start();
+                            }, 1);
+                        },
+                        uploadProgress: function(uploader, file) {
+                            //$scope.loading = file.percent/100.0;
+                            $scope.uploadedInspectionFiles[it.id][file.id].percent = file.percent;
+                        },
+                        beforeUpload: function(uploader, file) {
+                            uploader.settings.multipart_params = { type: it.id, id: file.id};
+                        },
+                        fileUploaded: function(uploader, file, response) {
+                            var im = { type_id: it.id, insp_image: file.name, id: nextNewImageId--, fileId: file.id, insp_line: null, rej_flag: false};
+                            $scope.AllImages.push(im);
+                            //$scope.EditedDetail.Images.push({ image: file.name, sid: file.id, id: 0, meeting_detail_id: $scope.EditedDetail.meeting_detail_id });
+                            $scope.uploadedInspectionFiles[it.id][file.id].percent = 100;
+
+                            //if (_.every($scope.files, function(f) { return f.percent === 100;}))
+                            //    $scope.uploadInProgress = false;
+                        },
+                        error: function(uploader, error) {
+                            $scope.loading = false;
+                            alert(error.message);
+                        }
+                    };
+            });
+
+            $scope.AddUploadCallback = function(r) {
+                if (!_.has($scope.fileUpload.rejectionCallbacks, r.Line.id))
+                    $scope.fileUpload.rejectionCallbacks[r.Line.id] = {};
+                $scope.fileUpload.rejectionCallbacks[r.Line.id][r.type] = {
+                    filesAdded: function(uploader, files) {
+                        $scope.uploadInProgress = true;
+
+                        files.forEach(function(elem) {
+                            //initial progress value
+                            //var file = new File(elem.name, 0, elem.size);
+                            $scope.uploadedInspectionFiles[elem.id] = elem;
+                        });
+                        $timeout(function() {
+                            uploader.start();
+                        }, 1);
+                    },
+                    uploadProgress: function(uploader, file) {
+                        //$scope.loading = file.percent/100.0;
+                        $scope.uploadedInspectionFiles[file.id].percent = file.percent;
+                    },
+                    beforeUpload: function(uploader, file) {
+                        uploader.settings.multipart_params = { type: r.type, id: file.id };
+                    },
+                    fileUploaded: function(uploader, file, response) {
+                        var im = { type_id: r.type, insp_image: file.name, id: nextNewImageId--, fileId: file.id, insp_line: r.Line.id, rej_flag : true };
+                        $scope.AllImages.push(im);
+                        //$scope.EditedDetail.Images.push({ image: file.name, sid: file.id, id: 0, meeting_detail_id: $scope.EditedDetail.meeting_detail_id });
+                        $scope.uploadedInspectionFiles[file.id].percent = 100;
+
+                        //if (_.every($scope.files, function(f) { return f.percent === 100;}))
+                        //    $scope.uploadInProgress = false;
+                    },
+                    error: function(uploader, error) {
+                        $scope.loading = false;
+                        alert(error.message);
+                    }
+                };
+            };
+
+            $scope.AllRejections.forEach(function(r) {
+                $scope.AddUploadCallback(r);
+            });
+
+            $scope.GetCallbacks = function(type) {
+                return $scope.fileUpload.callbacks[type];
+            }
+
+            $scope.GetRejectionCallbacks = function(line_id, type) {
+                return $scope.fileUpload.rejectionCallbacks[line_id][type];
+            }
+
+            $scope.GetInspectionImageUrl = function(im) {
+                if (im.insp_image.length == 0)
+                    return '';
+                if (im.id <= 0)
+                    //temp file
+                    return $.validator.format('@Url.Action("GetFinalTempFile")/{0}', im.fileId);
+                else
+                    return im.insp_image;
+            }
+
+            $scope.DeleteInspectionImage = function(im) {
+                _.remove($scope.AllImages, { id: im.id });
+            }
+
+        }
+    ]);
+
+    function GetQty(line) {
+        if (line.OrderLine == null || line.qty > 0)
+            return line.qty;
+        return line.OrderLine.orderqty;
+    }
+
+    function CheckImageType(line,type) {
+        return line.Rejections == null || !_.some(line.Rejections, { type: type });
+    }
+
+    function CheckCA(line) {
+        return line.Rejections != null && _.some(line.Rejections, { ca: true });
+    }
+
+    function BuildAllRejectionsList(lines) {
+        var result = [];
+        lines.forEach(function(l) {
+            if (l.Rejections != null) {
+                l.Rejections.forEach(function(r) {
+                    r.Line = JSON.parse(JSON.stringify(l)) ;
+                    r.Line.Rejections = null;
+                    result.push(r);
+                });
+            }
+        });
+        return result;
+    }
+
+    function CheckRejectedImages(images, rejections) {
+        images.forEach(function(im) {
+            im.rej_flag = _.some(rejections, { line_id: im.insp_line });
+        });
+    }
+
+    function SetAcceptanceFlags(insp) {
+        insp.Lines.forEach(function(line) {
+            line.inspected_qty = line.inspected_qty == null ? (GetQty(line) * 0.1).toFixed(0) : line.inspected_qty;
+            line.acceptanceFlags = {};
+            line.acceptanceFlags[@((int) InspectionV2ImageType.Appearance)] = CheckImageType(line, @((int) InspectionV2ImageType.Appearance));
+            line.acceptanceFlags[@((int) InspectionV2ImageType.Dimension)] = CheckImageType(line,@((int) InspectionV2ImageType.Dimension));
+            line.acceptanceFlags[@((int) InspectionV2ImageType.Function)] = CheckImageType(line,@((int) InspectionV2ImageType.Function));
+            line.acceptanceFlags[@((int) InspectionV2ImageType.Material)] = CheckImageType(line,@((int) InspectionV2ImageType.Material));
+            line.acceptanceFlags[@((int) InspectionV2ImageType.Packaging)] = CheckImageType(line,@((int) InspectionV2ImageType.Packaging));
+            line.ca = CheckCA(line);
+            if (line.Rejections != null) {
+                line.Rejections.forEach(function(r) {
+                    r.isDeleted = false;
+                });    
+            }
+            
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+﻿@{
+    Layout = null;
+}
+@model TrackingNumbersModelMail
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>tracking numbers</title>
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+</head>
+<body>
+
+    @{ 
+        var listRefs = Model.product_track_number_gc_list.Where(l => l.MastProduct?.factory_ref != null).GroupBy(l => l.MastProduct?.factory_ref).ToList();
+    }
+
+    <div class="container-fluid">
+
+        <label>This is an automated e-mail - please do not reply to it.</label>
+        <br />
+        <br />
+
+        <form>
+            <div>
+            <label>Factory: </label>@Model.factory_code
+            </div>
+            <br />
+            <div>
+                <label>Client: </label>@Model.customer_code
+            </div>
+            <br />
+            <div>
+                <label>PO: </label>@Model.custpo
+            </div>
+            <br />
+            <div>
+                <label>Report number: </label>@Model.report_number
+            </div>
+            <br />
+            <div>
+                <label>QC: </label>@Model.qc 
+            </div>
+            <br />
+            <div>
+                <label>Tracking number:</label>
+            </div>
+            <br />
+            @foreach (var group in listRefs)
+            {
+                var tracking_number_list = group.Select(t => t.track_number);
+                string tracking_nums_display = string.Join(", ", tracking_number_list);
+
+                <div><span>@String.Format("{0}: {1};",group.Key, tracking_nums_display)</span></div>
+                <br />
+            }
+        
+        </form>
+    </div>
+</body>
+</html>

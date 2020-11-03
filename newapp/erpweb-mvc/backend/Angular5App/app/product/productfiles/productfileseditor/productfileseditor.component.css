@@ -1,0 +1,58 @@
+.type {
+    padding: 12px;
+    width: 12%;
+}
+.files {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.fileBox {
+    padding: 12px;
+    position: relative;
+}
+.fileBox img {
+    max-width: 150px !important;
+}
+.remove {
+    position: absolute;
+    top: 12px;
+    cursor: pointer;
+    right: 12px;
+}
+.addfiles {
+    padding: 12px;    
+    margin-left: auto;
+    min-width: 300px !important;
+}
+.remove .glyphicon {
+    color: deepskyblue;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+.editor {
+    border-top: 1px solid lightgray;
+}
+.moveLeft {
+    position: absolute;
+    bottom: 6px;
+    cursor: pointer;
+    left: 12px;
+    color: deepskyblue;
+    font-size: 1.5em;
+}
+.moveRight {
+    position: absolute;
+    bottom: 6px;
+    cursor: pointer;
+    right: 12px;
+    color: deepskyblue;
+    font-size: 1.5em;    
+}
+
+.moveLeft:hover {
+    display: block;
+}
+.moveRight:hover {
+    display: block;
+}

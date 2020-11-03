@@ -1,0 +1,69 @@
+<div [formGroup]="formGroup">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th style="width: 10%">Brand Code</th>
+                <th>Factory</th>
+                <th style="width: 90px">BRS code</th>
+                <th style="width: 15%">Product type</th>
+                <th>Brand description</th>
+                <th style="width: 5%">Group</th>
+                <th [style]="iconColumnStyle">dwg</th>
+                <th [style]="iconColumnStyle">Basic<br>draw</th>
+                <th [style]="iconColumnStyle">Det.<br> draw</th>
+                <th [style]="iconColumnStyle">Instr.</th>
+                <th [style]="iconColumnStyle">Image</th>
+                <th [style]="iconColumnStyle">Spare<br> pic.</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let p of products, let ix = index">
+                <td><input type="text" class="form-control" [(ngModel)]="p.cprod_code1" [formControlName]="p.cprod_id + '_' + 'cprod_code1'"
+                    (blur)="checkUpdate(p, 'cprod_code1')"></td>
+                <td>{{p.mastProduct.factory?.factory_code}}</td>
+                <td><span [title]="p.mastProduct.factory_ref">{{correctLongText(p)}}</span></td>
+                <td><select class="form-control" [(ngModel)]="p.cprod_brand_cat" [formControlName]="p.cprod_id + '_' + 'cprod_brand_cat'" 
+                    (blur)="checkUpdate(p, 'cprod_brand_cat')">
+                    <option [value]="c.brand_cat_id" *ngFor="let c of categories">{{c.brand_cat_desc}}</option>
+                </select></td>
+                <td><input type="text" class="form-control" [(ngModel)]="p.cprod_name" [formControlName]="p.cprod_id + '_' + 'cprod_name'"
+                    (blur)="checkUpdate(p, 'cprod_name')"></td>
+                <td><input type="text" class="form-control" [(ngModel)]="p.mastProduct.product_group" 
+                    [formControlName]="p.cprod_id + '_' + 'product_group'" (blur)="checkUpdate(p, 'product_group')"></td>
+                <td>
+                    <a *ngIf="getDataPdfLink(p.cprod_dwg, p.mastProduct.prod_image3)" [href]="getDataPdfLink(p.cprod_dwg, p.mastProduct.prod_image3)" 
+                    target="_blank"><img src="/images/small/technical.jpg"></a>
+                    <img *ngIf="!getDataPdfLink(p.cprod_dwg, p.mastProduct.prod_image3)" src="/images/small/technicalx.jpg">
+                </td>
+                <td>
+                    <a *ngIf="getDataPdfLink(p.cprod_dwg, p.mastProduct.prod_image3)" [href]="getTechDataLink(p,'')" 
+                    target="_blank"><img src="/images/small/pdf_icon.gif"></a>
+                    <a *ngIf="!getDataPdfLink(p.cprod_dwg, p.mastProduct.prod_image3) && p.mastProduct.prod_image2" 
+                    [href]="p.mastProduct.prod_image2" _target="blank"><img src="/images/small/pdf_icon.gif"></a>
+                    <img *ngIf="!getDataPdfLink(p.cprod_dwg, p.mastProduct.prod_image3) && !p.mastProduct.prod_image2" src="/images/small/pdf_icon2.gif">
+                </td>
+                <td>
+                    <a *ngIf="getDataPdfLink(p.cprod_dwg, p.mastProduct.prod_image3)" [href]="getTechDataLink(p,'2')" 
+                    target="_blank"><img src="/images/small/pdf_icon.gif"></a>                    
+                    <img *ngIf="!getDataPdfLink(p.cprod_dwg, p.mastProduct.prod_image3)" src="/images/small/pdf_icon2.gif">
+                </td>
+                <td>
+                    <a *ngIf="getDataPdfLink(p.cprod_instructions, p.mastProduct.prod_instructions)" [href]="getTechDataLink(p,'2')" 
+                    target="_blank"><img src="/images/small/pdf_icon.gif"></a>                    
+                    <img *ngIf="!getDataPdfLink(p.cprod_instructions, p.mastProduct.prod_instructions)" src="/images/small/pdf_icon2.gif">
+                </td>
+                <td>
+                    <img *ngIf="p.mastProduct.prod_image1" style="cursor: pointer" (click)="openLightbox(ix)" src="/images/small/picture.gif">                    
+                    <img *ngIf="!p.mastProduct.prod_image1" src="/images/small/nopicture.gif">
+                </td>
+                <td>
+                    <a *ngIf="getSparesLink(p)" [href]="getSparesLink(p)" target="_blank">
+                        <img src="/images/small/picture.gif">
+                    </a>                    
+                    <img *ngIf="!getSparesLink(p)" src="/images/small/nopicture.gif">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+

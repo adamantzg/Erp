@@ -1,0 +1,29 @@
+<div *ngIf="products.length > 0">
+        <div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th style="width: 10%">Brand code</th>
+                            <th>Factory</th>                    
+                            <th>Brand description</th>                    
+                            <th>Tariff code</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let p of products">
+                            <td>{{p.cprod_code1}}</td>
+                            <td>{{p.mastProduct?.factory?.factory_code}}</td>
+                            <td>{{p.cprod_name}}</td>
+                            <td>
+                                <div>
+                                    <select class="form-control" [(ngModel)]="p.mastProduct.tariff_code" (change)="onChange(p)">
+                                        <option *ngFor="let t of tariffs" [value]="t.tariff_id">{{t.tariff_code}}:{{t.tariff_desc}}</option>
+                                    </select>
+                                </div>
+                            </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>  
+
+</div>

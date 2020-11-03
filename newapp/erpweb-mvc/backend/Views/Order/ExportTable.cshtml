@@ -1,0 +1,467 @@
+﻿@using System.Linq.Expressions
+@using Utilities = company.Common.Utilities
+@model StockOrderAllocationsModel
+@functions
+{
+    public string GetStockValueClass(List<SOProductStock> stockValues)
+    {
+        if (stockValues[6].BalanceBy3MonthsAvg > 3 || stockValues[7].BalanceBy3MonthsAvg > 3 || stockValues[8].BalanceBy3MonthsAvg > 3)
+            return "class=stockbalance_above3month";
+        else if (stockValues[6].BalanceBy3MonthsAvg < 0 || stockValues[7].BalanceBy3MonthsAvg < 0 || stockValues[8].BalanceBy3MonthsAvg < 0)
+            return "class=stockbalance_below0month";
+        else
+        {
+            return "";
+        }
+    }
+    public string Display9Ref(int? orderid)
+    {
+        return string.Format("9{0}", orderid);
+    }
+}
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Allocations</title>
+        <style type="text/css">.so_upperheader { background-color: lightblue}
+
+ .so_middleheader { background-color: gray; color: white}
+
+ .so_prodrowheader { }
+ .so_prodrowheader_discontinued {background-color: #d3d3d3 }
+
+ .so_prod_sums { background-color: plum}
+
+ .so_prod_total {background-color: yellow }
+
+ .so_prod_balance { background-color: green}
+ .co_arrived {background-color: pink}
+ .co_shipped {background-color: lightgrey}
+ table { font-family: arial;font-size:10px}
+ body {font-family: arial; font-size: 10px}
+
+ .prodrow_salesdata {background-color: yellow }
+ .stockbalance_above3month { background-color: yellow;}
+ .stockbalance_below0month { background-color: red;}
+ .groupcell_1 {background-color: orangered}
+ .groupcell_2 {background-color: lightseagreen}
+ .groupcell_3
+ {
+     background-color: rgb(236, 85, 236);
+ }
+ .totalbalance {
+     background-color: orange;
+ }
+ td {text-align: center}
+        </style>
+    </head>
+
+    <body>
+        @{ Func<CalloffOrder, bool> cWhere = (c => true);
+            Func<Stockorder, bool> sWhere = (s => s.Balance > 0);
+            var colspan = 47;
+           }
+        <table>
+            <tr class="so_upperheader">
+                <td colspan="@colspan" rowspan="6"></td>
+                <td>Date of order</td>
+                @foreach (var corder in Model.CallOffOrders.Where(cWhere))
+                {   
+                    <td>@corder.orderdate.ToString("d")</td>
+                }
+                <td colspan="2"></td>
+                <td>Date of order</td>
+                @foreach (var sorder in Model.StockOrders.Where(sWhere))
+                {
+                    <td colspan="3">@sorder.orderdate.ToString("d")</td>
+                }
+                <td rowspan="7" class="totalbalance">Total balance</td>
+                <td rowspan="7" class="totalbalance">Total balance value</td>
+                @if (Model.IncludePalletQty)
+                {
+                    <td rowspan="7">Pallet Qty</td>    
+                }
+                <td rowspan="7">MOQ</td>
+            </tr>
+            <tr class="so_upperheader">
+                @*<td colspan="@colspan"></td>*@
+                <td>China ETD</td>
+                @foreach (var corder in Model.CallOffOrders.Where(cWhere))
+                {
+                    <td>@corder.po_req_etd.ToString("d")</td>
+                }
+                <td colspan="2"></td>
+                <td>Ready date</td>
+                @foreach (var sorder in Model.StockOrders.Where(sWhere))
+                {
+                    <td colspan="3">@(sorder.po_ready_date.ToString("d") ?? sorder.po_req_etd.ToString("d"))  </td>
+                }
+            </tr>
+            <tr class="so_upperheader">
+                @*<td colspan="@colspan"></td>*@
+                <td>Lead time</td>
+                @foreach (var corder in Model.CallOffOrders.Where(cWhere))
+                {
+                    <td>@corder.LeadTime</td>
+                }
+                <td colspan="2"></td>
+                <td>Lead time</td>
+                @foreach (var sorder in Model.StockOrders.Where(sWhere))
+                {
+                    <td colspan="3">@sorder.LeadTime</td>
+                }
+            </tr>
+            <tr class="so_upperheader">
+                @*<td colspan="@colspan"></td>*@
+                <td>ETA</td>
+                @foreach (var corder in Model.CallOffOrders.Where(cWhere))
+                {
+                    <td>@corder.req_eta.ToString("d")</td>
+                }
+                <td colspan="2"></td>
+                <td>Status</td>
+                @foreach (var sorder in Model.StockOrders.Where(sWhere))
+                {
+                    <td colspan="3">@if (sorder.po_req_etd > DateTime.Today)
+                                    {
+                                        <span>In production</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Ready</span>
+                                    }</td>
+                }
+            </tr>
+            <tr class="so_upperheader">
+                @*<td colspan="@colspan"></td>*@
+                <td>Container name</td>
+                @foreach (var corder in Model.CallOffOrders.Where(cWhere))
+                {
+                    <td>@corder.containerName</td>
+                }
+                <td colspan="3" rowspan="2">UNALLOCATED STOCK QTY IN</td>
+                
+                @foreach (var sorder in Model.StockOrders.Where(sWhere))
+                {
+                    <td rowspan="2">Total quantity</td>
+                    <td rowspan="2">Balance</td>
+                    <td rowspan="2">Balance value</td>
+                }
+            </tr>
+            <tr class="so_upperheader">
+                @*<td colspan="@colspan"></td>*@
+                <td>9Ref</td>
+                @foreach (var corder in Model.CallOffOrders.Where(cWhere))
+                {
+                    <td>@Display9Ref(corder.orderid)</td>
+                }
+                
+                
+                
+            </tr>
+            <tr class="so_middleheader">
+            <td>Factory code</td>
+            <td>MFG code</td>
+            <td>Client code</td>
+            <td width="200">Description</td>
+            @for (int i = 1; i <= 12; i++)
+            {
+                //we display 12 months in the past not counting current month. If curr month is e.g. June, we start from june last year to may this year
+                <td>Sales of @System.Globalization.DateTimeFormatInfo.InvariantInfo.MonthNames[DateTime.Today.AddMonths(-1*(13 - i)).Month - 1]</td>
+            }
+            <td>Group</td>
+            <td>Av. monthly</td>
+            <td>Stock quantity</td>
+
+            @for (int i = 0; i < 14; i++)
+            {
+                //14 weeks in the future
+                <td>WC-@Model.FirstWeek.AddDays(i*7).ToString("dd/MM")</td>
+                <td>Stock qty - @Model.FirstWeek.AddDays(i*7).ToString("dd/MM")</td>
+            }
+            <td></td>
+
+            @foreach (var corder in Model.CallOffOrders.Where(cWhere))
+            {
+                <td>@corder.custpo</td>
+            }
+            <td></td>
+            <td>Ready</td>
+            <td>In production</td>
+            @foreach (var sorder in Model.StockOrders.Where(sWhere))
+            {
+                <td colspan="3">@sorder.custpo</td>
+            }
+        </tr>
+            @{ var callOffTotals = new Dictionary<int, int>();
+                //var callOffTotalValues = new Dictionary<int, double>();
+                var stockOrderTotals = new Dictionary<int, double>();
+                var stockBalanceTotals = new Dictionary<int, double>();
+                var stockBalanceValueTotals = new Dictionary<int, double>();
+                double? grandTotalBalance=0.0, grandTotalBalanceValue=0.0;
+            }
+            
+            @*14/10/2013 order by 6th week balance*@
+            @foreach (var product in Model.Products.OrderBy(f=>f.Prod.MastProduct.Factory.factory_code).ThenBy(p=>p.StockValues[5].BalanceBy3MonthsAvg))
+            {
+                var prod = product.Prod;
+                var prodBalance = Model.Lines.Where(l => l.cprod_id == prod.cprod_id && l.stock_order == 1 ).Sum(l => l.orderqty) - product.Allocations.Sum(a => a.alloc_qty);
+                //var hasCallOff = product.Allocations.Any(a=>a.co_orderid);
+                if (prod.cprod_status != "D" || prodBalance > 0)
+                {
+                    <tr>
+                        <td class="so_prodrowheader">@prod.MastProduct.Factory.factory_code</td>
+                        <td class="so_prodrowheader">@prod.MastProduct.factory_ref</td>
+                        <td class="so_prodrowheader">@Html.Hidden("hid" + prod.cprod_id, prod.cprod_id) @prod.cprod_code1</td>
+                        <td class="@Html.Raw(prod.cprod_status == "D" ? "so_prodrowheader_discontinued" : "so_prodrowheader")">@prod.cprod_name</td>
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            var data = string.Empty;
+                            var sales = product.SalesData.FirstOrDefault(f => f.month21 == Utilities.GetMonthFromNow(i - 13));
+                            if (sales != null)
+                            {
+                                data = sales.sales_qty.ToString();
+                            }
+                            <td class="prodrow_salesdata">@data</td>
+                        }
+                        <td class="groupcell_@prod.cprod_stock_code">@if (prod.cprod_stock_code >= 1)
+                                                                     {
+                                                                         switch (prod.cprod_stock_code.Value)
+                                                                         {
+                                                                             case 1:
+                                                                                 @Html.Raw("A")
+                                                                                 ;
+                                                                                 break;
+                                                                             case 2:
+                                                                                 @Html.Raw("B")
+                                                                                 ;
+                                                                                 break;
+                                                                             case 3:
+                                                                                 @Html.Raw("C")
+                                                                                 ;
+                                                                                 break;
+                                                                         }
+                                                                     }</td>
+                        @*@{
+                        var threeMonthsAverage = product.SalesData.Where(s => s.month21 >= WebUtilities.GetMonthFromNow(-3)).Average(s => s.sales_qty);
+                    }*@
+                        <td>@product.StockAvg3Months.ToString("N2")</td>
+                        <td>@prod.cprod_stock</td>
+                        @{
+
+                            for (int i = 0; i < 14; i++)
+                            {
+                                <td @(Html.Raw(GetStockValueClass(product.StockValues)))>@product.StockValues[i].Balance.ToString("N0")</td>
+                                <td @(Html.Raw(GetStockValueClass(product.StockValues)))>@(product.StockValues[i].BalanceBy3MonthsAvg.ToString("n2"))</td>
+
+                            }
+                        }
+
+                        <td></td>
+
+                        @foreach (var corder in Model.CallOffOrders.Where(cWhere))
+                        {
+                            <td class="co_@{
+                                              if (corder.req_eta < DateTime.Today)
+                                              {
+                                                  @Html.Raw("arrived")
+                                              }
+                                              else if (corder.po_req_etd < DateTime.Today)
+                                              {
+                                                  @Html.Raw("shipped")
+                                              }
+                                          }">
+                                @{
+                                    if (!callOffTotals.ContainsKey(corder.orderid))
+                                    {
+                                        callOffTotals[corder.orderid] = 0;
+                                        //callOffTotalValues[corder.orderid] = 0;
+                                    }
+                                }
+                                @foreach (var alloc in product.Allocations.Where(a => a.co_orderid == corder.orderid && a.alloc_qty > 0))
+                                {
+                                    callOffTotals[corder.orderid] += alloc.alloc_qty.Value;
+                                    <span>@alloc.so_custpo : </span>
+                                    @alloc.alloc_qty<br/>
+                                }
+                            </td>
+                        }
+                        <td></td>
+                        @{
+                            var slines = Model.Lines.Where(l => l.cprod_id == prod.cprod_id && l.stock_order == 1).
+                                Select(l => new {l.po_req_etd, l.orderqty, l.custpo, balance = l.orderqty - product.Allocations.Where(a => a.so_orderid == l.orderid).Sum(a => a.alloc_qty)}).Where(sl => sl.balance >= 0);
+                        }
+                        <td class="so_prod_sums">
+
+                            @slines.Where(sl => sl.po_req_etd < DateTime.Today).Sum(sl => sl.balance)
+                        </td>
+                        <td class="so_prod_sums">
+                            @slines.Where(sl => sl.po_req_etd >= DateTime.Today).Sum(sl => sl.balance)
+                        </td>
+                        @{
+                            var totalBalance = 0.0;
+                            double? totalBalanceValue = 0.0;}
+                        @foreach (var sorder in Model.StockOrders.Where(sWhere))
+                        {
+
+                            var lines = sorder.Lines.Where(l => l.cprod_id == prod.cprod_id).ToList();
+                            var lineQtySum = lines.Sum(l => l.orderqty);
+                            
+                            <td class="so_prod_total">@(lineQtySum != null ? lineQtySum.ToString() : string.Empty)</td>
+
+                            if (!stockOrderTotals.ContainsKey(sorder.orderid))
+                            {
+                                stockOrderTotals[sorder.orderid] = 0.0;
+                                stockBalanceTotals[sorder.orderid] = 0;
+                                stockBalanceValueTotals[sorder.orderid] = 0.0;
+                            }
+                            if (lineQtySum != null)
+                            {
+                                stockOrderTotals[sorder.orderid] += lineQtySum.Value;
+                                var sorderBalance = lineQtySum - product.Allocations.Where(a => a.so_orderid == sorder.orderid).Sum(a => a.alloc_qty);
+                                double? price = null;
+                                if (sorderBalance != null)
+                                {
+                                    stockBalanceTotals[sorder.orderid] += sorderBalance.Value;
+                                    totalBalance += sorderBalance.Value;
+
+                                    price = lineQtySum > 0 ? lines.Sum(l => l.orderqty*l.unitprice)/ lineQtySum : 0;
+                                    totalBalanceValue += sorderBalance.Value*price;
+                                    stockBalanceValueTotals[sorder.orderid] += sorderBalance.Value*(price ?? 0);
+
+                                }
+                                <td class="so_prod_balance">@sorderBalance</td>
+                                <td class="so_prod_balance">@((sorderBalance*price).ToString("N2"))</td>
+
+                            }
+                            else
+                            {
+                                <td colspan="2" class="so_prod_balance">&nbsp;</td>
+                            }
+
+                        }
+                        @{
+                            grandTotalBalance += totalBalance;
+                            grandTotalBalanceValue += totalBalanceValue;
+                        }
+                        <td class="totalbalance">@totalBalance</td>
+                        <td class="totalbalance">@totalBalanceValue</td>
+                        @if (Model.IncludePalletQty)
+                        {
+                            <td>@prod.MastProduct.units_per_pallet_single</td>
+                        }
+                        <td>@prod.MastProduct.min_ord_qty</td>
+                    </tr>
+                }
+            }
+            <tr class="so_upperheader">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                @for (int i = 1; i <= 12; i++)
+                {
+                    <td></td>
+                }
+                <td></td>
+                <td></td>
+                <td></td>
+                @for (int i = 0; i < 14; i++)
+                {
+                    <td></td>
+                    <td></td>
+                }
+
+                <td>TOTAL</td>
+                @foreach (var corder in Model.CallOffOrders.Where(cWhere))
+                {
+                    <td>@(callOffTotals[corder.orderid])</td>
+                }
+                <td></td>
+                <td></td>
+                <td></td>
+                @foreach(var sorder in Model.StockOrders.Where(sWhere))
+                {
+                    <td>@(stockOrderTotals.ContainsKey(sorder.orderid) ? stockOrderTotals[sorder.orderid] : 0)</td>
+                    <td>@(stockBalanceTotals.ContainsKey(sorder.orderid) ? stockBalanceTotals[sorder.orderid] : 0)</td>
+                    <td>@(stockBalanceValueTotals.ContainsKey(sorder.orderid) ? stockBalanceValueTotals[sorder.orderid] : 0)</td>
+                }
+                <td>@grandTotalBalance</td>
+                <td>@grandTotalBalanceValue.ToString("N2")</td>
+            </tr>
+            <tr class="so_upperheader">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                @for (int i = 1; i <= 12; i++)
+                {
+                    <td></td>
+                }
+                <td></td>
+                <td></td>
+                <td></td>
+                @for (int i = 0; i < 14; i++)
+                {
+                    <td></td>
+                    <td></td>
+                }
+
+                <td>TOTAL VALUE</td>
+                @foreach (var corder in Model.CallOffOrders.Where(cWhere))
+                {
+                    <td>@(Model.Lines.Where(l=>l.orderid == corder.orderid).Sum(l=>l.orderqty*l.unitprice).ToString("N2"))</td>
+                }
+                <td></td>
+                <td></td>
+                <td></td>
+                @foreach (var sorder in Model.StockOrders.Where(sWhere))
+                {
+                    <td>@(Model.Lines.Where(l=>l.orderid == sorder.orderid).Sum(l=>l.orderqty*l.unitprice).ToString("N2"))</td>
+                    <td colspan="2">&nbsp;</td>
+                }
+                
+                
+            </tr>
+            <tr class="so_upperheader">
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                @for (int i = 1; i <= 12; i++)
+                {
+                    <td></td>
+                }
+                <td></td>
+                <td></td>
+                <td></td>
+                @for (int i = 0; i < 14; i++)
+                {
+                    <td></td>
+                    <td></td>
+                }
+
+                <td>TOTAL VALUE (STOCK ORDER PRICE)</td>
+                @foreach (var corder in Model.CallOffOrders.Where(cWhere))
+                {
+                    <td>@(Model.Lines.Where(l=>l.orderid == corder.orderid).Sum(l=>l.AllocatedLines.Sum(sol=>sol.AllocQty*sol.unitprice)).ToString("N2"))</td>
+                }
+                <td></td>
+                <td></td>
+                <td></td>
+                 @foreach (var sorder in Model.StockOrders.Where(sWhere))
+                {
+                    <td></td>
+                    <td colspan="2">&nbsp;</td>
+                }
+                
+                
+            </tr>
+            
+        </table>
+    </body>
+</html>

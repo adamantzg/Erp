@@ -1,0 +1,77 @@
+﻿@using company.Common
+@model Inspection_v2
+<div id="top" class="logo">
+    <img src="/images/asaq_ext2.jpg" alt="logo" />
+</div><!--logo-->
+
+<div class="main">
+    @{
+        var insp = Model;
+    }
+    <span class="inspection_title">INSPECTION REPORT</span>
+    
+    <table id="technical" class="gpc_title"><tr><td>Part 1 - GENERAL</td></tr></table><!--gpc_title-->
+
+    <table class="table_general" width="100%" border="0" cellspacing="1" cellpadding="1">
+        <tr>
+            <td width="150" height="18" class="first_row">Client</td>
+            <td class="dotted_row" style="text-align: left;">
+                <span>@insp.Client.IfNotNull(c=>c.customer_code)</span>
+            </td>
+        </tr>
+        <tr>
+            <td width="150" height="18" class="first_row">Report #:</td>
+            <td class="dotted_row" style="text-align: left;">
+                @insp.ComputedCode
+            </td>
+        </tr>
+        <tr>
+            <td width="150" height="18" class="first_row">Service type:</td>
+            <td class="dotted_row" style="text-align: left;">Final inspection</td>
+        </tr>
+        @*<tr>
+                <td width="150" height="18" class="first_row">Supplier name:</td>
+                <td class="dotted_row" style="text-align:left;">@Model.Factory.user_name</td>
+            </tr>*@
+        <tr>
+            <td width="150" height="18" class="first_row">Inspection date:</td>
+            <td class="dotted_row" style="text-align: left;">
+                <span>@insp.startdate.ToString("d")</span>
+                
+            </td>
+
+        </tr>
+        <tr>
+            <td width="150" height="18" class="first_row">Inspectors</td>
+            <td class="dotted_row" style="text-align: left">
+                @if (insp.Controllers != null)
+                {
+                    <span>@string.Join(",",insp.Controllers.Select(c=>c.Controller.IfNotNull(con=>con.userwelcome)))</span>
+                }
+            </td>
+
+        </tr>
+        
+        <tr>
+            <td width="150" height="18" class="first_row">P.O. No:</td>
+            <td class="dotted_row" style="text-align: left;">
+                @insp.CustPos
+            </td>
+
+        </tr>
+        <tr>
+            <td width="150" height="18" class="first_row">Total quantity:</td>
+            <td class="dotted_row" style="text-align: left;">
+                @insp.Lines.Sum(l => l.qty > 0 ? l.qty : l.OrderLine != null ? l.OrderLine.IfNotNull(ol=>ol.orderqty) : 0)
+            </td>
+        </tr>
+        <tr>
+            <td width="150" height="18" class="first_row">Inspected Quantity:</td>
+            <td class="dotted_row" style="text-align: left;">
+                @insp.Lines.Sum(l => l.inspected_qty)
+            </td>
+        </tr>
+
+    </table>
+
+</div>

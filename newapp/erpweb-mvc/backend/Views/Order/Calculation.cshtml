@@ -1,0 +1,38 @@
+﻿@model backend.ContainerLoadService.CargoInfo
+@{
+    ViewBag.Title = "title";
+}
+<div>
+    <div style="width:50%;text-align: center;margin:0px auto">Please wait while container load is being estimated</div>
+    <div class="error" style="display: none" id="errordiv"></div>
+    <div >
+        <div style="width:100px;margin: 0px auto">
+        <img  src="/Images/animated_spinner.gif" alt="spinner"/></div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+
+        $(document).ready(function() {
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: "/Order/StartCalculation",
+                dataType: "json",
+                data: '{' +
+                    '"cargoInfo": ' + '@Html.Raw(Json.Encode(Model))' + '}',
+                success: function(session_id) {
+                    location.href = '/Order/DisplayResults/?session_id=' + session_id + '&sorder_ids=@ViewBag.order_ids';
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    $("#errordiv").html('Error in calculation service: ' + errorThrown).show();
+                    
+                }
+            });
+
+        });
+    </script>
+
+}

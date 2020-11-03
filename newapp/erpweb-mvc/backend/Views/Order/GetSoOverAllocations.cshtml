@@ -1,0 +1,290 @@
+﻿@model System.Collections.Generic.List<asaq2.Model.soalloc_overallocation>
+
+@{
+    ViewBag.Title = "title";
+    
+}
+
+<h2>Stock order overallocations</h2>
+
+<table id="tblMain">
+    <thead>
+        <tr class="table_headerrow">
+            <td>custpo</td>
+            <td>product code</td>
+            <td>product name</td>
+            <td class="number">order qty</td>
+            <td class="number">allocated qty</td>
+            @*<td class="number">new allocated qty</td>*@
+
+        </tr>
+    </thead>
+    <tbody data-bind="foreach: OverAllocations">
+        <tr data-bind="attr: {style : OddEven($index())}">
+            <td><a href="javascript:void(0)" data-bind="click: $root.ShowDetails"><span data-bind="    text: Header.custpo"></span></a></td>
+            <td><span data-bind="text: Product.cprod_code1"></span></td>
+            <td><span data-bind="text: Product.cprod_name"></span></td>
+            <td class="number"><span data-bind="text: StockLineQty"></span></td>
+            <td class="number"><span data-bind="text: AllocQty"></span></td>
+            @*<td class="number"><span data-bind="text: NewAllocQty"></span></td>*@
+        </tr>
+        <tr data-bind="visible: $root.ActiveIndex() == $index"><td></td>
+            <td colspan="4">
+                <br/>
+                <span style="font-weight: bold">Allocated calloff orders:</span><br/>
+                <table>
+                    <thead>
+                        <tr class="table_headerrow">
+                            <td>custpo</td>
+                            <td>linenum</td>
+                            <td class="number">order qty</td>
+                            <td class="number">allocated qty</td>
+                            @*<td class="number">new allocated qty</td>*@
+                            @*<td></td>*@
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: CalloffLines">
+                        <tr data-bind="attr: { style: OddEven($index()) }">
+                            <td><span data-bind="text: Header.custpo"></span></td>
+                            <td data-bind="text: linenum"></td>
+                            <td class="number"><span data-bind="text: orderqty"></span></td>
+                            <td class="number"><span data-bind="text: AllocQty"></span></td>
+                            @*<td class="number"><input type="text" style="width: 100px;text-align: right" data-bind="value: NewAllocQty" /></td>*@
+                            @*<td><a href="javascript:void(0)" data-bind="click: $root.DeleteAllocation"><img src="/Images/menus/Delete.gif"/></a></td>*@
+                        </tr>
+                    </tbody>
+                </table>
+                <br />
+                <span style="font-weight: bold">Other stock orders for this product:</span><br/>
+                <table >
+                    <thead>
+                        <tr class="table_headerrow">
+                            <td>custpo</td>
+                            <td>ETD</td>
+                            <td class="number">order qty</td>
+                            <td class="number">allocated qty</td>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: AvailableStockLines">
+                        <tr data-bind="attr: { style: OddEven($index()) }">
+                            <td><span data-bind="text: Header.custpo"></span></td>
+                            <td><span data-bind="text: fromJSONDateFormatted(Header.po_req_etd())"></span></td>
+                            <td class="number"><span data-bind="text: orderqty"></span></td>
+                            <td class="number"><span style="text-align: right" data-bind="text: AllocQty" /></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td colspan="3">Calloff lines</td>
+                        </tr>
+                        <tr>
+                            <td>
+                            </td>
+                            <td colspan="3">
+                                <table>
+                                    <thead>
+                                        <tr class="table_headerrow">
+                                            <td>custpo</td>
+                                            <td>linenum</td>
+                                            <td class="number">order qty</td>
+                                            <td class="number">allocated qty</td>
+                                            @*<td class="number">new allocated qty</td>*@
+                                            @*<td></td>*@
+                                        </tr>
+                                    </thead>
+
+                                    <tbody data-bind="foreach: AllocatedLines">
+                                        <tr data-bind="attr: { style: OddEven($index()) }">
+                                            <td><span data-bind="text: Header.custpo"></span></td>
+                                            <td data-bind="text: linenum"></td>
+                                            <td class="number"><span data-bind="text: orderqty"></span></td>
+                                            <td class="number"><span data-bind="text: AllocQty"></span></td>
+                                            @*<td class="number"><input type="text" style="width: 100px;text-align: right" data-bind="value: NewAllocQty" /></td>*@
+                                            @*<td><a href="javascript:void(0)" data-bind="click: $root.DeleteOtherAllocation"><img src="/Images/menus/Delete.gif"/></a></td>*@    
+
+                                        </tr>
+                                    </tbody>
+                                    
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table><br/>
+                <input type="button" value="Update" data-bind="click: $root.UpdateAllocation"/>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+@section head
+{
+    <style>
+        td {padding: 5px}
+    </style>
+}
+
+@section scripts
+{
+@Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/knockout")
+    @Scripts.Render("~/bundles/jqueryval")
+
+    
+    @Html.GlobalizationScript()
+
+    <script type="text/javascript">
+        var data = ko.mapping.fromJSON('@Html.Raw(Json.Encode(Model))');
+        var model;
+
+        $(function() {
+
+            model = new Model(data);
+
+            ko.applyBindings(model);
+
+            //$('#tblMain tbody tr').each(function(i) {
+            //    if (i % 4 == 2) {
+            //        $(this).find('td').css('background-color', '#F4F4F4');
+            //    }
+
+            //});
+
+        });
+
+        function OddEven(index) {
+            if (index % 2 == 1)
+                return 'background-color: #F4F4F4';
+            return '';
+        }
+
+        function Model(data) {
+            this.OverAllocations = data;
+
+            var self = this;
+
+            ko.utils.arrayForEach(self.OverAllocations(), function(overAlloc) {
+                overAlloc.CalloffLines = ko.observableArray([]);
+                overAlloc.AvailableStockLines = ko.observableArray([]);
+                //overAlloc.NewAllocQty = ko.observable(overAlloc.AllocQty());
+
+                /*overAlloc.CalloffLines.subscribe(function(lines) {
+                    var result = 0;
+                    if (lines().length > 0) {
+                        for (var j = 0; j < lines().length; j++) {
+                            result += lines()[j].NewAllocQty();
+                        }
+                    } else {
+                        result = oAlloc.AllocQty();
+                    }
+                    return result;
+                });*/
+
+                //overAlloc.NewAllocQty = ko.computed(function() {
+                //    var result = 0;
+                //    if (overAlloc.CalloffLines().length > 0) {
+                //        for (var j = 0; j < overAlloc.CalloffLines().length; j++) {
+                //            result += parseInt(overAlloc.CalloffLines()[j].NewAllocQty());
+                //        }
+                //    } else {
+                //        result = overAlloc.AllocQty();
+                //    }
+                //    return result;
+                //});
+
+
+                /*ko.utils.arrayForEach(overAlloc.CalloffLines(), function(line) {
+                    line.AllocQty.subscribe(function(newValue) {
+                        //TODO: Logic for change 
+                    });
+                });*/
+            });
+
+
+            this.ActiveIndex = ko.observable(0);
+
+            this.DeletedAllocations = [];
+            this.UpdatedAllocations = [];
+
+            this.ShowDetails = function(data, event) {
+                if (data.CalloffLines().length == 0) {
+                    //load data
+
+                    $.ajax({
+                        url: '@Url.Action("GetCallOffLines")',
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        dataType: "json",
+                        data: "{'so_line': " + data.stockLineNum().toString() + "}",
+                        success: function(lines) {
+                            //for (var i = 0; i < lines.length; i++) {
+                            //    lines[i].NewAllocQty = lines[i].AllocQty;
+                            //}
+                            ko.mapping.fromJS(lines, {}, data.CalloffLines);
+                        },
+                        error: function(a, b, c) {
+                            alert("Error in obtaining calloff lines");
+                        }
+                    });
+
+
+                    $.ajax({
+                        url: '@Url.Action("GetAvailableStockLines")',
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        async: false,
+                        dataType: "json",
+                        data: "{'cprod_id': " + data.Product.cprod_id().toString() + "}",
+                        success: function(lines) {
+
+                            //ko.utils.arrayForEach(lines, function(line) {
+                            //    ko.utils.arrayForEach(line.AllocatedLines, function (coline) {
+                            //        coline.NewAllocQty = coline.AllocQty;
+                            //    });
+                            //});
+
+                            ko.mapping.fromJS(lines, {}, data.AvailableStockLines);
+                            //ko.utils.arrayForEach(data.AvailableStockLines(), function(line) {
+                            //    line.NewAllocQty = ko.computed(function() {
+                            //        var result = 0;
+                            //        if (line.AllocatedLines().length > 0) {
+                            //            for (var j = 0; j < line.AllocatedLines().length; j++) {
+                            //                result += parseInt(line.AllocatedLines()[j].NewAllocQty());
+                            //            }
+                            //        } else {
+                            //            result = line.AllocQty();
+                            //        }
+                            //        return result;
+                            //    });
+
+                            //});
+                        },
+                        error: function(a, b, c) {
+                            alert("Error in obtaining stock order lines");
+                        }
+                    });
+
+
+                }
+                var context = ko.contextFor(event.target);
+                self.ActiveIndex(context.$index);
+            };
+
+            this.DeleteAllocation = function(data, event) {
+                var context = ko.contextFor(event.target);
+                self.DeletedAllocations.push({ unique_link_ref: data.allocation_id() });
+                context.$parent.CalloffLines.remove(data);
+            };
+
+            this.DeleteOtherAllocation = function(data, event) {
+                var context = ko.contextFor(event.target);
+                self.DeletedAllocations.push({ unique_link_ref: data.allocation_id() });
+                context.$parent.CalloffLines.remove(data);
+            };
+
+            this.UpdatedAllocation = function() {
+                //Saves deleted and updated allocations to db
+            };
+
+        }
+    </script>
+}

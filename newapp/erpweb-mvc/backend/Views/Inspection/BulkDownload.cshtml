@@ -1,0 +1,425 @@
+﻿@model InspectionBulkModel
+
+@{
+    ViewBag.Title = "David Bulk Download";
+    Layout = null;
+}
+
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="bulkInspections">
+<head>
+    <title>Download</title>
+    <style type="text/css">
+        .small-body {
+            /*font-family: Verdana, Geneva, sans-serif;*/
+            font-family:'Arial';
+            font-size: 10px;
+            font-style: normal;
+            color: #000;
+        }
+        .small-desc{
+            font-family:'Arial';
+            font-size: 12px;
+            font-style: normal;
+            color: #000;
+        }
+
+        .data-block-rows-header {
+            /*font-family: 'Arial, Helvetica, sans-serif'*/;
+            font-family:'Arial';
+            font-size: 11px;
+            height: 500px;
+            width: 760px;
+            /*margin-left:10px;*/
+            overflow: auto;
+            margin-bottom: 0px;
+            margin-top: 10px;
+            text-align: left;
+            border: 0px;
+            border-style: dashed;
+            border-color: #999;
+            padding: 2px;
+            position: relative;
+        }
+
+        .small-body-faint {
+            /*font-family: Verdana, Geneva, sans-serif;*/
+            font-family:'Arial';
+            font-size: 10px;
+            font-style: normal;
+            color: #666;
+        }
+
+        .small-body-wonb {
+            /*font-family: Verdana, Geneva, sans-serif;*/
+            font-family:'Arial';
+            font-size: 10px;
+            font-style: normal;
+            color: #FFF;
+        }
+        .odd{
+            background-color:#ffffff;
+        }
+        .even{
+            background-color:#dddddd;
+        }
+    </style>
+</head>
+<body ng-controller="bulkCtrl" style="width:920px">
+    @*<span style="color:#ff6a00;font-size:38px"><b>{{ checkedSelected.types.length }} &nbsp;&nbsp; {{checkedSelected.products.length}} - {{InspId}} - @Model.Insepctions.First().cprod_id </b></span><br />
+        <span style="color:#ff6a00">@ViewBag.user - @ViewBag.id </span>*@
+    @*<span style="color:#ff6a00">{{linklog}} </span>*@
+    <div id="container" style="display:block" ng-init="checkDocTypesAll()">
+        <div class="small_body">
+            @*Type of document to download: <br />*@
+            @*<input type="checkbox"
+                id="chkDocTypeAll"
+                ng-model="selectedAll"
+                ng-click="checkToggle()" />*@
+            @*<strong>All</strong>*@
+            @*<span ng-repeat="chkTypeDoc in DocTypes">
+                    <input type="checkbox"
+                           checklist-model="checkedSelected.types"
+                           checklist-value="chkTypeDoc.id"
+                           ng-click="isCheckedAll()" /><span>{{chkTypeDoc.name}}</span>
+                </span>*@
+            @*<br />*@
+            @*<input type="button" value="Download" ng-click="Download()" />*@
+
+            @*<br /><span>&nbsp;</span>*@
+            <div class="data-block-row-header"></div>
+            <table style="width:100%;font-family:'Arial'" border="0" align="center" cellpadding="2" cellspacing="0">
+                <tr>
+                    <td></td>@*1*@
+                    <td></td>@*2*@
+                    <td></td>@*3*@
+                    <td></td>@*4*@
+                    <td class="small-desc" colspan="4">
+                        Select documents to download
+                        &nbsp;&nbsp;
+
+                    </td>
+                    
+                    <td @*style="text-align:right"*@>
+                        <input class="small-desc" type="button" value="Download" ng-click="Download()" />
+                    </td>
+                    
+                </tr>
+                @*<tr>*@
+                @* check box *@
+                @*<td></td>*@
+                @* factory *@
+                @*<td></td>*@
+                @* client code *@
+                @*<td></td>*@
+                @* client description *@
+                @*<td></td>*@
+
+                @*<td ng-repeat="chkTypeDoc in DocTypes" class="small-desc">
+                        <span style="display:block">
+                            <input type="checkbox"
+                                   checklist-model="checkedSelected.types"
+                                   checklist-value="chkTypeDoc.id"
+                                   ng-click="isCheckedAll()" />
+                            <span style="margin-top:2px;position:absolute">{{chkTypeDoc.name}}</span>
+                        </span>
+                    </td>*@
+                @*<td></td>
+                    <td></td>
+                    <td></td>*@
+                @*</tr>*@
+                <tr bgcolor="#EFEFEF" class="normal_body" style="font-family:'Arial'">
+                   @*1*@ <td widht="20" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        <input type="checkbox"
+                               ng-model="selectedProductAll"
+                               ng-click="atwork-checkbox()" />
+                    </td>
+                   @*2*@ <td widht="90" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        Factory <br /> Product <br /> Code
+                    </td>
+                    @*3*@<td widht="90" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        Client <br /> Product <br /> Code
+                    </td>
+                    @*4*@<td align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        Client Description
+                    </td>
+                    @*<td widht="60" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                            Insp. <br /> Quantity
+                        </td>*@
+                    @*<td widht="60" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                            basic<br />drawing
+                        </td>*@
+                    @*5*@<td width="70" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        drawing <br />
+                        <input type="checkbox"
+                               checklist-model="checkedSelected.types"
+                               checklist-value="3"
+                               ng-click="isCheckedAll()" />
+                    </td>
+                    @*<td widht="60" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                            CAD
+                        </td>*@
+                    @*6*@<td width="70" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        Instr. <br />
+                        <input type="checkbox"
+                               checklist-model="checkedSelected.types"
+                               checklist-value="4"
+                               ng-click="isCheckedAll()" />
+                    </td>
+                    @*7*@<td width="70" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        label <br />
+                        <input type="checkbox"
+                               checklist-model="checkedSelected.types"
+                               checklist-value="5"
+                               ng-click="isCheckedAll()" />
+                    </td>
+                    @*8*@<td width="70" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        pkg. <br />
+                        <input type="checkbox"
+                               checklist-model="checkedSelected.types"
+                               checklist-value="6"
+                               ng-click="isCheckedAll()" />
+                    </td>
+                    @*9*@<td width="70" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        photo <br />
+                        <input type="checkbox"
+                               checklist-model="checkedSelected.types"
+                               checklist-value="9"
+                               ng-click="isCheckedAll()"
+                               />
+                    </td>
+                </tr>
+                <tbody ng-repeat="inspection in Inspections" style="font-size:10px" ng-class-odd="'odd'" ng-class-even="'even'">
+                    <tr>
+                       @*1*@ <td>
+                            <input type="checkbox"
+                                   checklist-model="checkedSelected.products"
+                                   checklist-value="inspection.mast_id"
+                                   ng-click="isCheckedProductsAll()" />
+                        </td>
+                        @*2*@<td>
+                            <span>{{inspection.insp_factory_ref}}</span>
+                        </td>
+                        @*3*@<td>
+                            <span>{{inspection.insp_client_ref}}</span>
+                        </td>
+                        @*4*@<td>
+                            <span>{{inspection.insp_client_desc}}</span>
+                        </td>
+                        @*<td>
+                                <span>{{inspection.insp_qty}}</span>
+                            </td>*@
+                        @*<td>*@
+                        @*basic drawing*@
+                        @*<a href="{{GetTechPdfLink(inspection,'')}}" download
+                                   ng-click="CreateLog(GetTechPdfLink(inspection,''),inspection.cprod_id,inspection.mast_id)">
+                                    <img src="/images/small/pdf_icon.gif" ng-show="IconPdfVisible" />
+                                </a>
+                            </td>*@
+                        @*5*@<td>
+                            <a href="{{GetTechPdfLink(inspection,2)}}" download
+                               ng-click="CreateLog(GetTechPdfLink(inspection,2),inspection.cprod_id,inspection.mast_id)">
+                                <img src="/images/small/pdf_icon.gif" ng-show="IconPdfVisible" />
+                            </a>
+                        </td>
+                        @*<td>*@
+                        @* dwg *@
+                        @*<a href="{{inspection.prod_image3}}" download
+                               ng-click="CreateLog(GetLinkPdf(inspection.prod_image3),inspection.cprod_id,inspection.mast_id)">
+                                <img src="/images/small/technical.jpg"
+                                     ng-show="{{inspection.prod_image3 != ''}}"
+                                     width="19" height="18" border="0" />
+                            </a>*@
+                        @*</td>*@
+
+                        @*6*@<td>
+                            @* instructions *@
+                            @*<a ng-href="~/{{inspection.cprod_instructions !=''?inspection.cprod_instructions:inspection.prod_instructions}}">
+                                    <img src="/images/small/pdf_icon.gif" alt="Alternate Text" visible="" />
+                                </a>*@
+                            <a href="{{GetLinkPdf(inspection.cprod_instructions,inspection.prod_instructions)}}" download
+                               ng-click="CreateLog(GetLinkPdf(inspection.cprod_instructions,inspection.prod_instructions),inspection.cprod_id,inspection.mast_id)">
+                                <img src="/images/small/pdf_icon.gif" ng-show="IconPdfVisible" />
+                            </a>
+                        </td>
+                        @*7*@<td>  @* label *@
+                            <a ng-href="{{GetLinkPdf(inspection.cprod_label,inspection.prod_image4)}}" download
+                               ng-click="CreateLog(GetLinkPdf(inspection.cprod_label,inspection.prod_image4),inspection.cprod_id,inspection.mast_id)">
+                                <img src="/images/small/pdf_icon.gif" ng-show="IconPdfVisible" />
+                            </a>
+                        </td>
+                        @*8*@<td>  @*packaging*@
+                            <a ng-href="{{GetLinkPdf(inspection.cprod_packaging,inspection.prod_image5)}}" download
+                               ng-click="CreateLog(GetLinkPdf(inspection.cprod_packaging,inspection.prod_image5),inspection.cprod_id,inspection.mast_id)">
+                                <img src="/images/small/pdf_icon.gif" ng-show="IconPdfVisible" />
+                            </a>
+                        </td>
+                        @*9*@<td>
+                            <a ng-href="{{inspection.prod_image1}}" download
+                               ng-click="CreateLog(GetLinkPdf(inspection.cprod_packaging,inspection.prod_image5),inspection.cprod_id,inspection.mast_id)">
+                                <img src="~/Images/icons/glyphicons-picture.png" style="width: 20px; margin-top: 3px; opacity:0.7"/>
+                                @*<img src="/images/small/" ng-show="IconPdfVisible" />*@
+                                @*<i class="glyphicon glyphicon-picture" ng-show="true"></i> -*@
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jqueryval")
+    @*// @Scripts.Render("~/bundles/knockout")*@
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/angularmodel")
+    @*<script src="~/Scripts/angularjs-cheklist-model.js"></script>*@
+    <script type="text/javascript">
+        @{
+            var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+            var json = serializer.Serialize(Model.DocTypes.Where(c=>c.id != 2 && c.id != 7 ));
+            var jsonInspection = serializer.Serialize(Model.Insepctions.Select(s => new {
+                insp_factory_ref=s.insp_factory_ref,
+                insp_client_ref=s.insp_client_ref,
+                insp_client_desc=s.insp_client_desc,
+                cprod_instructions=s.cprod_instructions,
+                cprod_label = s.cprod_label,
+                cprod_packaging = s.cprod_packaging,
+                prod_instructions =s.prod_instructions,
+                prod_image1=s.prod_image1,
+                prod_image2=s.prod_image2,
+                prod_image3=s.prod_image3,
+                prod_image4=s.prod_image4,
+                prod_image5=s.prod_image5,
+                insp_id=s.insp_id,
+                mast_id=s.mast_id,
+                cprod_id=s.cprod_id
+            }).ToList());
+
+        }
+        var downloadURL=function downloadURL(url){
+            var hiddenIFrameID='hiddenDownloader',
+                iframe=document.getElementById(hiddenIFrameID);
+            if(iframe===null){
+                iframe=document.createElement('iframe');
+                iframe.id = hiddenIFrameID;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+            }
+            iframe.src = url;
+        }
+        var bulkInspections = angular.module('bulkInspections', ["checklist-model"])
+        .controller("bulkCtrl", function ($scope,$http) {
+            //model DocTypes
+            $scope.DocTypes=@Html.Raw(json);
+            $scope.Inspections=@Html.Raw(jsonInspection);
+            $scope.InspId=$scope.Inspections[0].insp_id;
+
+            $scope.CreateLog=function(link,cprod_id,mast_id){
+                $scope.linklog=link;
+                $http.post("/Inspection/CreateLog",{link:link,cprodId:cprod_id,mastId:mast_id})
+                    .error(function(responseData){
+                        console.log("Error!" + responseData);
+                    });
+            }
+
+            $scope.Download=function(){
+                var prodids=$scope.checkedSelected.products;
+                var docTypesId=$scope.checkedSelected.types;
+
+                if(prodids.length>0 && docTypesId.length>0){
+                    downloadURL($.validator.format('@Url.Action("Download")?prodIds={0}&docTypeIds={1}&inspId={2}',
+                        $scope.checkedSelected.products.join(),$scope.checkedSelected.types.join(),$scope.InspId));
+                }else{
+                    alert("no product or document type selected");
+                }
+            }
+            //links
+            $scope.asproot='@Settings.Default.aspsite_root';
+            $scope.IconPdfVisible=false;
+
+            $scope.GetTechPdfLink = function(prod,prefix){
+                $scope.IconPdfVisible=false;
+                //$scope.pr=prod.mast_id;
+                if(prod.mast_id != null ){
+                    //$scope.pr=prod.mast_id;
+                    if(prod.mast_id!=''){
+                        //$scope.pr=prod.mast_id;
+                        $scope.IconPdfVisible=true;
+
+                    }
+
+                }
+                if($scope.IconPdfVisible)
+                {
+                    //return "www.net.hr";
+                    //return $.validator.format('{0}/asaq-back/factory_PR_4_tech_pdf.asp?prod_id={1}&cprod_code={2}',$scope.asproot,prod.mast_id,prod.insp_client_ref);
+                    return $.validator.format('{0}/asaq_back/factory_PR_4_tech{3}_pdf.asp?prod_id={1}&cprod_code={2}',$scope.asproot,prod.mast_id,prod.insp_client_ref,prefix);
+                }
+                return '';
+            }
+            $scope.GetLinkPdf=function(field1,field2){
+                var field='';
+                $scope.IconPdfVisible=false;
+                if((field1 != null) && (field1 != '')) {
+                    field=field1;
+                    $scope.IconPdfVisible=true;
+
+                }else{
+                    if((field2 != null) && (field2 != '')){
+                            field=field2
+                            $scope.IconPdfVisible=true;
+
+                    }
+                }
+                return field;
+            }
+
+
+
+            $scope.selectedAll=true;
+            $scope.selectedProductAll=false;
+
+            $scope.checkedSelected={types:[],products:[]};
+
+            //$scope.selectedLength=$scope.checkDocSelected.types.lenght;
+            //FOR DOC TYPES
+            $scope.isCheckedAll=function(){
+                if ($scope.DocTypes.length != $scope.checkedSelected.types.length) {
+                    $scope.selectedAll=false;
+                }else{
+                    $scope.selectedAll=true;
+                }
+            };
+            $scope.checkToggle = function(){
+                if($scope.selectedAll){$scope.checkDocTypesAll()}
+                else{$scope.unselectDocTypesAll()}
+            };
+            $scope.checkDocTypesAll=function(){
+                $scope.checkedSelected.types=$scope.DocTypes.map(function(item){return item.id});
+            };
+            $scope.unselectDocTypesAll=function(){
+                $scope.checkedSelected.types=[];
+            }
+
+            //FOR PRODUCTS
+            $scope.isCheckedProductsAll=function(){
+                if($scope.Inspections.length != $scope.checkedSelected.products.length){$scope.selectedProductAll=false;}
+                else{$scope.selectedProductAll=true;}
+            }
+            $scope.checkProductToggle=function(){
+                if($scope.selectedProductAll){$scope.checkProductTypesAll()}
+                else{ $scope.unselectProductTypesAll();}
+            }
+            $scope.checkProductTypesAll=function(){
+                $scope.checkedSelected.products=$scope.Inspections.map(function(insp){return insp.mast_id});
+            }
+            $scope.unselectProductTypesAll=function(){
+                $scope.checkedSelected.products=[];
+            }
+
+        });
+    </script>
+</body>
+</html>

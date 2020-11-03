@@ -1,0 +1,144 @@
+﻿@using company.Common
+@model InspectionLoadingTableModel
+@{
+    Inspection_v2_loading curr_loading = null;
+    var columnWidths =  new[] {200,350, 90, 50, 60, 60, 60, 50,35};
+    if (Model.IsEdit)
+    {
+        //Temporary trick for screenshot
+        //columnWidths[1] = 50;
+        columnWidths[0] = 150;
+    }
+	var fontSize = "12";
+}
+<table @Html.Raw(Model.ForPdf ? "height=\"750\" style=border: 1px solid #999;border-collapse:collapse" : "class=data_holder" + (Model.Column > 0 ? "2" : "")) border="0" cellpadding="2" cellspacing="1">
+    <tr>
+        <td style="font-size: 11px" width="@columnWidths[0]" height="20" class="backgr1">Item</td>
+        <td style="font-size: 11px" width="@columnWidths[1]" align="center" class="backgr1">Description</td>
+        <td style="font-size: 11px" width="@columnWidths[2]" class="backgr1">PO#</td>
+        <td style="font-size: 11px" width="@columnWidths[3]" align="center" class="backgr1">Full <br/>Pallets</td>
+        <td style="font-size: 11px" width="@columnWidths[4]" align="center" class="backgr1">QTY<br/> per Pallet</td>
+        <td style="font-size: 11px" width="@columnWidths[5]" align="center" class="backgr1">QTY on Mixed Pallets</td>
+        <td style="font-size: 11px" width="@columnWidths[6]" align="center" class="backgr1">Loose L<br/> QTY</td>
+         @if (Model.IsEdit) {
+            <td  style="font-size: 11px;width:50px" align="center" class="backgr1">Mixed pallets</td>
+         }
+        
+        <td  style="font-size: 11px" width="@columnWidths[7]" align="center" class="backgr1">
+            Total<br/>
+            QTY
+        </td>
+        <td style="font-size: 11px" width="@columnWidths[8]" align="center" class="backgr1">Area</td>
+        
+    </tr>
+    @*<tr>
+        @if (Model.IsEdit)
+        {
+            <td style="font-size: 11px" width="10" align="center" class="backgr1">1</td>
+            <td style="font-size: 11px" width="10" align="center" class="backgr1">2</td>
+            <td style="font-size: 11px" width="10" align="center" class="backgr1">3</td>
+        }
+    </tr>*@
+    @if (Model.IsEdit) {
+        <tr ng-repeat="l in GetLoadings(c) | orderBy: 'cprod_code'" ng-class="l.loadingClass()">
+            <td style="font-size:9px" height="20" class="backgr3" width="@columnWidths[0]">{{l.cprod_code}} ({{l.factory_ref}}) x {{l.qty}}</td>
+            <td style="font-size:9px" class="backgr3">{{l.Description}}</td>
+            <td style="font-size:9px" class="backgr3">{{l.custpo}}</td>
+            <td style="font-size: 9px" align="center" class="backgr3">
+                <input type="text" ng-model="l.full_pallets" ng-if="l.id != null" />
+            </td>
+            <td style="font-size:9px" align="center" class="backgr3"> <input type="text" ng-model="l.qty_per_pallet"/></td>
+            <td style="font-size:9px" align="center" class="backgr3">{{l.totalqty_mixedpallets()}}</td>
+            <td style="font-size: 9px" align="center" class="backgr3">
+                <input type="text" ng-model="l.loose_load_qty" ng-if="l.id != null" />
+
+            </td>
+            @*<td style="font-size: 11px" width="10" align="center" class="backgr1"><input type="text" style="width: 10px" ng-model="l.mixed_pallet_qty" ng-if="l.id != null" /></td>
+            <td style="font-size: 11px" width="10" align="center" class="backgr1"><input type="text" style="width: 10px" ng-model="l.mixed_pallet_qty2" ng-if="l.id != null" /></td>
+            <td style="font-size: 11px" width="10" align="center" class="backgr1"><input type="text" style="width: 10px" ng-model="l.mixed_pallet_qty3" ng-if="l.id != null" /></td>*@
+            <td style="font-size: 11px;text-align:center" class="backgr1"><button style="font-size: 11px" ng-click="assignMixedPallets(l)">Edit</button></td>
+            <td style="font-size: 9px" align="center" class="backgr3">{{l.totalqty()}}</td>
+            <td style="font-size:9px" align="center" class="backgr3">
+                <input ng-model="l.AreasText" type="text" />
+            @*<select ng-model="l.area_id"><option ng-repeat="a in Areas" value="{{a.id}}" ng-selected="a.id == l.area_id">{{a.name}}</option></select>*@
+            </td>
+            
+        </tr>
+        <tr ng-repeat="l in GetEmptyRows(c,@(Model.StartIndex))">
+            <td style="font-size:9px" height="20" class="backgr3"></td>
+            <td style="font-size:9px" class="backgr3"></td>
+            <td style="font-size: 9px" align="center" class="backgr3">
+                
+            </td>
+            <td style="font-size:9px" align="center" class="backgr3"></td>
+            <td style="font-size:9px" align="center" class="backgr3"></td>
+            <td style="font-size: 9px" align="center" class="backgr3">
+                
+            </td>
+            @*<td style="font-size: 11px" width="10" align="center" class="backgr1"></td>
+            <td style="font-size: 11px" width="10" align="center" class="backgr1"></td>*@
+            <td style="font-size: 11px" width="10" align="center" class="backgr1"></td>
+            <td style="font-size: 9px" align="center" class="backgr3"></td>
+            <td style="font-size:9px" align="center" class="backgr3"></td>
+            <td style="font-size:9px" align="center" class="backgr3"></td>
+        </tr>
+    }
+    else {
+
+        var i = Model.StartIndex;
+        var loadingIndex = i;
+        while (i < Model.StartIndex + Model.Rows) {
+            curr_loading = (Model.Loadings.Count > loadingIndex) ? Model.Loadings[loadingIndex] : null;
+            if (curr_loading != null) {
+                var qty = curr_loading?.Line?.qty ?? curr_loading?.Line?.OrderLine?.orderqty;
+                if (qty == null || qty == 0) {
+                    loadingIndex++;
+                    continue;
+                }
+                var fullPallets = curr_loading?.full_pallets;
+                var qtyPerPallet = curr_loading.qty_per_pallet;  //(curr_loading?.Line?.OrderLine?.Cust_Product?.MastProduct?.units_per_pallet_single ?? curr_loading?.Line?.Product?.MastProduct?.units_per_pallet_single);
+                var totalQtyOnPallets = fullPallets * qtyPerPallet;
+                var looseLoad = curr_loading?.loose_load_qty ?? 0;
+                var mixed_pallet_qty = curr_loading?.mixed_pallet_qty ?? 0;
+                var mixed_pallet_qty2 = curr_loading?.mixed_pallet_qty2 ?? 0;
+                var mixed_pallet_qty3 = curr_loading?.mixed_pallet_qty3 ?? 0;
+                var qtyMixedPallets = curr_loading?.QtyMixedPallets.Sum(q => q.qty);
+                var custProductCode = !string.IsNullOrEmpty(curr_loading?.Line?.insp_custproduct_code) ? curr_loading?.Line?.insp_custproduct_code : curr_loading?.Line?.OrderLine?.Cust_Product?.cprod_code1;
+                var mastProductCode = !string.IsNullOrEmpty(curr_loading?.Line?.insp_mastproduct_code) ? curr_loading?.Line?.insp_mastproduct_code : curr_loading?.Line?.OrderLine?.Cust_Product?.MastProduct?.factory_ref;
+                var cprodName = !string.IsNullOrEmpty(curr_loading?.Line?.OrderLine?.Cust_Product?.cprod_name) ? curr_loading?.Line?.OrderLine?.Cust_Product?.cprod_name : curr_loading?.Line?.insp_custproduct_name;
+
+                <tr>
+                    <td style="font-size:@(fontSize)px" height="20" class="backgr3">@(custProductCode) @*(@(mastProductCode))*@ @(qtyMixedPallets > 0 ? "* (" + string.Join(",",curr_loading?.QtyMixedPallets.Select(mp=>mp.Pallet?.name)) + ")"  : WebUtility.HtmlDecode("&nbsp;"))</td>
+                    <td style="font-size:@(fontSize)px" class="backgr3">@(cprodName)</td>
+                    <td style="font-size:@(fontSize)px" class="backgr3">@(curr_loading?.Line?.OrderLine?.Header?.custpo)</td>
+                    <td style="font-size:@(fontSize)px" align="center" class="backgr3">
+                        @WebUtilities.DisplayValueForPdf(fullPallets)
+                    </td>
+                    <td style="font-size:@(fontSize)px" align="center" class="backgr3">@WebUtilities.DisplayValueForPdf(qtyPerPallet)</td>
+                    <td style="font-size:@(fontSize)px" align="center" class="backgr3">@WebUtilities.DisplayValueForPdf(qtyMixedPallets)</td>
+                    <td style="font-size: @(fontSize)px" align="center" class="backgr3">
+                        @if (curr_loading != null) {
+                            @WebUtilities.DisplayValueForPdf(looseLoad)
+                            if (totalQtyOnPallets == null) {
+                                totalQtyOnPallets = 0;
+                            }
+                        }
+                    </td>
+                    <td style="font-size:9px" align="center" class="backgr3">@WebUtilities.DisplayValueForPdf(totalQtyOnPallets + looseLoad + qtyMixedPallets)</td>
+                    <td style="font-size:9px" align="center" class="backgr3">@(curr_loading?.Areas != null && curr_loading.Areas.Count > 0 ? string.Join(",", curr_loading.Areas.Select(a => a.name)) : WebUtility.HtmlDecode("&nbsp;"))</td>
+                </tr>
+            }
+            else {
+                <tr>
+                    @for (int j = 0; j < 9; j++) {
+                        <td class="backgr3" height="20">&nbsp;</td>
+                    }
+                </tr>
+            }
+            i++;
+            loadingIndex++;
+        }
+    }
+    
+
+</table>

@@ -1,0 +1,479 @@
+﻿@using company.Common
+@model FinalInspectionV2ReportModel
+
+@{
+    Layout = null;
+}
+
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Inspection report</title>
+    <style type="text/css">
+        body {
+            background: #fff;
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: arial;
+        }
+
+        img {
+            border: 0px;
+        }
+
+        .container {
+            /*height: 600px;*/
+            width: 1000px;
+            background: #FFF;
+            overflow: hidden;
+            border: 2px solid #f4f4f4;
+            -webkit-border-radius: 10px;
+            -moz-border-radius: 10px;
+            border-radius: 10px;
+            margin: 10px auto;
+            /*margin-bottom: -100px;*/
+        }
+
+
+
+        .logo {
+            /*height: 90px;*/
+            width: 1000px;
+            /*background:#999;*/
+            /*float: left;*/
+        }
+
+            .logo img {
+                margin: 10px 0 0 20px;
+            }
+
+
+
+        .main {
+            width: 980px;
+            margin-left: 10px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+
+
+        .inspection_title {
+            font-size: 28px;
+            width: 100%;
+            text-align: center;
+            color: #4E9BEF;
+            margin: 10px 0 0 10px;
+            letter-spacing: 3px;
+            /*float: left;*/
+        }
+
+        .gpc_title {
+            width: 99%;
+            height: 18px;
+            background: #4E9BEF;
+            color: #fff;
+            text-align: center;
+            font-size: 16px;
+            /*float: left;*/
+            line-height: 18px;
+            padding: 5px;
+            margin-top: 10px;
+        }
+
+        .table_general {
+            margin: 2px 0 0 0;
+            /*float: left;*/
+            border: 3px solid #e4e4e4;
+            width: 100%;
+        }
+
+            .table_general img {
+                width: 430px;
+                height: 322px;
+            }
+
+        .first_row {
+            background: #f4f4f4;
+        }
+
+        .dotted_row {
+            border-bottom: 1px dotted #e4e4e4;
+            text-align: right;
+        }
+
+        .text_area {
+            margin: 3px;
+            border: 3px solid #e4e4e4;
+            padding: 2px;
+        }
+
+        .unpacked {
+            background: #E5E5E5;
+            text-align: right;
+        }
+
+        .packed {
+            background: #CFCFCF;
+            text-align: right;
+        }
+
+        .sub_title {
+            font-size: 14px;
+            font-weight: bolder;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div id="top" class="logo">
+            <img src="/images/asaq_ext2.jpg" alt="logo" />
+        </div><!--logo-->
+
+
+
+        <div class="main">
+
+            <span class="inspection_title">INSPECTION REPORT</span>
+
+            <table id="technical" class="gpc_title"><tr><td>Part 1 - GENERAL</td></tr></table><!--gpc_title-->
+
+            <table class="table_general" width="100%" border="0" cellspacing="1" cellpadding="1">
+                <tr>
+                    <td width="150" height="18" class="first_row">Client</td>
+                    <td class="dotted_row" style="text-align:left;">
+                        @if (Model.Inspection != null) {
+                            <span>
+                                @Model.Inspection.Client.IfNotNull(c=>c.customer_code)
+                            </span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Report #:</td>
+                    <td class="dotted_row" style="text-align:left;">
+                        @if (Model.Inspection != null) {
+                            <span>
+                                @Model.Inspection.ComputedCode
+                            </span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Service type:</td>
+                    <td class="dotted_row" style="text-align:left;">Final inspection</td>
+                </tr>
+                @*<tr>
+                        <td width="150" height="18" class="first_row">Supplier name:</td>
+                        <td class="dotted_row" style="text-align:left;">@Model.Factory.user_name</td>
+                    </tr>*@
+                <tr>
+                    <td width="150" height="18" class="first_row">Inspection date:</td>
+                    <td class="dotted_row" style="text-align:left;">
+                        @if (Model.Inspection != null) {
+                            <span>
+                                @Model.Inspection.startdate.ToString("d")
+                            </span>
+                        }
+                    </td>
+
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Inspectors</td>
+                    <td class="dotted_row" style="text-align:left">
+                        @if (Model.Inspection != null) {
+                            <span>
+                                @Model.Inspection.Controllers.IfNotNull(con=>string.Join(",", con.Select(c=>c.Controller.user_initials)))
+                            </span>
+                        }
+                    </td>
+
+                </tr>
+                @* <tr>
+                        <td width="150" height="18" class="first_row">Inspection location:</td>
+                        <td class="dotted_row" style="text-align:left;">@WebUtilities.ArrayToString(new string[]{Model.Factory.user_address1,Model.Factory.user_address2,Model.Factory.user_address3,Model.Factory.user_address4, Model.Factory.user_address5}, ",")</td>
+                    </tr>*@
+                <tr>
+                    <td width="150" height="18" class="first_row">P.O. No:</td>
+                    <td class="dotted_row" style="text-align:left;">
+                        @if (Model.Inspection != null) {
+                            <span>
+                                @Model.Inspection.CustPos
+                            </span>
+                        }
+                    </td>
+
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Total quantity:</td>
+                    <td class="dotted_row" style="text-align:left;">
+                        @if (Model.Inspection != null) {
+                            <span>
+                                @Model.Inspection.Lines.IfNotNull(lines=>lines.Sum(l => l.ComputedQty))
+                            </span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Inspected Quantity:</td>
+                    <td class="dotted_row" style="text-align:left;">
+                        @Model.Inspection.IfNotNull(i=>i.Lines.IfNotNull(lines=>lines.Sum(l=>l.inspected_qty)))
+                </td>
+            </tr>
+
+        </table>
+
+        <table class="gpc_title"><tr><td>Part 2 - SUMMARY INFORMATION</td></tr></table><!--gpc_title-->
+
+        <table class="table_general" width="100%" border="0" cellspacing="1" cellpadding="1">
+            <tr class="first_row">
+                <td>Ref.</td>
+                <td>Order Qty</td>
+                <td>Inspection Qty</td>
+                <td>Appearance</td>
+                <td>Dimension</td>
+                <td>Function</td>
+                <td>Material</td>
+                <td>Packaging</td>
+                <td>CA Required</td>
+            </tr>
+            @if (Model.Inspection != null)
+            {
+                foreach (var lt in Model.Inspection.Lines) {
+                    var qty = lt.ComputedQty;
+                    var inspqty = lt.inspected_qty;
+                    if (qty > 0) {
+                        <tr>
+                            <td class="dotted_row">@lt.insp_custproduct_code</td>
+                            <td class="dotted_row" style="text-align: center;">@qty</td>
+                            <td class="dotted_row" style="text-align: center;">@inspqty</td>
+                            <td class="dotted_row" style="text-align: center;">@(lt.Rejections != null && lt.Rejections.FirstOrDefault(r => r.type == (int) InspectionV2ImageType.Appearance) != null ? "Not OK" : "OK")</td>
+                            <td class="dotted_row" style="text-align: center;">@(lt.Rejections != null && lt.Rejections.FirstOrDefault(r => r.type == (int)InspectionV2ImageType.Dimension) != null ? "Not OK" : "OK")</td>
+                            <td class="dotted_row" style="text-align: center;">@(lt.Rejections != null && lt.Rejections.FirstOrDefault(r => r.type == (int)InspectionV2ImageType.Function) != null ? "Not OK" : "OK")</td>
+                            <td class="dotted_row" style="text-align: center;">@(lt.Rejections != null && lt.Rejections.FirstOrDefault(r => r.type == (int)InspectionV2ImageType.Material) != null ? "Not OK" : "OK")</td>
+                            <td class="dotted_row" style="text-align: center;">@(lt.Rejections != null && lt.Rejections.FirstOrDefault(r => r.type == (int) InspectionV2ImageType.Packaging) != null ? "Not OK" : "OK")</td>
+                            <td class="dotted_row" style="text-align: center;">@(lt.Rejections != null && lt.Rejections.Any(r => r.ca == true) ? "YES" : "NO")</td>
+                        </tr>
+                    }
+                }
+            }
+            
+        </table>
+    </div>
+    <div style="height:1px"></div>
+    @*<br style="page-break-after: always; height:1px"></br>*@
+
+    <div class="main">
+        @{
+            var ca = false;
+        }
+        <table class="gpc_title"><tr><td>Part 3 - CORRECTIVE ACTION</td></tr></table><!--gpc_title-->
+        <div class="table_general">
+            @if (Model.Inspection.IfNotNull(i => i.Lines.IfNotNull(lines => lines.All(l => l.Rejections == null || l.Rejections.Count(r => r.ca == true) == 0))))
+            {
+                <span>No Corrective actions required</span>
+            }
+            else
+            {
+
+                foreach (var r in Model.Inspection.IfNotNull(i => i.AllRejections).Where(r => r.ca == true))
+                {
+                    ca = true;
+
+                    var counter = 0;
+                    var l = r.Line;
+                    <div style="clear: both">
+                        <div class="text_area">@l.insp_custproduct_code @l.insp_mastproduct_code @l.insp_custproduct_name @r.comments @r.document</div>
+                        @if (!string.IsNullOrEmpty(r.rejection))
+                        {
+                            <div class="sub_title">Rejection</div>
+                            <div>@r.rejection</div>
+                        }
+                        @if (!string.IsNullOrEmpty(r.reason))
+                        {
+                            <div class="sub_title">Reason</div>
+                            <div>@r.reason</div>
+                        }
+                        @if (!string.IsNullOrEmpty(r.action))
+                        {
+                            <div class="sub_title">Action</div>
+                            <div>@r.action</div>
+                        }
+                        @if (!string.IsNullOrEmpty(r.permanentaction))
+                        {
+                            <div class="sub_title">Permanent Action</div>
+                            <div>@r.permanentaction</div>
+                        }
+                    </div>
+
+                    if (l != null)
+                    {
+                        foreach (var image in l.Images)
+                        {
+                            <div style="width: 450px; margin-right: 20px; margin-top: 5px; float: left@(counter++%2 == 0 ? ";clear:left" : "")">
+
+                                <div style="display: table-cell; width: 100%">
+                                    <img src="@WebUtilities.HandleInspectionFolderUrl(image.insp_image, Model.ImagesFolder)" style="text-align: center"/>
+                                </div>
+                            </div>
+                        }
+                    }
+
+                }
+            }
+
+        </div>
+    </div>
+    @if (ca) {
+        <div style="height: 1px"></div>
+        @*<br style="page-break-after: always; height: 1px"/>*@
+    }
+
+    <div class="main">
+
+        <table class="gpc_title"><tr><td>Part 4 - REJECTED UNITS</td></tr></table><!--gpc_title-->
+        @{ ViewData["isRejection"] = true;}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+    </div>
+
+    <div style="height:1px"></div>
+    <br style="page-break-after: always; height:1px"></br>
+        @{ ViewData["isRejection"] = false;}
+    <div class="main">
+
+        <table class="gpc_title"><tr><td>Part 5 - APPEARANCE</td></tr></table><!--gpc_title-->
+        @{ ViewData["type"] = InspectionV2ImageType.Appearance;}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+    </div>
+
+    <div style="height:1px"></div>
+    <br style="page-break-after: always; height:1px"></br>
+
+    <div class="main">
+        <table class="gpc_title"><tr><td>Part 6 - DIMENSION</td></tr></table><!--gpc_title-->
+        <table class="table_general" width="100%" border="0" cellspacing="1" cellpadding="1">
+            <tr>
+                <td class="first_row">&nbsp;</td>
+                <td colspan="4" style="text-align: center">
+                    <div align="center" class="first_row">Unpacked unit</div></td>
+                <td colspan="4" style="text-align: center">
+                    <div align="center" class="first_row">Packed unit</div></td>
+            </tr>
+            @if (Model.Inspection != null && Model.Inspection.Lines != null) {
+                <tr>
+                    <td class="first_row">Product code</td>
+                    <td class="unpacked">length mm</td>
+                    <td class="unpacked">width mm</td>
+                    <td class="unpacked">height mm</td>
+                    <td class="unpacked">Net weight (kg)</td>
+                    <td class="packed">length mm</td>
+                    <td class="packed">width mm</td>
+                    <td class="packed">height mm</td>
+                    <td class="packed">Gross weight (kg)</td>
+                </tr>
+
+                foreach (var l in Model.Inspection.Lines) {
+                    if (l.OrderLine != null && l.OrderLine.Cust_Product != null)
+                    {
+                        var prod = l.OrderLine.Cust_Product;
+                        <tr>
+                            <td class="first_row">@prod.cprod_code1</td>
+                            <td class="dotted_row">@prod.MastProduct.IfNotNull(m=>m.prod_length)</td>
+                            <td class="dotted_row">@prod.MastProduct.IfNotNull(m=>m.prod_width)</td>
+                            <td class="dotted_row">@prod.MastProduct.IfNotNull(m=>m.prod_height)</td>
+                            <td class="dotted_row">@prod.MastProduct.IfNotNull(m=>m.prod_nw)</td>
+                            <td class="dotted_row">@prod.MastProduct.IfNotNull(m=>m.pack_length)</td>
+                            <td class="dotted_row">@prod.MastProduct.IfNotNull(m=>m.pack_width)</td>
+                            <td class="dotted_row">@prod.MastProduct.IfNotNull(m=>m.pack_height)</td>
+                            <td class="dotted_row">@prod.MastProduct.IfNotNull(m=>m.pack_GW)</td>
+                        </tr>
+                    }
+
+                }
+            }
+            
+
+        </table>
+        @{ ViewData["type"] = InspectionV2ImageType.Dimension;}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+    </div>
+
+    <div style="height:1px"></div>
+    <br style="page-break-after: always; height:1px"></br>
+
+    <div class="main">
+        <table class="gpc_title"><tr><td>Part 7 - FUNCTION</td></tr></table><!--gpc_title-->
+        @{ ViewData["type"] = InspectionV2ImageType.Function;}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+        <div style="height:1px"></div>
+        <br style="page-break-after: always; height:1px"></br>
+    </div>
+
+
+    @* @if (Html.Partial("_ReportImagesPartial", Model, ViewData) == null){
+        <div style="height:1px"></div>
+        <br style="page-break-after: always; height:1px"></br>
+        }*@
+
+    <div class="main">
+        <table class="gpc_title"><tr><td>Part 8 - MATERIAL</td></tr></table><!--gpc_title-->
+        @{ ViewData["type"] = InspectionV2ImageType.Material;}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+
+
+
+
+    </div>
+
+
+
+    <div class="main">
+        <table class="gpc_title"><tr><td>Part 9 - PACKAGING</td></tr></table><!--gpc_title-->
+        @{ ViewData["type"] = InspectionV2ImageType.Packaging;}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+    </div>
+
+    @*@if (Model.ProductTrackNumbers != null && Model.ProductTrackNumbers.Count > 0) {
+        <div class="main">
+            <table class="gpc_title"><tr><td>Part 10 - PRODUCT TRACK NUMBERS</td></tr></table><!--gpc_title-->
+
+            <table>
+                <tr style="font-weight: bold">
+                    <td>Ref</td>
+                    <td>Tracking codes</td>
+                </tr>
+                @foreach (var p in Model.ProductsForTracking) {
+                    <tr>
+                        <td>@p.cprod_code1</td>
+                        <td>@string.Join(",", Model.ProductTrackNumbers.Where(pt => pt.mastid == p.cprod_mast).Select(pt => pt.track_number))</td>
+                    </tr>
+                }
+            </table>
+
+        </div>
+    }*@
+    @*<div style="height:1px"></div>*@
+        @* <br style="page-break-after: always; height:1px"></br>*@
+
+        @*<div class="main">
+                <table class="gpc_title"><tr><td>Part 9 - INSPECTION CRITERIA</td></tr></table><!--gpc_title-->
+                @{ ViewData["title"] = "DIMENSION"; }
+                @Html.Partial("_ReportInspectionCriteriaTable", Model.InspectionCriteria.Where(i=>i.insp_type == "D"))
+                @{ ViewData["title"] = "APPEARANCE"; }
+                @Html.Partial("_ReportInspectionCriteriaTable", Model.InspectionCriteria.Where(i=>i.insp_type == "A"))
+                @{ ViewData["title"] = "MATERIAL"; }
+                @Html.Partial("_ReportInspectionCriteriaTable", Model.InspectionCriteria.Where(i=>i.insp_type == "M"))
+                @{ ViewData["title"] = "FUNCTION"; }
+                @Html.Partial("_ReportInspectionCriteriaTable", Model.InspectionCriteria.Where(i=>i.insp_type == "F"))
+                @{ ViewData["title"] = "PACKAGING"; }
+                @Html.Partial("_ReportInspectionCriteriaTable", Model.InspectionCriteria.Where(i=>i.insp_type == "P"))
+            </div>*@
+    </div>
+</body>
+</html>

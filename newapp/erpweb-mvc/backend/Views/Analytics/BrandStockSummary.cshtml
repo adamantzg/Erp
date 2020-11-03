@@ -1,0 +1,217 @@
+﻿@model BrandStockSummaryModel
+
+
+@functions 
+{
+    private string GetImageUrl(string chartname)
+    {
+        return string.Format("{0}{1}", WebUtilities.GetSiteUrl(), Url.Action("Image", new { param = string.Format("{0}_{1}", Model.ChartKey, chartname) + "#" + Settings.Default.StatsKey }));
+    }
+
+
+    private string FormatGBP(double? gbp)
+    {
+        return gbp.ToString("N0");
+    }
+}
+
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <style type="text/css">
+        .normal_body {
+	        font-family:Arial, Helvetica, sans-serif;
+	        font-size:12px;
+	        color:#333;
+        }
+        body {
+	        font-family:Arial, Helvetica, sans-serif;
+	        margin: 0; /* it's good practice to zero the margin and padding of the body element to account for differing browser defaults */
+	        padding: 0;
+	        text-align: left; /* this centers the container in IE 5* browsers. The text is then set to the left aligned default in the #container selector */
+	        position: relative;	
+        }
+        .main_header_section {
+	        width:896px; 
+        /*	background-color:#EAF5FD; */
+	        /*height:35px;*/ 
+	        padding-left:2px; 
+	        font-family:Arial, Helvetica, sans-serif; 
+	        color:#000; 
+	        font-size:24px;
+	        border-top:none ;
+	        border-right: none;
+	        border-left:none;
+	        border-bottom:3px #999 solid;
+	        float:left;
+	        margin-bottom:30px;
+            margin-top:30px;
+	        /*float:left;*/
+        }
+    </style>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+</head>
+<body>
+    <table style="width:900px;border-width: 0">
+        <tr>
+            <td style="width:140px;height: 85px;vertical-align: top">&nbsp;</td>
+            <td align="center" valign="top">
+                @if (Model.Brand != null)
+                {
+                    <img src="@WebUtilities.GetSiteUrl()/Images/@Model.Brand.image" style="width: 500px" height="65" />
+                }
+                else
+                {
+                    <span>UNIVERSAL</span>
+                }
+            </td>
+            <td style="width:140px;height: 85px;text-align: right;vertical-align: top" class="normal_body">
+                @DateTime.Today.ToLongDateString()
+            </td>
+        </tr>
+    </table>
+
+    @{
+        //last month calculations
+        DateTime fromdate = ViewBag.date.AddMonths(-1);
+
+        int daysInMonth = DateTime.DaysInMonth(fromdate.Year, fromdate.Month);
+
+        DateTime from = fromdate.AddDays(1 - fromdate.Day);
+        //DateTime to = from.AddDays(daysInMonth - 1); <- bug, hours where set 0:00:00
+
+        //DateTime to = new DateTime(fromdate.Year, fromdate.Month + 1, 1);
+        DateTime to = company.Common.Utilities.GetMonthStart(fromdate.AddMonths(1));
+
+        var costUsa = Model.CostValueItemListUSA.Where(m => m.date_entered >= from && m.date_entered <= to)
+                    .Sum(s => s.order_qty * s.price);
+
+        var stockreceiptUsa = Model.StockReceiptItemListUSA.Where(m => m.booked_in_date>= from && m.booked_in_date <= to)
+                        .Sum(s => s.orderqty * s.unit_price);
+
+        var costOthers = Model.CostValueItemListOthers.Where(m => m.date_entered >= from && m.date_entered <= to)
+                .Sum(s => s.order_qty * s.price);
+
+        var stockreceiptOthers = Model.StockReceiptItemListOthers.Where(m => m.booked_in_date >= from && m.booked_in_date <= to)
+                        .Sum(s => s.orderqty * s.unit_price);
+
+    }
+
+    <div class="main_header_section">Weekly summary - @ViewBag.date.ToString("dd/MM/yyyy")</div>
+
+    <div style="width: 900px">
+        <div style="float:left;">
+            <table style="width:400px;border-width: 0;font-family:Arial, Helvetica, sans-serif; font-size:13px;">
+                <tr>
+                    <td colspan="2" style="font-weight:bold;" align="right">USD</td>
+                </tr>
+                <tr>
+                    <td>Physical stock value US</td>
+                    <td align="right">@Model.StockValueUSA.ToString("N2")</td>
+                </tr>
+                <tr>
+                    <td>Cost value of items sold in the last month</td>
+                    <td align="right">@costUsa.ToString("N2")</td>
+                </tr>
+                <tr>
+                    <td>Stock receipts in the last month</td>
+                    <td align="right">@stockreceiptUsa.ToString("N2")</td>
+                </tr>
+            </table>
+        </div>
+        <div style="float:right;">
+            <table style="width:400px;border-width: 0;font-family:Arial, Helvetica, sans-serif; font-size:13px;">
+                <tr>
+                    <td colspan="2" style="font-weight:bold;" align="right">USD</td>
+                </tr>
+                <tr>
+                    <td>Physical stock value Crosswater London</td>
+                    <td align="right">@Model.StockValueOthers.ToString("N2")</td>
+                </tr>
+                <tr>
+                    <td>Cost value of items sold in the last month</td>
+                    <td align="right">@costOthers.ToString("N2")</td>
+                </tr>
+                <tr>
+                    <td>Stock receipts in the last month</td>
+                    <td align="right">@stockreceiptOthers.ToString("N2")</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <br />
+
+    <div class="main_header_section">Brand stock summary chart</div>
+
+    @if (Model.Debug)
+    {
+        <div>
+            <div style="width: 900px">
+                <div style="float:left;">
+                    <table style="width:400px;border-width: 0;font-family:Arial, Helvetica, sans-serif; font-size:13px;">
+                        <thead>
+                            <tr>
+                                <td colspan="4">US</td>
+                            </tr>
+                            <tr>
+                                <td>Time</td>
+                                <td>Total</td>
+                                <td>Cost</td>
+                                <td>Recepit</td>
+                            </tr>
+                        </thead>
+                        @foreach(var v in Model.DataForChart.Where(i => i.ItemType == BrandStockSummaryItemType.US))
+                        {
+                            <tr>
+                                <td>@v.DateValue</td>
+                                <td>@v.totalcalc.ToString("N2")</td>
+                                <td>@v.cost.ToString("N2")</td>
+                                <td>@v.receipts.ToString("N2")</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+                <div style="float:right;">
+                    <table style="width:400px;border-width: 0;font-family:Arial, Helvetica, sans-serif; font-size:13px;">
+                        <thead>
+                            <tr>
+                                <td colspan="4">UK</td>
+                            </tr>
+                            <tr>
+                                <td>Time</td>
+                                <td>Total</td>
+                                <td>Cost</td>
+                                <td>Recepit</td>
+                            </tr>
+                        </thead>
+                        @foreach (var v in Model.DataForChart.Where(i => i.ItemType == BrandStockSummaryItemType.Others))
+                        {
+                            <tr>
+                                <td>@v.DateValue</td>
+                                <td>@v.totalcalc.ToString("N2")</td>
+                                <td>@v.cost.ToString("N2")</td>
+                                <td>@v.receipts.ToString("N2")</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    }
+
+    <br />
+    <div style="clear:both">
+        <img src="@WebUtilities.GetSiteUrl()@Path.Combine(Settings.Default.Analytics_ImagesFolder,$"{ViewBag.ChartKey}_BrandStockSummaryMonthlyChart.jpg")" />
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+<button class="btn btn-primary" (click)="newProject()">New project</button> 
+<div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
+<div class="mt-2">
+    <app-grid [definition]="gridDefinition" [data]="projects" (ButtonClicked)="buttonClicked($event)"></app-grid>
+</div>
+

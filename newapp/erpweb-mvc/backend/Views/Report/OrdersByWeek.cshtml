@@ -1,0 +1,211 @@
+﻿@model OrdersByWeekModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Container orders report</title>
+        <style>
+            body {
+                font-family: Calibri, Verdana;
+            }
+            .subtitle {
+                font-weight: bold;
+            }
+            .number {
+                text-align: right;
+            }
+            .total {
+                font-size: 20px;
+                font-weight: bold;
+                background-color: #888;
+            }
+            .subtotal {
+                font-size: 18px;
+                font-weight: bold;
+                background-color: #CCC;
+            }
+            
+            .totaltable {
+                border-collapse: collapse
+            }
+            .totaltable td {
+                border-bottom: 1px solid black;
+                
+            }
+        </style>
+    </head>
+<body>
+
+    <h2>Container orders</h2>
+
+    <h3>Clients</h3>
+
+    <table class="totaltable" style="width: 800px">
+        <tr>
+            <td>&nbsp;</td>
+            <td colspan="@Model.Weeks" style="text-align: center">ETD week commencing</td>
+        </tr>
+        <tr>
+            <td></td>
+            @for (int i = 0; i < Model.Weeks; i++)
+            {
+                <td style="width: 100px" class="number">@Model.FirstDate.AddDays(i*7).ToShortDateString()</td>
+            }
+        </tr>
+        <tr>
+            <td colspan="@(1 + Model.Weeks)" class="subtotal">Brand distributors</td>
+        </tr>
+        @if (Model.DistributorData != null)
+        {
+            
+            foreach (var dist in Model.DistributorData.Where(d => d.isBrandDistributor).Select(d => new {d.company_id, d.customer_code}).Distinct())
+            {
+                <tr>
+                    <td>@dist.customer_code</td>
+                    @for (int i = 0; i < Model.Weeks; i++)
+                    {
+                        <td class="number">
+                            @{
+                                var weekStart = Model.FirstDate.AddDays(i*7);
+                                var data = Model.DistributorData.FirstOrDefault(d => d.company_id == dist.company_id && d.WeekStart == weekStart);
+                                if (data != null)
+                                {
+                                    @data.OrderCount
+                                }
+                            }&nbsp;
+                        </td>
+                    }
+                </tr>
+                
+            }
+            <tr>
+                <td class="subtotal">TOTAL Brand distributors</td>
+                @for (int i = 0; i < Model.Weeks; i++)
+                {
+                    <td class="number subtotal">
+                        @{
+                            var weekStart = Model.FirstDate.AddDays(i*7);
+                            @Model.DistributorData.Where(d=>d.WeekStart == weekStart && d.isBrandDistributor).Sum(d=>d.OrderCount);
+                                
+                        }
+                    </td>
+                }
+            </tr>
+        }
+        <tr>
+            <td colspan="@(1 + Model.Weeks)" class="subtotal">Others</td>
+        </tr>
+        @if (Model.DistributorData != null)
+        {
+            
+            foreach (var dist in Model.DistributorData.Where(d =>!d.isBrandDistributor).Select(d => new {d.company_id, d.customer_code}).Distinct())
+            {
+                <tr>
+                    <td>@dist.customer_code</td>
+                    @for (int i = 0; i < Model.Weeks; i++)
+                    {
+                        <td class="number">
+                            @{
+                                var weekStart = Model.FirstDate.AddDays(i*7);
+                                var data = Model.DistributorData.FirstOrDefault(d => d.company_id == dist.company_id && d.WeekStart == weekStart);
+                                if (data != null)
+                                {
+                                    @data.OrderCount
+                                }
+                            }&nbsp;
+                        </td>
+                    }
+                </tr>
+            }
+            <tr>
+                <td class="subtotal">TOTAL others</td>
+                @for (int i = 0; i < Model.Weeks; i++)
+                {
+                    <td class="number subtotal">
+                        @{
+                            var weekStart = Model.FirstDate.AddDays(i*7);
+                            @Model.DistributorData.Where(d=>d.WeekStart == weekStart && !d.isBrandDistributor).Sum(d=>d.OrderCount);
+                                
+                        }
+                    </td>
+                }
+            </tr>
+            <tr>
+                <td class="total">TOTAL all</td>
+                @{
+                    var points = new List<int>();
+                }
+                @for (int i = 0; i < Model.Weeks; i++)
+                {
+                        
+                    <td class="number total">
+                        @{
+                            var weekStart = Model.FirstDate.AddDays(i*7);
+                            var point = Model.DistributorData.Where(d=>d.WeekStart == weekStart).Sum(d=>d.OrderCount);
+                            points.Add(point);
+                            @point
+                                
+                        }
+                    </td>
+                }
+            </tr>
+            <tr>
+                <td colspan="@(1 + Model.Weeks)">
+                    <img src="@Url.Action("Chart", new {points = Model.FirstDate.ToShortDateString() + "|" + string.Join("|", points)})"/>
+                </td>
+            </tr>
+        }
+        
+    </table>
+    <BR style="page-break-before: always">
+    <h3>Factories</h3>
+
+    <table class="totaltable" style="width: 800px">
+        <tr>
+            <td>&nbsp;</td>
+            <td colspan="@Model.Weeks" style="text-align: center">ETD week commencing</td>
+        </tr>
+    <tr>
+        <td></td>
+        @for (int i = 0; i < Model.Weeks; i++)
+        {
+            <td style="width: 100px" class="number">@Model.FirstDate.AddDays(i*7).ToShortDateString()</td>
+        }
+    </tr>
+        @foreach (var location in Model.FactoryData.Select(d => d.consolidated_port).Distinct())
+        {
+            <tr>
+                <td colspan="@(1 + Model.Weeks)" class="subtotal">Location @location.Value</td>
+            </tr>
+            if (Model.FactoryData != null)
+            {
+
+                foreach (var fact in Model.FactoryData.Where(d => d.consolidated_port == location).Select(d => new { d.company_id, d.customer_code }).Distinct().OrderBy(d => d.customer_code))
+                {
+                    <tr>
+                        <td>@fact.customer_code</td>
+                        @for (int i = 0; i < Model.Weeks; i++)
+                        {
+                            <td class="number">
+                                @{
+                                    var weekStart = Model.FirstDate.AddDays(i*7);
+                                    var data = Model.FactoryData.FirstOrDefault(d => d.company_id == fact.company_id && d.WeekStart == weekStart);
+                                    if (data != null)
+                                    {
+                                        @data.OrderCount
+                                    }
+                                }&nbsp;
+                            </td>
+                        }
+                    </tr>
+                }
+            }
+        }
+    </table>
+</body>
+</html>

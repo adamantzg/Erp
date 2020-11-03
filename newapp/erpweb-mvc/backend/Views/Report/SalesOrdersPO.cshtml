@@ -1,0 +1,85 @@
+﻿@model dynamic
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Orders report</title>
+    <style type="text/css">
+           body {
+                font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+                font-size: 12px;
+                line-height: 1.42857143;
+                color: #666666;
+                background-color: #ffffff;
+                padding: 0;
+                height: 100%;
+                width: 100%;
+                margin: 5px;
+                display: block;
+            }
+    </style>
+</head>
+@{
+    var data = ViewBag.Data as List<Sales_orders>;
+    var clients = ViewBag.Clients.ToString();
+    var brands = ViewBag.Brands.ToString();
+    var total = data != null ? data.Sum(m => m.value) : 0;
+ }
+<body>
+    <div style="container">
+        <div style="main">
+            <div id="content" class="content">
+                <div class="logo">
+                    <a href="#"><img src="http://newapp.bigcompany.com/images/Logo.jpg" alt="logo" width="200" /></a>
+                </div>
+                <br/>
+                <div>
+                    <div>
+                        <h3>ORDERS REPORT</h3>
+                    </div>
+                    <BR />
+                    <div>
+                        <label style="font-weight:bold">From: </label>@ViewBag.From.ToString() <label style="font-weight:bold">To: </label> @ViewBag.To.ToString()
+                    </div>
+                    <BR />
+                    <div>
+                        <label style="font-weight: bold">Clients: </label><span>@clients</span>
+                    </div>
+                    <BR />
+                    <div>
+                        <label style="font-weight: bold">Brands: </label><span>@brands</span>
+                    </div>
+                    <BR />
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: left">PO</th>
+                                <th style="text-align: right">VALUE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var v in data)
+                            {
+                                <tr>
+                                    <td style="text-align: left">@v.customer_order_no</td>
+                                    <td style="text-align: right">@v.value</td>
+                                </tr>
+                            }
+                        <tr>
+                            <td style="text-align: left; font-weight:bold">TOTAL:</td>
+                            <td style="text-align: right; font-weight:bold">@total</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

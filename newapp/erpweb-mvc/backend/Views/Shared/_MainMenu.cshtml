@@ -1,0 +1,40 @@
+﻿@model List<Navigation_item> 
+
+@functions 
+{
+    public string AdjustUrl(string url)
+    {
+        return WebUtilities.CombineUrls(url.EndsWith(".asp") ? Settings.Default.aspsite_root : "", url);
+    }
+}
+
+<ul class="nav">
+    @foreach (var i in Model.Where(i=>i.parent_id == null)) {
+        if (!Model.Any(it => it.parent_id == i.id)) {
+            <li class="nav-item @Html.Raw(i.Active ? "active" : "")">
+                <a class="nav-link" href="@AdjustUrl(i.url)">
+                    <i class="nav-icon icon-@i.image_url"></i>@(i.text)
+                </a>
+            </li>
+        }
+        else {
+            <li class="nav-item nav-dropdown @Html.Raw(Model.Any(it=>it.parent_id == i.id && it.Active) ? " open" : "")">                
+                <a href="#" class="nav-link nav-dropdown-toggle">
+                    <i class="nav-icon icon-@i.image_url"></i>@i.text
+                </a>
+                <ul class="nav-dropdown-items">
+					@foreach (var c in Model.Where(it => it.parent_id == i.id)) {
+						<li class="nav-item @Html.Raw(c.Active ? "active" : "")">
+							<a class="nav-link" href="@AdjustUrl(c.url)">
+								<i class="nav-icon icon-@i.image_url"></i>@c.text
+							</a>
+						</li>                        
+                    }                        
+                </ul>                
+            </li>
+        }
+    }     
+
+</ul>
+
+

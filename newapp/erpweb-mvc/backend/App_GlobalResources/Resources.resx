@@ -1,0 +1,803 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AfterSalesEnquiriesComment_RespondTo_Manufacturer" xml:space="preserve">
+    <value>Manufacturer</value>
+  </data>
+  <data name="AfterSalesEnquiries_ChargeType_Customer" xml:space="preserve">
+    <value>customer</value>
+  </data>
+  <data name="AfterSalesEnquiries_ChargeType_Dealer" xml:space="preserve">
+    <value>dealer</value>
+  </data>
+  <data name="AfterSalesEnquiries_ChargeType_Distributor" xml:space="preserve">
+    <value>distributor</value>
+  </data>
+  <data name="AfterSalesEnquiries_ResponseType_SiteVisit" xml:space="preserve">
+    <value>arrange for a site visit (3 business days)</value>
+  </data>
+  <data name="AfterSalesEnquiries_ResponseType_Tech" xml:space="preserve">
+    <value>an online technical response</value>
+  </data>
+  <data name="AfterSalesSiteVisit_Wrongid" xml:space="preserve">
+    <value>Site visit record with given id cannot be found</value>
+  </data>
+  <data name="AfterSales_MailBody" xml:space="preserve">
+    <value>A new after sales enquiry has been made. &lt;br&gt;
+&lt;br&gt;
+Distributor: {0}&lt;br&gt;
+Dealer: {1}&lt;br&gt;
+&lt;br&gt;
+Product: {2}&lt;br&gt;
+Site visit required: {3}&lt;br&gt;
+Comments: {4}&lt;br&gt;
+
+Please &lt;a href="{5}"&gt;login&lt;/a&gt; for full details.</value>
+  </data>
+  <data name="AfterSales_NewComment_MailBody" xml:space="preserve">
+    <value>A new comment has been posted for after sales enquiry {5} by {6}&lt;br&gt;
+Dealer: {0}&lt;br&gt;
+Product: {1}&lt;br&gt;
+Comment text:{2}&lt;br&gt;
+{3} files attached to comment.&lt;br&gt;
+
+Please &lt;a href="{4}"&gt;login&lt;/a&gt; for full details.</value>
+  </data>
+  <data name="AfterSales_NewComment_MailSubject" xml:space="preserve">
+    <value>New after sales enquiry comment has been made.</value>
+  </data>
+  <data name="AfterSales_SiteVisitNotifyDistributor_MailBody" xml:space="preserve">
+    <value>New site visit report was submitted.&lt;br&gt;
+Customer: {0}&lt;br&gt;
+Product: {1}&lt;br&gt;
+Comment by Crosswater: {2}&lt;br&gt;
+Please &lt;a href="{3}"&gt;login&lt;/a&gt; to see details.</value>
+  </data>
+  <data name="AfterSales_SiteVisitNotifyDistributor_MailSubject" xml:space="preserve">
+    <value>New site visit report submitted</value>
+  </data>
+  <data name="AfterSales_SiteVisitRequest_MailBody" xml:space="preserve">
+    <value>You have been selected for site visit by {0}.&lt;br&gt;
+Product: {1}&lt;br&gt;
+Customer: {2}&lt;br&gt;
+Address:{3}&lt;br&gt;
+Message: {4}&lt;br&gt;
+Please &lt;a href="{5}"&gt;login in&lt;/a&gt; for details
+</value>
+  </data>
+  <data name="AfterSales_SiteVisitRequest_MailSubject" xml:space="preserve">
+    <value>New site visit requested.</value>
+  </data>
+  <data name="AfterSales_SiteVisitSubmitted_MailBody" xml:space="preserve">
+    <value>Site visit report submitted by {0}&lt;br&gt;
+Product: {1}&lt;br&gt;
+Customer: {2}&lt;br&gt;
+Please &lt;a href="{3}"&gt;login in&lt;/a&gt; for details
+</value>
+  </data>
+  <data name="AfterSales_SiteVisitSubmitted_MailSubject" xml:space="preserve">
+    <value>site visit report submitted.</value>
+  </data>
+  <data name="AfterSales_SiteVisit_SubmitCommentPrefix" xml:space="preserve">
+    <value>Site visit report has been submitted. &lt;br&gt;</value>
+  </data>
+  <data name="AfterSales_Status_Awaiting" xml:space="preserve">
+    <value>awaiting response</value>
+  </data>
+  <data name="AfterSales_Status_Awaiting_Master_Dist" xml:space="preserve">
+    <value>awaiting distributor response</value>
+  </data>
+  <data name="AfterSales_Status_Awaiting_Master_Manuf" xml:space="preserve">
+    <value>awaiting manufacturer response</value>
+  </data>
+  <data name="AfterSales_Status_New" xml:space="preserve">
+    <value>new</value>
+  </data>
+  <data name="AfterSales_Status_Processed" xml:space="preserve">
+    <value>processed</value>
+  </data>
+  <data name="AfterSales_Status_Responded" xml:space="preserve">
+    <value>responded</value>
+  </data>
+  <data name="AfterSales_Status_Responded_Dist" xml:space="preserve">
+    <value>distributor responded</value>
+  </data>
+  <data name="AfterSales_Status_Responded_Manuf" xml:space="preserve">
+    <value>manufacturer responded</value>
+  </data>
+  <data name="AfterSales_Status_SiteVisitRequested" xml:space="preserve">
+    <value>site visit requested</value>
+  </data>
+  <data name="AfterSales_Status_SiteVisitRequestedDist" xml:space="preserve">
+    <value>awaiting report</value>
+  </data>
+  <data name="AfterSales_Status_SiteVisitSubmitted" xml:space="preserve">
+    <value>site visit report submitted</value>
+  </data>
+  <data name="AfterSales_Subject" xml:space="preserve">
+    <value>{0}:A new after sales enquiry has been made</value>
+  </data>
+  <data name="Combo_NotSelectedText" xml:space="preserve">
+    <value>(Select)</value>
+  </data>
+  <data name="DealerConfirm_text" xml:space="preserve">
+    <value>Thank you.
+&lt;p&gt;The Dealer has been confirmed and activated.&lt;/p&gt;</value>
+  </data>
+  <data name="Dealerdetails_address" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Dealerdetails_bybus" xml:space="preserve">
+    <value>By Bus</value>
+  </data>
+  <data name="Dealerdetails_byrail" xml:space="preserve">
+    <value>By Rail</value>
+  </data>
+  <data name="Dealerdetails_byroad" xml:space="preserve">
+    <value>By Road</value>
+  </data>
+  <data name="Dealerdetails_directions" xml:space="preserve">
+    <value>Directions</value>
+  </data>
+  <data name="Dealerdetails_email" xml:space="preserve">
+    <value>E-mail:</value>
+  </data>
+  <data name="Dealerdetails_fax" xml:space="preserve">
+    <value>Fax:</value>
+  </data>
+  <data name="DealerDetails_Map" xml:space="preserve">
+    <value>Map &amp; Address</value>
+  </data>
+  <data name="Dealerdetails_opentimes" xml:space="preserve">
+    <value>Opening times</value>
+  </data>
+  <data name="Dealerdetails_proddisplay" xml:space="preserve">
+    <value>Products on display</value>
+  </data>
+  <data name="DealerDetails_StoreInfo" xml:space="preserve">
+    <value>Store information</value>
+  </data>
+  <data name="Dealerdetails_tel" xml:space="preserve">
+    <value>Tel:</value>
+  </data>
+  <data name="DealerImage_FileOverLimitMessage" xml:space="preserve">
+    <value>File size exceeds {0} M limit.</value>
+  </data>
+  <data name="DealerIndexPage_LatLongNote" xml:space="preserve">
+    <value>your store location can be entered directly by updating the longitude and latitude fields or alternatively locate and click on the exact information in the map below and the coordinates will be updated automatically. Remember to click submit to save any changes.</value>
+  </data>
+  <data name="DealerType_Gold" xml:space="preserve">
+    <value>Gold</value>
+  </data>
+  <data name="DealerType_Silver" xml:space="preserve">
+    <value>Silver</value>
+  </data>
+  <data name="DealerType_Standard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="Dealer_brochure_tablehead_customer" xml:space="preserve">
+    <value>customer</value>
+  </data>
+  <data name="Dealer_brochure_tablehead_daterequest" xml:space="preserve">
+    <value>date requested</value>
+  </data>
+  <data name="Dealer_brochure_tablehead_datesent" xml:space="preserve">
+    <value>date sent</value>
+  </data>
+  <data name="Dealer_brochure_tablehead_email" xml:space="preserve">
+    <value>e-mail</value>
+  </data>
+  <data name="Dealer_brochure_tablehead_salestatus" xml:space="preserve">
+    <value>sales status</value>
+  </data>
+  <data name="Dealer_brochure_tablehead_tel" xml:space="preserve">
+    <value>tel</value>
+  </data>
+  <data name="Dealer_displayprint_head" xml:space="preserve">
+    <value>Display products for</value>
+  </data>
+  <data name="Dealer_displayprint_title" xml:space="preserve">
+    <value>Print display items</value>
+  </data>
+  <data name="Dealer_displayprod_confirmdist" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="Dealer_displayprod_distributorlabel" xml:space="preserve">
+    <value>Our records show that your current distributor is</value>
+  </data>
+  <data name="Dealer_displayprod_distributorlabel2" xml:space="preserve">
+    <value>Please confirm or adjust and confirm.</value>
+  </data>
+  <data name="Dealer_displayprod_printbutton" xml:space="preserve">
+    <value>Print display items</value>
+  </data>
+  <data name="Dealer_Image_Request_Header" xml:space="preserve">
+    <value>Image Requests</value>
+  </data>
+  <data name="Dealer_Image_Request_HighResInstructions" xml:space="preserve">
+    <value>: tick the high resolution image and download the file</value>
+  </data>
+  <data name="Dealer_Image_Request_HighResLabel" xml:space="preserve">
+    <value>High Resolution Images</value>
+  </data>
+  <data name="Dealer_Image_Request_LowResInstructions" xml:space="preserve">
+    <value>: click on the image to enlarge then right mouse click and select save picture as</value>
+  </data>
+  <data name="Dealer_Image_Request_LowResLabel" xml:space="preserve">
+    <value>Low Resolution Images</value>
+  </data>
+  <data name="Dealer_Image_Request_TableHeader_code" xml:space="preserve">
+    <value>code</value>
+  </data>
+  <data name="Dealer_Image_Request_TableHeader_hires" xml:space="preserve">
+    <value>high res image</value>
+  </data>
+  <data name="Dealer_Image_Request_TableHeader_lowres" xml:space="preserve">
+    <value>low res image</value>
+  </data>
+  <data name="Dealer_Image_Request_TableHeader_prodname" xml:space="preserve">
+    <value>product name</value>
+  </data>
+  <data name="Dealer_Image_Request_TableHeader_prodtype" xml:space="preserve">
+    <value>product type</value>
+  </data>
+  <data name="Dealer_index_address" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Dealer_index_bus" xml:space="preserve">
+    <value>Bus</value>
+  </data>
+  <data name="Dealer_index_company" xml:space="preserve">
+    <value>Company Name</value>
+  </data>
+  <data name="Dealer_index_contactmobile" xml:space="preserve">
+    <value>Contact mobile</value>
+  </data>
+  <data name="Dealer_index_contactname" xml:space="preserve">
+    <value>Contact name</value>
+  </data>
+  <data name="Dealer_index_directions" xml:space="preserve">
+    <value>Directions:</value>
+  </data>
+  <data name="Dealer_index_distributor" xml:space="preserve">
+    <value>Distributor</value>
+  </data>
+  <data name="Dealer_index_email" xml:space="preserve">
+    <value>E-mail:</value>
+  </data>
+  <data name="Dealer_index_fax" xml:space="preserve">
+    <value>Fax:</value>
+  </data>
+  <data name="Dealer_index_lat" xml:space="preserve">
+    <value>Latitude</value>
+  </data>
+  <data name="Dealer_index_long" xml:space="preserve">
+    <value>Longitude</value>
+  </data>
+  <data name="Dealer_index_mapcoord" xml:space="preserve">
+    <value>Map Coordinates</value>
+  </data>
+  <data name="Dealer_index_opening" xml:space="preserve">
+    <value>Opening times</value>
+  </data>
+  <data name="Dealer_index_password" xml:space="preserve">
+    <value>Password:</value>
+  </data>
+  <data name="Dealer_index_postcode" xml:space="preserve">
+    <value>Postcode</value>
+  </data>
+  <data name="Dealer_index_rail" xml:space="preserve">
+    <value>Rail / Tube</value>
+  </data>
+  <data name="Dealer_index_road" xml:space="preserve">
+    <value>Road / Parking</value>
+  </data>
+  <data name="Dealer_index_storename" xml:space="preserve">
+    <value>STORE NAME</value>
+  </data>
+  <data name="Dealer_index_submit" xml:space="preserve">
+    <value>Submit</value>
+  </data>
+  <data name="Dealer_index_tel" xml:space="preserve">
+    <value>Tel:</value>
+  </data>
+  <data name="Dealer_index_vertical1" xml:space="preserve">
+    <value>Store Address &amp; Contact Details</value>
+  </data>
+  <data name="Dealer_index_vertical2" xml:space="preserve">
+    <value>Store Opening Times</value>
+  </data>
+  <data name="Dealer_index_website" xml:space="preserve">
+    <value>Website</value>
+  </data>
+  <data name="Dealer_login_caption" xml:space="preserve">
+    <value>dealer login</value>
+  </data>
+  <data name="Dealer_login_distributorcaption" xml:space="preserve">
+    <value>distributor login</value>
+  </data>
+  <data name="Dealer_login_failuretext" xml:space="preserve">
+    <value>Wrong e-mail or password</value>
+  </data>
+  <data name="Dealer_login_forgottenpass" xml:space="preserve">
+    <value>Forgotten password</value>
+  </data>
+  <data name="Dealer_login_forgotten_email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Dealer_login_forgotten_errormessage" xml:space="preserve">
+    <value>please enter your email</value>
+  </data>
+  <data name="Dealer_login_logintype_dealer" xml:space="preserve">
+    <value>Dealer</value>
+  </data>
+  <data name="Dealer_login_logintype_distributor" xml:space="preserve">
+    <value>Distributor</value>
+  </data>
+  <data name="Dealer_login_password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Dealer_login_submit" xml:space="preserve">
+    <value>Submit</value>
+  </data>
+  <data name="Dealer_login_username" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="Dealer_login_validationsummary_text" xml:space="preserve">
+    <value>The required information is incomplete or contains errors:</value>
+  </data>
+  <data name="Dealer_master_menulink_address" xml:space="preserve">
+    <value>address/contact info, opening &lt;br /&gt;
+        times, directions</value>
+  </data>
+  <data name="Dealer_master_menu_br" xml:space="preserve">
+    <value>brochure requests</value>
+  </data>
+  <data name="Dealer_master_menu_displayed" xml:space="preserve">
+    <value>displayed products</value>
+  </data>
+  <data name="Dealer_master_menu_imgreq" xml:space="preserve">
+    <value>image requests</value>
+  </data>
+  <data name="Dealer_master_menu_logoff" xml:space="preserve">
+    <value>Log off</value>
+  </data>
+  <data name="Dealer_master_menu_photos" xml:space="preserve">
+    <value>store photos</value>
+  </data>
+  <data name="Dealer_master_menu_preview" xml:space="preserve">
+    <value>preview store page</value>
+  </data>
+  <data name="Dealer_master_menu_training" xml:space="preserve">
+    <value>product training</value>
+  </data>
+  <data name="Dealer_photos_deletepicture" xml:space="preserve">
+    <value>delete this picture</value>
+  </data>
+  <data name="Dealer_photos_photonotice" xml:space="preserve">
+    <value>Store image pages (maximum {0} photos)</value>
+  </data>
+  <data name="Dealer_photos_storename" xml:space="preserve">
+    <value>Store name:</value>
+  </data>
+  <data name="Dealer_photos_uploadtext" xml:space="preserve">
+    <value>Upload files</value>
+  </data>
+  <data name="EnquiryWrongId" xml:space="preserve">
+    <value>Enquiry with given id cannot be found</value>
+  </data>
+  <data name="FileTooBig" xml:space="preserve">
+    <value>File is larger than {0} MB.</value>
+  </data>
+  <data name="IssueWrongId" xml:space="preserve">
+    <value>Issue with given id cannot be found.</value>
+  </data>
+  <data name="Login_Validation_invaliduserandpassword" xml:space="preserve">
+    <value>The user name or password provided is incorrect.</value>
+  </data>
+  <data name="PasswordRequired" xml:space="preserve">
+    <value>Password is required</value>
+  </data>
+  <data name="PasswordsDontMatch" xml:space="preserve">
+    <value>Passwords don't match</value>
+  </data>
+  <data name="RecordWrongId" xml:space="preserve">
+    <value>Record with given id cannot be found</value>
+  </data>
+  <data name="SiteVisitPrice" xml:space="preserve">
+    <value>£ 150</value>
+  </data>
+  <data name="Uploader_uploadfailedmessage" xml:space="preserve">
+    <value>Upload failed</value>
+  </data>
+  <data name="Validation_CategoryCannotBeDeleted" xml:space="preserve">
+    <value>Category cannot be deleted because it or its children are related to one or more issues. First few entries are: &lt;br&gt;{0}</value>
+  </data>
+  <data name="Validation_PasswordRequired" xml:space="preserve">
+    <value>Password must be specified.</value>
+  </data>
+  <data name="ChangedDealer_DealerNotification_Body" xml:space="preserve">
+    <value>This is an automated message – please do not reply&lt;br&gt;
+Our recorded displays for UK Big Company have been updated.&lt;br&gt;
+You are now showing as the following dealer types:&lt;br&gt;
+{0}
+&lt;p&gt;
+</value>
+  </data>
+  <data name="ChangedDealer_DealerNotification_Subject" xml:space="preserve">
+    <value>Display records have been updated</value>
+  </data>
+  <data name="ChangedDealer_Dist_AdminNotification_Body" xml:space="preserve">
+    <value>Images for dealer {0} have been updated. Please amend their display products accordingly.</value>
+  </data>
+  <data name="ChangedDealer_Dist_AdminNotification_Subject" xml:space="preserve">
+    <value>dealer images updated</value>
+  </data>
+  <data name="NewDealer_AdminNotification_Body" xml:space="preserve">
+    <value>A new dealer has been created:&lt;br&gt;
+
+Distributor: {0}&lt;br&gt;
+
+Dealer name: {1}&lt;br&gt;
+&lt;br&gt;
+
+Please log in to update the displays and confirm the dealer.</value>
+  </data>
+  <data name="NewDealer_Live_Body" xml:space="preserve">
+    <value>Congratulations you have been confirmed as a {0} {1} dealer.&lt;br&gt;
+
+Please click &lt;a href="{2}"&gt;here&lt;/a&gt; to activate your account..&lt;br&gt;
+{3}&lt;p&gt;
+This is an automated message – please do not reply</value>
+  </data>
+  <data name="NewDealer_Live_Subject" xml:space="preserve">
+    <value>{0} Dealer</value>
+  </data>
+  <data name="NewDealer_Subject" xml:space="preserve">
+    <value>A new UK Big Company  dealer has been created</value>
+  </data>
+  <data name="Issues_CommentAdded_MailBody" xml:space="preserve">
+    <value>IT ticket "{0}" has been updated by {1}.&lt;br&gt;
+comments: {2}&lt;br&gt;
+
+</value>
+  </data>
+  <data name="Issues_CommentAdded_Subject" xml:space="preserve">
+    <value>IT ticket "{0}" ticket has been updated</value>
+  </data>
+  <data name="ReturnsStatus_Closed" xml:space="preserve">
+    <value>Closed</value>
+  </data>
+  <data name="ReturnsStatus_New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="ReturnsStatus_Progress" xml:space="preserve">
+    <value>In progress</value>
+  </data>
+  <data name="Photos_deletepicture" xml:space="preserve">
+    <value>delete this picture</value>
+  </data>
+  <data name="Inspection_Location1_Title" xml:space="preserve">
+    <value>East China</value>
+  </data>
+  <data name="Inspection_Location2_Title" xml:space="preserve">
+    <value>South China</value>
+  </data>
+  <data name="Inspection_Location3_Title" xml:space="preserve">
+    <value>North China</value>
+  </data>
+  <data name="Inspection_Admin_Id" xml:space="preserve">
+    <value>ASAQ</value>
+  </data>
+  <data name="NewDealer_Live_ImagesText_HasImages" xml:space="preserve">
+    <value>From the images you have uploaded we have identified and added the following products as displays:
+{0}</value>
+  </data>
+  <data name="NewDealer_Live_ImagesText_NoImages" xml:space="preserve">
+    <value>No images have been uploaded</value>
+  </data>
+  <data name="SimpleInput" xml:space="preserve">
+    <value>simple-input</value>
+    <comment>SimpleInput description</comment>
+  </data>
+  <data name="Display_FEOffice" xml:space="preserve">
+    <value>FE Office</value>
+  </data>
+  <data name="Feedback_5_body" xml:space="preserve">
+    <value>Client: {0}&lt;br&gt;Factory: {1}&lt;br&gt;&lt;br&gt;Product: {2} - {3}&lt;br&gt;&lt;br&gt;What is the specific issue? {4} &lt;br&gt;&lt;br&gt;What is /are the specific question/s?  {5}  &lt;br&gt;&lt;br&gt;What is your suggestion for the resolution of this issue?  {6}&lt;br&gt;&lt;br&gt;Resolution:  {7}&lt;br&gt;&lt;br&gt;&lt;br&gt;Please check the system for full details&lt;br&gt;&lt;br&gt;&lt;br&gt;This is an automated message. Please do not reply to it</value>
+  </data>
+  <data name="Feedback_6_body" xml:space="preserve">
+    <value>Submitted by: {2}&lt;br&gt;What is the specific issue? {0} &lt;br&gt;&lt;br&gt;What is /are the specific question/s?  {1}  &lt;br&gt;Please check the system for &lt;a href="{3}/claims/itfeedback#/edit/{4}"&gt;full details&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;This is an automated message. Please do not reply to it</value>
+  </data>
+  <data name="Feedback_comment_5_body" xml:space="preserve">
+    <value>&lt;br&gt;&lt;br&gt;
+Reference: {0}
+&lt;br&gt;
+Category: {1}
+&lt;br&gt;
+Product: {2}
+&lt;br&gt;
+PO#: {3}
+&lt;br&gt;
+&lt;br&gt;
+Date Submitted: {4}
+&lt;br&gt;
+Urgency: {5}
+&lt;br&gt;
+QC user names: {6}
+&lt;br&gt;
+&lt;br&gt;
+Reason:	 {7}
+&lt;br&gt;
+Resolution-Prior to shipment the product: {8}
+&lt;br&gt;
+Permanent Action - How to prevent reoccurring: {9}
+&lt;br&gt;
+&lt;br&gt;
+Rejection date: {10}
+&lt;br&gt;
+Recheck date: {11}
+&lt;br&gt;
+Recheck required: {12}
+&lt;br&gt;
+Recheck OK: {13}
+&lt;br&gt;
+Inspection qty: {14}
+&lt;br&gt;
+Sample qty: {15}
+&lt;br&gt;
+Rejection qty: {16}
+&lt;br&gt;
+&lt;br&gt;</value>
+  </data>
+  <data name="Feedback_comment_6_body" xml:space="preserve">
+    <value>Response from: {0}&lt;br&gt;Response: {1}
+&lt;br&gt;&lt;br&gt;Please check the system for &lt;a href="{2}/claims/itfeedback#/edit/{3}"&gt;full details&lt;/a&gt;
+&lt;br&gt;&lt;br&gt;&lt;br&gt;This is an automated message. Please do not reply to it</value>
+  </data>
+  <data name="Feedback_comment_subject" xml:space="preserve">
+    <value>{0} - client comment added</value>
+  </data>
+  <data name="Feedback_subject" xml:space="preserve">
+    <value>{0}-New {2} feedback submitted - {1}</value>
+  </data>
+  <data name="SalesRepCompareValue_LocalDisplaying" xml:space="preserve">
+    <value>local displaying dealers</value>
+  </data>
+  <data name="SalesRepCompareValue_LocalNondisplaying" xml:space="preserve">
+    <value>local non-displaying dealers</value>
+  </data>
+  <data name="SalesRepCompareValue_Previous" xml:space="preserve">
+    <value>previous period</value>
+  </data>
+  <data name="SalesRepProduct_All" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="SalesRepProduct_Displayed" xml:space="preserve">
+    <value>displayed products only</value>
+  </data>
+  <data name="SalesRepProduct_TopN" xml:space="preserve">
+    <value>top 10</value>
+  </data>
+  <data name="SalesRepProduct_BottomN" xml:space="preserve">
+    <value>bottom 10</value>
+  </data>
+  <data name="SalesRepCompareValue_LocalDealers" xml:space="preserve">
+    <value>local dealers</value>
+  </data>
+  <data name="Inspection_Location4_Title" xml:space="preserve">
+    <value>Location4</value>
+  </data>
+  <data name="Feedback_7_body" xml:space="preserve">
+    <value>&lt;br&gt;&lt;br&gt;
+Reference: {0}&lt;br&gt;Category: {1}&lt;br&gt;
+Product: {2}
+&lt;br&gt;
+PO#: {3}
+&lt;br&gt;
+&lt;br&gt;
+Date Submitted: {4}
+&lt;br&gt;
+Urgency: {5}
+&lt;br&gt;
+QC user names: {6}
+&lt;br&gt;
+&lt;br&gt;
+Reason:	 {7}
+&lt;br&gt;
+Resolution-Prior to shipment the product: {8}
+&lt;br&gt;
+Permanent Action - How to prevent reoccurring: {9}
+&lt;br&gt;
+&lt;br&gt;
+Rejection date: {10}
+&lt;br&gt;
+Recheck date: {11}
+&lt;br&gt;
+Recheck required: {12}
+&lt;br&gt;
+Recheck OK: {13}
+&lt;br&gt;
+Inspection qty: {14}
+&lt;br&gt;
+Sample qty: {15}
+&lt;br&gt;
+Rejection qty: {16}
+&lt;br&gt;
+&lt;br&gt;&lt;br&gt;Please check the system for &lt;a href="{17}/claims/EditCA/{18}"&gt;full details&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;This is an automated message. Please do not reply to it</value>
+  </data>
+  <data name="Feedback_8_body" xml:space="preserve">
+    <value>Category: {0} &lt;br/&gt; Summary: {1} &lt;br/&gt; Description of the issue: {2} &lt;br&gt; Products: {3}. &lt;br&gt; Please check the system for &lt;a href="{4}/claims/qa#/edit/{5}"&gt;full details&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;This is an automated message. Please do not reply to it</value>
+  </data>
+  <data name="Feedback_comment_8_body" xml:space="preserve">
+    <value>Response from: {0}&lt;br&gt;Response: {1}
+&lt;br&gt;&lt;br&gt;Please check the system for &lt;a href="{2}/claims/qa#/edit/{3}"&gt;full details&lt;/a&gt;
+&lt;br&gt;&lt;br&gt;&lt;br&gt;This is an automated message. Please do not reply to it</value>
+  </data>
+  <data name="NsReportTitle" xml:space="preserve">
+    <value>Spare / Samples Loading Notification</value>
+  </data>
+  <data name="NtReportTitle" xml:space="preserve">
+    <value>Improved / Changed Product Loading Notification</value>
+  </data>
+  <data name="Feedback_recheck_body" xml:space="preserve">
+    <value>&lt;br&gt;&lt;br&gt;
+Reference: {0}&lt;br&gt;Submitted by: {18}&lt;br&gt;Category: {1}&lt;br&gt;
+Product: {2}
+&lt;br&gt;
+PO#: {3}
+&lt;br&gt;
+&lt;br&gt;
+Date Submitted: {4}
+&lt;br&gt;
+Urgency: {5}
+&lt;br&gt;
+&lt;br&gt;
+Reason:	 {6}
+&lt;br&gt;
+Resolution-Prior to shipment the product: {7}
+&lt;br&gt;
+Permanent Action - How to prevent reoccurring: {8}
+&lt;br&gt;
+&lt;br&gt;
+Rejection date: {9}
+&lt;br&gt;
+Recheck date: {10}
+&lt;br&gt;
+Recheck required: {11}
+&lt;br&gt;
+Recheck OK: {12}
+&lt;br&gt;
+Inspection qty: {13}
+&lt;br&gt;
+Sample qty: {14}
+&lt;br&gt;
+Rejection qty: {15}
+&lt;br&gt;
+&lt;br&gt;&lt;br&gt;Please check the system for &lt;a href="{16}/claims/EditCA/{17}"&gt;full details&lt;/a&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;This is an automated message. Please do not reply to it</value>
+  </data>
+  <data name="Feedback_Subject_Rejection" xml:space="preserve">
+    <value>Recheck Status {3} --  {0}- Product feedback rejection submitted - {1}</value>
+  </data>
+  <data name="Feedback_comment_7_body" xml:space="preserve">
+    <value>Response from: {0}&lt;br&gt;Response: {1}
+&lt;br&gt;&lt;br&gt;Please check the system for &lt;a href="{2}/claims/editca/{3}"&gt;full details&lt;/a&gt;
+&lt;br&gt;&lt;br&gt;&lt;br&gt;This is an automated message. Please do not reply to it</value>
+  </data>
+</root>

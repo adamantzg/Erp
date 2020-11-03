@@ -1,0 +1,271 @@
+
+@{
+    ViewBag.Title = "[a5]";
+    
+
+    var version = typeof(backend.RouteConfig).Assembly.GetName().Version.ToString();
+}
+
+<app-root></app-root>
+
+@section head {
+@Styles.Render("~/Content/font-awesome.css")
+<link href="~/Content/ionicons2/css/ionicons.min.css" rel="stylesheet" />
+<base href="/a5/" />
+
+@*@Styles.Render("~/Content/ionicons.css")*@
+@*<link href="~/Content/flag-icon-css-master/css/flag-icon.min.css" rel="stylesheet" />*@
+@*<link href="/Content/flag-icon-css-master/css/flag-icon.css" rel="stylesheet" />*@
+
+@Styles.Render("~/Content/style.css")
+
+<link rel="stylesheet" href="https://unpkg.com/ngx-bootstrap/datepicker/bs-datepicker.css">
+<link href="~/Content/loading.css" rel="stylesheet" />
+
+<style>
+    @@media (min-width: 768px) {
+        #footer {
+            width: 750px
+        }
+    }
+
+    @@media (min-width: 992px) {
+        #footer {
+            width: 970px
+        }
+    }
+
+    @@media (min-width: 1200px) {
+        #footer {
+            width: 1170px
+        }
+    }
+
+    .content {
+        background: none;
+        padding: 0 15px 0 0; 
+    }
+
+    .main {
+        width: auto;
+        min-height: 80vh;
+    }
+
+    html, body {
+        background: none;
+    }
+    /** BOOTSTRAP OVERIDE */
+    /*.nav-tabs > li.active > a, .nav-tabs > li.active > a:focus, .nav-tabs > li.active > a:hover {
+        color: #333 !important;
+        border: none !important;
+        
+        border-bottom-color: transparent;
+        font-weight: 700 !important;
+        font-size: 1.2em !important;
+    }
+
+    .nav > li > a {
+        position: relative;
+        display: block;
+        padding: 10px 0px;
+        text-transform: capitalize;
+    }*/
+    /** BOOTSRAP OVERIDE*/
+    .add-products-show {
+        margin-bottom: 15px;
+    }
+
+        .add-products-show:hover {
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+    .add-products-show-text {
+        border-bottom: 2px solid #555;
+        /* text-decoration: underline; */
+        margin-top: 0;
+        margin-bottom: 0;
+        /* position: relative; */
+        float: right;
+        line-height: 1.2;
+    }
+
+        .add-products-show-text:hover {
+            opacity: .85;
+        }
+
+    .spinner-overlay {
+        background-color: white;
+        cursor: wait;
+    }
+
+    .spinner-message-container {
+        position: absolute;
+        top: 35%;
+        left: 0;
+        right: 0;
+        height: 0;
+        text-align: center;
+        z-index: 10001;
+        cursor: wait;
+    }
+
+    .spinner-message {
+        display: inline-block;
+        text-align: left;
+        background-color: #333;
+        color: #f5f5f5;
+        padding: 20px;
+        border-radius: 4px;
+        font-size: 20px;
+        font-weight: bold;
+        filter: alpha(opacity=100);
+    }
+
+    .modal-backdrop.in {
+        filter: alpha(opacity=10);
+        opacity: .10;
+    }
+
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1040;
+        background-color: #000;
+    }
+
+    .ng-valid[required], .ng-valid.required {
+        border-left: 5px solid #42A948; /* green */
+    }
+
+    .ng-invalid:not(form) {
+        border-left: 5px solid #a94442; /* red */
+    }
+
+    .drop-container {
+        background: white;
+        border-radius: 6px;
+        /*height: 20px;*/
+        width: 100%;
+        box-shadow: 1px 2px 20px rgba(10, 10, 10, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px dashed #C0C4C7;
+    
+      /*/-webkit-transform: rotate(30deg);
+      -moz-transform: rotate(30deg);
+      -o-transform: rotate(30deg);
+      -ms-transform: rotate(30deg);
+      transform: rotate(30deg);*/
+        animation: .6s rotateRight infinite linear;
+    }
+
+    .is-drop-over {
+        background-color: lightgray;
+    }
+
+    .numeric-control {
+        width: 150px;
+        text-align: right;
+    }
+    .navbar-default {
+        background-color: transparent;
+        border-color: black;
+    }
+
+    .container-fluid {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+        .container-fluid > .navbar-collapse {
+            padding-left: 0px;
+            padding-right: 0px;
+        }
+
+    .nav > li {
+        border-right: 1px solid black;
+    }
+
+    .navbar-default .navbar-nav > li > a {
+        color: black;
+        font: bold 12px Trebuchet MS;
+    }
+    .page_title {
+        display: none;
+    }
+</style>
+
+}
+
+@{
+    IEnumerable<string> fileEntries = Enumerable.Empty<string>();
+
+    List<string> bundles = new List<string>();
+
+    
+    
+    
+
+}
+
+@section scripts {
+    @if (HttpContext.Current.IsDebuggingEnabled)
+    {
+
+        @*<script src="~/dist/inline.bundle.js?v=@version"></script>*@
+        <script src="~/distdev/polyfills.bundle.js?v=@version"></script>
+        @*<script src="~/dist/styles.bundle.js?v=@version"></script>
+        <script src="~/dist/vendor.bundle.js?v=@version"></script>*@
+        <script src="~/distdev/app.bundle.js?v=@version"></script>
+    }
+    else
+    {
+        fileEntries = Directory.EnumerateFiles(Server.MapPath("~/dist"));
+        bundles.Add("runtime.");
+        bundles.Add("polyfills");
+        bundles.Add("styles.");
+        bundles.Add("vendor.");
+        bundles.Add("main.");
+
+        foreach (string bundleName in bundles)
+        {
+            foreach (string fileName in fileEntries)
+            {
+                FileInfo fileInfo = new FileInfo(fileName);
+                if (fileInfo.Name.Contains(bundleName) && fileInfo.Name.Contains(".map") == false)
+                {
+                    if (fileInfo.Name.Contains("styles"))
+                    {
+                        <link href="~/dist/@fileInfo.Name" rel="stylesheet" />
+                    }
+                    else
+                    {
+                        <script src="~/dist/@fileInfo.Name"></script>
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+    <script>
+        
+        var title = document.getElementsByClassName("page_title");
+        if (title != null && title.length > 0)
+			title[0].style = "display:none";
+
+        
+    </script>
+}
+
+@section title {
+
+}
+

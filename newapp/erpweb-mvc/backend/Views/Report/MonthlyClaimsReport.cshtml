@@ -1,0 +1,101 @@
+﻿@model dynamic
+
+@{
+    Layout = null;
+    var date = (DateTime) ViewBag.Date;
+    var rows = (List <Claims_monthly_summary>) ViewBag.Rows;
+}
+<html>
+<head>
+    <style>
+        table {
+            width: 900px;
+            border-collapse: collapse;
+            font-family: arial;
+            font-size: 10px;
+        }
+        thead {
+            font-weight: bold;
+        }
+        td {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h2>Claims monthly report for @date.ToString("MMMM yyyy")</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <td style="width: 48pt">Factory</td>
+            <td style="width: 48pt">Client</td>
+            <td style="width: 84pt">Claim #</td>
+            <td style="width: 62pt">Code</td>
+            <td style="width: 295pt">Description</td>
+            <td style="width: 39pt">Reason</td>
+            <td style="width: 22pt">Qty</td>
+            <td style="width: 65pt">CC decision</td>
+            <td style="width: 81pt">Factory decision</td>
+            <td style="width: 66pt">Refit GBP</td>
+            <td style="width: 66pt">FOB value</td>
+            <td style="width: 66pt">FOB currency</td>
+            <td style="width: 114pt">Accepted value</td>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var r in rows) {
+            <tr>
+                <td>@r.factory_code</td>
+                <td>@r.customer_code</td>
+                <td>@r.return_no</td>
+                <td>@r.cprod_code1</td>
+                <td>@r.cprod_name</td>
+                <td>@r.reason</td>
+                <td>@r.return_qty</td>
+                <td>@r.decision</td>
+                <td>@r.factory_decision</td>
+                <td style="text-align: right">@r.refit_GBP</td>
+                <td style="text-align: right">@r.FOB_value</td>
+                <td>@r.currency</td>
+                <td>@r.accepted_value</td>
+            </tr>
+        }
+        <tr>
+            <td colspan="13"></td>
+        </tr>
+        <tr height=40 style="height:30.0pt">
+            <td colspan=7 style="height:30.0pt;"></td>
+            <td >FOB Values</td>
+            <td style="text-align: right" >ALL</td>
+            <td  style="border-left:none;width:66pt;text-align: right">Factory accepted</td>
+            <td colspan=3 ></td>
+        </tr>
+        <tr height=20 style="height:15.0pt">
+            <td  colspan=7 style="height:15.0pt"></td>
+            <td style="border-top:none;text-align: right">GBP Total</td>
+            <td  style="border-top:none;text-align: right">
+                @rows.Where(r=>r.currency == "GBP").Sum(r=>r.FOB_value).ToString("N2")
+            </td>
+            <td style="border-top:none;text-align: right">
+               @rows.Where(r => r.currency == "GBP" && r.factory_decision.ToLower() == "accepted").Sum(r => r.FOB_value).ToString("N2")
+            </td>
+            <td colspan=3></td>
+        </tr>
+        <tr  style="height: 15.0pt">
+            <td  colspan=7 style="height: 15.0pt"></td>
+            <td  style="border-top: none;text-align: right">USD Total</td>
+            <td  style="border-top: none;text-align: right">
+                @rows.Where(r => r.currency == "USD").Sum(r => r.FOB_value).ToString("N2")
+            </td>
+            <td style="border-top: none;text-align: right">
+                @rows.Where(r => r.currency == "USD" && r.factory_decision.ToLower() == "accepted").Sum(r => r.FOB_value).ToString("N2")
+            </td>
+            <td colspan=3 ></td>
+        </tr>
+
+        </tbody>
+    </table>
+</body>
+</html>
+

@@ -1,0 +1,23 @@
+﻿
+<h4>Forms</h4>
+<div class="row">
+    <div class="col-lg-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th style="width: 120px"></th>
+                    <th style="width: 120px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="f in forms">
+                    <td>{{f.title}}</td>
+                    <td><button class="btn btn-default" ui-sref="fill({id: f.id})" style="width: 115px">Fill</button></td>
+                    <td><button class="btn btn-default" ui-sref="results({name: f.title,id: f.id})" style="width: 115px">Submissions</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+

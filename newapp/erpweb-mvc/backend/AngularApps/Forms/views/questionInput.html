@@ -1,0 +1,29 @@
+﻿<input type="text" class="form-control" ng-model="$ctrl.answer.textValue" ng-if="$ctrl.type == $ctrl.QuestionTypeEnum.shorttext" />
+<div ng-if="$ctrl.type == $ctrl.QuestionTypeEnum.singlechoice">
+    <select class="form-control" ng-if="$ctrl.render_id == $ctrl.RenderMethodEnum.dropdown" ng-options="c.id as c.name for c in $ctrl.choices" ng-model="$ctrl.answer.intValue"></select>
+    <div class="radio-inline" ng-if="$ctrl.render_id == $ctrl.RenderMethodEnum.radio">
+        <div ng-repeat="c in $ctrl.choices"><input type="radio" value="{{c.id}}" ng-model="$ctrl.answer.intValue" /> {{c.name}}</div>
+    </div>
+</div>
+<div ng-if="$ctrl.type == $ctrl.QuestionTypeEnum.yesno">
+    <div class="checkbox">
+        <input type="checkbox" ng-model="$ctrl.answer.intValue" ng-true-value="1" ng-false-value="0" style="margin-left: 0" />
+    </div>
+</div>
+<div ng-if="$ctrl.type == $ctrl.QuestionTypeEnum.date">
+    <span class="input-group">
+        <input class="form-control" type="text" ng-model="$ctrl.answer.dateValue" uib-datepicker-popup="dd/MM/yyyy"
+                is-open="$ctrl.popupOpened" datepicker-options="dateOptions"
+                close-text="Close" />
+        <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="$ctrl.openPopup()"><i class="glyphicon glyphicon-calendar"></i></button>
+        </span>
+    </span>
+</div>
+<textarea class="form-control" ng-model="$ctrl.answer.textValue" rows="4" ng-if="$ctrl.type == $ctrl.QuestionTypeEnum.longtext"></textarea>
+<div ng-if="$ctrl.type == $ctrl.QuestionTypeEnum.multiplechoice">
+    <label class="checkbox-inline" ng-repeat="c in $ctrl.choices">
+        <input type="checkbox" ng-model="c.selected" /> {{c.name}}
+    </label>
+</div>
+

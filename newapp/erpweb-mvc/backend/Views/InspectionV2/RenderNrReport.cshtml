@@ -1,0 +1,299 @@
+﻿@model NRReportRenderModel
+
+@{
+    Layout = null;
+}
+
+@functions
+{
+    public DateTime? GetETD()
+    {
+        var o = GetMainOrder();
+
+        if (o != null && o.po_req_etd != null)
+            return o.po_req_etd;
+        return null;
+    }
+
+    public DateTime? GetETA()
+    {
+        var o = GetMainOrder();
+        if (o != null && o.req_eta != null)
+            return o.req_eta;
+        return null;
+    }
+
+    public Order_header GetMainOrder()
+    {
+        var o = Model.Orders.FirstOrDefault(or => or.combined_order == null);
+
+        if (o == null && Model.Orders.Count > 0)
+            o = Model.Orders[0];
+        return o;
+    }
+
+    public string GetMastProductField(Inspection_v2_line l, string field, string defaultField)
+    {
+        var prop1 = typeof(Mast_products).GetProperty(field);
+        var prop2 = typeof(Inspection_v2_line).GetProperty(defaultField);
+        var mast = l?.OrderLine?.Cust_Product?.MastProduct;
+        if (mast != null)
+            return prop1.GetValue(mast).ToString();
+        return prop2.GetValue(l).ToString();
+    }
+
+    public string GetMastProductFactory(Inspection_v2_line l)
+    {
+        return l?.OrderLine?.Cust_Product?.MastProduct?.Factory?.factory_code;
+    }
+
+    public string GetCustProductField(Inspection_v2_line l, string field, string defaultField)
+    {
+        var prop1 = typeof(Cust_products).GetProperty(field);
+        var prop2 = typeof(Inspection_v2_line).GetProperty(defaultField);
+        var prod = l?.OrderLine?.Cust_Product;
+        if (prod != null)
+            return prop1.GetValue(prod).ToString();
+        return prop2.GetValue(l).ToString();
+    }
+
+
+    public double? GetQty(Inspection_v2_line l)
+    {
+        if (l.OrderLine != null)
+            return l.OrderLine.orderqty;
+        return l.qty;
+    }
+
+    public string GetContainers(Inspection_v2_line l, Inspection_v2 insp)
+    {
+        var result = new List<string>();
+        foreach (var elem in insp.Lines)
+        {
+            if (elem.Loadings != null && elem.orderlines_id == l.orderlines_id) {
+                foreach (var lo in elem.Loadings)
+                {
+                    var no = lo?.Container?.container_no;
+                    if(!string.IsNullOrEmpty(no))
+                        result.Add(no);
+                }
+            }
+        }
+
+        return string.Join(",",result.Distinct());
+    }
+
+    public string GetImageUrl(Nr_line_images image)
+    {
+        if (image != null) {
+            return WebUtilities.CombineUrls(Model.ImagesRootUrl, image.image_name);
+        }
+        return "/images/no-image.jpg";
+    }
+
+
+}
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>N report</title>
+    
+    <link href="~/Content/nr_report/main.css" rel="stylesheet"/>
+    <style>
+        .tdImageStyle {
+            height: 240px;
+            text-align: center;
+            width: @(Math.Round(100*1.0 / Model.ImageTypes.Count) + " %")
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <div>
+        <table width="100%" border="0" cellspacing="2" cellpadding="3" style="border-spacing: 2px; border-collapse: inherit">
+            <tr>
+                <td colspan="6"><img style="width: 250px;" src="/images/asaq_logo.jpg"/></td>
+            </tr>
+            <tr>
+                <td colspan="6" align="center" class="doc_name">@Model.Title</td>
+            </tr>
+            <tr>
+                <td class="backgr1"><span class="title bold">PO Numbers</span></td>
+                <td class="backgr1">@(string.Join(",", Model.Orders.Select(o => o.custpo).Distinct()))</td>
+                <td class="backgr2"><span class="title bold">Date of Inspection</span></td>
+                <td class="backgr2">@Model.Inspection.startdate.ToString("d")</td>
+            </tr>
+            <tr>
+                <td class="backgr1"><span class="title bold">QC Inspectors</span></td>
+                <td class="backgr1">@(Model.Inspection.Controllers != null ? string.Join(",", Model.Inspection.Controllers.Select(c => c.Controller?.user_initials)) : string.Empty)</td>
+                <td class="backgr2"><span class="title bold">Report Number</span></td>
+                <td class="backgr2">@Model.NrHeader.NR_document_no</td>
+
+            </tr>
+            <tr>
+                <td class="backgr1">&nbsp;</td>
+                <td class="backgr1">&nbsp;</td>
+                <td class="backgr2"><span class="title bold">ETD</span></td>
+                <td class="backgr2"><span class="title bold">ETA</span></td>
+
+            </tr>
+            <tr>
+                <td class="backgr1">&nbsp;</td>
+                <td class="backgr1">&nbsp;</td>
+                <td class="backgr2">@GetETD().ToString("d")</td>
+                <td class="backgr2">@GetETA().ToString("d")</td>
+
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+
+            </tr>
+        </table>
+
+        <table width="100%" border="0" cellspacing="2" cellpadding="3" style="border-spacing: 2px; border-collapse: separate">
+            <tr valign="top" class="title bold">
+                <td width="50">Factory</td>
+                <td width="120">Factory Product <br/>Code</td>
+                <td width="120">
+                    Client Product <br/>
+                    Code
+                </td>
+                <td width="350">Product Description</td>
+                <td width="70" align="left">
+                    Qty of <br/>
+                    Products
+                </td>
+                <td>Container number</td>
+            </tr>
+            @{ var counter = 0;}
+            @foreach (var l in Model.NrHeader.Lines.Where(l => l.InspectionV2Line != null && l.InspectionV2Line.qty != 0))
+            {
+                <tr class="backgr@((counter % 2) + 1)">
+                    <td>@GetMastProductFactory(l.InspectionV2Line)</td>
+                    <td>@GetMastProductField(l.InspectionV2Line, "factory_ref", "insp_mastproduct_code")</td>
+                    <td>@GetCustProductField(l.InspectionV2Line, "cprod_code1", "insp_custproduct_code")</td>
+                    <td>@GetCustProductField(l.InspectionV2Line, "cprod_name", "insp_custproduct_name")</td>
+                    <td>@GetQty(l.InspectionV2Line)</td>
+                    <td>@GetContainers(l.InspectionV2Line, Model.Inspection)</td>
+                </tr>
+            }
+
+
+        </table>
+
+        <table width="100%" border="0" cellspacing="2" cellpadding="3" style="border-spacing: 2px; border-collapse: separate">
+            <tr valign="top" class="title bold">
+                <td>Details:</td>
+            </tr>
+            <tr>
+                <td>@Model.NrHeader.NR_comment1</td>
+            </tr>
+        </table>
+        
+        @if(Model.NrHeader.nr_type_id == Nr_header.TypeNS)
+        {
+             
+            var cartons = Model.NrHeader.Images.Max(im => im.carton_no);
+            var rows = (cartons - 1) / 3 + 1;
+            
+            <div style="margin-bottom: 15px">The above items are packed in @cartons cartons.</div>
+
+            <table class="prod_img" style="width:100%" border="0" cellspacing="2" cellpadding="2">
+                @for (int i = 0; i < rows; i++)
+                {
+                    <tr>
+                        @for (int j = 0; j < 3; j++)
+                        {
+                            <td style="width:32%;padding:2px">
+                                @foreach (var t in Model.ImageTypes)
+                                {
+                                    var carton = i * 3 + j + 1;
+                                    <div style="height: 248px;margin-bottom:10px">
+                                        @if (carton <= cartons)
+                                        {
+                                            <div>Carton: @(carton) @t.name</div>
+                                            <div style="position: relative;height:230px">
+                                                @{
+                                                    var im = Model.NrHeader.Images.FirstOrDefault(img => img.carton_no == carton && img.image_type == t.id);
+                                                }
+                                                @if (im != null)
+                                                {
+                                                    <img style="height: 230px" src="@GetImageUrl(im)" />
+                                                }
+
+                                            </div>
+                                        }
+
+                                    </div>
+                               }
+                            </td>
+                        }
+
+                    </tr>
+                    
+
+                    if (i!= rows -1 && (i == 0 || i%2 == 0))
+                    {
+                        <tr>
+                            <td colspan="3">
+                                <br style="page-break-before: always" />
+                            </td>
+                        </tr>                        
+                    }
+                }
+            </table>
+        }
+        else
+        {
+            foreach(var t in Model.ImageTypes)
+            {
+                var images = Model.NrHeader.Images.Where(img => img.image_type == t.id).ToList();
+                var rows = (images.Count - 1) / 3 + 1;
+                <div style="font-weight: bold">@t.name  images</div>
+                <table class="prod_img" style="width:100%" border="0" cellspacing="2" cellpadding="2">
+                    @for (int i = 0; i < rows; i++)
+                    {
+                        <tr>
+                            @for (int j = 0; j < 3; j++)
+                            {
+                                <td style="width:32%;padding:2px">
+                                    @if(i*3 + j < images.Count)
+                                    {
+                                        <div style="position: relative;height:230px">
+                                        @{
+                                            var im = images[i * 3 + j];
+                                        }
+                                        
+                                        <img style="height: 230px" src="@GetImageUrl(im)" />
+                                        
+
+                                    </div> 
+                                    }
+                                                                       
+                                </td>
+                            }
+                        
+                        </tr>
+                    }
+            </table>
+            }
+        }
+
+        
+
+    </div>
+
+
+</div>
+</body>
+</html>
+
+
+
+

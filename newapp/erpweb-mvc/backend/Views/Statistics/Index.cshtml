@@ -1,0 +1,235 @@
+﻿@model backend.Models.StatisticsModel
+@using asaq2.Model.DAL
+@{
+    ViewBag.Title = "Stats";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var visits = Model.Visits;
+    var websites = Model.Websites;
+}
+
+<h2>Websites Products Visits Statistics</h2>
+
+<div class="stats-wrapper">
+    @using (Html.BeginForm("Index", "Statistics", FormMethod.Post, new { id = "Filters" }))
+    {
+        <table class="filters">
+            <tr>
+                <td>
+                    <label for="datefrom-filter">Date from:</label>
+                    <input type="text" id="datefrom-filter" name="datefrom-filter" class="datepicker" placeholder="MM/dd/yyyy" value="@(Model.datefrom != null ? Model.datefrom.Value.ToString("MM/dd/yyyy",System.Globalization.CultureInfo.InvariantCulture) : "")" />
+                </td>
+                <td>
+                    <label for="dateto-filter">Date to:</label>
+                    <input type="text" id="dateto-filter" name="dateto-filter" class="datepicker" placeholder="MM/dd/yyyy" value="@(Model.dateto != null ? Model.dateto.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")" />
+                </td>
+                <td>
+                    <label for="limit-filter">Limit:</label>
+                    <input type="number" id="limit-filter" name="limit-filter" placeholder="10" value="@(Model.limit != null ? Model.limit : 100)" />
+                </td>
+                <td>
+                    <label for="site-filter">Website:</label>
+                    <select class="filter" id="site-filter" name="site-filter">
+                        <option value="-1">Pick a website</option>
+                        @foreach (var w in websites)
+                        {
+                            <option value="@w.id" @(Model.site_id == w.id ? "selected" : "")>@w.name</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <input type="submit" value="Filter" />
+                </td>
+                <td align="center">
+                    <label for="export-to-excel">Excel</label>
+                    <a href="#" id="export-to-excel">
+                        <img src="~/Images/excel-icon.png" alt="excel-icon" />
+                    </a>
+                </td>
+                <td width="30%" align="right">
+                    <a href="@Url.Action("Brands","Statistics")">Top 10 Products By Brand</a>
+                </td>
+            </tr>
+        </table>
+    }
+    <table class="data">
+        @if (visits != null && visits.Count > 0)
+        {
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th width="60">Web Unique</th>
+                    <th align="left">Product</th>
+                    <th>IP</th>
+                    <th>Country</th>
+                    <th>Site</th>
+                    <th>Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var v in visits)
+                {
+                    var product = v.web_unique != null ? Web_product_newDAL.GetById(v.web_unique.Value) : null;
+                    var site = websites.FirstOrDefault(w => w.brand_id == v.visit_site);
+                    if (product != null)
+                    {
+                        <tr>
+                            <td>@v.id</td>
+                            <td align="center">@v.web_unique</td>
+                            <td>@product.web_name</td>
+                            <td align="center">
+                                <a href="http://www.infosniper.net/index.php?ip_address=@v.visit_IP&map_source=1&overview_map=1&lang=1&map_type=1&zoom_level=7" target="_blank" title="Check IP address on infosnper.net">@v.visit_IP</a>
+                            </td>
+                            <td align="center">@v.visit_country</td>
+                            <td>@site.name</td>
+                            <td align="center">
+                                <a href="http://@site.Url/Products/ProductDetail?prodId=@v.web_unique&name=@product.web_name" target="_blank" title="Go to @product.web_name on @site.name website">
+                                    <img src="~/Images/product.png" alt="@product.web_name" />
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        }
+        else
+        {
+            <thead>
+                <tr>
+                    @{
+            var message = string.Empty;
+            message = Model.site_id != null ? (" for " + Web_siteDAL.GetById(Model.site_id.Value).name) : "";
+            if (Model.datefrom != null && Model.datefrom != null)
+            {
+                message += (" between " + Model.datefrom.Value + " - " + Model.dateto.Value);
+            }
+            else if (Model.datefrom != null && Model.dateto == null)
+            {
+                message += (" from " + Model.datefrom.Value);
+            }
+            else if (Model.dateto != null && Model.datefrom == null)
+            {
+                message += (" to " + Model.dateto.Value);
+            }
+                    }
+                    <th align="center" style="background-color:#fff;">There were no visits @message</th>
+                </tr>
+            </thead>
+        }
+    </table>
+</div>
+
+@section head {
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <style>
+        h2 {
+            text-align: center;
+            clear: both;
+        }
+        .container .logo-layout  {
+            display:none!important;
+        }
+
+        table.filters {
+            margin: 1rem 0;
+        }
+
+            table.filters .datepicker {
+                width: 100px;
+            }
+
+            table.filters #limit-filter {
+                width: 50px;
+            }
+
+            table.filters td {
+                padding: 0;
+            }
+
+            table.filters input {
+                  height: 1.3rem;
+                  text-align: center;
+                  margin: 0;
+                  padding: 5px 0;
+                  border: 1px solid gray;
+            }
+
+                table.filters select, table.filters input[type="submit"] {
+                      height: 2.05rem;
+                      padding: 5px 0;
+                      border: 1px solid grey;
+                }
+
+                table.filters input[type="submit"] {
+                    margin-top:1rem;
+                    padding:5px 15px;
+                }
+
+            table.filters a {
+                display: block;
+            }
+
+                table.filters a:hover {
+                    opacity: 0.7;
+                }
+
+                table.filters a img {
+                    position: relative;
+                    top: 3px;
+                }
+
+        .stats-wrapper table {
+            width: 100%;
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        .stats-wrapper .data thead tr th {
+            background-color: #F0F0F0;
+            text-align:center;
+        }
+        .stats-wrapper .data thead tr th:nth-child(3)
+        {
+            text-align:left;
+        }
+
+        .stats-wrapper .data tbody tr:hover td {
+            background-color: #F0F0F0;
+        }
+
+        .stats-wrapper .data tbody tr td {
+            padding: 1px 0;
+            border-bottom: 1px solid #ccc;
+        }
+
+            .stats-wrapper .data tbody tr td a {
+                text-decoration: none;
+                display: block;
+                padding-top: 5px;
+            }
+
+                .stats-wrapper .data tbody tr td a:hover {
+                    text-decoration: underline;
+                    opacity: 0.7;
+                }
+    </style>
+}
+
+@section scripts {
+
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script>
+        $(function () {
+            $(".datepicker").datepicker();
+            $(document).tooltip();
+        });
+        $(document).on("click", "#export-to-excel", function () {
+            $("#Filters").attr("action", "/Statistics/ExportToExcel");
+            $("#Filters").submit();
+            $("#Filters").attr("action", "/Statistics/Index");
+        })
+    </script>
+}
+
+
+

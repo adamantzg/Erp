@@ -1,0 +1,26 @@
+﻿<h4>Instructions files</h4>
+<button class="btn btn-primary" ui-sref="create">Create new</button>
+<table class="table" datatable="ng" dt-options="dtSettings" style="margin-top:5px">
+    <thead>
+        <tr>
+            <th>Filename</th>
+            <th>Language</th>
+            <th>Products</th>
+            <th>Created by</th>
+            <th>Date created</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="i in model.instructions">
+            <td>
+                <a ng-href="{{getFileUrl(i)}}" target="_blank">{{i.filename}}</a>
+            </td>
+            <td>{{i.language.name}}</td>
+            <td><span ng-repeat="p in i.products">{{p.factory_ref}}<span ng-if="!$last">,</span> </span></td>
+            <td>{{i.createdBy.userwelcome}}</td>
+            <td>{{i.dateCreated | date:'dd/MM/yyyy'}}</td>
+            <td><button class="btn btn-default" ui-sref="edit({id: i.id})">Edit</button></td>
+        </tr>
+    </tbody>
+</table>

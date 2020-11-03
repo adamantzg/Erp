@@ -1,0 +1,378 @@
+﻿@model OrderLoadingModel
+
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html ng-app="inspApp">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>OrderLoading</title>
+    <link href="~/Content/bootstrap/bootstrap.css" rel="stylesheet" />
+    @*<script src="~/Scripts/bootstrap.js"></script>*@
+    @*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />*@
+    <style>
+        .sub-title{
+            background-color:lightgray;
+        }
+        .body-form{
+            background-color:#F0F0F0;
+        }
+        .input-def{
+            height:15px;
+        }
+        .vcenter {
+            display: inline-block;
+            /*vertical-align: middle;*/
+            margin-top:5px;
+            float: none;
+        }
+    </style>
+</head>
+<body style="width:740px;border:solid 1px gray;font-size:12px" ng-controller="inspectionCtrl">
+   
+    <div class="container body-form" style="width:740px">
+        <form role="form" ng-submit="submitForm()" ng-hide="!!skipLiCreation || !!skipLiCreationSuccess">
+            <div class="row" style="background-color:white">
+                <div class="col-xs-12" style="background-color:gray;height:28px">
+                    <span class="h5 vcenter" style="color:white">Create LI Inspection List</span>
+                </div>
+            </div>
+            <div class="row sub-title">
+                @*<div class="col-xs-1"></div>*@
+                <div class="col-xs-9">
+                    <span class="vcenter">LI is not required or will be created by another factory for this order</span>
+                </div>
+                <div class="col-xs-2">
+                    <input ng-model="skipLiCreation" type="checkbox" value="" />
+                </div>
+            </div>
+            <div class="row body-form">
+                <div class="co-xs-12">
+                    <div class="alert alert-success "
+                         style="padding:2px 5px 2px 5px;"
+                         ng-show="SUCCESS">
+                        @*<span>{{SUCCESS.statusText}}</span>*@
+                        &nbsp;&nbsp;<span> Inspection list saved successfully</span>
+                    </div>
+                    <div class="alert alert-danger"
+                         style="padding:2px 5px 2px 5px; margin:0"
+                         ng-show="EXCEPTION">
+                        <span>{{EXCEPTION.statusText}}</span>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="row body-form">
+                <div class="col-xs-3">
+                    <b class="vcenter"> Inspection Type</b>
+                </div>
+                <div class="col-xs-3">
+                    @*<span class="pull-left vcenter">Loading</span>*@
+                    <div class="form-group form-group-sm">
+                        <select class="form-control"
+                                style="height:25px;font-size:12px; padding:1px"
+                                disabled>
+
+                            <option value="1" selected>Loading</option>
+               
+                        </select>
+                    </div>
+
+                </div>
+                <div class="col-xs-2">
+                    <b class="vcenter">QC Required</b>
+                </div>
+                <div class="col-xs-2">
+                    <div class="form-group form-group-xs">
+                        <select class="form-control"
+                                style="height:25px;font-size:12px;padding:1px"
+                                ng-model="inspectionV2.qc_required"
+                                ng-options="opt for opt in qcRequired"
+                                ng-disabled="buttonVisible">                          
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row body-form">
+                <div class="col-xs-3">
+                    <span><b>Start Date</b><br /> (YYYY-MM-DD) <b> / Days</b></span>
+                </div>
+                <div class="col-xs-3">
+                    <div class="form-group form-group-sm">
+                        <p class="input-group">
+                            <input class="form-control"
+                                   type="text"
+                                   @*pattern="YYYY-MM-dd"*@
+                                   style="height:25px"
+                                   name="name" value=" "
+                                   ng-model="inspectionV2.startdate"
+                                   placeholder="YYYY-MM-DD"
+                                   ng-disabled="buttonVisible"
+                                   datepicker-popup="{{format}}"
+                                   datepicker-options="dateOptions"
+                                   is-open="opened"                                   
+                                   date-disabled="disabled(date,mode)" close-text="Close"/>
+                            <span class="input-group-btn">
+                                <button type="button"
+                                        class="btn btn-default"
+                                        style="height:25px; padding-top:2px"
+                                        ng-click="open($event)"
+                                        ng-disabled="buttonVisible">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </button>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-xs-2">
+                    <div class="form-group form-group-sm">
+                        <select class="form-control"
+                                style="height:25px"
+                                ng-model="inspectionV2.duration"
+                                ng-options="day for day in days"
+                                ng-disabled="buttonVisible">                           
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xs-4" >
+                    @*<div class="alert alert-warning">
+                        {{inspectionV2.startdate}}
+                    </div>*@
+                </div>
+            </div>
+            <div class="row body-form">
+                <div class="col-xs-3 "><b class="vcenter">Comments</b></div>
+                <div class="col-xs-9">
+                    <textarea rows="4" cols="63"
+                              ng-model="inspectionV2.comments" ng-disabled="buttonVisible"></textarea>
+                </div>
+            </div>
+            <div class="row body-form">
+                <div class="col-xs-3"><b class="vcenter">Note</b></div>
+                <div class="col-xs-7">
+                    <span>
+                        by creating LI the products on this order will be added onto the LI for the main order. By creating the LI
+                        this will mean that will be flagged as the loading factory tor this order.
+                    </span>
+                </div>
+            </div>
+            <div class="row body-form">
+                 <button class="btn btn-default" plupload="fileUpload.url"
+                               plupload-options="fileUpload.options"
+                               plupload-callbacks="fileUpload.callbacks">Upload drawing</button>
+                <span ng-if="inspectionV2.drawingFile">{{inspectionV2.drawingFile}}&nbsp;&nbsp;<button class="glyphicon glyphicon-remove" ng-click="removeFile()"></button></span>
+            </div>
+            <div class="row body-form">
+                <div class="col-xs-3"></div>
+                <div class="col-xs-7">
+                    <img class="pull-right" src="~/Images/animated_spinner.gif" width="22px" ng-show="loadVisible" />
+                </div>
+                <div class="col-xs-2">
+                    <input type="submit" 
+                           style="width:100px"
+                           class="btn btn-primary btn-xs pull-right" name="name" value="Add" 
+                           ng-disabled="loadVisible" 
+                           ng-hide="buttonVisible"/>
+                    <input style="width:100px;background-color:lightgray"
+                           value="Add"
+                           class="btn btn-default btn-xs  pull-right"
+                           ng-show="buttonVisible"
+                           disabled />
+                </div>
+            </div>
+           
+        </form>
+        @* NO  *@
+        <div class="row" ng-hide="!skipLiCreation  " style="min-height:170px">
+            <div class="panel panel-warning" style="padding-bottom:0;margin-bottom:0">
+                <div class="panel-heading">
+                    
+                    <h3 class="h3">Are you sure you want to skip Li Creation?</h3>
+                </div>
+                
+                <div class="panel-body" style="height:95px;padding-top:50px">
+                   
+                    <button class="btn btn-default btn-warning pull-right" ng-click="setSkipLiCreation()">Yes</button>
+                    <button class="btn btn-default  pull-right" style="margin-right:5px" ng-click="cancelSkipLiCreation()">No</button>
+                </div>
+            </div>
+        </div>
+        @* YES *@
+        <div class="row" ng-hide="!skipLiCreationSuccess" style="min-height:170px">
+            <div class="panel panel-success" style="padding-bottom:0;margin-bottom:0">
+                <div class="panel-heading">
+
+                    <h3 class="h3">LI Creation has been skipped</h3>
+                </div>
+
+                <div class="panel-body" style="height:95px;padding-top:50px">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+    <script src="~/Scripts/angular.js"></script>
+    @Scripts.Render("~/bundles/utils")
+    @*<script src="~/Scripts/angular-ui/ui-bootstrap.js"></script>*@
+    <script src="~/Scripts/angular-ui-tpl/ui-bootstrap-tpls-0.13.0.min.js"></script>
+    <script src="~/Scripts/logToServer.js"></script>
+    @Scripts.Render("~/bundles/plupload2")
+    <script src="~/Scripts/angular-plupload/angular-plupload.js"></script>
+    <script>
+        var inspApp = angular.module('inspApp', ['ui.bootstrap', 'logToServer', 'angular-plupload'])
+            .constant("baseUrl", "/InspectionV2/")
+        .controller("inspectionCtrl", ['$scope', '$timeout', 'dataService', function ($scope, $timeout,dataService) {
+            $scope.orderHeader =@Html.Raw(WebUtilities.JsonSerialize(Model))
+            $scope.inspectionType = 1;
+            $scope.qcRequired = [1, 2, 3, 4, 5];
+            $scope.days = [1, 2, 3, 4, 5];
+            $scope.inspectionV2 = {};
+            $scope.inspectionV2.duration = 1;
+            $scope.inspectionV2.startdate = '';
+
+
+            $scope.today = function () {
+                // $scope.inspectionV2.startdate = new Date();
+
+            };
+            $scope.format = 'yyyy-MM-dd';
+            $scope.today();
+            $scope.dateOptions = {
+                formatYear: 'yyyy',
+                startingDay: 1
+            };
+            $scope.open = function ($event) {
+                $event.preventDefault();
+                $event.stopPropagation();
+                $scope.opened = true;
+            }
+            /*load image and save button enable-disable*/
+            $scope.loadVisible = false;
+
+            /*button show-hide and enable-disable input fields*/
+            $scope.buttonVisible = false;
+
+            console.log($scope.orderHeader);
+            $scope.setSkipLiCreation = function () {
+                dataService.createSkipLiCreation($scope.orderHeader.PorderId).then(
+                    function (resp) {
+                        $scope.statusSkipList = resp;
+                        $scope.skipLiCreationSuccess = true;
+                        $scope.skipLiCreation = !$scope.skipLiCreation;
+                    },
+                    function (err) {
+                        $scope.statusError;
+                    }
+
+                )
+            }
+            $scope.cancelSkipLiCreation = function () {
+                $scope.skipLiCreation = !$scope.skipLiCreation;
+            }
+
+            $scope.removeFile = function () {
+                $scope.inspectionV2.drawingFile = '';
+            };
+
+            $scope.submitForm = function () {
+                $scope.loadVisible = true;
+                $scope.inspectionV2.type = 1;
+                $scope.inspectionV2.custpo = $scope.orderHeader.OrderHeader.custpo;
+                $scope.inspectionV2.factory_id = $scope.orderHeader.OrderHeader.loading_factory;
+                $scope.inspectionV2.client_id = $scope.orderHeader.OrderHeader.userid1;
+                $scope.container_type = $scope.orderHeader.OrderHeader.container_type === null ? 0 : $scope.orderHeader.OrderHeader.container_type;
+                $scope.inspectionV2.Containers = [{ id: $scope.container_type, num: 1 }];
+                var orderid = $scope.orderHeader.OrderHeader.orderid;
+                $scope.inspectionV2.orderids = [orderid];
+
+                dataService.createOrderLoading($scope.inspectionV2)
+                    .then(
+                       function (results) {
+                           $scope.buttonVisible = true;
+                           // $scope.inspectionV2 = {};
+                           $scope.loadVisible = false;
+                           $scope.SUCCESS = results;
+                           $scope.EXCEPTION = null;
+                           if (window.parent != null)
+                               window.parent.location = document.referrer;
+
+                       }, function (results) {
+                           $scope.loadVisible = false;
+
+                           $scope.EXCEPTION = results;
+                       }
+                    )
+
+                console.log($scope.inspectionV2)
+
+            }
+
+            $scope.uploadedImages = [];
+            $scope.fileUpload = {
+                url: '@Url.Action("Images")',
+                options: {
+                    multi_selection: false,
+                    max_file_size: '32mb'
+                },
+                callbacks: {
+                    filesAdded: function (uploader, files) {
+                        $scope.uploadInProgress = true;
+                        files.forEach(function (elem) {
+                            //initial progress value
+                            var file = { id: elem.id, name: elem.name, percent: 0, size: elem.size };
+                            $scope.uploadedImages.push(file);
+                        });
+                        $timeout(function () {
+                            uploader.start();
+                        }, 1);
+                    },
+                    uploadProgress: function (uploader, file) {
+
+                        var f = _.find($scope.uploadedImages, { id: file.id });
+                        if (f != null)
+                            f.percent = file.percent;
+                    },
+                    beforeUpload: function (uploader, file) {
+                        uploader.settings.multipart_params = { id: file.id };
+                    },
+                    fileUploaded: function (uploader, file, response) {
+
+                        var f = _.find($scope.uploadedImages, { id: file.id });
+                        if (f != null) {
+                            f.percent = 100;
+                        }
+                        //im.id = 0;
+                        $scope.inspectionV2.file_id = file.id;
+                        $scope.inspectionV2.drawingFile = file.name;
+                        $scope.uploadedImages = [];
+                        //im.id = "";
+
+                    },
+                    error: function (uploader, error) {
+                        $scope.loading = false;
+                        alert(error.message);
+                    }
+                }
+            };
+
+        }])
+        .factory('dataService', ['$http', 'baseUrl', function ($http, baseUrl) {
+            var createOrderLoading = function (data) {
+                return $http.post(baseUrl + "CreateInspection/", data);
+            }
+            var setSkipLiCreation = function (new_id) {
+                return $http.post(baseUrl + "CreateSkipLiCreation?id=" + new_id);
+            }
+            return {
+                createOrderLoading: createOrderLoading,
+                createSkipLiCreation: setSkipLiCreation
+            }
+        }]);
+    </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+﻿<div class="row">
+    <button class="btn btn-primary" ng-click="new()">Create new</button> <button class="btn btn-default" ui-sref="distributors">Distributors</button>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th class="text-right">Total Actual UK</th>
+                <th class="text-right">Total Actual Non-UK</th>
+                <th class="text-right">Total Budget UK</th>
+                <th class="text-right">Total Budget Non-UK</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="d in data">
+                <td>{{d.month21Formatted}}</td>
+                <td class="text-right">{{d.actualUKTotal | number:0}}</td>
+                <td class="text-right">{{d.actualNonUKTotal | number:0}}</td>
+                <td class="text-right">{{d.budgetUKTotal | number:0}}</td>
+                <td class="text-right">{{d.budgetNonUKTotal | number:0}}</td>
+                <td><span class="btn btn-xs glyphicon glyphicon-edit" ui-sref="edit({month21: d.month21})"></span></td>
+            </tr>
+        </tbody>
+    </table>
+</div>

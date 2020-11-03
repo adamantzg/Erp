@@ -1,0 +1,103 @@
+﻿@model DuplicateProductsModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Duplicate products</title>
+    <style type="text/css">
+        body {
+            font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+            font-size: 12px;
+            line-height: 1.42857143;
+            color: #666666;
+            background-color: #ffffff;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            margin: 5px;
+            display: block;
+        }
+        th {
+            padding: 0px 5px;
+        }
+        td {
+            padding: 0px 5px;
+        }
+        tr.border_bottom td {
+             border-bottom:1pt solid black;
+        }
+    </style>
+</head>
+@{
+    
+
+}
+<body>
+    <div style="container">
+        <div style="main">
+            <div id="content" class="content">
+                <div class="logo">
+                    <a href="#"><img src="http://newapp.bigcompany.com/images/Logo.jpg" alt="logo" width="200" /></a>
+                </div>
+                <br />
+                <div>
+                    <div>
+                        <h3>DUPLICATE PRODUCTS</h3>
+                    </div>
+                    <BR />
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="text-align: left">FACTORY REF</th>
+                                <th style="text-align: center">MAST_ID</th>
+                                <th style="text-align: center">FACTORY_ID</th>
+                                <th style="text-align: center">CPROD_ID</th>
+                                <th style="text-align: center">CPROD_CODE1</th>
+                                <th style="text-align: center">CPROD_USER</th>
+                                <th style="text-align: center">CPROD_STATUS</th>
+                                <th style="text-align: right">LIVE ORDER LINES</th>
+                                <th style="text-align: right">MASTPRODUCT STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @*@foreach (var v in Model.JoinData)
+                            {
+                                <tr>
+                                    <td style="text-align: left">@v.factory_ref</td>
+                                    <td style="text-align: center">@v.mast_id</td>
+                                    <td style="text-align: center">@v.factory_id</td>
+                                    <td style="text-align: center">@v.cprod_id</td>
+                                    <td style="text-align: center">@v.cprod_code1</td>
+                                    <td style="text-align: center">@v.cprod_user</td>
+                                    <td style="text-align: center">@v.cprod_status</td>
+                                    <td style="text-align: right">@v.Count</td>
+                                </tr>
+                            }*@
+                            @foreach (var p in Model.Products.OrderBy(p => p.cprod_code1)) {                                
+                                    <tr>
+                                        <td style="text-align: left">@(p.MastProduct?.factory_ref)</td>
+                                        <td style="text-align: center">@p.cprod_mast</td>
+                                        <td style="text-align: center">@(p.MastProduct?.factory_id)</td>
+                                        <td style="text-align: center">@p.cprod_id</td>
+                                        <td style="text-align: center">@p.cprod_code1</td>
+                                        <td style="text-align: center">@p.cprod_user</td>
+                                        <td style="text-align: center">@p.cprod_status</td>
+                                        <td style="text-align: right">@(Model.LinesCount.ContainsKey(p.cprod_id) ? Model.LinesCount[p.cprod_id] : 0)</td>
+                                        <td style="text-align: center">@(p.MastProduct?.product_status)</td>
+                                    </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,380 @@
+﻿@using company.Common
+@using backend.Controllers
+@model MonthlyBrochureRequest
+
+@{
+    Layout = null;
+    ViewBag.Title = "Brochure Requests";
+}
+@functions{
+    //private string GetImageUrl(string name )
+    //{
+    //    if(Model.ImageName=="")
+    //    {
+    //        var imageName = string.Format("{0}", Url.Action("GetLastSavedImage"));
+    //        //var imageName=
+    //    }
+    //    return string.Format("{0}","");
+    //}
+}
+<!DOCTYPE html>
+
+
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    @*<link href="~/Content/npd/main.css" rel="stylesheet" />*@
+    <style>
+         body {
+                font-family: Calibri, Verdana;
+            }
+            .subtitle {
+                font-weight: bold;
+            }
+            .number {
+                text-align: left;
+                padding-top:10px;
+                padding-bottom:10px;
+                padding-left:10px;
+            }
+            .text {
+                text-align: left;
+                padding-left:4px;
+                padding-top:4px;
+                padding-bottom:4px;
+                margin:0px;
+                line-height:90%;
+            }
+            .total {
+                font-size: 20px;
+                font-weight: bold;
+                background-color: #888;
+            }
+            .subtotal {
+                font-size: 14px;
+                font-weight: bold;
+                background-color: #CCC;
+                line-height:85%;
+                padding:8px
+            }
+            .subtotal td {
+                /*border: 1px solid #999999;*/
+                padding-top:8px;
+                padding-bottom:8px;
+                vertical-align:middle;
+            }
+            
+            .totaltable {
+                border-collapse: collapse;
+                border:1px solid gray;
+            }
+            .totaltable td {
+                border-bottom: 1px solid gray;
+                
+            }
+            .tablerow
+            {
+                background-color:#DCDCDC;
+               /*background-color: White;*/
+                color: #000000;
+                border: 1px solid #999999;
+                border-top: 1px solid gray;
+             }
+             .tablerow td {
+                 border: 1px solid #999999;
+                 border-spacing:0;
+                 padding: 4px 0 4px 2px;
+                 /*padding-right:4px;
+                 padding-left:4px;*/
+                 font-size:14px;
+             }
+             .table-holder{
+                 margin-left:-5px;
+             }
+             .title-h2{
+                 position:relative;
+                 margin-left:5px;
+             }
+             .circle {
+                 margin-left:auto;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border-color:black;
+            border-right-style:solid;
+            border-width:thin;
+             }
+             .circle td{
+                 padding:1px;
+             }
+             
+             #Britton{
+                 background:limegreen;
+             }
+             #Burlington{
+                 background:dodgerblue;
+             }
+             #Arcade{
+                 background:indianred;
+             }
+             #Clearwater{
+                 background:yellow;
+             }
+             #googft-mapCanvas{height:100%;margin:0;padding:0;}
+    </style>
+    
+    
+
+   
+</head>
+
+<body>
+    <h2>Brochure Requests</h2>
+    @if (Model.Requests.Count > 0)
+    {
+        <h3>
+        @if (Model.EndDate == null) {
+            @Model.Requests[0].user_created.ToString("MMMM yyyy")
+        }
+        else {
+            @($"From: {Model.FromStart.ToShortDateString()} to {Model.EndDate.ToString("d")}")
+        }
+        </h3>
+    }
+    else {
+        <h3>
+            @if (Model.EndDate == null) {
+                @($"{Model.FromStart.ToString("MMMM yyyy")} has no requests")
+            }
+            else {
+                @($"Period {Model.FromStart.ToShortDateString()} to {Model.EndDate.ToString("d")} has no requests")
+            }
+        </h3>
+    }
+
+    @* @WebUtilities.GetSiteUrl() *@
+    @*<img src="@WebUtilities.GetSiteUrl()@Url.Action("GetImagesName", new { param = string.Format("{0}#{1}", Model.ImageName, Settings.Default.StatsKey) })" style="margin-left:0px" />*@
+
+
+
+    @{
+        var markerDesc = new Dictionary<string, string>{
+            {"Clearwater","yellowt.png"},
+            {"Burlington","bluet.png"},
+            {"Britton","greent.png"},
+            {"Arcade","redt.png"},
+            {"Cleargreen","yellowt.png"},
+            {"Zamori","violett.png"}
+        };
+    }
+    @*@Html.DrawMap("600", "600", "6", Model.RedNew, Model.BlueNew, Model.GreenNew, Model.YellowNew)*@
+
+
+    <table style="border:none">
+        <tr>
+            <td>
+                <img src="@WebUtilities.GetSiteUrl()@Url.Action("GetImagesName", new { param = string.Format("{0}#{1}", Model.ImageName, Settings.Default.StatsKey) })" style="margin-left:0px" title="@Model.ImageName" />
+            </td>
+            <td style="vertical-align:bottom">
+                <table class="totaltable" style="width:285px;margin-bottom:5px">
+                    <tr class="subtotal" style="text-align: left;padding:1px">
+                        <td style="padding:4px;min-width:100px">Brand</td>
+                        <td style="padding:4px;text-align: center">No. of requests</td>
+                        <td style="padding:4px;text-align:center">Marker</td>
+                    </tr>
+
+                    @{
+                        var requests = (
+                                from r in Model.Requests
+                                group r by r.Brand.brandname into requestgroup
+                                select new { RequestCount = requestgroup.Count(), requestgroup.Key }
+                            ).OrderByDescending(x => x.RequestCount);
+                    }
+
+                    @if (Model.Requests.Count > 0)
+                    {
+                        foreach (var g in requests/*Model.Requests.GroupBy(r => r.Brand.brandname)*/)
+                        {
+                            <tr class="tablerow" style="font-size:12px;background-color:white">
+                                <td style="padding:2px"><strong>@g.Key</strong></td>
+                                <td style="padding:2px; text-align: center">@g.RequestCount</td>
+                                <td style="padding:2px; text-align:center">
+                                    @*<img src="~/Images/markers/@markerDesc[g.Key]" width="15"/>*@
+                                    <div><img src="https://newapp.bigcompany.com/Images/markers/@markerDesc[g.Key]" width="10" /></div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </table>
+
+
+            </td>
+        </tr>
+    </table>
+
+
+    @*<div style=" margin-left:605px;height:200px;width:285px;text-align:left;position:absolute;">*@
+
+    @*</div>*@
+
+    @* Sliku je dohvaćao iz memorije a ne čitao iz fajla *@
+    @*<img src="@Url.Action("monthlybrochurerequests", new { fromStart = Model.FromStart, StatsKey = "00BAA5E3-2E27-41A8-9032-6E745453489D", screenCapture=true })" alt="" />*@
+
+
+
+
+    @*<img src="@Url.Action("Capture","report",new{ webAddress="report/bing"})" />*@
+    @* <table class="totaltable" style="width: 300px;margin-left:5px;border-collapse:collapse">
+        <tr class="subtotal" style="text-align: left;padding:1px;border-spacing:0;font-size:12px">
+            <td style="padding:2px;width:100px">Brand</td>
+            <td style="padding:2px;text-align: center">No. of requests</td>
+            <td style="padding:2px;text-align:center">Marker</td>
+        </tr>
+        @foreach (var g in Model.Requests.GroupBy(r => r.Brand.brandname))
+        {
+            <tr class="tablerow" style="font-size:12px">
+                <td style="padding:2px"><strong>@g.Key</strong></td>
+                <td style="padding:2px; text-align: center">@g.Count()</td>
+                <td style="padding:2px; text-align:center">
+                    @*<img src="~/Images/markers/@markerDesc[g.Key]" width="15"/>*@
+    @*<div><img src="http://localhost:1535/Images/markers/@markerDesc[g.Key]" width="12" /></div>
+                    </td>
+                </tr>
+            }
+        </table>*@
+
+
+    @if (Model.Requests.Count > 0)
+    {
+        var i = 1;
+
+        //if (Model.Requests.Where(c => c.brand_id == 1).Count() > 0)
+        //{
+        var _groupRequests = Model.Requests.GroupBy(c => c.brand_id).Select(g => new { BrandGroup = (int)g.Key, Requests = g });
+        foreach (var gr in _groupRequests)
+        {
+                @*<div style="display:@(Model.Requests.Where(c => c.brand_id == 1).Count() > 0 ? "block" : "none")" class="table-holder">*@
+
+
+                    @*<h2 class="title-h2">@Model.Requests.Where(b => b.brand_id == 1).First().Brand.brandname</h2>*@
+                     <h2 class="title-h2">@gr.Requests.First().Brand.brandname</h2>
+                    <table class="totaltable" style="width:895px;clear:both;margin-left:5px;padding:0">
+
+                        <tr class="subtotal" style="text-align:left">
+                            <td style="width:74px">Date</td>
+                            @*<td style="width:68px">Brand</td>*@
+                            <td style="width:150px">Customer name</td>
+                            <td style="width:68px">Postcode</td>
+                            <td style="width:310px">Nearest dealer</td>
+                            <td style="width:68px">Dealer ID</td>
+                            <td>
+                                @*Address*@
+                                Did the customer allow contact?
+                            </td>
+                        </tr>
+                       
+                        @foreach (var request in gr.Requests)
+                    {
+                       
+                    <tr class="tablerow" style="background-color:@(i % 2 == 0 ? "#DCDCDC;" : "#FFF");">
+                        <td class="number">@request.user_created.ToString("d")</td>
+                        @*<td class="text">@(request.brand_id != null ? request.Brand.brandname.ToString() : "unspecified")</td>*@
+                        <td class="text">
+                            @(string.Format("{0} {1} {2}",
+                        request.user_title,
+                        request.user_firstname,
+                        request.user_surname))
+                        </td>
+                        <td class="number">@(string.Format("{0}", request.postcode))&nbsp;</td>
+                        <td class="text"><span>@request.Dealer.IfNotNull(d => d.user_name)</span></td>
+                        <td class="number">@string.Format("{0}", request.Dealer.IfNotNull(d => d.user_id))</td>
+                        <td class="text" style="text-align:center">
+                            @*@(string.Format("{0} {1} {2} {3}",
+            string.IsNullOrWhiteSpace(request.user_address1.ToString()) ? "" : request.user_address1 + ", ",
+            string.IsNullOrWhiteSpace(request.user_address2.ToString()) ? "" : request.user_address2 + ", ",
+            string.IsNullOrWhiteSpace(request.user_address3.ToString()) ? "" : request.user_address3 + ", ",
+            request.user_address4))*@
+                            @(request.contact_optout == 0 ? "Yes" : "No")
+                        </td>
+                    </tr>
+                        i++;
+                    }
+                        <tfoot>
+                            <tr>
+                            <td colspan="6">
+                                @{
+                                    double req = (double)gr.Requests.Where(r=>r.contact_optout==1 || r.contact_optout == null).Count();
+                                    double percentage=(req)*1.0 / gr.Requests.Count();
+                                }
+                                
+                                <span>There were <u>@gr.Requests.Count()</u> brochure requests of which  @(percentage.ToString("P0")) said they do not want contact </span>
+                            </td>
+                        </tr>
+                            <tr>
+                                <td colspan="6">
+                                    <span>There were <u>@Model.BrochureLogs.Count(c=>c.brand_id == gr.Requests.First().brand_id)</u> online brochure views</span>
+                                    @*<strong> @Model.BrochureLogs.Count(c=>c.brand_id == gr.BrandGroup) </strong>*@
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                i = 1;
+                @*</div>*@
+
+                                    }
+
+                                    var brands = new List<int> { 1, 2, 4, 6, 11 };
+                                    var hasNoRequests = Model.Brands.Where(b => !_groupRequests.Any(g => g.BrandGroup == b.brand_id)); //_groupRequests.Where(c => !brands.Any(b=>b == c.BrandGroup));
+                                    foreach (var brandNoReq in hasNoRequests)
+                                    {
+                                        if (Model.BrochureLogs.Count(c=>c.brand_id == brandNoReq.brand_id)> 0)
+                                        {                                            
+                                            <h2 class="title-h2">@brandNoReq.brandname</h2>
+                                            <table class="totaltable" style="width:895px;clear:both;margin-left:5px;padding:0">
+
+                                                <tr class="subtotal" style="text-align:left">
+                                                    <td style="width:74px">Date</td>
+                                                    @*<td style="width:68px">Brand</td>*@
+                                                    <td style="width:150px">Customer name</td>
+                                                    <td style="width:68px">Postcode</td>
+                                                    <td style="width:310px">Nearest dealer</td>
+                                                    <td style="width:68px">Dealer ID</td>
+                                                    <td>
+                                                        @*Address*@
+                                                        Did the customer allow contact?
+                                                    </td>
+                                                </tr>
+                                                <tr class="tablerow" style="background-color:#FFF;" >
+                                                    <td style="text-align:center;" class="number"> - </td>                                                  
+                                                    <td style="text-align:center;" class="text"> - </td>
+                                                    <td style="text-align:center;" class="number"> - </td>
+                                                    <td style="text-align:center;" class="text"> - </td>
+                                                    <td style="text-align:center;" class="number " > - </td>
+                                                    <td style="text-align:center;" class="text text-center" > - </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="6">
+                                                        <span>There were 
+                                                        <u>@Model.BrochureLogs.Count(c=>c.brand_id == brandNoReq.brand_id)</u> online brochure views</span>
+                                                        
+                                                    </td>
+                                                </tr>
+                                                </table>
+                                                }
+
+                                                }
+
+                                                @*
+                                                    foreach (var brand in Model.Brands)
+    {
+    <h4>@brand.brandname</h4>
+    }*@
+
+                                    }
+
+</body>
+
+
+
+</html>

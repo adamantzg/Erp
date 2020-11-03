@@ -1,0 +1,81 @@
+
+<h3>Factory stock order</h3>
+<app-errormessage [errorMessage]="errorMessage"></app-errormessage>
+<div class="row">
+    <div class="col-md-8">
+        <form>
+            <div class="form-group">
+                <label for="cboClient">Client</label>
+                <select class="form-control" name="cboClient" [(ngModel)]="model.clientId" (change)="clientChanged()">
+                    <option *ngFor="let c of model.clients" [value]="c.user_id">{{c.customer_code}}</option>
+                </select>
+            </div> 
+            <app-factorystockorder [model]="model" (currencyChanged)="currencyChanged()"></app-factorystockorder>
+        </form>        
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div *ngIf="model.order.factory_id">
+            <div class="buttons">
+                <div><button class="btn btn-default" value="Add new line" (click)="addNewLine()">Add new line</button></div>
+                <div *ngIf="model.order.id > 0 && getSelectedLines().length > 0" class="ml-2" style="display: flex;">
+                    <div><button class="btn btn-default" value="Move lines"  (click)="moveLines()">Move lines</button></div>
+                    <div class="ml-2">
+                        <select class="form-control" [(ngModel)]="model.orderId">
+                            <option value="">(New order)</option>
+                            <option *ngFor="let o of model.orders" [value]="o.id">{{getOrderDescription(o)}}</option>
+                        </select>
+                    </div>                    
+                </div>
+            </div>
+            
+            
+            <p></p>
+            <table class="table table-bordered">
+                <thead>
+                    <tr class="tableheader">
+                        <td><input type="checkbox" (change)="selectAllToggle()" [(ngModel)]="model.selectAllLines"  /></td>
+                        <td style="width:40%">Client product code</td>
+                        <td>Factory code</td>
+                        <td class="number">Qty</td>
+                        <td class="number">Price</td>
+                        <td class="number" style="width: 20%">Total</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let l of model.order.lines">
+                        <td><input type="checkbox" *ngIf="l.id > 0" [(ngModel)]="l.selected"></td>
+                        <td><input type="text" [(ngModel)]="l.cprod_code1" 
+                            [typeahead]="custProducts(l)" 
+                            (typeaheadOnSelect)="onProductSelected(l,$event)"
+                            [typeaheadOptionsLimit]="20" 
+                            [typeaheadMinLength]="3" 
+                            typeaheadWaitMs="500"
+                            [typeaheadScrollable]="true"
+                            placeholder="Type factory or product code"
+                            typeaheadOptionField="combined_code" /></td>
+                        <td>{{l.mastProduct.factory_ref}}</td>
+                        <td><input class="number" type="text" [(ngModel)]="l.qty"/></td>
+                        <td><input class="number" type="text" [(ngModel)]="l.price"/></td>
+                        <td class="number">{{(l.qty*l.price).toFixed(2)}}</td>
+                        <td><button class="btn btn-default" value="Delete" (click)="deleteLine(l)">Delete</button></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5">&nbsp;</td>
+                        <td class="number">{{getTotal() | number:'1.2-2'}}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+                        
+            <button class="btn btn-success mr-2" value="Update" (click)="update()">Update</button> 
+            <button value="Back to List" class="btn btn-default" (click)="backToList()">Back to List</button>
+
+            <div style="height: 100px;"></div>
+        </div>        
+    </div>
+</div>

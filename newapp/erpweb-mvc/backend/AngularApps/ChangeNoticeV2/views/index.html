@@ -1,0 +1,73 @@
+﻿<h2>Change notices</h2>
+
+<section class="panel panel-primary">
+
+    <header class="panel-heading">
+        Criteria
+    </header>
+
+    <div class="panel-body">
+        <div class="row">
+            <div class="form col-lg-4">
+                <div class="form-group">
+                    <label>
+                        Factory:
+                    </label>
+                    <select class="form-control" ng-options="f.user_id as f.factory_code for f in model.factories | orderBy: 'factory_code'" ng-model="model.factory_id"></select>
+                </div>
+            </div>
+            <div class="form col-lg-4">
+                <div class="form-group">
+                    <label>
+                        Client:
+                    </label>
+                    <select class="form-control" ng-options="c.user_id as c.customer_code for c in model.clients | orderBy: 'customer_code'" ng-model="model.client_id"></select>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form col-lg-4">
+                <div class="form-group">
+                    <label>
+                        Status:
+                    </label>
+                    <select class="form-control" ng-options="s.id as s.value for s in model.statuses | orderBy: 'factory_code'" ng-model="model.status"></select>
+                </div>
+            </div>
+            <div class="form col-lg-4">
+                <div class="form-group">
+                    <label>
+                        Product:
+                    </label>
+                    <input type="text" class="form-control" ng-model="model.product_code"></input>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn btn-primary" ng-click="showList()">Filter</button> <button class="btn btn-default" ng-click="resetFilter()">Reset filter</button>
+    </div>
+
+</section>
+
+<table class="table table-striped" datatable="ng" dt-options="dtListOptions">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>Description</th>
+            <th>Date created</th>
+            <th>Ready date</th>
+            <th>Reason</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="n in model.notices">
+            <td><a ui-sref="edit({ id: n.id })">{{n.id}}</a></td>
+            <td>{{n.description}}</td>
+            <td>{{FormatDate(n.datecreated)}}</td>
+            <td>{{FormatDate(n.expectedReadyDate)}}</td>
+            <td>{{n.reason}}</td>
+            <td>{{n.category}}</td>
+        </tr>
+    </tbody>
+</table>

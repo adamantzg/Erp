@@ -1,0 +1,180 @@
+﻿@model FirstShipmentsModel
+
+@using (Html.BeginForm())
+{
+    <table width="940" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+      <td width="153"><a href="@Url.Action("FirstShipments")"><strong><span class="small_body">First shipments </span></strong></a></td>
+    <td width="153"><a href="@Settings.Default.aspsite_root/asaq_back/2011_asaq_product_change_report.asp"><strong><span class="small_body">Product change </span></strong></a></td>
+       <td width="153"><a href="@Settings.Default.aspsite_root/asaq_back/2012_asaq_product_notes_report.asp"><strong><span class="small_body">Product notes </span></strong></a></td>
+        <td width="153"><a href="@Settings.Default.aspsite_root/asaq_back/2012_asaq_factory_managements_certificates_report.asp"><strong><span class="small_body">Certificates </span></strong></a></td>
+      <td width="328" align="right">&nbsp;</td>
+      </tr>
+  </table> 
+    <table border="0" cellpadding="0" width="930" style="border: 1px; border-style: solid; border-color: #333; padding: 3px;">
+        <tr valign="baseline">
+            <td width="75" nowrap="nowrap" align="left" class="small_body" style="font-weight: bold">Product:</td>
+            <td width="150">@Html.TextBoxFor(m => m.Product)</td>
+            <td width="10">&nbsp;</td>
+            <td width="50" nowrap="nowrap" align="left" class="small_body" style="font-weight: bold">PO:</td>
+            <td width="150">@Html.TextBoxFor(m => m.PO)</td>
+            <td width="10">&nbsp;</td>
+            <td width="75"nowrap="nowrap" align="left" class="small_body" style="font-weight: bold">Factory:</td>
+            <td width="100">@Html.DropDownListFor(m => m.Factory_id, new SelectList(Model.Factories, "user_id", "factory_code"), "ALL")</td>
+            <td width="10">&nbsp;</td>
+            <td width="80"nowrap="nowrap" align="left" class="small_body" style="font-weight: bold">Client:</td>
+            <td width="100">@Html.DropDownListFor(m => m.Client_id, new SelectList(Model.Clients, "user_id", "customer_code"), "ALL")</td>
+        
+            <td width="100">&nbsp;</td>
+        </tr>
+        <tr>
+            <td width="75" height="16" align="left" class="small_body" style="font-weight: bold;">ETD From:</td>
+            <td width="150" height="16" align="left" class="small_body">
+                @Html.TextBoxFor(m => m.ETDFrom, "{0:d}", new { isDate = true })
+            </td>
+            <td  width="10">&nbsp;</td>
+            <td width="50" height="16" align="left" class="small_body" style="font-weight: bold;">To:</td>
+            <td width="150" height="16" align="left" class="small_body">
+                @Html.TextBoxFor(m=>m.ETDTo,"{0:d}", new {isDate = true})
+            </td>
+            <td  width="10">&nbsp;</td>
+            <td  width="75" nowrap="nowrap" align="left" class="small_body" style="font-weight: bold">Category:</td>
+            <td  width="100">
+                @Html.DropDownListFor(m => m.Category_id, new SelectList(Model.Categories, "Id", "Title"),"ALL")
+            </td>
+            <td  width="10">&nbsp;</td>
+            <td  width="80" nowrap="nowrap" align="left" class="small_body" style="font-weight: bold">Order by:</td>
+            <td  width="100">
+                @Html.DropDownListFor(m => m.OrderBy_Id, new SelectList(Model.Orderby, "Id", "Title"))
+            </td>
+            <td width="100" align="right"> 
+                <input type="submit" name="button" id="button" value="search " style="width: 50px; cursor: pointer;"/>
+            </td>
+        </tr>
+    </table>
+}
+
+<table width="940"  border="0" align="center" cellpadding="4" cellspacing="0">
+    <tr class="small_body_wonb" bgcolor="#E3EBED">
+      <td width="40" style="color:#000000;font-weight:bold;">Factory</td>
+      <td width="150" style="color:#000000;font-weight:bold;">MFG code</td>
+      <td width="150" style="color:#000000;font-weight:bold;">Cust code</td>
+      <td width="300" style="color:#000000;font-weight:bold;">Description</td>
+      <td width="100" style="color:#000000;font-weight:bold;">PO</td>
+      <td width="100" style="color:#000000;font-weight:bold;">ETD</td>
+      <td width="100" style="color:#000000;font-weight:bold;">Inspection date</td>
+    </tr>
+  </table>
+@if (Model.NewLines != null || Model.ChangedLines != null)
+{
+    <table width="940"  border="0" align="center" cellpadding="4" cellspacing="0" class="small_body_wonb">
+    @if (Model.NewLines != null)
+    {
+        var rownum = 1;
+        <tr><td colspan="7" style="color:#000000;font-weight:bold">New</td></tr>
+        foreach (var row in Model.NewLines)
+{
+        <tr bgcolor="@(rownum++%2 == 1 ? "#F4F4F4" : "#FFFFFF")" class="small_body">
+            <td width="40">@row.factory_code</td>
+            <td width="150"><a href="@Settings.Default.aspsite_root/asaq_back/asaq_prod_detail.asp?mastid=@row.cprod_mast&factory=@row.factory_id&cusid=@row.userid1" style="text-decoration:underline;color:#000000;" target="_blank">@row.factory_ref</a></td>
+            <td width="150">@row.cprod_code1</td>
+            <td width="300">@row.cprod_name</td>
+            <td width="100">@if (row.porder_id != null)
+                            {
+                                <a href="@Settings.Default.aspsite_root/asaq_back/asaq_CM_order_detail.asp?porderid=@row.porder_id&soid=@row.orderid&cusid=@row.cprod_user" style="text-decoration:underline;color:#000000;" target="_blank">@row.customer_code-@row.custpo</a>
+                            }
+                            else
+                            {
+                                <span>@row.customer_code-@row.custpo</span>
+                            }
+            </td>
+            <td width="100">@row.po_req_etd.ToString("d")</td>
+            <td width="100">
+                @{ var inspection = Model.Inspections[string.Format("{0}-{1}-{2}", row.custpo, row.factory_code, row.customer_code)];}
+                @if (inspection != null)
+                {
+                    if (inspection.insp_status == 0)
+                    {
+                        <a href="@Settings.Default.aspsite_root/asaq_back/asaq_qc_management_detail_fc.asp?insp_id=@inspection.insp_unique" style="text-decoration:underline;color:#000000;" target="_blank">@inspection.insp_start.ToString("d")</a>
+                    }
+                    else
+                    {
+                        <a href="@Settings.Default.aspsite_root/asaq_back/asaq_qc_management_detail_print.asp?insp_id=@inspection.insp_unique" target="_blank" style="text-decoration:underline;color:#000000;">@inspection.insp_start.ToString("d")</a>
+                    }
+                }
+                        
+            </td>
+        </tr>
+}   
+    }
+    @if (Model.ChangedLines != null)
+    {
+        var rownum = 1;
+        <tr><td colspan="7" style="color:#000000;font-weight:bold">Change</td></tr>
+        foreach (var row in Model.ChangedLines)
+{
+        <tr bgcolor="@(rownum++%2 == 1 ? "#F4F4F4" : "#FFFFFF")" class="small_body">
+            <td width="40">@row.factory_code</td>
+            <td width="150"><a href="@Settings.Default.aspsite_root/asaq_back/asaq_prod_detail.asp?mastid=@row.cprod_mast&factory=@row.factory_id&cusid=@row.userid1" style="text-decoration:underline;color:#000000;" target="_blank">@row.factory_ref</a></td>
+            <td width="150">@row.cprod_code1</td>
+            <td width="300">@row.cprod_name</td>
+            <td width="100">@if (row.porder_id != null)
+                            {
+                                <a href="@Settings.Default.aspsite_root/asaq_back/asaq_CM_order_detail.asp?porderid=@row.porder_id&soid=@row.orderid&cusid=@row.cprod_user" style="text-decoration:underline;color:#000000;" target="_blank">@row.customer_code-@row.custpo</a>
+                            }
+                            else
+                            {
+                                <span>@row.customer_code-@row.custpo</span>
+                            }
+            </td>
+            <td width="100">@row.po_req_etd.ToString("d")</td>
+            <td width="100">
+                @{ var inspection = Model.Inspections[string.Format("{0}-{1}-{2}", row.custpo, row.factory_code, row.customer_code)];}
+                @if (inspection != null)
+                {
+                    if (inspection.insp_status == 0)
+                    {
+                        <a href="@Settings.Default.aspsite_root/asaq_back/asaq_qc_management_detail_fc.asp?insp_id=@inspection.insp_unique" style="text-decoration:underline;color:#000000;" target="_blank">@inspection.insp_start.ToString("d")</a>
+                    }
+                    else
+                    {
+                        <a href="@Settings.Default.aspsite_root/asaq_back/asaq_qc_management_detail_print.asp?insp_id=@inspection.insp_unique" target="_blank" style="text-decoration:underline;color:#000000;">@inspection.insp_start.ToString("d")</a>
+                    }
+                }
+                        
+            </td>
+        </tr>
+}   
+    }
+               
+    </table>
+}
+
+@section head
+{
+    <style>
+        input[type="text"] { width: auto}
+        
+    </style>
+}
+
+@section scripts2
+{
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script type='text/javascript' >
+        //$.validator.setDefaults({
+        //    ignore: "not([data-elementispart]):hidden"
+        //});
+    </script>
+    
+    @Html.GlobalizationScript()   
+    
+
+    <script type="text/javascript">
+        $(function () {
+            $('[isdate]').css('width','80%');
+        });
+    </script>
+}

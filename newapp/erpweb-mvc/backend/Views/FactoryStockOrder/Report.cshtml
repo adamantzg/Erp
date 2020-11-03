@@ -1,0 +1,88 @@
+﻿@model FactoryStockOrderReportModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Report</title>
+    <style>
+        .tableheader {
+            font-weight: bold;
+            background-color: #E0E0E0;
+        }
+        .number {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    @{
+        var balances = new Dictionary<int, Tuple<double?, Mast_products>>();
+        foreach (var g in Model.Lines.GroupBy(l => l.mast_id).OrderBy(g => g.First()?.MastProduct?.Factory?.factory_code)) {
+            var mastProd = g.First()?.MastProduct;
+            var custProd = mastProd.CustProducts.FirstOrDefault(p => Model.Brands.Count(b => b.user_id == p.brand_userid) > 0);
+            var balance = mastProd.factory_stock;
+            double? price = 0.0;
+            
+            var items = balance ?? 0;
+            double? total = 0.0;
+            foreach (var l in g.OrderByDescending(l => l.linedate)) {
+                price = l.price;
+                var qty = Math.Min(items, l.qty ?? 0);
+                total += price * qty;
+                items -= qty;
+                if (items <= 0) {
+                    break;
+                }
+            }
+            var weightedPrice = total / balance;
+            balances[g.Key.Value] = new Tuple<double?, Mast_products>(weightedPrice, mastProd);
+        }
+    }
+    <div> SUMMARY</div>
+    <table >
+        <thead>
+            <tr class="tableheader">
+                <td>Factory</td>
+                <td>TOTAL BALANCE</td>
+                <td>Currency</td>
+            </tr>
+        </thead>
+    </table>
+    <div>DETAIL</div>
+    <table >
+        <thead>
+            <tr class="tableheader">
+                <td>Factory</td>
+                <td>factory code</td>
+                <td>Client code</td>
+                <td>Description</td>
+                <td>Balance</td>
+                <td>Unit price</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var g in Model.Lines.GroupBy(l=>l.mast_id).OrderBy(g=>g.First()?.MastProduct?.Factory?.factory_code)) {
+                var mastProd = g.First()?.MastProduct;
+                var custProd = mastProd.CustProducts.FirstOrDefault(p => Model.Brands.Count(b => b.user_id == p.brand_userid) > 0);
+                var balance = mastProd.factory_stock;
+                
+                var weightedPrice = balances[mastProd.mast_id].Item1;
+                <tr>
+                    <td>@(mastProd.Factory?.factory_code)</td>
+                    <td>@mastProd.factory_ref</td>
+                    <td>@(custProd?.cprod_code1)</td>
+                    <td>@(custProd?.cprod_name)</td>
+                    <td class="number">@balance</td>
+                    <td class="number">@weightedPrice.ToString("N2")</td>
+                    <td class="number">@((weightedPrice*balance).ToString("N2"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>

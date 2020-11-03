@@ -1,0 +1,563 @@
+﻿@model OrdersCombinedLoadingList
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html ng-app="loadApp">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Combined Loading List</title>
+    <link href="~/Content/bootstrap/bootstrap.css" rel="stylesheet" />
+
+    <style>
+        #dateIput:disabled{
+            background-color:whitesmoke;
+        }
+        .sub-title {
+            background-color: lightgray;
+        }
+
+        .body-form {
+            background-color: #F0F0F0;
+        }
+
+        .input-def {
+            height: 15px;
+        }
+        .span{
+            margin-top:20px
+        }
+        .vcenter {
+            display: inline-block;
+            vertical-align: middle;
+            margin-top:5px;
+            float: none;
+        }
+        .col-sm-1{
+            width:5.33%!important;
+        }
+        .custom-position{
+            position:absolute;
+            margin-top:-54px;
+        }
+        .panel {
+            background-color: #F0F0F0;
+            margin-bottom: 0px;
+        }
+        .panel-default .panel-heading {
+            background-color: #0A0A0A;
+            color: white;
+        }
+    </style>
+
+</head>
+<body style="width:742px;border:solid 1px black;font-size:12px" ng-controller="inspCtrl" >
+    <form role="form" >
+        <div class="panel panel-default" style="width:740px">
+
+            <div class="panel-heading">Create Combined Loading List
+            </div>
+            
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-sm-3"><span class="vcenter">Client Code</span></div>
+                    <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <select class="form-control"
+                                    style="height:25px;padding:1px 1px 1px 10px"
+                                    ng-model="selectedClient"
+                                    ng-options="client.user_id as client.customer_code for client in clients |orderBy:'customer_code'"
+                                    ng-change="clientChanged()">
+                                <option value="">
+                                    - please select client code -
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-1">
+                        @*{{clients.length}} &nbsp;{{selectedClient}}*@
+                    </div>
+                    <div class="col-sm-2">
+                        <span class="vcenter">QC Required</span>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-group form-group-sm">
+                            <select class="form-control"
+                                    style="height:25px;padding:1px 1px 1px 10px"
+                                    ng-model="inspectionV2.qc_required"
+                                    ng-options="op for op in qcRequired"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <span class="vcenter">Factory Code</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <select class="form-control"
+                                    style="height:25px;padding:1px 1px 1px 10px"
+                                    ng-model="selectedFactory"
+                                    ng-options="code as code.factory_code for code in factoriesCode | orderBy:'factory_code'">
+                                <option value="">- please select factory code -</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-1">
+                        
+                        <img src="~/Images/animated_spinner.gif" ng-show="loadFactoriesCode" width="22px" />
+                    </div>
+                    <div class="col-sm-2"><span class="vcenter">Container type </span></div>
+                    <div class="col-sm-2">
+                        <div class="form-group form-group-sm">
+                            <select class="form-control"
+                                    style="height:25px"
+                                    ng-model="container.type"
+                                    ng-options="cont.container_type_id as cont.container_type_desc for cont in ContainerTypes">
+                                <option value=""> - select - </option>
+                            </select>
+                        </div>
+
+                        
+                    </div>
+                    
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-3"><span class="vcenter">Inspection Type</span></div>
+                    <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <select class="form-control"
+                                    style="height:25px;padding:1px 1px 1px 10px;"
+                                    disabled>
+                                <option value="1" selected>Loading</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-sm-1"></div>
+
+
+                </div>
+
+                <div class="row ">
+                    <div class="col-sm-3">
+                        <br />
+                        <p>PO No.s<span>(ctrl click-select multiple)</span></p>
+
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group form-group-sm">
+                            <select class="form-control"
+                                    style="margin-top:15px;height:104px"
+                                    ng-model="selectedCustPo"
+                                    ng-options="code.custpo for code in headerPO_No|filter:{custpo : ''}|orderBy:custpo"
+                                    multiple></select>
+                            <div>Selected POs: <span>{{getSelectedPOs()}}</span></div>
+                        </div>
+
+                    </div>
+                    <div class="col-sm-1">
+                        <br />
+                        <br />
+                        <img src="~/Images/animated_spinner.gif" ng-show="loadPONo" style="width:22px" />
+
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="custom-position">
+                            <span style="float:left;margin-bottom:5px">Comments</span><br />
+                            <textarea ng-model="inspectionV2.comments"
+                                      cols="33" rows="9"></textarea>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-3"> <span><b>Start Date</b><br /> (YYYY-MM-DD) <b> / Days</b></span></div>
+                    <div class="col-sm-4">
+                        <table>
+                            <tr>
+                                <td>
+                                    <div class="form-group form-group-sm">
+                                        <p class="input-group"
+                                           uib-popover="Pick start date"
+                                           popover-popup-delay="1000"
+                                           popover-placement="top"
+                                           popover-trigger="'mouseenter'">
+                                            <input id="dateIput"
+                                                   class="form-control"
+                                                   ng-model="inspectionV2.startdate"
+                                                   type="text"
+                                                   @*style="height:25px;width:100px;"*@
+                                                   style="height:25px;padding-left:5px"
+                                                   name="name"
+                                                   placeholder="YYYY-MM-DD"
+                                                   @*ng-disabled="true"*@
+                                                   uib-datepicker-popup="{{format}}"
+                                                   datepicker-options="dateOptions"
+                                                   is-open="opened"
+                                                   date-disabled="disabled(date,mode)" close-text="Close" style="background-color:white" />
+                                            <span class="input-group-btn">
+                                                <button type="button"
+                                                        class="btn btn-default"
+                                                        style="height:25px; padding-top:2px"
+                                                        ng-click="open($event)">
+                                                    <i class="glyphicon glyphicon-calendar"></i>
+                                                </button>
+                                            </span>
+                                        </p>
+                                    </div>
+                                </td>
+                                <td style="padding-left:10px">
+                                    <div class="form-group form-group-sm">
+
+                                        <select class="form-control"
+                                                style="height:25px;width:70px; padding:1px"
+                                                ng-model="inspectionV2.duration"
+                                                ng-options="day for day in days">
+                                            <option value="">- days -</option>
+                                        </select>
+                                    </div>
+                                </td>
+
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="col-sm-5"></div>
+
+
+                </div>
+                <div class="row ">
+                    <div class="col-sm-12">
+                        <button class="btn btn-default" plupload="fileUpload.url"
+                                plupload-options="fileUpload.options"
+                                plupload-callbacks="fileUpload.callbacks">
+                            Upload drawing
+                        </button>
+                        <span ng-if="inspectionV2.drawingFile">{{inspectionV2.drawingFile}} &nbsp;&nbsp;<button class="glyphicon glyphicon-remove" ng-click="removeFile()"></button></span>
+                    </div>
+
+                </div>
+                <div class="row ">
+                    <div class="col-sm-3">
+                        
+                    </div>
+                    <div class="col-sm-4">
+                                                
+                    </div>
+                    <div class="col-sm-3">
+                        <img class="pull-right" src="~/Images/animated_spinner.gif" ng-show="loadForm" width="22px" />
+                    </div>
+                    <div class="col-sm-2" style="padding-right:24px">
+                        <input type="button" ng-click="submitForm()"
+                               style="width:100px"
+                               class="btn btn-primary btn-xs pull-right" name="name" value="Add"
+                               ng-disabled="loadForm "
+                               ng-show="inspectionV2.orderids.length > 0 && containerSelected >= 0" />
+                        <input style="width:100px;background-color:lightgray"
+                               value="Add"
+                               class="btn btn-default btn-xs  pull-right"
+                               ng-hide="inspectionV2.orderids.length > 0 && containerSelected >= 0"
+                               disabled />
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-3">
+                        
+                    </div>
+                    <div class="col-sm-4">
+                        
+                    </div>
+                    <div class="col-sm-3 ">
+
+                    </div>
+                    <div class="col-sm-2">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="alert alert-success text-center"
+                         style="padding:1px 5px 1px 5px; margin:0"
+                         ng-show="SUCCESS">
+                        @*<span>{{SUCCESS.statusText}}</span>*@
+                        <span>Loading list saved successfully</span>
+                    </div>
+                    <div class="alert alert-danger text-center"
+                         style="padding:1px 5px 1px 5px; margin:0"
+                         ng-show="EXCEPTION">
+                        <span>{{EXCEPTION.statusText}}</span>
+                    </div>
+                </div>
+
+            </div>
+      
+        </div>
+
+    </form>
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    <script src="~/Scripts/logToServer.js"></script>
+    @Scripts.Render("~/bundles/plupload2")
+    <script src="~/Scripts/angular-plupload/angular-plupload.js"></script>
+    <script>
+        var loadApp = angular.module('loadApp', ['ui.bootstrap','angular-plupload'])
+            .constant("baseUrl","/InspectionV2/")
+        .controller("inspCtrl",['$scope','$http','$timeout', 'dataService', function ($scope,$http,$timeout,dataService) {
+            $scope.ContainerTypes=@Html.Raw(WebUtilities.JsonSerialize(Model.Containers));
+            /*DATE PICKER*/
+            $scope.format='yyyy-MM-dd';
+            $scope.dateOptions={
+                formatYear:'yyyy',
+                startingDay:1
+            }
+            //$scope.inspectionV2.startdate='';
+            $scope.opned={}
+            $scope.open=function(){
+                $scope.opened=true;
+            }
+            /*END DATE PICKER*/
+            $scope.selectedClient=0;
+            //$scope.selectedFactory=0;
+            $scope.factoriesCode=[];
+            $scope.arrSelected_PO_No=[];
+            $scope.headerPO_No=[];
+
+            //loading image
+            $scope.loadFactoriesCode=false;
+            $scope.loadPONo=false;
+            $scope.loadForm=false
+
+
+            //trenutno zakomentirati
+            //initialization container types option-select
+            $scope.container={};
+            $scope.container._LCL=0;
+            $scope.container._2O=0;
+            $scope.container._4OGP=0;
+            $scope.container._4OHC=0;
+            $scope.$watch('[container._LCL,container._2O,container._4OGP,container._4OHC,container.type]',function(newValue,oldValue){
+                $scope.containerSelected=$scope.container._LCL+$scope.container._2O+ $scope.container._4OGP+$scope.container._4OHC+$scope.container.type;
+
+
+            })
+
+            //=$scope.container._LCL +  $scope.container._2O +$scope.container._4OGP +$scope.container._4OHC;
+
+            //initialization static option-select
+            $scope.qcRequired = [1, 2, 3, 4, 5];
+            $scope.days = [1, 2, 3, 4, 5];
+            $scope.containersNumbers=[0,1,2,3,4,5];
+
+            //initialization form data
+            $scope.inspectionV2={type: 1};
+            $scope.inspectionV2.qc_required=1;
+            $scope.selectedCustPo=[];
+            $scope.inspectionV2.orderids=[];
+            $scope.inspectionV2.code="";
+            $scope.$watch('selectedCustPo',function(newValue,oldValue){
+                //clear data first;
+                $scope.inspectionV2.orderids=[];
+                $scope.inspectionV2.custpo="";
+                for (var i = 0; i < $scope.selectedCustPo.length; i++) {
+                    $scope.inspectionV2.orderids.push($scope.selectedCustPo[i].orderid);
+                    $scope.inspectionV2.custpo +=  i>0? ", "+$scope.selectedCustPo[i].custpo:$scope.selectedCustPo[i].custpo ;
+                    console.log($scope.inspectionV2.orderids);
+
+                }
+            });
+
+            $scope.getSelectedPOs = function() {
+                return _.map($scope.selectedCustPo, 'custpo').join(', ');
+            };
+
+            $scope.getCount=function(){
+
+                var arr=[];
+                if ($scope.container._LCL > 0) {
+                    $scope.inspectionV2.Containers.push({id:3,num:$scope.container._LCL});
+                }
+                if($scope.container._2O > 0){
+                    $scope.inspectionV2.Containers.push({id:1,num:$scope.container._2O});
+                }
+                if($scope.container._4OGP > 0){
+                    $scope.inspectionV2.Containers.push({id:6,num:$scope.container._4OGP});
+                }
+                if($scope.container._4OHC > 0){
+                    $scope.inspectionV2.Containers.push({id:2,num:$scope.container._4OHC});
+                }
+                if($scope.container.type >-1)
+                    $scope.inspectionV2.Containers.push({id:$scope.container.type,num:1});
+
+            };
+
+
+            $scope.clients=@Html.Raw(WebUtilities.JsonSerialize(Model.Clients.Where(c=>c.customer_code!="")));
+            @*//$scope.factories=@Html.Raw(WebUtilities.JsonSerialize(Model.Factories.Where(c=>c.factory_code!="")));*@
+            $scope.clientChanged=function(){
+                $scope.SUCCESS=null;
+                $scope.loadFactoriesCode=true;
+
+                $scope.headerPO_No=[];
+                dataService.getCodeForFactories($scope.selectedClient)
+                .then(
+                function(response){
+                    $scope.factoriesCode=response.data;
+                    $scope.getPO_No();
+
+                },function(response){
+                    $scope.gres=response;
+
+                }).finally(
+                    function(){
+                        $scope.loadFactoriesCode=false;
+                    }
+                );
+            }
+            $scope.getPO_No=function(){
+
+                $scope.loadPO=true;
+                $scope.headerPO_No=[];
+                //if($scope.selectedFactory !== null){
+                dataService.getPO_No($scope.selectedClient)
+                .then(
+                function(response){
+                    $scope.response=response;
+                    $scope.headerPO_No=response.data;
+
+                },function(response){
+                    $scope.response=response
+                    //alert(response);
+                }).finally(
+                    function(){
+                        $scope.loadPO=false;
+                    }
+                );
+                //}
+
+            }
+            $scope.clearForm=function(){
+                $scope.inspectionV2={type: 1,qc_required: 1 };
+                $scope.selectedClient=null;
+                $scope.selectedFactory=null;
+                $scope.factoriesCode=[];
+                $scope.arrSelected_PO_No=[];
+                $scope.headerPO_No=null;
+                $scope.container._LCL=0;
+                $scope.container._2O=0;
+                $scope.container._4OGP=0;
+                $scope.container._4OHC=0;
+                $scope.container.type=-1;
+            }
+
+
+            $scope.uploadedImages = [];
+            $scope.fileUpload = {
+                url: '@Url.Action("Images")',
+                options: {
+                    multi_selection: false,
+                    max_file_size: '32mb'
+                },
+                callbacks: {
+                    filesAdded: function (uploader, files) {
+                        $scope.uploadInProgress = true;
+                        files.forEach(function (elem) {
+                            //initial progress value
+                            var file = {id: elem.id, name: elem.name, percent:  0,size: elem.size};
+                            $scope.uploadedImages.push(file);
+                        });
+                        $timeout(function () {
+                            uploader.start();
+                        }, 1);
+                    },
+                    uploadProgress: function (uploader, file) {
+
+                        var f = _.find($scope.uploadedImages, { id: file.id });
+                        if (f != null)
+                            f.percent = file.percent;
+                    },
+                    beforeUpload: function (uploader, file) {
+                        uploader.settings.multipart_params = { id: file.id };
+                    },
+                    fileUploaded: function (uploader, file, response) {
+
+                        var f = _.find($scope.uploadedImages, { id: file.id });
+                        if (f != null) {
+                            f.percent = 100;
+                        }
+                        //im.id = 0;
+                        $scope.inspectionV2.file_id = file.id;
+                        $scope.inspectionV2.drawingFile = file.name;
+                        $scope.uploadedImages = [];
+                        //im.id = "";
+
+                    },
+                    error: function (uploader, error) {
+                        $scope.loading = false;
+                        alert(error.message);
+                    }
+                }
+            };
+
+            $scope.removeFile = function() {
+                $scope.inspectionV2.drawingFile = '';
+            };
+
+            $scope.submitForm=function(){
+                $scope.loadForm=true;
+                $scope.inspectionV2.client_id=$scope.selectedClient;
+                // $scope.inspectionV2.factory_id=$scope.selectedFactory.loading_factory;
+                $scope.inspectionV2.factory_id=$scope.selectedFactory.user_id;
+                $scope.inspectionV2.code="";
+                $scope.inspectionV2.Containers=[];
+                $scope.getCount();
+
+                dataService.createOrderLoading($scope.inspectionV2)
+                .then(
+                    function(results){
+
+                        $scope.clearForm();
+
+                        $scope.loadForm=false;
+                        $scope.SUCCESS=results;
+                        $scope.EXCEPTION=null;
+                    },function(results){
+                        $scope.loadForm=false;
+                        $scope.EXCEPTION=results;
+                        $scope.SUCCESS=null;
+                    }
+                )
+
+            }
+
+        }])
+        .factory('dataService',['$http','baseUrl', function($http,baseUrl){
+
+            var getCodeForFactories =function(data){
+                @*//return $http.get('@Html.Action("GetFactoriesCode")',data);*@
+                return $http.get(baseUrl+"GetFactoriesForClient",{params:{user_id:data}});
+            }
+            var getPO_No = function(data){
+                return $http.get(baseUrl+"GetPoList",{params:{user_id:data}});
+            }
+            var createOrderLoading=function(data,containers){
+                return $http.post(baseUrl+"CreateInspection/",data);
+            }
+            return{
+                getCodeForFactories:getCodeForFactories,
+                getPO_No :getPO_No,
+                createOrderLoading:createOrderLoading
+            }
+        }]);
+
+    </script>
+</body>
+</html>

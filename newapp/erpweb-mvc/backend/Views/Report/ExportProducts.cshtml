@@ -1,0 +1,47 @@
+﻿@model ExportProductsModel
+
+@{
+    Layout = null;
+}
+
+
+<html>
+<head>
+    <title>Export products</title>
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+</head>
+<body>
+
+    <div class="container-fluid">
+        <img src="@(Path.Combine(Settings.Default.LogosFolder,Model.Client.clientlogo))" />
+        <h3>Export products</h3>
+
+
+        @using (Html.BeginForm())
+        {
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="factory_id">Factory:</label>
+                        @Html.DropDownListFor(m => m.factory_id, new SelectList(Model.Factories.OrderBy(f => f.factory_code), "user_id", "factory_code"), new {@class = "form-control"})
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-1">
+                    <input type="submit" class="form-control" value="Export"/>
+                </div>
+            </div>
+            @Html.HiddenFor(m=>m.clientId)
+        }
+    </div>
+
+@Scripts.Render("~/bundles/bootstrap")
+</body>
+</html>
+
+
+
+
+
+

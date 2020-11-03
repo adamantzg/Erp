@@ -1,0 +1,206 @@
+﻿<div loading class="loading-dialog"></div>
+<h2 ng-if="types.showTest"> {{ctrlName}} - dealerListOnlyCallsView</h2>
+<div class="row">
+    <!-- LEFT SIDE -->
+
+    <!-- RIGHT SIDE-->
+    <div class="col-sm-12 col-xs-12">
+        <section class="panel">
+            <h3 style="text-align:center">CALL LOGS</h3>
+            <!--<header class="panel-heading">
+                <span ng-if="false">RECENT CALL LOG</span>
+                <h3>CALL LOGS</h3>
+                <button class="btn btn-default create_new pull-right"
+                        ng-click="open(null,true)" style="width:150px">
+                    Add Miscellaneous
+                </button>
+
+            </header>-->
+
+            <div class="panel-body">
+
+
+
+                <div class="col-sm-1 filter-title" style="width:65px">
+                    <label class="pull-right">From</label>
+                </div>
+                <div class="col-sm-3">
+                    <!-- CALENDAR -->
+                    <p class="input-group">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-sm btn-default" ng-click="open1()"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+
+                        <input type="text" class="form-control input-sm"
+                               uib-datepicker-popup="yyyy-MM-dd hh-mm"
+                               ng-model="dtFrom"
+                               is-open="popup1.opened"
+                               datepicker-options="dateOptions"
+                               ng-required="true"
+                               close-text="Close"
+                               alt-input-formats="altInputFormats"
+                               ng-change="PreselectTo()" />
+                    </p>
+                    <!-- END CALENDAR  -->
+                </div>
+
+                <div class="col-sm-1 filter-title" style="width:47px">
+                    <label class="pull-right">To</label>
+                </div>
+                <!-- CALENDAR -->
+                <div class="col-sm-3">
+                    <p class="input-group">
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-sm btn-default" ng-click="open2()"><i class="glyphicon glyphicon-calendar"></i></button>
+                        </span>
+                        <input type="text" class="form-control input-sm"
+                               uib-datepicker-popup="yyyy-MM-dd hh-mm"
+                               ng-model="dtTo"
+                               is-open="popup2.opened"
+                               datepicker-options="dateOptions"
+                               ng-required="true" close-text="Close"
+                               alt-input-formats="altInputFormats"
+                               id="date2" />
+
+                    </p>
+                </div>
+                <div class="col-sm-1">
+                    <button class="btn btn-sm btn-default" ng-click="getRange(dtFrom,dtTo)">Filter</button>
+                </div>
+                <!-- END CALENDAR -->
+
+
+                <div class="col-sm-2">
+                    <div class="pull-right">
+                        <a href="/dealerusa/Export" class="btn btn-default" style="margin-right:15px;" target="_blank" ><i class="fa fa-file-excel-o" ></i> Call Logs Export</a>
+                    </div>
+                </div>
+                
+                <!-- SHOW MISCELLANEOUS -->
+                <div class="col-sm-1">
+                    <div class="pull-right">
+                        <button class="btn btn-default"
+                                ui-sref="detail({id:null})">
+                            Show Miscellaneous 
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ADD MISCELLANEOUS BUTTON -->
+
+                <div class="col-sm-1" style="padding:0">
+                    <button class="btn btn-default create_new pull-right"
+                            ng-click="open(null,true)" style="width:150px">
+                        Add Miscellaneous
+                    </button>
+                </div>
+
+                <!-- LAST 10 CALL LOGS -->
+                <div class="col-lg-12 m-t-15" ng-if="true">
+                    <!--<table class="table table-striped" style="margin-top:20px">
+            <tr style="border-bottom:1px solid #ddd">
+                <th class="col-lg-4">Dealer</th>
+                <th class="col-lg-3">Date / Who took the call</th>
+                <th class="col-lg-5">Notes</th>
+            </tr>
+            -->
+                    <!-- <tr ng-repeat="log in logs |orderBy:'-date'">
+                    <td>
+                        <a ui-sref="detail({id:log.dealer})">
+                            {{log.usDealer.name}}
+                            {{log.usDealer === null || log.usDealer ==='' ? "Miscellaneous" : ""}}
+                            {{log.hasOwnProperty("usDealer")?'': 'Miscellaneous'}}
+                        </a>
+                        <button class="btn btn-default btn-xs pull-right" ng-click="openNewClaim(null,log.usDealer.customer)">
+
+                            <i class="fa fa-plus-square"></i>
+                            Claim
+                        </button>
+                    </td>
+                    <td>
+                        <span style="opacity:.7;float:left; margin-top:2px; margin-right:5px" class="glyphicon ion-calendar "></span>
+                        {{log.usaDate|date }}
+                        <br />
+                        <span style="opacity:.7;float:left; margin-top:2px; margin-right:6px" class="glyphicon ion-person"></span>
+                        {{log.user.userwelcome}}
+                        {{log.userwelcome}}
+                    </td>
+                    <td>
+                        {{log.note}}
+                    </td>
+                </tr>
+            </table> -->
+                </div>
+                <!-- END LAST 10 CALL LOGS -->
+                <!-- CALL LOGS TABLE WITH ALL CALL LOGS -->
+                <table datatable="ng"
+                       class="table table-striped table-condensed m-t-15"
+                       dt-options="tableOptionsCallLogs" style="margin-top:1px">
+                    <thead>
+                        <tr>
+                            <th style="pointer-events:none;"> <i ></i> Dealer</th>
+                            <th style="pointer-events:none;width:105px">Date</th>
+                            <th style="pointer-events:none;width:75px">From</th>
+                            <th style="pointer-events:none;width:75px">To</th>
+                            <th style="pointer-events:none;">Notes</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr ng-repeat="log in logs | orderBy:'-sortDate'">
+
+                            <td style="min-width:275px">
+                                <span tooltip-placement="top"
+                                      ng-if="log.date_edit !== null"
+                                      uib-tooltip="Edited"
+                                      
+                                      style="left:-22px; position:absolute; font-size:12px; margin-top:2px ;color:gray">
+                                    <i class="glyphicon glyphicon-pencil"></i>
+                                </span>
+                                <span tooltip-placement="top"
+                                      uib-tooltip="{{log.status == types.status.open?'status open': log.status == types.status.closed ? 'status closed': 'status undefined'}}"
+                                      ng-class="{'status-open-flag': log.status === types.status.open,'status-closed-flag':log.status === types.status.closed,'status-undefined-flag': log.status == undefined }"
+                                      style="left:5px;">
+                                    <i class="ion ion-flag"></i>
+                                </span>
+                                <a ui-sref="detailAlpha({id:log.dealer})">
+                                    &nbsp;
+                                    {{log.usDealer.name}}
+                                    {{log.usDealer.name === null || log.usDealer.name ==='' ? "Miscellaneous" : ""}}
+                                    {{log.hasOwnProperty("usDealer") ? '' : 'Miscellaneous'}}
+                                    
+                                </a>
+                                <button class="btn btn-default btn-xs pull-right" ng-click="openNewClaim(null,log.usDealer.customer)">
+
+                                    <i class="fa fa-plus-square"></i>
+                                    Claim
+                                </button>
+                            </td>
+                            <td style="width:100px">
+                                <span style="opacity:.7;float:left; margin-top:2px; margin-right:5px" class="glyphicon ion-calendar "></span>
+                                {{log.usaDate|date }}
+                            </td>
+                            <td>
+                                <span style="opacity:.7;float:left; margin-top:2px; margin-right:6px" class="glyphicon ion-person"></span>
+                                {{log.from}}
+                            </td>
+                            <td>
+                                <span style="opacity:.7;float:left; margin-top:2px; margin-right:6px" class="glyphicon ion-person"></span>
+                                {{log.to}}
+
+                            </td>
+                            <td>
+                                {{log.note}}
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+
+
+                <!-- END CALL LOGS TABLE WITH ALL CALL LOGS -->
+            </div>
+           
+        </section>
+    </div>
+</div>

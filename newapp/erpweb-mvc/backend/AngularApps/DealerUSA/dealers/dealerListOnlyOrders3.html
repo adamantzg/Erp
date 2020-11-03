@@ -1,0 +1,226 @@
+﻿<div loading class="loading-dialog"></div>
+<div class="row">
+   
+    <!--*** ORDER DETAILS ***-->
+    <div class="col-xs-12 col-sm-12" style="text-align:center;margin-bottom:10px">
+        <span class="h4">
+            ORDER DETAILS
+        </span>
+    </div>
+    <div class="col-sm-12 col-xs-12" >
+        <section class="panel" style="min-height:467px">
+
+            <!-- this filter is hidden by request. there is no way we can filter now by brand, before data was filtered by warehouse
+            <div class="row">
+                <div class="col-sm-1" >
+                    <span>Brand</span>
+                </div>
+
+                <div class="col-sm-11 col-md-6 col-lg-5" >
+                    
+                        <div class="btn-group" >
+                            <button class="btn create_new btn-default" style="width:130px" ng-change="getFilter('all')" uib-btn-radio="'all'" ng-model="filter1">
+                                <i ng-show="filter1=='all'" class="glyphicon glyphicon-ok" style="margin-right:10px"></i>All
+                            </button>
+                            <button class="btn create_new btn-default" style="width:130px" ng-change="getFilter('ammara')" uib-btn-radio="'ammara'" ng-model="filter1">
+                                <i ng-show="filter1=='ammara'" class="glyphicon glyphicon-ok" style="margin-right:10px"></i>Ammara
+                            </button>
+                            <button class="btn create_new btn-default" style="width:130px" ng-change="getFilter('cwLondon')" uib-btn-radio="'cwLondon'" ng-model="filter1">
+                                <i ng-show="filter1=='cwLondon'" class="glyphicon glyphicon-ok" style="margin-right:10px"></i>CW London
+                            </button>
+                        </div>
+                </div>
+                
+                <div class="col-sm-1 col-md-3" >&nbsp;</div>
+            </div>
+            -->
+            <header >
+                <div class="row">
+                    <div class="col-sm-1 col-lg-1">
+                        Status
+                    </div>
+                    <div class="col-sm-7 col-md-6 col-lg-5">
+                        <div class="btn-group">
+                            <button class="btn create_new btn-default" ng-model="filter2" ng-change="getFilter2('all');" uib-btn-radio="'all'" style="width:130px" >
+                                <i ng-show="filter2=='all'" class="glyphicon glyphicon-ok" style="margin-right:10px"></i>All
+                            </button>
+                            <button class="btn create_new btn-default" ng-model="filter2" ng-change="getFilter2('oustanding');" uib-btn-radio="'oustanding'" style="width:130px" >
+                                <i ng-show="filter2==='oustanding'" class="glyphicon glyphicon-ok" style="margin-right:10px"></i>Outstanding
+                            </button>                                           
+                            <button class="btn create_new btn-default" ng-model="filter2" ng-change="getFilter2('delivered');" uib-btn-radio="'delivered'" style="width:130px">
+                                <i ng-show="filter2==='delivered'" class="glyphicon glyphicon-ok" style="margin-right:10px"></i>Delivered
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <span class="form-group col-sm-4 col-lg-6" style="margin-bottom:0px; ">
+                        <span class="input-group">
+                            <!-- ng-change="showChanges()" -->
+                            <input  
+                                    ng-model="search.text"  class="form-control input-sm pull-right " style="max-width:400px" placeholder="Search by Order Nr "/> <!--or Dealer Name-->
+                            <span class="input-group-addon btn btn-default"  ng-class="{create_new:!isSearched}" ng-click="showChanges(search.text); filter2=''; filter1='';" style="cursor:pointer"><i class="glyphicon glyphicon-search"></i></span>
+                        </span>
+                    </span>
+
+                </div>
+
+
+            </header>
+            <content class="panel-body">
+                <section class="panel general" style="min-height:417px!important;margin-top:-17px">
+                    <table class="table table-condensed table-hover">
+                        <thead>
+                            <tr>
+                                <!--1--><th style="width:20px"></th>
+                                <!--2--><th>Dealer Name</th>
+                                <!--3--><th>Date</th>
+                                <!--4--><th>Order Nr</th>
+                                <!--5--><th>Customer Order Nr</th>
+                                <!--6--><th>Items</th>
+                                <!--7--><th>Value</th>
+                                <!--8--><th>Pack. List</th>
+                                <!--9--><th>Shipping Number</th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody ng-repeat="order in orders track by $index" >
+                            <tr 
+                                                             
+                                ng-class="{expanded:expand}">
+                               <!--1--> <td style="border-top:none;cursor:pointer" 
+                                            data-toggle="collapse"
+                                            data-target="#accordion{{$index}}"
+                                            ng-click="expand = !expand" 
+                                            >
+                                           <a>
+                                               <i ng-hide="!!expand" class="icon ion-plus-round"></i>
+                                               <i ng-show="expand" class="icon ion-minus-round"></i>
+                                           </a>
+                                           </td>
+                               <!--2--> <td>{{order.dealer_name}}</td>
+                                <!--<td><a>{{order[0].order_no}}</a></td>-->
+                                <!--{{dealerName(order[0].customer)}}-->
+                               <!--3--> <td>{{order.date_entered|date}}</td>
+                               <!--4--> <td style="cursor:pointer" 
+                                            ng-click="expand = !expand"
+                                            data-toggle="collapse"
+                                            data-target="#accordion{{$index}}"> <a>{{order.order_no}}</a></td>
+                               <!--5--> <td>{{order.customer_order_no}}</td>
+                               <!--6--> <td>
+                                            {{order.order_qty}}
+                                        <!--{{orderItemsLines(order)}}-->
+                                        </td>
+                               <!--7--> <td>
+                                            {{order.value|currency}}
+                                        <!--{{orderValueLines(order)|currency}}-->
+                                </td>
+                                        <td >
+                                            
+                                            <a ng-if="order.pick_list !== null" ng-href="ussales/packinglist/?orderno={{order.order_no}}" target="_blank">
+                                                <i style="font-size:17px;margin-left:10px;" class="glyphicon glyphicon-list-alt"></i>
+                                            </a>
+                                        </td>
+                               <!--8--> <td>
+                                            <!--<span  ng-if="order[0].header.shippings != null && order[0].header.shippings.length > 0" class="fa fa-truck"></span>-->
+                                            <span ng-repeat="shipp in order.shippings" >{{shipp.refnumber}}&nbsp;
+                                            <span ng-click="deleteRef(shipp,order)"
+                                                 ng-if="!isUndefined(shipp.id)"
+                                                  class="btn btn-xs btn-default" id="deleteRef" style="font-size:8px; margin-top:-3px">
+                                                <i class="glyphicon glyphicon-remove" style="font-size:8px"></i></span> <br />
+                                            </span>
+                                            
+                                        </td>
+                                        <td style="width:230px;">
+                                            <input ng-model="shippings[$index].refnumber"
+                                                   ng-class="{'input-novalid st-red' : novalidInput[$index]}"
+                                                    style="width:75%" class="form-control input-sm pull-left" name="name" value="" placeholder="Enter shipping number"/>
+                                            <!-- CONFIRM NEW -->
+
+                                            <div ng-click="createShippings($index,order)"                                                
+                                                 class="btn btn-default btn-xs pull-right" 
+                                                 style="margin:5px 0 0 5px">
+                                                <i class="glyphicon glyphicon-ok" ng-if="!loadingNewRF"></i>
+                                                <i class="fa fa-refresh fa-spin" style="color:#fa8564" ng-if="loadingNewRF"></i>
+                                            </div>
+                                            <!-- CLEAR INPUT BOX -->
+                                            <div ng-click="cancelShippings($index,order)"
+                                                 class="btn btn-default btn-xs pull-right" 
+                                                 style="margin-top:5px;"> <i class="glyphicon glyphicon-ban-circle"></i></div>
+                                        </td>
+                                
+                            </tr>
+                            <tr>
+                                <td colspan="10">
+                                    <div id="accordion{{$index}}" class="collapse">
+                                        <table class="table table-striped">
+                                            <tr>
+                                                <th>Product code</th>
+                                                <th>Description</th>
+                                                <th>Order quantity</th>
+                                                <th>Value</th>
+                                                <th style="color:gray">Order_qty</th>
+                                                <th style="color:gray">Des_qty</th>
+                                                <td style="color:gray">Brand</td>
+                                            </tr>
+                                            <tr ng-repeat="item in order.lines">
+                                                <td><i class="fa fa-file-archive-o" ng-click="openNewClaim(null,customer,item.cprod_id)" style="cursor:pointer" title="Create claim"></i>&nbsp; {{item.cprod_code1}}</td>
+                                                <td>{{item.cprod_name}}</td>
+                                                <td>{{item.order_qty2}}</td>
+                                                <td>{{item.value}}</td>
+                                                <td style="color:gray!important" >{{item.order_qty}}</td>
+                                                <td style="color:gray!important" >{{item.despatched_qty}}</td>
+                                                <td style="color:gray!important">{{item.brand}}</td>
+                                            </tr>
+                                            <!--<tr ng-if="order[0].header.shippings.length > 0">
+                                                <td style="font-weight:bold; background-color: #dff0d8 !important;">REF NUMBERS: </td>
+                                                <td style="background-color: #dff0d8 !important;" colspan="4">
+                                                    <div>
+                                                        {{orderShippingRefNumbers(order[0])}}
+                                                    </div>
+                                                </td>
+                                            </tr>-->
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </content>
+            <footer class="panel-footer">
+                <ul class="pagination pull-right">
+                    <li ng-class="{'disabled ended':pager.currentPage === 1}"
+                        ng-if="pager.totalPages>10">
+                        <a ng-click="setPage(1)" href="">First</a>
+                    </li>
+                    <li ng-class="{'disabled ended':pager.currentPage === 1}">
+                        <a ng-click="setPage(pager.currentPage - 1)" href="">
+                            <i class="ion ion-ios7-arrow-back"></i>
+                        </a>
+                        <!-- Previous -->
+                    </li>
+
+                    <li ng-repeat="page in pager.pages" ng-class="{'active':pager.currentPage===page }">
+                        <a ng-click="setPage(page)" href="">{{page}}</a>
+                    </li>
+
+                    <li>
+                        <a ng-click="setPage(pager.currentPage + 1)">
+                            <i class="ion ion-ios7-arrow-forward"></i>
+                        </a>
+                    </li>
+                    <!--<li ng-class="{'disabled ended':pager.currentPage === pager.totalPages}">
+                        <a ng-click="setPage(pager.currentPage + 1)" href="">
+                            <i class="ion ion-ios7-arrow-forward"></i>
+                        </a>
+                        
+                    </li>-->
+                    <li ng-class="{'disabled ended':pager.currentPage === pager.totalPages}" ng-if="pager.totalPages>10">
+                        <a ng-click="setPage(pager.totalPages)" href="">Last <small>({{pager.totalPages}})</small></a>
+                    </li>
+                </ul>
+            </footer>
+        </section>
+    </div> <!--*** END ORDER DETAILS ***-->
+
+</div>

@@ -1,0 +1,65 @@
+﻿@model DisplayOrdersScheduleModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Display orders schedule</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+        }
+        table {
+            border-collapse: collapse;            
+        }
+        table thead tr {
+            font-weight: bold;
+        }
+        td, th {
+            border: 1px solid black;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h3>Display orders schedule</h3>
+    <div> 
+        <table>
+            <thead>
+                <tr>
+                    <th>Week starting</th>
+                    <th>PO</th>
+                    <th>CUSTOMER</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var g in Model.DisplayOrders.Where(o=>o.DateAvailable != null).GroupBy(o=>o.DateAvailable).OrderBy(g=>g.Key)) {
+                    var orders = g.ToList();
+                    <tr>
+                        <td rowspan="@orders.Count">@g.Key.ToString("d")</td>
+                        <td>@orders[0].OrderNo</td>                        
+                        <td>@(orders[0].Customer?.name)</td>
+                    </tr>
+                    foreach (var o in orders.Skip(1)) {
+                        <tr>
+                            <td>@o.OrderNo</td>
+                            <td>@(o.Customer?.name)</td>
+                        </tr>
+                    }
+
+                }
+                @*<tr>
+                    <td>Can't be shipped due to stock missing</td>
+                    <td>@string.Join(", ",Model.DisplayOrders.Where(o=>o.DateAvailable == null).Select(o=>o.OrderNo))</td>
+                </tr>*@
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

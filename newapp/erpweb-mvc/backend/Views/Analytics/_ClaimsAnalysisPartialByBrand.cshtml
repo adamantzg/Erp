@@ -1,0 +1,123 @@
+﻿ @model AnalyticsClaimsModel
+
+@functions
+{
+
+    public string BrandName(int? id, List<Brand> brands)
+    {
+        var brand = brands.FirstOrDefault(b => b.user_id == id);
+        return brand != null ? brand.brandname : "Universal";
+    }
+
+}
+
+<table class="clienttable">
+    <tr class="clienttable_header">
+        <td style="width: 300px; vertical-align: middle" rowspan="2" >Brand</td>
+        <td style="width: 90px; text-align: center" colspan="2">product claims</td>
+        <td style="width: 90px; text-align: center" colspan="2">refit claims</td>
+        <td style="width: 90px; text-align: center" colspan="2">TOTAL</td>
+    </tr>
+    <tr class="clienttable_header">
+        <td style="width: 60px; text-align: right">GBP</td>
+        <td style="width: 60px; text-align: right">% of sales</td>
+        <td style="width: 60px; text-align: right">GBP</td>
+        <td style="width: 60px; text-align: right" >% of sales</td>
+        <td style="width: 60px; text-align: right">GBP</td>
+        <td style="width: 60px; text-align: right" >% of sales</td>
+    </tr>
+    @{
+        var ebBrands = Model.Brands.Select(b => b.user_id).ToArray();
+        
+        var brands = Model.ReturnsSummary.GroupBy(r => ebBrands.Contains(r.id) ? r.id : 1000)
+            .OrderBy(g => ebBrands.Contains(g.Key) ? g.Key : 1000)
+            .Select(g => new NullableItem { Id = g.Key, Name = BrandName(g.Key,Model.Brands) }).ToList();
+    }                   
+    @for (int i = 0; i < brands.Count; i++)
+    {
+        var brand = brands[i];
+        var isEbBrand = ebBrands.Contains(brand.Id);
+        var brand_product_claim_total = Model.ReturnsSummary.Where(r => r.claim_type != Returns.ClaimType_Refit && (isEbBrand ? r.id == brand.Id : !ebBrands.Contains(r.id))).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var brand_refit_total = Model.ReturnsSummary.Where(r => r.claim_type == Returns.ClaimType_Refit && (isEbBrand ? r.id == brand.Id : !ebBrands.Contains(r.id))).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var brand_sales_total = Model.Sales.Where(s => (isEbBrand ? s.id == brand.Id : !ebBrands.Contains(s.id))).Sum(s => s.total);
+        if (brand_product_claim_total + brand_refit_total > 0)
+        {
+            <tr style="background-color: @(i%3 == 1 ? "#FFFFFF" : i%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+                @*<td>
+                    <a href="@Url.Action("BrandClaimsAnalysisDetails", new {Settings.Default.StatsKey,from = Model.From,brand_user_id = brand.Id, countryFilter = Model.CountryFilter})">@brand.Name @(brand.Id == 80 ? "*" : "")</a> 
+                </td>*@
+                <td>
+                    @brand.Name @(brand.Id == 80 ? "*" : "")
+                </td>
+                <td style="text-align: right">@brand_product_claim_total.ToString("N0")</td>
+                <td style="text-align: right">@((brand_sales_total > 0 ? brand_product_claim_total / brand_sales_total : 0).ToString("P1"))</td>
+                <td style="text-align: right">@brand_refit_total.ToString("N0")</td>
+                <td style="text-align: right">@((brand_sales_total > 0 ? brand_refit_total/brand_sales_total : 0).ToString("P1"))</td>
+                <td style="text-align: right">@((brand_product_claim_total + brand_refit_total).ToString("N0"))</td>
+                <td style="text-align: right">@((brand_sales_total > 0 ? (brand_product_claim_total + brand_refit_total) / brand_sales_total : 0).ToString("P1"))</td>
+            </tr>
+        }
+    }
+    
+                    
+    @{
+        var product_claim_total = Model.ReturnsSummary.Where(r => r.claim_type != Returns.ClaimType_Refit).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var refit_total = Model.ReturnsSummary.Where(r => r.claim_type == Returns.ClaimType_Refit).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var sales_total = Model.Sales.Sum(s => s.total);
+
+        var product_claim_total_py = Model.PYReturnsSummary.Where(r => r.claim_type != Returns.ClaimType_Refit).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var refit_total_py = Model.PYReturnsSummary.Where(r =>  r.claim_type == Returns.ClaimType_Refit).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var sales_total_py = Model.PYSales.IfNotNull(y=>y.Sum(s => s.total));
+    }
+    <tr class="clienttable_header">
+        <td>TOTAL (LAST @Model.Months MONTHS)</td>
+        <td style="text-align: right">@product_claim_total.ToString("N0")</td>
+        <td style="text-align: right" class="percent">@((sales_total > 0 ? product_claim_total/sales_total : 0).ToString("P1"))</td>
+        <td style="text-align: right">@refit_total.ToString("N0")</td>
+        <td style="text-align: right" class="percent">@((sales_total > 0 ? refit_total/sales_total : 0).ToString("P1"))</td>
+        <td style="text-align: right">@((product_claim_total + refit_total).ToString("N0"))</td>
+        <td style="text-align: right" class="percent">@((sales_total > 0 ? (product_claim_total + refit_total)/sales_total : 0).ToString("P1"))</td>
+    </tr>
+    @if (Model.ExpandPreviousForClaimsAnalysis)
+    {
+        for (int i = 0; i < brands.Count; i++)
+        {
+            var brand = brands[i];
+            var isEbBrand = ebBrands.Contains(brand.Id);
+            var brand_product_claim_total = Model.PYReturnsSummary.Where(r => r.claim_type != Returns.ClaimType_Refit && (isEbBrand ? r.id == brand.Id : !ebBrands.Contains(r.id))).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+            var brand_refit_total = Model.PYReturnsSummary.Where(r => r.claim_type == Returns.ClaimType_Refit && (isEbBrand ? r.id == brand.Id : !ebBrands.Contains(r.id))).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+            var brand_sales_total = Model.PYSales.Where(s => (isEbBrand ? s.id == brand.Id : !ebBrands.Contains(s.id))).Sum(s => s.total);
+            if (brand_product_claim_total + brand_refit_total > 0)
+            {
+                <tr style="background-color: @(i%3 == 1 ? "#FFFFFF" : i%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+                    <td>
+                        @brand.Name @(brand.Id == 80 ? "*" : "")
+                    </td>
+                    <td style="text-align: right">@brand_product_claim_total.ToString("N0")</td>
+                    <td style="text-align: right">@((brand_sales_total > 0 ? brand_product_claim_total / brand_sales_total : 0).ToString("P1"))</td>
+                    <td style="text-align: right">@brand_refit_total.ToString("N0")</td>
+                    <td style="text-align: right">@((brand_sales_total > 0 ? brand_refit_total / brand_sales_total : 0).ToString("P1"))</td>
+                    <td style="text-align: right">@((brand_product_claim_total + brand_refit_total).ToString("N0"))</td>
+                    <td style="text-align: right">@((brand_sales_total > 0 ? (brand_product_claim_total + brand_refit_total) / brand_sales_total : 0).ToString("P1"))</td>
+                </tr>
+            }
+        }
+    }
+    <tr class="clienttable_footer">
+        <td>TOTAL (PREVIOUS @Model.Months MONTHS)</td>
+        <td style="text-align: right">@product_claim_total_py.ToString("N0")</td>
+        <td style="text-align: right" class="percent">@((sales_total_py > 0 ? product_claim_total_py/sales_total_py : 0).ToString("P1"))</td>
+        <td style="text-align: right">@refit_total_py.ToString("N0")</td>
+        <td style="text-align: right" class="percent">@((sales_total_py > 0 ? refit_total_py/sales_total_py: 0).ToString("P1"))</td>
+        <td style="text-align: right">@((product_claim_total_py + refit_total_py).ToString("N0"))</td>
+        <td style="text-align: right" class="percent">@((sales_total_py > 0 ? (product_claim_total_py + refit_total_py)/sales_total_py : 0).ToString("P1"))</td>
+    </tr>
+</table>
+
+
+
+
+
+
+<br />
+

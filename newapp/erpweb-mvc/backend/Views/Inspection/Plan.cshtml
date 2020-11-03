@@ -1,0 +1,188 @@
+﻿@using System.Globalization
+@model InspectionsPlanListModel
+
+
+<h4>Inspection planning</h4>
+@{
+    var currUser = ViewBag.CurrentUser as User;
+    var isInspector = currUser?.admin_type == 5;
+    var isAdmin = currUser?.inspection_plan_admin == 1;
+}
+@using (Html.BeginForm("Plan", "Inspection", FormMethod.Get, new { id = "mainForm" }))
+{
+    
+    if (!Model.ForExport)
+    {
+        if (!isInspector)
+        {
+            foreach (var loc in Model.Locations)
+            {
+                <span>&nbsp;</span>
+                @Html.RadioButtonFor(m => m.location_id, loc.id)<span>&nbsp;</span>
+                @loc.Name
+            }
+        }
+        else {
+            if (currUser?.Locations?.Count > 0) {
+                foreach (var loc in currUser.Locations) {
+                    <span>&nbsp;</span>
+                    @Html.RadioButtonFor(m => m.location_id, loc.id)<span>&nbsp;</span>
+                    @loc.Name
+                }
+            }
+            else {
+                var location = Model.Locations.FirstOrDefault(l => l.id == currUser?.consolidated_port);
+                if (location != null) {
+                    @location.Name
+                }
+            }
+
+        }
+    }
+    <br/>
+    if (!Model.ForPdf && !Model.ForExport)
+    {
+         if (!isInspector)
+         {
+              <input type="button" id="btnList" value="inspection list" class="btn btn-info" onclick="window.open('@Url.Action("List", new {Model.DateFrom, Model.DateTo, Model.location_id})') "/>
+         }
+        <input type="button" id="btnPdf" value="open as pdf" class="btn btn-info" onclick="window.open('@Url.Action("Pdf", new { Model.DateFrom, Model.DateTo, Model.location_id })') "/>
+         if (!isInspector)
+         {
+             <input type="button" id="btnExport" value="export" class="btn btn-info" onclick=" window.open('@Url.Action("Export", new {Model.DateFrom, Model.DateTo, Model.location_id}) ') "/>
+         }
+    }
+    @Html.Hidden("DateFrom", Model.DateFrom.ToString(CultureInfo.InvariantCulture))
+    @Html.Hidden("DateTo", Model.DateTo.ToString(CultureInfo.InvariantCulture))
+    <div id="edit" style="display: none">
+        
+
+    </div>
+    @Html.Partial("PlanTable", Model)
+}
+
+@if (Model.ForPdf)
+{
+    @Html.Partial("ListPartial", Model)
+}
+else if (!Model.ForExport && isInspector)
+{
+    Model.Inspections = Model.Inspections.Where(ins =>
+                                                (
+                                                    (ins.Controllers.Count == 0 &&
+                                                     (ins.insp_qc1 == currUser.userid || ins.insp_qc2 == currUser.userid
+                                                      || ins.insp_qc3 == currUser.userid || ins.insp_qc4 == currUser.userid
+                                                      || ins.insp_qc5 == currUser.userid || ins.insp_qc6 == currUser.userid))
+                                                    || ins.Controllers.Any(co => co.controller_id == currUser.userid))).ToList();
+    @Html.Partial("ListPartial",Model)
+}
+
+<div class="loading-dialog" style="display:none"></div>
+
+
+@section scripts
+{
+    @if (!Model.ForPdf && !Model.ForExport)
+    {
+        @Scripts.Render("~/bundles/globalize")
+        @Scripts.Render("~/bundles/jqueryval")
+        @*<script src="/Scripts/MVCControlToolkit.Controls-2.2.5.min.js" type="text/javascript"></script>*@
+        @*<script src="~/Scripts/globalize/cultures/globalize.culture.en-GB.js"></script>
+        <script type='text/javascript' >
+            Globalize.culture('en-GB');
+        </script>*@
+        @*<script src="/Scripts/globalize.js" type="text/javascript"></script>*@
+        @Html.GlobalizationScript()
+        @*@Html.JQueryDatePickerGlobalizationScript(globalizationFolder: "/Scripts/i18n/")*@
+       
+	    <script type="text/javascript">
+    		$(document).ready(function() {
+    			$('[name="location_id"]').change(function() {
+    				$("#mainForm").submit();
+    			});
+    		});
+
+    		function edit(id, controller_id, isV2) {
+    			var url;
+    			if (id != 0) {
+    				url = '@Html.Raw(Url.Action("Edit", new { id = "[id]", Model.location_id, returnTo = Url.Action("Plan", new { Model.DateFrom, Model.DateTo, Model.location_id }),isV2 = "[isV2]" }))';
+				    url = url.replace(escape("[id]"), id);
+				    url = url.replace(escape("[isV2]"), isV2);
+			    } else {
+				    //office assignment
+				    url = '@Html.Raw(Url.Action("Create", new { insp_type = "X", controller_id = "[id]", date = Model.DateFrom, Model.location_id, returnTo = Url.Action("Plan", new { Model.DateFrom, Model.DateTo, Model.location_id }) }))';
+    				url = url.replace(escape("[id]"), controller_id);
+    			}
+    			$('.loading-dialog').show();
+    			$("#edit").load(url, function () {
+    				$('.loading-dialog').hide();
+    			});
+    			$("#edit").show();
+                
+    		}
+    	</script>
+	    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
+    }
+}
+
+@section head
+{
+	<style type="text/css">
+		.logo_admin
+		{
+			background-image: url('/images/asaq_ext2.jpg');
+			text-indent: -9999px;
+		}
+		.logo {
+			width: 980px;
+			margin: 5px;
+			float: left;
+			height: 90px;
+			background-repeat: no-repeat;
+		}
+		.inspectionplan_lightheader {
+			font-family: Verdana, Geneva, sans-serif;
+			background-color: #CCCCCC;
+			font-size: 10px;
+			font-style: normal;
+		}
+
+		.inspectionplan_darkheader {
+			font-family: Verdana, Geneva, sans-serif;
+			background-color: #999999;
+			font-size: 10px;
+			font-style: normal;
+			color: white;
+			text-align: center;
+			width: 90px;
+		}
+		
+		.inspectionplan_datacell {
+			text-align: center;
+		}
+		.inspectionplan_currentday {
+			background-color: #e3ebed;
+		}
+		.inspectionplan_weekend {
+			background-color: #f4f4f4;
+		}
+		.inspectionplan_edit {
+			background-color: #f4f4f4;
+		}
+		a {
+			outline: none;
+			text-decoration: underline
+		}
+
+		a:link,a:visited,a:active,a:hover {
+			color: #333
+		}
+
+		a:hover {
+			color: #666
+		}
+	</style>
+	
+	<link href="~/Content/loading.css" rel="stylesheet" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css" />
+}

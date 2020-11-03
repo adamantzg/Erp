@@ -1,0 +1,525 @@
+﻿@{
+    ViewBag.Title = "Index";
+   
+    //Layout = "~/Views/shared/_Layout.cshtml";
+
+}
+@section head{
+    <style>
+    .fileinput-button 
+    {
+	    position: relative;
+	    overflow: hidden;
+    }
+
+    .fileinput-button input 
+    {
+	    position: absolute;
+	    top: 0;
+	    right: 0;
+	    margin: 0;
+	    opacity: 0;
+	    filter: alpha(opacity=0);
+	    transform: translate(-300px, 0) scale(4);
+	    font-size: 23px;
+	    direction: ltr;
+	    cursor: pointer;
+    }
+
+
+        .container {
+            width: 1000px;
+            padding: 0px;
+        }
+
+        .local-container {
+            position: relative;
+            margin-top: -40px;
+            min-height: 450px;
+            clear: both;
+        }
+
+        .page_title {
+            background-color: #FFF;
+        }
+
+        .navbar {
+            background-image: linear-gradient(#AAA, #888 50%, #666);
+        }
+
+        .navbar-default .navbar-brand {
+            color: #FFF;
+        }
+
+        ul#css3menu1, ul#css3menu1 ul {
+            width: 978px;
+            background-color: #fff;
+        }
+
+        li.toplast {
+            width: 121px;
+        }
+    </style>
+}
+@section scripts{
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap/bootstrap-theme-spacelab.css" rel="stylesheet" />
+
+   
+    
+   
+@*<script src="~/Scripts/jquery-1.10.2.js"></script>*@
+    
+@*<script src="~/Scripts/jquery-1.10.2.js"></script>*@
+
+<script src="~/Scripts/jquery-ui-1.11.3.js"></script>
+<script src="~/Scripts/jquery.fileupload.js"></script>
+
+    <script src="~/Scripts/angular.js"></script>
+    <script src="~/Scripts/angular-ui/ui-bootstrap-tpls.js"></script>
+    <script src="~/Scripts/angular-route.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-filter/0.5.4/angular-filter.min.js"></script>
+<script src="~/Scripts/angular-cookies.js"></script>
+<script src="~/Scripts/ngKookies.js"></script>
+
+    @*<script src="~/Scripts/plupload-angular-directive/js/plupload-angular-directive.js"></script>*@
+    @*'plupload.directive',*@
+    <script>
+        var userManual = angular.module('manualApp', ['ngRoute', 'angular.filter', 'ngKookies'])
+            
+        .constant("baseUrl", "/UserManuals/")
+        .controller("manualCtrl", function ($scope, $rootScope,FileUploadService,uploadManager) {
+            GetUserManuals();
+            isCollapsed_II = false;
+            $scope.Message = "";
+            $scope.FileInvalidMessage = "";
+            $scope.SelectedFileForUpload = null;
+            $scope.FileDescription = 0;
+            $scope.IsFormSubmitted = false;
+            $scope.IsFileValid = false;
+            $scope.IsFormValid = false;
+            $scope.loading = false;
+            $scope.loadingGetManual = false;
+
+            $scope.$watch("f1.$valid", function (isValid) {
+                $scope.IsFormValid = isValid;
+            });
+
+            //------------------------------------------------
+            //File Validation
+            $scope.ChechFileValid = function (file) {
+                var isValid = false;
+                if ($scope.SelectedFileForUpload != null) {
+                    if ((file.type == 'application/pdf'/*||file.type == 'image/png' || file.type == 'image/jpeg' || file.type == 'image/gif'*/) /*&& file.size <= (512 * 1024)*/) {
+                        $scope.FileInvalidMessage = "";
+                        isValid = true;
+                    }
+                    else {
+                        $scope.loading = false;
+                        $scope.loadingGetManual = false;
+                        $scope.FileInvalidMessage = "Selected file is Invalid. (only file type Pdf)";
+                    }
+                }
+                else {
+                    $scope.loading = false;
+                    $scope.loadingGetManual = false;
+                    $scope.FileInvalidMessage = "Pdf required!";
+                }
+                $scope.IsFileValid = isValid;
+            };
+
+            //File Select event
+            $scope.selectFileforUpload = function (file) {
+                $scope.SelectedFileForUpload = file[0];
+            }
+
+            //----------------------------------------------
+            $scope.SaveFile = function () {
+                $scope.loading = true;
+                $scope.IsFormSubmitted = true;
+                $scope.Message = "";
+                $scope.ChechFileValid($scope.SelectedFileForUpload);
+                if ($scope.IsFormValid && $scope.IsFileValid) {
+                    FileUploadService.fac.UploadFile($scope.SelectedFileForUpload, $scope.FileDescription).then(function (d) {
+                      
+                        //alert(d.Message);
+                        ClearForm();
+                        GetUserManuals();
+                        $scope.loading = false;
+                    }, function (e) {
+                        alert(e);
+                    });
+                }
+                else {
+                    $scope.Message = "All the fields are required.";
+                }
+            };
+
+            //clear form
+            function ClearForm() {
+                $scope.FileDescription = "";
+                //as 2 way binding not support for File input Type so we have to clear in this way
+                //you can select based on your requirement
+                angular.forEach(angular.element("input[type='file']"), function (inputElem) {
+                    angular.element(inputElem).val(null);
+                });
+                $scope.SelectedFileForUpload = [];
+                $scope.f1.$setPristine();
+                $scope.IsFormSubmitted = false;
+            }
+            $scope.$on('GetManuals', function (event) {
+                GetUserManuals();
+                //alert("PONOVO UČITAVAM");
+
+            })
+            $scope.$on('ClearForm', function (event) {
+                $scope.FileDescription = "";
+            })
+            function GetUserManuals() {
+                $scope.loading = true;
+                FileUploadService.getUserManuals().then(function (response) {
+                    $scope.UserManuals = response.data;
+                    
+                }).finally(function () {
+                    $scope.loading = false;
+                })
+            }
+
+            /*Novi kod za upload datoteke*/
+
+            $scope.files = [];
+            $scope.fileSingle = ""
+            $scope.percentage = 0;
+        })
+        .controller("FileUploadCtrl", function ($scope, $rootScope, $kookies, uploadManager) {
+            //za novi upload
+            $scope.files = [];
+            $scope.fileSingle = "";
+            $scope.percentage = 0;
+            //file type id
+            $scope.id = 0;   
+         
+           
+
+            
+            $scope.$watch('id', function () {
+                //alert($scope.id);
+                $kookies.set('myAppIdManual', $scope.id, { path: '/' });               
+                //alert($kookies.get('myAppIdManual'));
+
+            });
+
+           
+
+            $scope.upload = function () {
+                uploadManager.upload();
+                $scope.files = [];
+                $scope.fileSingle = "";
+                // $scope.$emit('ClearForm');
+                $scope.id = 0;
+                $scope.$emit('GetManuals');
+                
+            };
+            
+            $rootScope.$on('typeId', function (e, call) {
+                $scope.id = call;
+            })
+            $rootScope.$on('fileAdded', function (e, call) {
+                $scope.files.push(call);
+                $scope.fileSingle = call;
+                $scope.$apply();
+            });
+            $rootScope.$on('uploadProgress', function (e, call) {
+                $scope.percentage = call;
+                $scope.$apply();
+            })
+
+           
+
+        })
+        .factory('FileUploadService', function ($http, $q, baseUrl) {
+            var fac = {};
+            fac.UploadFile = function (file, description) {
+                var formData = new FormData();
+                formData.append("file", file);
+                //We can send more data to server using append
+                formData.append("description", description);
+
+                var defer = $q.defer();
+                $http.post(baseUrl + "SaveFiles", formData,
+                    {
+                        withCredentials: true,
+                        headers: { 'Content-Type': undefined },
+                        transformRequest: angular.identity
+                    })
+                .success(function (d) {
+                    defer.resolve(d);
+                })
+                .error(function (data, status, headers, config) {
+                    defer.reject("File Upload Failed!");
+                });
+
+                return defer.promise;
+
+            }
+            var getUserManuals = function () {
+                
+                return $http.get(baseUrl + "UserManuals");
+            };
+            return {
+                fac: fac,
+                getUserManuals: getUserManuals
+
+            }
+        })
+        .factory('uploadManager', function ($rootScope) {
+            //za novi upload 
+            var files = [];
+            return {
+                add: function (file) {
+                    files.push(file);
+                    $rootScope.$broadcast('fileAdded', file.files[0].name);
+                },
+                clear: function () {
+                    files = [];
+                },
+                files: function () {
+                    var fileNames = [];
+                    $.each(files, function (index, file) {
+                        fileNames.push(file.files[0].name);
+                        //fileDesc = "deskription";
+                    });
+                },                
+                upload: function () {
+                    $.each(files, function (index, file) {
+                        file.submit();
+                    }),
+                   
+                    this.clear();
+                },
+                setProgress: function (percentage) {
+                    
+                    $rootScope.$broadcast('uploadProgress', percentage);
+                }
+                //setTypeId: function (id) {
+                //    $rootScope.$broadcast('typeId', id);
+                //}
+               
+
+            };
+        })
+        .directive('upload', ['uploadManager', function factory(uploadManager) {
+           
+            return {
+                restrict: 'A',
+                         
+              
+               link: function (scope, element, attrs) {
+                  
+                $(element).fileupload({
+                    dataType: 'text',
+                    url: '/usermanuals/savefiles',
+                    
+                    add: function (e, data) {
+                        uploadManager.add(data);
+
+                    },
+                        progressall: function (e, data) {
+                           
+                            var progress = parseInt(data.loaded / data.total * 100, 10);
+                            uploadManager.setProgress(progress);
+                            console.log("Progress: " + progress);
+                            
+                           // scope.$on("downloadId", function (e, url) { console.log("scope.on happend"); })
+                        },
+                        done: function (e, data) {
+                           // alert("seting progress");
+                            uploadManager.setProgress(0);
+                        }
+                    })
+            }
+        };
+        }]);
+    </script>
+}
+
+<div ng-app="manualApp">
+
+    <div class="local-container" ng-controller="manualCtrl" ng-init="manual_types=@Html.Raw(Model)">
+        <div>&nbsp;<br /></div>
+        @* Kontainer koji sadrži naslov i ostale  panele *@
+        <div class="panel panel-default" style="width:100%">
+            <nav class="navbar navbar-default">
+                <div class="navbar-header">
+                    <a href="" class="navbar-brand">User manuals </a>
+                </div>
+            </nav>
+            
+            <div class="panel" >
+                <div class="panel">
+                    
+                    <div class="penel-body" ng-controller="FileUploadCtrl">
+
+                        <form name="f1" @*ng-submit="SaveFile()"*@ class="form-horizontal">
+                            @*<div style="color:red">{{Message}}</div>*@
+
+                            <fieldset style="border:none">
+                                @*<div class="alert alert-danger"
+                                     style="text-align:center"
+                                     ng-show="FileInvalidMessage.length>2"><span>{{FileInvalidMessage}}</span></div>*@
+                                <div class="col-sm-1 col-xs-11">&nbsp;</div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 col-xs-11" style="margin-top:10px">
+                                        Upload new manual
+                                    </label>
+                                    <div class="col-sm-6  col-xs-11">
+                                        <select style="margin-left:-9px; width:439px"
+                                                my-directive="ext"
+                                                class="form-control"
+                                                ng-model="id"
+                                                ng-options="mtype.id as mtype.description for mtype in manual_types ">
+                                            <option value="">(New manual)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-1">
+                                        @*{{FileDescription}}
+                                        {{fileSingle}}*@
+                                    </div>
+                                </div>
+
+                            </fieldset>
+                            <fieldset style="border: none">
+                                @*<div class="col-sm-3"></div>*@
+                                <div class="col-sm-1">
+                                    @*<img src="~/Images/Spinning_wheel_throbber.gif" ng-show="loading" />*@
+                                </div>
+                                <div class="col-sm-3 ">
+                                    @* novi  *@
+                                    <div class="btn-group pull-left">
+                                        <div class="btn btn-default btn-xs fileinput-button" style="float:left">
+                                            <i class="glyphicon glyphicon-plus-sign">
+                                                <input type="file" name="file"
+                                                       accept="application/pdf"                                                     multiple
+                                                      upload />
+                                            </i>
+                                            <span>Add file...</span>
+                                        </div>
+
+                                        <button type="submit"
+                                                class="btn btn-primary btn-xs"
+                                                ng-disabled="(!id || !fileSingle.length)"
+                                                ng-click="upload()">
+                                            <span class="glyphicon glyphicon-upload"></span>
+                                            Upload file
+                                        </button>
+                                    </div>
+
+                                </div>
+
+                                <div class="col-sm-6" style="float:left;margin-top:10px;margin-left:5px">
+
+                                    <div style="margin-top:-10px">
+                                        <span ng-show="!fileSingle.length">No files selected</span>
+                                        <span style="max-width:330px">&nbsp;{{fileSingle}}</span>
+                                        @*<b>{{id}}</b>*@
+                                    </div>
+
+                                </div>
+                                <div class="col-sm-1">
+                                    <span ng-show="percentage">{{percentage}}% </span>
+                                </div>
+
+
+
+
+
+
+                            </fieldset>
+
+                        </form>
+                    </div>
+                </div>
+
+                @* table *@
+                <div class="panel panel-default" style="margin-left:-2px;margin-right:-2px;">
+                    <div class="panel-heading">
+                        <strong> Download</strong>
+                    </div>
+                </div>
+                <div class="panel-body" style="margin-top:-36px;margin-left:-16px;margin-right:-17px">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th><img src="~/Images/Spinning_wheel_throbber.gif" ng-show="loading" /></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Manual</th>
+                                    <th>Type</th>
+                                    <th style="text-align:center">Version</th>
+                                    <th>Last updated</th>
+                                </tr>
+                            </thead>
+                            @*<tbody ng-repeat="manual in UserManuals">*@
+                            <tbody ng-repeat="(key,value) in UserManuals |groupBy:'manual_type'|orderBy:'date_uploaded'">
+                                <tr>
+                                    <td ng-click="isCollapsed_II = !isCollapsed_II">
+                                        <span ng-hide="value.length < 2">
+                                            <i class="pull-right glyphicon glyphicon-chevron-down" ng-show="isCollapsed_II"></i>
+                                            <i class="pull-right glyphicon glyphicon-chevron-right" ng-show="!isCollapsed_II"></i>
+                                        </span>
+                                    </td>
+                                    <td style="text-align:center">
+                                        <a href="~/Images/manual/user_manuals/{{value[0].file_name}}.pdf" target="_blank">
+                                            <span class="glyphicon glyphicon-list-alt"></span>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="~/Images/manual/user_manuals/{{value[0].file_name}}.pdf" download>
+                                            <span class="glyphicon glyphicon-download-alt"></span>
+                                        </a>
+                                    </td>
+                                    <td>{{value[0].file_name}}</td>
+                                    <td>{{value[0].userManualType.description}}</td>
+                                    <td style="text-align:center">{{value[0].version}}</td>
+                                    <td style="width:180px">{{value[0].date_uploaded|date:dd-MMMM-yy  }} </td>
+
+                                </tr>
+                                <tr ng-hide="!isCollapsed_II">
+                                    <td colspan="7" style="padding:0px">
+                                        <div>
+                                            <table class="table" style="margin:0">
+                                                <tr ng-repeat="manual in value" ng-show="!$first">
+                                                    <td>&nbsp;&nbsp;&nbsp;</td>
+                                                    <td style="text-align:center">
+                                                        <a style="color:gray" href="~/Images/manual/user_manuals/{{manual.file_name}}.pdf" target=" _blank">
+                                                            <span class="glyphicon glyphicon-list-alt"></span>
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <a style="color:gray" href="~/Images/manual/user_manuals/{{manual.file_name}}.pdf" download>
+                                                            <span class="glyphicon glyphicon-download-alt"></span>
+                                                        </a>
+                                                    </td>
+                                                    <td>{{manual.file_name}}</td>
+                                                    <td style="color:white">{{manual.userManualType.description}}</td>
+                                                    <td style="text-align:left">{{manual.version}}</td>
+                                                    <td style="width:180px">{{manual.date_uploaded|date:"MMMM-dd-yy"  }} </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        <div>
+
+        </div>
+    </div>
+</div>

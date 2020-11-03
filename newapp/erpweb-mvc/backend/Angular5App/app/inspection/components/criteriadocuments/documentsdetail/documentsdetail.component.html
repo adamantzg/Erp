@@ -1,0 +1,28 @@
+<h4>{{title}}</h4>
+<div>
+    <app-errormessage [errorMessage]="errorMessage"></app-errormessage>
+    <button class="btn btn-primary" (click)="save()">{{buttonTitle}}</button>
+    <button class="btn btn-default ml-2" (click)="backToList()">Back to list</button>
+</div>
+<div class="mt-2">
+    <div *ngIf="model.instruction?.filename">
+        {{model.instruction.filename}}
+    </div>
+    <label class="upload-button">
+            <input type="file" class="form-control" class="btn btn-block btn-default" 
+            ngFileSelect [options]="options" (uploadOutput)="onUploadOutput($event)" [uploadInput]="uploadInput">
+    </label>
+</div>
+
+<section class="panel panel-primary">
+    <div class="panel-heading">Products</div>
+    <div class="panel-body">
+        <app-grid [data]="model.instruction?.products" [definition]="gridDefinition" (ButtonClicked)="onButtonClicked($event)"></app-grid>
+        <hr>
+        <h5 class="mt-2">Add more products</h5>
+        <app-productselector [factories]="model.factories" [clients]="model.clients" [loadDropdowns]="false" [multiSelect]="true"
+        [style]="{ height: '400px'}" (AddSelected)="onAddProducts($event)"></app-productselector>
+    </div>
+</section>
+
+

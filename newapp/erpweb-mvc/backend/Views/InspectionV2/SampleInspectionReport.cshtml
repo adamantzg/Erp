@@ -1,0 +1,157 @@
+﻿@using backend.Controllers
+@{
+    Layout = null;
+    var insp = (Inspection_v2)ViewBag.Inspection;
+    var imageTypes = ((List<Inspection_v2_image_type> )ViewBag.ImageTypes).ToDictionary(t=>t.id, t=>t.description);
+}
+
+@functions {
+    public string AdjustImage(string image)
+    {
+        return InspectionV2Controller.AdjustInspectionImage(image);
+    }
+}
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>@insp.ComputedCode</title>
+<style type="text/css">
+    
+ .normal_body {
+	font-size: 80%;
+	font:Arial, Helvetica, sans-serif;
+	color: #000;
+    }	
+ .small_body {
+	font-size: 70%;
+	font:Arial, Helvetica, sans-serif;
+	color: #000;
+} 
+ .LARGE_body {
+	font-size: 120%;
+	font:Arial, Helvetica, sans-serif;
+	color: #000;
+} 
+body {
+	background: #fff;
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	font-family:Arial, Helvetica, sans-serif;
+	}
+		
+img {
+	border: 0px;
+	}
+	
+.container {
+	/*height: 600px;*/
+	
+	width: 1000px;
+	background: #FFF;
+	overflow: hidden;
+	border: 2px solid #f4f4f4;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	margin: 10px auto;
+	/*margin-bottom: -100px;*/
+	}
+.logo {
+		/*height: 90px;*/
+		width: 1000px;
+		/*background:#999;*/
+		/*float: left;*/
+}
+.logo img {
+		
+		margin: 10px 0 0 20px;
+}
+    #tblHeader td {
+        background-color: #F4F4F4;
+    }
+    .productheader {
+        font-weight:bold;
+        font-size:15px;
+        color:#0000FF;
+    }
+    .imageTypeCaption {
+        font-size: 18px;
+        font-weight: bold;
+    }
+    .caption {
+        font-weight: bold;
+    }
+</style>
+</head>
+
+<body >
+
+    <div id="top" class="logo">
+   	    	<img src="/images/asaq_ext2.jpg"  alt="logo" />
+    </div><!--logo-->
+    <h2>Sample inspection report:  @insp.ComputedCode</h2>
+    <table width="940" style="border:1px solid black; background-color: #E0E0E0" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td width="139" class="caption">Factory Code</td>
+            <td width="150">@(insp.Factory?.factory_code)</td>
+            <td width="150" class="caption">Client code</td>
+            <td width="150">@(insp.Client?.customer_code)</td>
+            <td width="150" class="caption">Inspection date</td>
+            <td width="150">@insp.startdate.ToString("d")</td>
+        </tr>
+        <tr>
+            <td width="139" class="caption">Subject</td>
+            <td width="150">@(insp.Subject?.name)</td>
+            <td width="150" class="caption">Qc</td>
+            <td colspans="3">@(string.Join(",",insp.Controllers?.Select(c=>c.Controller?.userwelcome)))</td>
+        </tr>
+        <tr>
+            <td width="139" class="caption">Comments</td>
+            <td colspan="5">@insp.comments</td>
+        </tr>
+     </table>
+    <table width="940" border="0" cellspacing="0" cellpadding="2" style="border:1px solid #333;margin-top: 10px">
+        <tr style="background-color: #CCCCCC;font-weight: bold">
+            <td style="width: 20px"></td>
+            <td width="110">MFG code</td>
+            <td width="110">Client code</td>
+            <td width="675">Description</td>
+            <td width="45" style="text-align: right">Quantity</td>
+        </tr>
+        @{ var counter = 1;}
+        @foreach (var l in insp.Lines.Where(l=>l.Images.Count > 0)) {
+            <tr colspan="5" @(Html.Raw(counter != 1 ? "style=border-top: 1px solid black" : ""))></tr>
+            <tr class="productheader">
+                <td>@(counter++)</td>
+                <td>@l.insp_mastproduct_code</td>
+                <td>@l.insp_custproduct_code</td>
+                <td>@l.insp_custproduct_name</td>
+                <td style="text-align:right">@l.qty</td>
+            </tr>
+            foreach (var t in l.Images.Select(im => im.type_id).Distinct().OrderBy(i => i)) {
+                var siDetails = l.SiDetails.FirstOrDefault(d=>d.type_id == t);
+                <tr>
+                    <td rowspan="2" colspan="2"><span class="imageTypeCaption">@(imageTypes[t.Value])</span></td>
+                    <td colspan="3"><strong>Requirement</strong>: <small> @(siDetails?.requirement)</small></td>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>Comments</strong>:  <small>@(siDetails?.comments)</small></td>
+                </tr>
+                <tr>
+                    <td colspan="5">
+                        @foreach (var im in l.Images.Where(i => i.type_id == t)) {
+                            <img style="width: 460px" src="@(WebUtilities.GetSiteUrl())/@AdjustImage(im.insp_image)" />
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+</body>
+</html>

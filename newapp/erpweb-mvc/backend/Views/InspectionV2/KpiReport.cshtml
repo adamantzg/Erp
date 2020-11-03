@@ -1,0 +1,163 @@
+﻿
+<div class="row" ng-app="app">
+
+    <div class="col-lg-12" ng-controller="controller">
+
+        <h2>KPI report</h2>
+
+        <section class="panel panel-primary">
+
+            <header class="panel-heading">
+                Select Qc
+            </header>
+
+            <div class="panel-body">
+                <div class="form col-lg-6">
+                    <div class="form-group">
+                        <label>
+                            Select Qc:
+                        </label>
+                        <select class="form-control" ng-options="c.userid as c.userwelcome for c in model.controllers | orderBy: 'userwelcome'" ng-model="model.controller_id"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Month:
+                        </label>
+                        <div uib-datepicker ng-model="model.monthStart" datepicker-options="monthSelectorOptions"></div>
+                    </div>
+                    <button class="btn btn-primary" ng-click="showData()" ng-show="model.controller_id">Show data</button>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="panel panel-primary">
+            <header class="panel-heading">
+                Inspections
+            </header>
+            <div class="panel-body">
+                <div class="col-lg-8">
+                    <table datatable="ng" dt-options="inspDtOptions" class="table table-striped" dt-instance="inspDtInstance">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Factory</th>
+                                <th>Inspection</th>
+                                <th>Type</th>
+                                <th>CAs</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="i in model.inspections">
+                                <td>{{formatDate(i.startDate)}}</td>
+                                <td>{{i.factory_code}}</td>
+                                <td><a ng-href="{{getInspectionUrl(i)}}" target="_blank">{{i.insp_no}}</a></td>
+                                <td>{{i.type}}</td>
+                                <td>{{i.ca}}</td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+        </section>
+        <section class="panel panel-primary" ng-repeat="s in model.claimsSections">
+            <header class="panel-heading">
+                {{s.title}}
+            </header>
+            <div class="panel-body">
+                <h4>{{s.subtitle}}</h4>
+                <div ng-repeat="g in s.groups" style="margin-top: 5px">
+                    <div class="row">
+                        <div class="col-lg-8">
+                            {{g.data.length}} {{g.text}}
+                            <button class="btn pull-right" ng-click="showHideGroup(g)">{{(g.show ? 'Hide ' : 'Show ')}}details</button>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="g.show">
+                        <div class="col-lg-8">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Description</th>
+                                        <th>Reference</th>
+                                        <th>Date</th>
+                                        <th>Factory</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="c in g.data">
+                                        <td>{{c.product.cprod_code1}}</td>
+                                        <td>{{c.product.cprod_name}}</td>
+                                        <td><a ng-href="{{getClaimUrl(c)}}" target="_blank">{{c.return_no}}</a></td>
+                                        <td>{{formatDate(c.request_date)}}</td>
+                                        <td>{{c.factory}}</td>
+                                        
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div loading class="loading-dialog"></div>
+
+    </div>
+
+
+
+@section head
+{
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/dt-1.10.15/b-1.3.1/r-2.1.1/se-1.2.2/datatables.min.css" />
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    <link href="~/Content/loading.css" rel="stylesheet" />
+    
+    <style>
+        
+        .main {
+            width: auto;
+        }
+
+        @@media (min-width: 768px) {
+            #footer {
+                width: 750px
+            }
+        }
+
+        @@media (min-width: 992px) {
+            #footer {
+                width: 970px
+            }
+        }
+
+        @@media (min-width: 1200px) {
+            #footer {
+                width: 1170px
+            }
+        }
+    </style>
+}
+
+@section scripts2
+{
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/globalize")
+    <script src="~/Scripts/logToServer.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.10.15/b-1.3.1/r-2.1.1/se-1.2.2/datatables.min.js"></script>
+    @Scripts.Render("~/bundles/AngularDataTable")
+    <script src="~/AngularApps/Kpi/app.js"></script>
+    <script src="~/AngularApps/Kpi/factory.js"></script>
+    <script src="~/AngularApps/Kpi/controller.js"></script>
+    
+    <script src="~/AngularApps/loading.js"></script>
+
+}

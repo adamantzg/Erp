@@ -1,0 +1,378 @@
+﻿@using company.Common
+@using backend.Controllers
+@model LoadingInspectionV2ReportModel
+
+@{
+    Layout = null;
+    //for pdf
+    ViewBag.maxImageHeight = 184;
+    ViewBag.maxImageWidth = 290;
+}
+
+@functions {
+    public string AdjustImage(string image)
+    {
+        return InspectionV2Controller.AdjustInspectionImage(image);
+    }
+
+    public string GetResizedImage(string image)
+    {
+        return Url.Action("GetImage", new { url = image, width = ViewBag.maxImageWidth, height = ViewBag.maxImageHeight });
+    }
+
+    public List<string> MixedPalletSummary(List<Inspection_v2_loading> loadings)
+    {
+        var palletesSummary = new Dictionary<int?, dynamic>();
+        foreach(var l in loadings) {
+            if (l.QtyMixedPallets != null) {
+                foreach(var qmp in l.QtyMixedPallets) {
+                    if (palletesSummary.ContainsKey(qmp.pallet_id))
+                    {
+                        palletesSummary[qmp.pallet_id].quantities.Add(l.Line?.OrderLine?.Cust_Product?.cprod_code1 + 'x' + qmp.qty.ToString());
+                    }
+                    else
+                    {
+                        var pallet = Model.Inspection?.MixedPallets.FirstOrDefault(p=> p.id ==  qmp.pallet_id);
+                        if (pallet != null) {
+                            dynamic obj = new System.Dynamic.ExpandoObject();
+                            obj.name = pallet.name;
+                            obj.quantities = new List<string>();
+                            obj.quantities.Add(l.Line?.OrderLine?.Cust_Product?.cprod_code1 + 'x' + qmp.qty.ToString());
+                            palletesSummary[qmp.pallet_id] = obj;
+
+                        }
+
+                    }
+                }
+            }
+        }
+        var result = new List<string>();
+        foreach(var p in palletesSummary.Keys) {
+            result.Add(palletesSummary[p].name + ": " + string.Join(", ", palletesSummary[p].quantities));
+        }
+        return result;
+    }
+        }
+
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Loading inspection report</title>
+    <link href="/Content/inspection/main_report.css" rel="stylesheet" type="text/css">
+    @if (true/*!Model.ForPdf*/) {
+	    <style>
+    		body
+    		{
+				font-family: Arial, Helvetica, sans-serif;
+    		}
+    		.container {
+    			height: auto;
+    			@if (Model.ForPdf)
+                {
+                    @: width: 950px;
+                    @: margin-top: 0;
+                }
+
+    		}
+    		.footer td {
+    			padding: 3px;
+    		}
+    		.footer {
+    			padding: 0;
+    		}
+    		.data_holder2 {
+    			margin-bottom: 10px;
+    		}
+
+    		@*.cont img { width: 230px;}*@
+    		@if (Model.ForPdf)
+            {
+               @: .prod_img img { max-width: 250px; max-height: 184px}
+            }
+			.cont_img img { max-width: 230px}
+    	</style>
+    }
+    
+<link href="~/Scripts/lightbox/css/lightbox.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    @{
+        var insp = Model.Inspection;
+        ViewBag.ForPdf = Model.ForPdf;
+    }
+
+    @if (!Model.ForPdf && Model.Inspection.insp_status == InspectionV2Status.ReportSubmitted)
+    {
+        <div class="container">
+            @using (Html.BeginForm("ModifyReport", "InspectionV2"))
+            {
+                @Html.HiddenFor(m => m.Inspection.id)
+                <input type="submit" class="button" value="Modify Report" />
+            }
+        </div>
+    }
+
+    @foreach (var cont in insp.Containers)
+    {
+
+        <div class="container">
+            @Html.Partial("_LoadingReport2Header", Model)
+            <table style="margin-top: 10px;width:100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td class="row_name_gray" width="150"><span class="white">Container No:</span></td>
+                    <td class="row_name_gray" width="300"><span class="white">@cont.container_no</span></td>
+                    <td class="row_name_gray" width="150"><span class="white">Seal No:</span></td>
+                    <td class="row_name_gray"><span class="white">@cont.seal_no</span></td>
+                </tr>
+            </table>
+
+            <table class="cont_img cont" style="margin-top: 10px;width:100%" border="0" cellspacing="0" cellpadding="5">
+                <tr>
+                    <td align="center">Empty container</td>
+                    <td align="center">Sealed container - from inside</td>
+                    <td align="center">Sealed container - from outside</td>
+                    <td align="center">Container seal</td>
+                </tr>
+                @{
+            var cont_images = cont.Images.OrderBy(i => i.order).Take(4).ToList();
+                }
+                <tr>
+                    <td>
+                        @{
+                    var image1 = cont_images?.FirstOrDefault(i => i.order == 0);
+                    var image2 = cont_images?.FirstOrDefault(i => i.order == 1);
+                    var image3 = cont_images?.FirstOrDefault(i => i.order == 2);
+                    var image4 = cont_images?.FirstOrDefault(i => i.order == 3);
+                    var imageWidthPdf = 290;
+                    var contImageHeightPdf = 184;
+                    var imageHeightPdf = 220;
+                        }
+                        @if (image1 != null)
+                {
+                    if (!Model.ForPdf)
+                    {
+                        <a href="@AdjustImage(image1.insp_image)" data-lightbox="containers"><img src="@AdjustImage(image1.insp_image)" /></a>
+            }
+            else
+            {
+                <img @Html.Raw(Model.ForPdf ? $"style=\"width: 230px;height: {contImageHeightPdf}px\"" : "") src="@AdjustImage(image1.insp_image)" />
+    }
+
+}
+else
+{
+        <img src="~/Images/no-image_wide.jpg" style="height: 184px" />
+}
+                    </td>
+                    <td>
+                        @if (image2 != null)
+                {
+                    if (!Model.ForPdf)
+                    {
+                        <a href="@AdjustImage(image2.insp_image)" data-lightbox="containers"><img src="@AdjustImage(image2.insp_image)" /></a>
+            }
+            else
+            {
+                <img @Html.Raw(Model.ForPdf ? $"style=\"width: 230px;height: {contImageHeightPdf}px\"" : "") src="@AdjustImage(image2.insp_image)" />
+    }
+}
+else
+{
+        <img src="~/Images/no-image_wide.jpg" style="height: 184px" />
+}
+                    </td>
+                    <td>
+                        @if (image3 != null)
+                {
+                    if (!Model.ForPdf)
+                    {
+                        <a href="@AdjustImage(image3.insp_image)" data-lightbox="containers"><img src="@AdjustImage(image3.insp_image)" /></a>
+            }
+            else
+            {
+                <img @Html.Raw(Model.ForPdf ? $"style=\"width: 230px;height: {contImageHeightPdf}px\"" : "") src="@AdjustImage(image3.insp_image)" />
+    }
+}
+else
+{
+        <img src="~/Images/no-image_wide.jpg" style="height: 184px" />
+}
+                    </td>
+                    <td>
+                        @if (image4 != null)
+                {
+                    if (!Model.ForPdf)
+                    {
+                        <a href="@AdjustImage(image4.insp_image)" data-lightbox="containers"><img src="@AdjustImage(image4.insp_image)" /></a>
+            }
+            else
+            {
+                <img @Html.Raw(Model.ForPdf ? $"style=\"width: 230px;height: {contImageHeightPdf}px\"" : "") src="@AdjustImage(image4.insp_image)" />
+    }
+}
+else
+{
+        <img src="~/Images/no-image_wide.jpg" style="height: 184px" />
+}
+                    </td>
+                </tr>
+            </table>
+            @{
+        var allLoadings = Model.AllLoadings.OrderBy(l => l.Line?.OrderLine?.Cust_Product?.MastProduct?.Factory?.factory_code).ThenBy(l => string.Join(",", l.Areas?.Select(a => a.name) ?? new string[] { })).ToList();
+        var pageCount = 1;
+        if (allLoadings.Count > 2 * LoadingInspectionV2ReportModel.LoadingTableRowsPerFirstPage)
+        {
+            pageCount += (allLoadings.Count - 2 * LoadingInspectionV2ReportModel.LoadingTableRowsPerFirstPage) / (2 * LoadingInspectionV2ReportModel.LoadingTableRowsPerPage) + 1;
+        }
+        pageCount++; //last page
+
+        var pageNo = 1;
+
+            }
+
+            @for (var i = 0; i < allLoadings.Count; i += (i == 0 ? LoadingInspectionV2ReportModel.LoadingTableRowsPerFirstPage : LoadingInspectionV2ReportModel.LoadingTableRowsPerPage))
+    {
+        if (Model.ForPdf)
+        {
+            <table @Html.Raw(Model.ForPdf ? "style=width: 99%; float: left; height: 750px; margin-top: 15px;" : "") border="0" cellspacing="@(Model.ForPdf ? 0 : 2)" cellpadding="0">
+
+                <tr>
+                    <td style="width:100%">
+                        @Html.Partial("_LoadingReport2LoadingsTable", new InspectionLoadingTableModel { StartIndex = i, Loadings = allLoadings, ForPdf = Model.ForPdf, Column = 0, Rows = (i == 0 ? LoadingInspectionV2ReportModel.LoadingTableRowsPerFirstPage : LoadingInspectionV2ReportModel.LoadingTableRowsPerPage) })
+                    </td>
+                </tr>
+            </table>
+}
+else
+{
+        @Html.Partial("_LoadingReport2LoadingsTable", new InspectionLoadingTableModel { StartIndex = i, Loadings = allLoadings, ForPdf = Model.ForPdf, Column = 0, Rows = (i == 0 ? LoadingInspectionV2ReportModel.LoadingTableRowsPerFirstPage : LoadingInspectionV2ReportModel.LoadingTableRowsPerPage) })
+}
+        <div style="clear:both">
+            <div>items with * are loaded on mixed pallets</div>
+            @foreach (var d in MixedPalletSummary(allLoadings))
+    {
+        <div>@d</div>
+}
+        </div>
+
+        <table style="margin-top: 5px; clear: both;padding:2px" width="@(ViewBag.ForPdf ? "99" : "100")%" border="0" cellspacing="0" cellpadding="0">
+            <tr class="footer">
+                <td style="width: 33%"><span class="white">Big Company.</span></td>
+                <td style="width: 33%; text-align: @(Model.ForPdf ? "left" : "center")"><span class="white">Page @(pageNo++) of @pageCount </span></td>
+                <td style="text-align: right"><span class="white"> Copyright @DateTime.Now.Year</span></td>
+            </tr>
+        </table>
+
+        if (Model.ForPdf)
+        {
+            <div class="divFooter" style="text-align:left;">&copy; Big Company</div>
+        }
+
+        <br style="page-break-after: always" />
+}
+
+        </div>
+        <div class="container" @Html.Raw(Model.ForPdf ? "style=width:1010px" : "")>
+            @Html.Partial("_LoadingReport2Header", Model)
+
+            <table style="margin-top: 10px;width:100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td class="row_name_gray" width="150"><span class="white">Container No:</span></td>
+                    <td class="row_name_gray" width="300"><span class="white">@cont.container_no</span></td>
+                    <td class="row_name_gray" width="150"><span class="white">Seal No:</span></td>
+                    <td class="row_name_gray"><span class="white">@cont.seal_no</span></td>
+                </tr>
+            </table>
+            @{
+                 var allImages = insp.AllImages.OrderBy(i => i.order).ToList();
+            }
+
+            <table class="prod_img" style="margin-top: 10px;width:100%" border="0" cellspacing="0" cellpadding="5">
+                @for (int i = 0; i < 3; i++)
+        {
+            <tr>
+                @for (int j = 0; j < 3; j++)
+        {
+            <td width="330" height="@(Model.ForPdf ? 60 : 20)" align="center">Area @Convert.ToChar(65 + i * 3 + j)</td>
+}
+            </tr>
+            <tr>
+                @for (int j = 0; j < 3; j++)
+        {
+            var idx = i * 3 + j;
+            var img = allImages.FirstOrDefault(im => im.order == idx);
+
+            <td width="350">
+                @if (img != null)
+        {
+            if (!Model.ForPdf)
+            {
+                <a href="@AdjustImage(img.insp_image)" data-lightbox="containers"><img src="@AdjustImage(img.insp_image)" /></a>
+    }
+    else
+    {
+        <img @Html.Raw(Model.ForPdf ? $"style=\"width: {imageWidthPdf}px;height:{imageHeightPdf}px\"" : "") src="@AdjustImage(img.insp_image)" />
+}
+
+}
+else
+{
+        <img src="~/Images/no-image_wide.jpg" style="width: 350px" />
+        @*<div style="height: 245px"></div>*@
+}
+            </td>
+}
+            </tr>
+}
+
+            </table>
+
+            <table style="margin-top: 5px; clear: both;width:100%" border="0" cellspacing="0" cellpadding="0">
+                <tr class="footer">
+                    <td style="width: 33%"><span class="white">Big Company.</span></td>
+                    <td style="width: 33%; text-align: @(Model.ForPdf ? "left" : "center")"><span class="white">Page @pageCount of @pageCount </span></td>
+                    <td style="text-align: right"><span class="white"> Copyright @DateTime.Now.Year</span></td>
+                </tr>
+            </table>
+
+            @if (Model.ForPdf)
+            {
+                <div class="divFooter">
+                    <br />
+                    <div style="text-align:left;font-size:smaller;font-style:italic;">
+                        This document is strictly private, confidential and personal to its recipients and should not be copied, distributed or reproduced in whole or in part, nor passed to any third party.
+                    </div>
+                    <div style="text-align:left;font-size:smaller;font-style:italic;">
+                        This document is a field report. The photo resolution and quality might vary depending on multiple factors such as weather and lighting. English is not a native language for the report makers, and the language used in this document might not be accurate.
+                    </div>
+                    <br />
+                    <div style="text-align:left;">
+                        &copy; Big Company
+                    </div>
+                </div>
+            }
+        </div>
+        
+    }
+    @if (!Model.ForPdf)
+    {
+        @Scripts.Render("~/bundles/jquery")
+        <script src="~/Scripts/lightbox/js/lightbox-2.6.min.js"></script>
+    }
+    <script>
+        function adjustImage(img, wValue, hValue) {
+            var width = img.width;
+            var height = img.height;
+            if (width > height)
+                img.style.width = wValue.toString() + "px";
+            else
+                img.style.height = hValue.toString() + "px";
+        }
+    </script>
+
+</body>
+</html>
+

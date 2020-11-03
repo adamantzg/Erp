@@ -1,0 +1,148 @@
+﻿@model LoginHistoryModel
+<h3>Login history</h3>
+@{ Html.EnableClientValidation(); }
+@using(Html.BeginForm("LoginHistory","Report", FormMethod.Post))
+{
+    @Html.ValidationSummary()
+    <table class="table_main" style="width:600px">
+        <tr>
+            <td class="table_main_td">Customer:</td>
+            <td class="table_main_td" style="width: 250px">@Html.DropDownListFor(m=>m.company_id, new SelectList(Model.Companies,"user_id","user_name"))</td>
+            
+        </tr>
+        <tr>
+            <td class="table_main_td">From:</td>
+            <td class="table_main_td">@*@Html.CheckBoxFor(m=>m.useDateFrom)*@
+                @*@Html.ViewsOnOff("startdate", Model.useDateFrom)*@
+                @*@Html.TypedTextBoxFor(m=>m.dateFrom,calendarOptions: new CalendarOptions { ShowButtonPanel = true, ShowOn = CalendarOptionsShowOn.button, ButtonImage = "/images/calendar.gif", ButtonImageOnly = true })*@
+                @*@{
+                    var d = Html.DateTimeFor(m => m.dateFrom, dateInCalendar: true);
+                }
+                <input type='checkbox' class="startdate_checkbox"/>
+                <span class="startdate">
+                @d.DateCalendar(inLine: false, calendarOptions: new CalendarOptions { ShowButtonPanel = true, ShowOn = CalendarOptionsShowOn.button, ButtonImage = "/images/calendar.gif", ButtonImageOnly = true }, containerHtmlAttributes: new Dictionary<string, object> { { "isDate", true } })
+                </span>*@
+                @Html.TextBoxFor(m=>m.dateFrom,new { @class = "jquery_datepicker",style="width:85%", @Value = Model.dateFrom.ToString("dd/MM/yyyy") })
+            </td>
+            
+        </tr>
+        <tr>
+            <td class="table_main_td">To:</td>
+            <td class="table_main_td">
+                @* @Html.CheckBoxFor(m=>m.useDateTo)*@
+                @*@Html.ViewsOnOff("enddate", Model.useDateTo)*@
+                @*@Html.TypedTextBoxFor(m=>m.dateTo,calendarOptions: new CalendarOptions { ShowButtonPanel = true, ShowOn = CalendarOptionsShowOn.button, ButtonImage = "/images/calendar.gif", ButtonImageOnly = true })*@
+                @*@{
+                    var d2 = Html.DateTimeFor(m => m.dateTo, dateInCalendar: true);
+                }
+                <input type='checkbox' class="enddate_checkbox"/>
+                <span class="enddate">
+                @d2.DateCalendar(inLine: false, calendarOptions: new CalendarOptions { ShowButtonPanel = true, ShowOn = CalendarOptionsShowOn.button, ButtonImage = "/images/calendar.gif", ButtonImageOnly = true }, containerHtmlAttributes: new Dictionary<string, object> { { "isDate", true } })
+                </span>*@
+               @Html.TextBoxFor(m=>m.dateTo,new { @class = "jquery_datepicker", style="width:85%", @Value = Model.dateTo.ToString("dd/MM/yyyy") })
+            </td>
+            
+        </tr>
+        <tr>
+            <td colspan="2"><input type="submit" value="Submit"/></td>
+        </tr>
+    </table>
+}
+@if (Model.History != null)
+{
+    <table class="table">
+        <tr>
+            <td class="table_headerrow">User</td>
+        </tr>
+        @foreach (var g in Model.History.GroupBy(h=>new {login = h.login_username.Trim(), name = h.userwelcome}))
+        {
+            <tr>
+                <td><a href="javascript:void(0)" onclick="ExpandDetails('@g.Key.login')">@g.Key.name</a></td>
+            </tr>
+            <tr id="tr_@g.Key.login" style="display:none">
+                <td>
+                    <table>
+                        <tr class="table_headerrow">
+                            <td>Date/time of visit</td>
+                            <td>Page</td>
+                            <td>Extra information</td>
+                            <td>Parameters</td>
+                        </tr>
+                        @{ var i = 0;}
+                        @foreach (var d in Model.History.Where(h => h.login_username.Trim() == g.Key.login).OrderBy(h => h.visit_time))
+                        {
+                            <tr class="@(i++% 2 == 0 ? "tablerow" : "tablerow_alt")">
+                                <td>@d.visit_time</td>
+                                <td>@{
+                                        if (!string.IsNullOrEmpty(d.page_description))
+                                        {
+                                            @d.page_description
+                                        }
+                                        else
+                                        {
+                                            @d.visit_page
+                                        }
+                                    }</td>
+                                <td>@{if (!string.IsNullOrEmpty(d.cprod_code1))
+                                      {
+                                          <span>Product: @d.cprod_code1 @d.cprod_name</span>
+                                      }
+                                      else if (!string.IsNullOrEmpty(d.custpo))
+                                      {
+                                          <span>Custpo: @d.custpo </span>
+                                      }
+                                    }</td>
+                                <td>@d.visit_URL</td>
+                            </tr>
+                        }
+                    </table>
+                </td>
+            </tr>
+        }
+    </table>
+}
+
+@section scripts
+{
+@Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    
+    <script type='text/javascript' >
+        //$.validator.setDefaults({
+        //    ignore: "not([data-elementispart]):hidden"
+        //});
+
+        function ExpandDetails(login) {
+            //$('tr[id^="tr_"]').hide();
+            $('tr[id="tr_' + login + '"]').toggle();
+        }
+
+        $(document).ready(function() {
+            //$('input[type="checkbox"]').click(function() {
+            //    if ($(this).attr('name') == 'useDateFrom') {
+            //        if ($(this).is(':checked'))
+            //            $('input[type="text"][name^="dateFrom"]').removeAttr("disabled");
+            //        else {
+            //            $('input[type="text"][name^="dateFrom"]').attr("disabled", "disabled");
+            //        }
+            //    } else {
+            //        if ($(this).is(':checked'))
+            //            $('input[type="text"][name^="dateTo"]').removeAttr("disabled");
+            //        else {
+            //            $('input[type="text"][name^="dateTo"]').attr("disabled", "disabled");
+            //        }
+            //    }
+            //});
+            $('input[name^="date"]').datepicker({
+                showButtonPanel: true,
+                showOn: "button",
+                buttonImage: "/images/calendar.gif",
+                buttonImageOnly: true
+            });
+        });
+    </script>
+    
+    @Html.GlobalizationScript()   
+    
+}

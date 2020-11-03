@@ -1,0 +1,320 @@
+﻿<div class="row" >
+    <div class="col-sm-12">
+        <div class="panel">
+            <header class="panel-heading">
+                <span class="heading-text">
+                    FEEDBACK DISCUSSION
+                </span>
+            </header>
+            <div class="panel-body">
+                <!-- Comment -->
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="form-horizontal">
+                            <div class="form-group-sm">
+                                <label class="control-label col-sm-3 pull-left">Short description</label>
+
+                                <span class="col-sm-7">
+                                    <textarea class="text-areastyle" ng-model="claim.client_comments" rows="2" style="width:100%"></textarea>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <br />
+                <!-- Tick box -->
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="form-horizontal">
+                            <div class="form-group-sm">
+                                <label class="control-label col-sm-3 pull-left">
+                                    What is the category of the issue?
+                                </label>
+                                <div class="col-sm-9">
+                                    <div class="radio-inline " ng-repeat="cat in model.categories | orderBy: '-days' ">
+                                        <label class="radio-inline">
+                                            <input class="radio" type="radio"
+                                                   ng-model="claim.feedback_category_id"
+                                                   name="category" ng-value="cat.feedback_cat_id" />
+                                            <span>{{cat.name}}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="form-horizontal">
+                            <div class="form-group-sm">
+                                <label class="control-label col-sm-3 pull-left">
+                                    What is the urgency of the issue?
+                                </label>
+                                <div class="col-sm-9">
+                                    <div class="radio-inline second-row" 
+                                         ng-repeat="i in model.importances | orderBy: '-days' ">
+                                        <label class="radio-inline ">
+                                            <input class="radio" type="radio" 
+                                                   ng-model="claim.importance_id" 
+                                                   name="importances" 
+                                                   ng-value="i.importance_id" />
+                                            <span>{{i.importance_text}}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="form-horizontal">
+                            <div class="form-group-sm">
+                                <label class="control-label col-sm-3 pull-left">
+                                    Issue type
+                                </label>
+                                <div class="col-sm-9">
+                                    <div class="radio-inline second-row"
+                                         ng-repeat="i in model.issueTypes">
+                                        <label class="radio-inline ">
+                                            <input class="radio" type="radio"
+                                                   ng-model="claim.issue_type_id"
+                                                   name="issueTypes"
+                                                   ng-value="i.id" />
+                                            <span>{{i.name}}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <!-- Comments2 -->
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="form-horizontal">
+                            <div class="form-group-sm">
+                                <label class="control-label col-sm-3 pull-left">Comments</label>
+
+                                <span class="col-sm-7">
+                                    <textarea class="text-areastyle" ng-model="claim.client_comments2" rows="2" style="width:100%" ng-paste="paste($event)"></textarea>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Image -->
+            <div class="panel-body table-responsive">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="form-horizontal">
+                            <div class="form-group-sm">
+                                <label class="control-label col-sm-3 pull-left">
+                                    
+                                        <span id="upload"
+                                           class="btn btn-xs btn-info"
+                                           
+                                           plupload="fileUpload.url"
+                                           plupload-options="fileUpload.options"
+                                           plupload-callbacks="fileUpload.callbacks"
+                                           title="Upload new image">
+                                            <i class="fa fa-upload"></i>
+                                            Upload files
+                                        </span>
+                                    
+                                </label>
+                                <!-- upload files -->
+                                <div class="col-sm-7">
+                                    <div ng-repeat="i in claim.images" style="float:left;margin-right:5px">
+                                        <div style="float:left;">
+                                            <a ng-href="{{getImageUrl(i,1)}}" ng-if="isPicture(i.return_image)" ng-click="openLightboxModal(claim.images,$index)" data-lightbox="images" 
+                                               >
+                                                <span style="max-height:150px">
+                                                    <img ng-src="{{getImageUrl(i,1)}}"
+                                                         title="{{i.return_image}}"
+                                                         class="thumbnail"
+                                                         style="max-height:90px" />
+                                                </span>
+                                            </a>
+                                            <a ng-href="{{getImageUrl(i,1,'return_image')}}" ng-if="!isPicture(i.return_image)" style="cursor: pointer" target="_blank">{{i.return_image}}</a>
+                                            
+                                        </div>
+                                        <div style="float:right;margin-right:5px">
+                                            <a ng-click="removeImage(claim.images,$index)" class="pointer">
+                                                <span class="glyphicon glyphicon-remove"></span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    
+                                    <!--<h4>Progres: {{vm.productListProgress}}</h4>-->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Users -->
+            <div class="panel-body table-responsive">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12">
+                        <div class="form-horizontal">
+                            <div class="form-group-sm">
+                                <label class="control-label col-sm-3 pull-left">
+                                   Subscribers
+                                </label>
+                                <div class="col-sm-9">
+                                    <div ng-if="claim.subscriptions.length>0" class="col-sm-12" style="padding-top:5px; padding-bottom:5px">
+                                        <span ng-repeat="s in claim.subscriptions" 
+                                              ng-class="{'label':true, 'label-default':getClass(s), 'label-inverse':!getClass(s)}" style="margin-right:5px">
+                                            {{s.user.userwelcome}}
+                                            &nbsp;<span  
+                                                        style="color:#fa8564;font-size:14px;cursor:pointer" 
+                                                        class="ion ion-ios7-close-outline"
+                                                        ng-click="removeSubscription($index,false)"></span>
+                                        </span>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        <div class="input-group col-sm-5">
+                                            <span class="input-group-addon"
+                                                  style="font-size:20px;padding-bottom:0;padding-top:1px">
+                                                <i class="ion ion-ios7-personadd"></i>
+                                            </span>
+                                            <input type="text"
+                                                   id="selectSubscriber"
+                                                   name="subscribers"
+                                                   class="form-control"
+                                                   placeholder="Select who to subscribe to this ticket"
+                                                   ng-model="selectedUser"
+                                                   typeahead-append-to-body="true"
+                                                   uib-typeahead="user as user.userwelcome for user in getUsers($viewValue)"
+                                                   typeahead-on-select="addSubscription(false)" />
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <div class="row" style="margin-right:20px;"> 
+                <div class="pull-right">
+                    <div ng-click="update()"
+                         class="btn btn-info">Send feedback</div></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--<div class="row" ng-if="false">
+    <div class="col-sm-12">
+        <div class="panel">
+            <header class="panel-heading tab-bg-dark-navy-blue">
+                <ul class="nav nav-tabs">
+                    <li ng-class="[vm.internal?'active':'']">
+                        <a data-toggle="tab" ng-click="vm.setActive()">
+                            <i class="ion ion-arrow-right-b ">
+                                <i class="ion ion-document-text"></i>
+                            </i> Internal
+                        </a>
+                    </li>
+                    <li ng-class="[vm.external?'active':'']">
+                        <a data-toggle="tab" ng-click="vm.setActive()">
+
+                            <i class="ion ion-arrow-left-b">
+                                <i class="ion ion-document-text"></i>
+                            </i>
+                            External
+                        </a>
+                    </li>
+
+                </ul>
+
+            </header>
+            <div class="panel-body">
+                <div class="tab-content">
+                    <div id="external" class="tab-pane" ng-class="['tab-pane', vm.external ?'active':'' ]">
+                        <div class="panel">
+                            <div class="row">
+                                <div class="col-sm-12 table-responsive">
+                                    <table class="table table-striped" id="tableExternal">
+
+                                        <tr>
+                                            <th><i class="ion ion-ios7-person-outline" style="font-size:13px"></i>&nbsp;User</th>
+                                            <th>
+                                                <i class="ion ion-ios7-calendar-outline"></i>
+                                                <span>&nbsp;Date</span>
+                                            </th>
+                                            <th>
+                                                <i class="ion ion-ios7-albums-outline"></i>
+                                                &nbsp;Comments
+                                            </th>
+                                        </tr>
+                                        <tr ng-repeat="comment in claim.comments|filter: { comments_type:'!1' }">
+                                            <td>{{comment.creator.userwelcome}} {{comment.comments_id}}</td>
+                                            <td>{{comment.comments_date |date}}</td>
+                                            <td>{{comment.comments}}</td>
+                                        </tr>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="internal" ng-class="['tab-pane', vm.internal ?'active':'' ]">
+                        <div class="panel">
+                            <table class="table table-striped" id="tableExternal">
+
+                                <tr>
+                                    <th><i class="ion ion-ios7-person-outline" style="font-size:13px"></i>&nbsp;User</th>
+                                    <th>
+                                        <i class="ion ion-ios7-calendar-outline"></i>
+                                        <span>&nbsp;Date</span>
+                                    </th>
+                                    <th>
+                                        <i class="ion ion-ios7-albums-outline"></i>
+                                        &nbsp;Comments
+                                    </th>
+                                </tr>
+                                <tr ng-repeat="comment in claim.comments|filter: { comments_type:'1' }">
+                                    <td>{{comment.creator.userwelcome}} {{comment.comments_id}}</td>
+                                    <td>{{comment.comments_date |date}}</td>
+                                    <td>{{comment.comments}}</td>
+                                </tr>
+
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>-->
+
+ <!-- Success message -->
+<div class="row" ng-if="vm.showSaved">
+    <div class="col-sm-12">
+        <div class="panel panel-success">
+            <div class="panel-heading" style="text-transform:none;">
+                Thank you for submitting your feedback. Your reference number for this feedback is <span style="font-weight:600" >{{vm.return_no}}</span>. We will come back to you shortly.
+                
+                
+            </div>
+            <div class="panel-footer">
+                <div class="row"><div class="pull-right"><a class="btn btn-success" href="/Claims/ITFeedbacks">Back to list</a></div></div>
+            </div>
+        </div>
+    </div>
+</div>

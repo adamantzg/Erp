@@ -1,0 +1,10 @@
+﻿@model dynamic
+
+
+<h2>Technical data import results</h2>
+
+@{
+    var info = (int[]) ViewBag.RecordChanges;
+}
+The import has finished. The @info[0] records were added, @info[1] updated and @info[2] deleted.<br/>
+@Html.ActionLink("Upload more data", "TechnicalDataImport")

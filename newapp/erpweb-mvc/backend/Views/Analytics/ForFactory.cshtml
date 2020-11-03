@@ -1,0 +1,483 @@
+﻿@model AnalyticsModel
+
+@functions {
+    private string GetImageUrl(string chartname)
+    {
+        return string.Format("{0}{1}", WebUtilities.GetSiteUrl(), Url.Action("Image", new {param = string.Format("{0}_{1}", Model.ChartKey, chartname) + "#" + Settings.Default.StatsKey}));
+    }
+
+    private string GetCountryString()
+    {
+        return Model.CountryFilter == CountryFilter.UKOnly ? "UK" : Model.CountryFilter == CountryFilter.NonUK ? "International" : "";
+    }
+}
+
+@{
+    Layout = null;
+}
+
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Analytics</title>
+        <style type="text/css">
+            body {
+	            font-family:Arial, Helvetica, sans-serif;
+	            margin: 0; /* it's good practice to zero the margin and padding of the body element to account for differing browser defaults */
+	            padding: 0;
+	            text-align: left; /* this centers the container in IE 5* browsers. The text is then set to the left aligned default in the #container selector */
+                position: relative;
+    
+            }
+
+            .oneColFixCtrHdr #container {
+	            width: 980px;  /* using 20px less than a full 800px width allows for browser chrome and avoids a horizontal scroll bar */
+	            background: #FFFFFF;
+	            margin: 0 auto; /* the auto margins (in conjunction with a width) center the page */
+	            border: 1px solid #000000;
+	            text-align: left; /* this overrides the text-align: center on the body element. */
+	            padding-bottom:18px;
+            }
+
+            .oneColFixCtrHdr #mainContent {
+	            padding: 0 20px; /* remember that padding is the space inside the div box and margin is the space outside the div box */
+	            background: #FFFFFF;
+	            text-align: left;
+	            height: 1400px;
+	            overflow: visible;
+	            position:relative;
+            }
+
+            ul {
+	            font-family: Arial, Helvetica, sans-serif;
+	            margin:4px;
+	            padding:0px;
+	            padding-left:12px;
+            }
+
+            li { list-style:circle; 
+            list-style-type: circle;
+            }
+
+            .main_header_section {
+	            width:896px; 
+           
+	            padding-left:2px; 
+	            font-family:Arial, Helvetica, sans-serif; 
+	            color:#000; 
+	            font-size:30px;
+	            border-top:none ;
+                border-right: none;
+                border-left:none;
+                border-bottom:3px #999 solid;
+	
+	            margin-bottom:10px;
+	            /*float:left;*/
+            }
+
+            .main_header_number {
+	            width:60px; 
+	            height:35px; 
+	            float:left; 
+	            font-size:24px; 
+	            color:#999;
+            }
+
+            .main_header_text {
+	            width:836px; 
+	           
+	            float:left; 
+	            font-size:30px; 
+	
+            }
+
+
+
+            .header_section {
+	            width:896px; 
+
+	            height:auto; 
+	            padding-left:2px; 
+	            font-family:Arial, Helvetica, sans-serif; 
+	            color:#000; 
+	            font-size:24px;
+            }
+
+            .header_number {
+	            width:60px;
+	            
+	            float:left;
+	            font-size:24px;
+	            color:#999;
+            }
+
+            .header_title {
+	            
+	            font-size:18px;
+            }
+
+            .sub_title {
+	            text-align:center;
+	            font-size:12px;
+	            font-weight:bold;
+            }
+
+            .sub_title2 {
+	            text-align:center;
+	            font-size:12px;
+	            font-weight:bold;
+            }
+
+            .big_sub_title {
+	            width:900px;
+	            height:auto;
+	            text-align:left;
+	            font-size:12px;
+	            font-weight:bold;
+            }
+
+
+            .graph_footer {
+	            width:900px;
+	            height:40px;
+	            padding-left:0px;
+	            margin-bottom:10px;
+	            font-family:Arial, Helvetica, sans-serif;
+	            color:#000;
+	            font-size:12px;
+	            float:left;
+            }
+
+            .footer {
+	            width:900px;
+	            font-family:Arial, Helvetica, sans-serif;
+	            font-size:11px;
+	            color:#999;
+	            height:18px;
+	            left:20px;
+	            border-top:1px; border-top-color:#333; border-top-style:solid;
+            }
+
+
+            .header_notes {
+	            
+	            font-size:12px;
+	            color:#666;
+            }
+
+            .normal_body {
+	            font-family:Arial, Helvetica, sans-serif;
+	            font-size:12px;
+	            color:#333;
+            }
+            .summary {
+                background-color: #CCCCCC;
+                width:900px;
+                border-width: 0;
+                font-size:14px; 
+                font-weight:bold; 
+                border:1px; 
+                border-style:solid;
+                 border-color:#333;
+            }
+
+            .image {
+                width: 900px
+            }
+            .clienttable_header {
+                background-color: #B9C9FE; 
+                color:#4033AC
+            }
+            .clienttable_footer {
+                background-color: #CCC; 
+                color:#4033AC
+            }
+
+            .clienttable {
+                width: 900px;
+                border: 0;
+                padding: 3px;
+                border-spacing: 0;
+                font-family:Arial, Helvetica, sans-serif;
+                font-size:11px;
+            }
+            .producttable {
+                width: 840px;
+                border: 0;
+                padding: 3px;
+                border-spacing: 0;
+                font-family:Arial, Helvetica, sans-serif;
+                font-size:11px;
+            }
+            .number { text-align: right;}
+            .percent { font-size: 14px;font-weight: bold}
+            .rightborder {border-right: 1px solid blue}
+            .rightbordernumber { border-right: 1px solid blue;text-align: right}
+            .bheader {width:42px}
+            .fheader {width: 30px}
+            .alternaterow {background-color: #DDD}
+        </style>
+    </head>
+    <body>
+        
+        <table style="width:900px;border-width: 0">
+            <tr>
+                <td style="width:140px;height: 85px;vertical-align: top" >&nbsp;</td>
+                <td align="center" valign="top"><img src="@WebUtilities.GetSiteUrl()/Images/Logo.jpg" style="width:300px" /></td>
+                <td style="width:140px;height: 85px;text-align: right;vertical-align: top" class="normal_body">Page 1<br />
+                    @DateTime.Today.ToLongDateString()</td>
+            </tr>
+        </table>
+        <div class="main_header_section" >@((Model.Factories.Count > 1 ? "Analysis for factories: " : "Analysis for factory: ") + string.Join(",",Model.Factories.Select(f=>f.factory_code)))</div>
+       
+        <!-- footers-->
+        
+        
+        <!-- SALES - PAGE 1-->
+        <div id="mainContent">
+           
+            @{
+                var sections = new List<ReportSection>
+                    {
+                        new ReportSection
+                            {
+                                Name = "sales",
+                                Subsections = new List<ReportSection>(new[]
+                                    {
+                                        new ReportSection {Name = "sales by month"},
+                                        new ReportSection {Name = "sales by country"},
+                                        new ReportSection {Name = "total orders"},
+                                        new ReportSection {Name = "top 15"}
+                                        
+                                    })
+                            }
+                    };
+
+                //remove excluded
+                var excluded = new List<ReportSection>();
+                
+                foreach (var s in sections)
+                {
+                    if (Model.ExcludedSections.Contains(s.Name))
+                    {
+                        excluded.Add(s);
+                    }
+                    else
+                    {
+                        foreach (var subsec in s.Subsections)
+                        {
+                            if (!Model.ExcludedSections.Contains(subsec.Name))
+                            {
+                                continue;
+                            }
+                            subsec.Parent = s;
+                            excluded.Add(subsec);
+                        }
+                    }
+
+                }
+                foreach (var s in excluded)
+                {
+                    if (s.Parent == null)
+                    {
+                        sections.Remove(s);
+                    }
+                    else
+                    {
+                        s.Parent.Subsections.Remove(s);
+                    }
+                }
+            
+                var section = sections.FirstOrDefault(s => s.Name == "sales");
+                var sectionOrder = sections.FindIndex(s => s.Name == "sales")+1;
+
+                //var currMonthSpan = string.Format("{0} to {1}", ViewBag.to.AddMonths(-12).ToString("MMM yyyy"), ViewBag.to.AddMonths(-1).ToString("MMM yyyy"));
+                //var prevMonthSpan = string.Format("{0} to {1}", ViewBag.to.AddMonths(-24).ToString("MMM yyyy"), ViewBag.to.AddMonths(-13).ToString("MMM yyyy"));
+            }            
+            
+            @if (section != null)
+            {
+                
+                var subName = "sales by month";
+                var sub = section.Subsections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}",sectionOrder,section.Subsections.FindIndex(s=>s.Name == subName)+1)</td>
+                            <td class="header_title">Total sales at factory price</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td class="header_notes">
+                                <ul>
+                                    <li>Items to the right of the dashed line represent non-closed months and are susceptible to change.</li>
+                                    <li>Excludes spares orders</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="image" >
+                        <img src="@GetImageUrl(string.Format("{0}_Chart_SalesByMonth", Model.Factories[0].factory_code))"/>
+                    </div>
+                }
+                //subName="sales by manufacturers ",
+                
+                subName = "sales by country";
+                sub = section.Subsections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}",sectionOrder,section.Subsections.FindIndex(s=>s.Name == subName)+1)</td>
+                            <td class="header_title">sales by country</td>
+                        </tr>
+                    </table>
+
+                    <table class="clienttable">
+                        <tr class="clienttable_header">
+                            <td style="width: 300px" >Country</td>
+                            <td style="width: 90px; text-align: right">current<br> 
+                                                                              12m Sales</td>
+                            <td style="width: 60px; text-align: right">% of total</td>
+                            <td style="width: 90px; text-align: right">previous<br> 
+                                                                               12m Sales</td>
+                            <td style="width: 60px; text-align: right" >% of total</td>
+                            <td style="width: 70px; text-align: right" >Change in sales</td>
+                    
+                        </tr>
+                    
+                        @{
+                            var currData = Model.CurrentCountrySalesData.OrderByDescending(d => d.Amount).ToList();
+                            var currtotal = currData.Sum(d => d.Amount);
+                            var previousTotal = Model.PreviousCountrySalesData.Sum(d => d.Amount);
+                            int i;
+                            }
+                        
+                        @for (i = 0; i < currData.Count; i++)
+                        {
+                            var data = currData[i];
+                            var previousData = Model.PreviousCountrySalesData.FirstOrDefault(d => d.user_country == currData[i].user_country);
+                            <tr style="background-color: @(i % 3 == 1 ? "#FFFFFF" : i % 3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+                                <td>
+                                    @data.country_name
+                                </td>
+                                <td style="text-align: right">@data.Amount.ToString("N0")</td>
+                                <td style="text-align: right">@((data.Amount / currtotal).ToString("P0"))</td>
+                                <td style="text-align: right">@(previousData != null ? previousData.Amount.ToString("N0") : string.Empty)</td>
+                                <td style="text-align: right">@(previousData != null && previousTotal > 0 ? (previousData.Amount / previousTotal).ToString("P0") : string.Empty)</td>
+                                <td style="text-align: right">@(previousData != null ? ((data.Amount - previousData.Amount) / previousData.Amount).ToString("+#0%;-#0%") : "+100%")</td>
+                            </tr>
+                            
+                        }
+                        <tr style="background-color: @(i % 3 == 1 ? "#FFFFFF" : i % 3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+                            <td><b>Total</b></td>
+                            <td style="text-align: right;"><b>@currtotal.ToString("N0")</b></td>
+                            <td ></td>
+                            <td style="text-align: right"><b>@previousTotal.ToString("N0")</b></td>
+                            <td></td>
+                            <td style="text-align: right;">@(previousTotal > 0 ? ((currtotal - previousTotal) / previousTotal).ToString("+#0%;-#0%") : "+100%")</td>
+                        </tr>
+                    
+                    </table>
+                
+                }
+                
+                subName = "total orders";
+                sub = section.Subsections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}",sectionOrder,section.Subsections.FindIndex(s=>s.Name == subName)+1)</td>
+                            <td class="header_title">total Orders</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td class="header_notes">
+                                <ul>
+                                    <li>Items to the right of the dashed line represent non-closed months and are susceptible to change.</li>
+                                    <li>Excludes spares orders</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="image" >
+                        <img src="@GetImageUrl(string.Format("{0}_Chart_OrdersByMonth",Model.Factories[0].factory_code))"/>
+                    </div>
+
+                    <br style="page-break-before: always"/>
+                }
+                
+                subName = "top 15";
+                sub = section.Subsections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+
+
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}",sectionOrder,section.Subsections.FindIndex(s=>s.Name == subName)+1)</td>
+                            <td class="header_title">Top 15 selling products</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td class="header_notes">
+                                <ul>
+                                    <li>Excludes spares</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div style="width: 900px">
+                        <table class="producttable">
+                            <tr class="clienttable_header">
+                                <td colspan="2"></td>
+                                <td colspan="2" style="text-align: center">last 12 months</td>
+                                <td colspan="2" style="text-align: center">previous 12 months</td>
+                                <td>&nbsp;</td>
+                            </tr>
+
+                            <tr class="clienttable_header">
+                                <td style="width: 90px; height: 30px">Code</td>
+                                <td >Description</td>
+                                <td style="width: 70px;text-align: right">Sales</td>
+                                <td style="width: 70px;text-align: right">Units</td>
+                                <td style="width: 70px;text-align: right">Sales</td>
+                                <td style="width: 70px;text-align: right">Units</td>
+                                <td style="width: 70px;text-align: right">% change</td>
+                            </tr>
+                            @{ var prodSales = Model.CurrentProductSalesData.OrderByDescending(s => s.Amount).Take(15).ToList(); }
+                            @for (int i = 0; i < prodSales.Count; i++)
+                            {
+                                var prod = prodSales[i];
+                                var previousProd = Model.PreviousProductSalesData.FirstOrDefault(p => p.cprod_code == prod.cprod_code);
+                                <tr style="background-color: @((i + prodSales.Count)%3 == 1 ? "#FFFFFF" : (i + prodSales.Count)%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+                                    
+                                    <td style="height: 30px">@prod.cprod_code.Substring(0, Math.Min(10, prod.cprod_code.Length))</td>
+                                    <td>@prod.cprod_name.Substring(0, Math.Min(34, prod.cprod_name.Length))</td>
+                                    <td style="text-align: right">@prod.POAmountGBP.ToString("N0")</td>
+                                    <td style="text-align: right">@prod.numOfUnits.ToString("N0")</td>
+                                    <td style="text-align: right">@(previousProd != null ?  previousProd.POAmountGBP.ToString("N0") : "")</td>
+                                    <td style="text-align: right">@(previousProd != null ? previousProd.numOfUnits.ToString("N0") : "")</td>
+                                    <td style="text-align: right">@(previousProd != null && previousProd.POAmountGBP > 0 ? (prod.POAmountGBP/previousProd.POAmountGBP).ToString("P1") : "")</td>
+                                </tr>
+                            }
+                        </table>
+                        
+                    </div>
+                }
+            }
+            
+        </div>
+        
+        <div class="footer">
+            All data contained within this document is the property of Big Company (Jersey), and is strictly confidential and is prohibited from distribution without written consent.
+        </div>
+
+         
+    </body>
+</html>

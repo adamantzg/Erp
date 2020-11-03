@@ -1,0 +1,53 @@
+﻿<div loading class="loading-dialog"></div>
+<h2 ng-if="types.showTest"> {{ctrlName}} - dealerIndexView.html 2</h2>
+<section class="panel general">
+    <header class="panel-heading tab-bg-dark-navy-blue">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a data-toggle="tab" href="#dealers">DEALERS</a>
+            </li>
+            <li class="">
+                <a data-toggle="tab" href="#call" ng-click="getLogs()">CALL LOGS</a>
+            </li>
+            <li class="">
+                <a data-toggle="tab" href="#orders" ng-click="getOrders()">ORDERS</a>
+            </li>
+            <li class="">
+                <a data-toggle="tab" href="#claims">CLAIMS</a>
+            </li>
+            <li ng-show="brsLink">
+                <a ng-href="{{brsLink}}">BRS</a>
+            </li>
+            <li >
+                <a data-toggle="tab" ng-href="#tasks">TASKS</a>
+            </li>
+        </ul>
+    </header>
+    <div class="panel-body">
+        <div class="tab-content">
+            <div id="dealers" class="tab-pane active">
+                <div class="panel-body">
+                    <div ng-include="'AngularApps/DealerUSA/dealers/dealerOnlyListView7.html'"></div>
+                </div>
+            </div>
+            <div id="call" class="tab-pane">
+                <div ng-include="'AngularApps/DealerUSA/dealers/dealerListOnlyCallsView1.html'"></div>
+            </div>
+            <div id="orders" class="tab-pane">
+                <div ng-include="'AngularApps/DealerUSA/dealers/dealerListOnlyOrders3.html'"></div>
+
+            </div>
+            <div id="claims" class="tab-pane">
+
+                <div ng-include="'AngularApps/DealerUSA/dealers/dealerListOnlyFeedbacksView7.html'"></div>
+
+            </div>
+            <div id="tasks" class="tab-pane">
+
+                <div ng-controller="logsStatus" ng-include="'AngularApps/DealerUSA/dealers/logsStatus1.html'"></div>
+
+            </div>
+        </div>
+    </div>
+
+</section>

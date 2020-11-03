@@ -1,0 +1,36 @@
+<section class="panel panel-primary">
+
+    <header class="panel-heading">
+        Criteria
+    </header>
+
+	<div class="panel-body">
+        <app-errormessage [errorMessage]="errorMessage" ></app-errormessage>
+		<div class="row">
+			<div class="form col-lg-4">
+				<div class="form-group">
+					<label>
+						Factory:
+					</label>
+					<select class="form-control" [(ngModel)]="model.factoryId">
+                        <option value="">(Any)</option>
+                        <option *ngFor="let f of model.factories" [value]="f.user_id">{{f.factory_code}}</option>
+                    </select>
+				</div>
+			</div>
+			<div class="form col-lg-4" *ngIf="showCategories">
+				<div class="form-group">
+					<label>
+						Category:
+					</label>
+					<select class="form-control" [(ngModel)]="model.categoryId">
+                        <option value="">(Any)</option>
+                        <option *ngFor="let c of model.categories" [value]="c.category1_id">{{c.cat1_name}}</option>
+                    </select>
+				</div>
+			</div>
+        </div>
+        <button class="btn btn-primary" (click)="onButtonClick('filter')">Filter</button> 
+        <button *ngIf="showReset" class="btn btn-default ml-2" (click)="onButtonClick('reset')">Reset filter</button>
+    </div>
+</section>

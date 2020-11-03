@@ -1,0 +1,41 @@
+﻿<div class="panel-body" style="padding:0!important; overflow:scroll">
+    <ul class="list-group">
+        <li class="list-group-item">
+            <div class="list-group-text">
+                <strong style="width:40%;display:inline-block">Recheck date</strong>
+                <span style="width:55%;display:inline-block" ng-bind="vm.resolved.recheck_date|date"></span>
+            </div>
+        </li>
+        <li class="list-group-item">
+            <div class="list-group-text">
+                <strong style="width:40%;display:inline-block">Resolution</strong>
+                <span style="width:55%;display:inline-block" ng-bind="vm.resolved.client_comments2"></span>
+            </div>
+        </li>
+        <li class="list-group-item">
+            <div class="list-group-text">
+                <strong style="width:40%;display:inline-block">Recheck OK</strong>
+               
+                <span class="badge" style="font-size:14px" ng-class="vm.status()=='OK'?'badge-success':'badge-default'" ng-bind="vm.status()"></span>
+            </div>
+        </li>
+        <li class="list-group-item">
+            <div class="list-group-text">
+                <strong style="width:40%;display:inline-block">Photos</strong>
+                <span class="badge badge-default" style="font-size:14px" ng-bind="vm.images.length"></span>
+                <span style="width:90%;display:inline-block">
+                    <span style="display:inline-block" ng-repeat="image in vm.images">
+
+                        <img ng-if="!vm.isPdf(image)"
+                             class="img-thumbnail"
+                             ng-src="{{image.return_image}}" style="float:left;margin-left:10px;max-width:78%;margin-top:10px" />
+                        <!--<i class="fa fa-remove delete-image-rounded" ng-click="vm.deletePhoto($index,image.name)"></i>-->
+                        <img ng-if="vm.isPdf(image)" ng-click="vm.openPdf(image)" class="img-thumbnail" style="max-width:70%;margin-left:20%"
+                             src="../../../Images/pdf-large.png"/>
+                    </span>
+                </span>
+            </div>
+        </li>
+
+    </ul> 
+</div>

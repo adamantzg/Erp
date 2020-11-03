@@ -1,0 +1,70 @@
+<div class="row">
+    <div class="col-sm-3">
+        <div class="pull-right">
+            <div class="input-group input-group-sm">
+                <span class="input-group-addon">
+                    <i class="ion ion-search search-icon"></i>
+                </span>
+                <input [(ngModel)]="filtertext" class="form-control">
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-9">
+        <div class="pull-right">
+            <a routerLink="/dealers/create" class="btn btn-primary" style="color:white">
+                   Create New Dealer 
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row table-row">
+    <div class="col-sm-12">
+        <table class="table table-condensed table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Dealer Name
+                    </th>
+                    <th>
+                        Address
+                    </th>
+                    <th>
+                        Postcode
+                    </th>
+                    <th>
+                        Status
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let dealer of dealers | dealerFilterPipe:filtertext ">
+                    <td>
+                        <a routerLink="/dealers/edit/{{dealer.user_id}}">
+                            <i class="ion ion-link"></i>&nbsp;
+                        </a>
+                        <a routerLink="/dealers/edit/{{dealer.user_id}}">
+                            <span [innerHTML]="dealer.user_name"></span>
+                        </a>
+                        <!--  [routerLink]="['edit/13016']"  -->
+                    </td>
+                    <td>
+                        <span *ngIf="!!dealer.user_address1"> {{ dealer.user_address1}}</span>
+                        <span *ngIf="!!dealer.user_address2">, {{ dealer.user_address2}}</span>
+                        <span *ngIf="dealer.user_address3 !== '  '">, {{ dealer.user_address3}}</span>
+                        <span *ngIf="dealer.user_address4 !== '  '">, {{ dealer.user_address4 }}</span>
+                        <span *ngIf="dealer.user_address5 !== '  '">, {{ dealer.user_address5 }}</span>
+                    </td>
+                    <td>{{dealer.postcode}}</td>
+                    <td>
+                        <i class="ion ion-record pull-left" [ngClass]="{'text-success':dealer.hide_1 === 1, 'text-danger':dealer.hide_1 === 0}"></i>
+                        <span class="pull-left" style="margin-left:2px">
+                            &nbsp;{{dealer.hide_1 > 0 ? '':'not'}} live
+                        </span>
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

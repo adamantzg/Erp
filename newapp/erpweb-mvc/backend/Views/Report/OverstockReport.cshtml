@@ -1,0 +1,59 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Overstock alert</title>
+    <style>
+        thead tr {
+            font-weight: bold;
+        }
+
+        td, th {
+            border: 1px solid black;
+            padding: 3px;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+    @{
+        var rows = (ViewBag.Rows as List<OverstockReportRow>);
+    }
+    <div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Factory</th>
+                    <th>Code</th>
+                    <th>Description</th>
+                    <th style="text-align:right">UK stock</th>
+                    <th style="text-align:right">Next 12 months forecast</th>
+                    <th style="text-align:right">On order quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in rows)
+                {
+                    <tr>
+                        <td>@r.factory_code</td>
+                        <td>@r.cprod_code1</td>
+                        <td>@r.cprod_name</td>
+                        <td style="text-align:right">@r.cprod_stock</td>
+                        <td style="text-align:right">@r.forecast_qty</td>
+                        <td style="text-align:right">@r.on_order_qty</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

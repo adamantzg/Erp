@@ -1,0 +1,25 @@
+﻿
+<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        <h1 class="page-header text-center">
+            {{title}}
+           <!-- DEALER MANAGEMENT-->
+        </h1>
+        <ol class="breadcrumb" style="display:none">
+            <li ng-if="root.indexOf('claims')>-1">
+                <i class="fa fa-list"></i> <a ui-sref="claims"> Claim List</a>
+            </li>
+            <li ng-if="root.indexOf('detail')>-1">
+                <i class="fa fa-users"></i> <a ui-sref="list"> Dealer List</a>
+            </li>
+
+            <li>
+                <i class="fa fa-edit" ng-show="!!breadLink"></i><a>{{breadLink}}.</a>
+            </li>
+        </ol>
+        <!--<div class="btn-group nav-btn" style="float:left;" ng-if="breadLink.indexOf('Claims List') > -1 || breadLink.indexOf('Dealer List')>-1">
+            <button class="btn create_new btn-default" style="width:150px" ui-sref="list" ui-sref-active="active"><i class="fa fa-group"  style="margin-right:10px"></i>Dealer List</button>
+            <button class="btn create_new btn-default" style="width:150px" ui-sref="claims" ui-sref-active="active"><i class="fa fa-list" style="margin-right:10px"></i>Claims List</button>
+        </div>-->
+    </div>
+</div>

@@ -1,0 +1,725 @@
+﻿@model backend.Models.OrderExportModel
+
+@{
+	ViewBag.Title = "ExportCriteria";
+}
+
+
+<h2>Order Management Export</h2>
+
+@using (Html.BeginForm("OMExport", "Order", FormMethod.Post, new { id = "mainForm" }))
+{
+	@Html.ValidationSummary(true)
+
+	if (!Model.IsCurrentUserFactoryUser)
+	{
+		<div class="row bordered">
+			<div class="col-md-12">
+				<div class="form-inline">
+					<label class="form-check-label mr-2">Location:</label>
+					<div class="form-check form-check-inline" >
+						@Html.RadioButtonFor(m => m.location_id, 0, new { @class="form-check-input"})
+						<label class="form-check-label">All</label>
+					</div>
+					@foreach (var l in Model.Locations.OrderBy(l => l.Name))
+					{
+						<div class="form-check form-check-inline">
+							@Html.RadioButtonFor(m => m.location_id, l.id, new { @class="form-check-input"}) 
+							<label class="form-check-label">
+								@l.Name
+							</label>
+						</div>						
+					}
+					
+				</div>
+			</div>
+		</div>
+
+	}
+
+	<div class="row bordered">
+		<div class="col-md-4 form-inline">			
+			<label class="mr-2">Factories:</label>
+			@if (!Model.IsCurrentUserFactoryUser || Model.Factories.Count > 1)
+			{
+				@Html.DropDownList("factory", new SelectList(Model.Factories, "user_id", "factory_code"), 
+			   new { multiple = true, @class = "form-control ml-2" })
+			}
+			else
+			{
+				<span>@(string.Join(",", Model.Factories.Select(f => f.factory_code)))</span>
+				@Html.Hidden("factory", string.Join(",", Model.Factories.Select(f => f.user_id)))
+			}
+			@Html.HiddenFor(m => m.factoryids)
+			@Html.HiddenFor(m => m.IsCurrentUserFactoryUser)
+			
+		</div>
+		<div class="col-md-4 form-inline">
+			<div class="form-group">
+				<label>Client: </label>
+				@{
+					var clientList = Model.Clients;
+					if (clientList == null)
+					{
+						clientList = new List<Company>();
+					}
+					clientList.Insert(0, new Company { user_id = -1, customer_code = "Brands" });
+				}
+				@Html.DropDownListFor(m => m.client_id, 
+			   new SelectList(clientList, "user_id", "customer_code"), "All", 
+			   new { @class = "form-control ml-2 mr-2", style="max-width:30%" })
+				<span id="divBrand">
+					Brand: @Html.DropDownListFor(m => m.brand_user_id, new SelectList(Model.Brands, "user_id", "brandname"), "All",
+new { @class = "form-control ml-2" })
+				</span>
+				<span id="divXYBrand" style="display:none">
+					Brand: @Html.DropDownList("cboXYBrand", 
+					new SelectList(Model.CWBrands, "brandname", "brandname"), 
+					new { multiple = true, @class = "form-control ml-2" })
+				</span>
+			</div>
+		</div>
+		<div class="col-md-4 ">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.MonthlySummary, new { @class = "form-check-input" })
+				<label class="form-check-label">Monthly summary</label>
+			</div>
+			@{ 
+				var radios = new List<Lookup>
+				{
+					new Lookup {Id = (int) MonthSummaryBy.ETD, Title = "ETD"},
+					new Lookup {Id = (int) MonthSummaryBy.ETA, Title = "ETA"},
+					new Lookup {Id = (int) MonthSummaryBy.OrderDate, Title = "Order date"}
+				};
+				foreach(var r in radios)
+				{
+					<div class="form-check form-check-inline">
+						@Html.RadioButtonFor(model => model.MonthlySummaryBy, r.Id, new { @class = "form-check-input" })
+						<label class="form-check-label">@r.Title</label>
+					</div>
+				}
+			}			
+		</div>
+	</div>
+
+	<div class="row bordered">
+		<div class="col-md-4 form-inline">
+			<label>ETD from:</label>
+			<div class="input-group mb-2 mr-sm-2 date">
+				@Html.TextBoxFor(m => m.ETD_From, "{0:d}", new { @class = "form-control ml-2" })
+				
+			</div>
+		</div>
+		<div class="col-md-4 form-inline">			
+			<label>ETD to:</label>
+			<div class="input-group mb-2 mr-sm-2 date">
+				@Html.TextBoxFor(m => m.ETD_To, "{0:d}", new { @class = "form-control ml-2" })
+				
+			</div>		
+		</div>
+		<div class="col-md-4">			
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.Dimensions, new { @class = "form-check-input" })			
+				<label class="form-check-label">Dimensions:</label>
+			</div>			
+		</div>
+	</div>
+
+	<div class="row bordered">
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.IncludeSpares, new { @class = "form-check-input" })
+				<label class="form-check-label"> Include spares</label>
+			</div>			
+		</div>
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.OrderBySeqNumber, new { @class = "form-check-input" })
+				<label class="form-check-label"> products order by seq number</label>
+			</div>			
+		</div>
+		<div class="col-md-4">
+			<div class="form-inline">
+				<label class="mr-2">Type of orders: </label>
+				@Html.DropDownListFor(m => m.OrderType, new SelectList(Model.OrderTypeList, "id", "value", OrderExportModel.OrderTypeRegular), "All", new { @class = "form-control" })
+			</div>
+		</div>
+	</div>
+
+	<div class="row bordered">
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.IncludeSalesForecast, new { @class = "form-check-input" })
+				<label class="form-check-label"> Sales forecast(C1/D1/D2/E4/F1 only)</label>
+			</div>			
+		</div>
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.IncludeSalesHistory, new { @class = "form-check-input" })
+				<label class="form-check-label"> Sales history(C1/D1/D2/E4/F1 only)</label>
+			</div>			
+		</div>
+		<div class="col-md-4">
+			<div class="form-inline">
+				<label class="mr-2">Order by:</label>
+				@Html.DropDownListFor(m => m.OrderBy, new SelectList(Model.OrderByList, ExportOrderBy.ETD), new { @class = "form-control" })
+			</div>
+		</div>
+	</div>
+	<div class="row bordered">
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.ShowTotalsAfterOrders, new { @class = "form-check-input" })
+				<label class="form-check-label"> Show totals after orders</label>
+			</div>			
+		</div>
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.HighlightLowForecasts, new { @class = "form-check-input" })
+				<label class="form-check-label"> Highlight low forecasts</label>
+			</div>			
+		</div>
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.ShowSales, new { @class = "form-check-input" })
+				<label class="form-check-label"> Show 6 months sales</label>
+			</div>			
+		</div>
+	</div>
+	<div class="row bordered">
+		<div class="col-md-4 form-inline">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.IncludeDiscontinued, new { @class = "form-check-input" })
+				<label class="form-check-label"> Show discontinued</label>
+			</div>
+			
+		</div>
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.ListOnlyOutOfStock, new { @class = "form-check-input" })
+				<label class="form-check-label"> <span id="spListOnlyOutOfStock" style="display: @(Model.IncludeSalesForecast ? "block" : "none")">Show only out of stock</span></label>
+			</div>			
+		</div>
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.ShowBrandRangeColumn, new { @class = "form-check-input" })
+				<label class="form-check-label"> Show brand/range</label>
+			</div>			
+		</div>
+	</div>
+	<div class="row bordered">
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.ShowSpecialComments, new { @class = "form-check-input" })
+				<label class="form-check-label"> Show special comments</label>
+			</div>			
+		</div>
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.ShowFactoryCode, new { @class = "form-check-input" })
+				<label class="form-check-label"> Show factory code</label>
+			</div>			
+		</div>
+		<div class="col-md-4">
+			@if (Model.EnableContainerPriceSelection)
+			{
+				<div class="form-check form-check-inline">
+					@Html.CheckBoxFor(model => model.ShowContainerPrice, new { @class = "form-check-input" })
+					<label class="form-check-label"> Show container price</label>
+				</div>				
+			}
+		</div>
+	</div>
+	<div class="row bordered">
+		<div class="col-md-4">
+			<div class="form-check form-check-inline" id="showSparesHistory">
+				@Html.CheckBoxFor(model => model.ShowHistoryForSpares, new { @class = "form-check-input" })
+				<label class="form-check-label"> <span id="showSparesHistory" style="display:@(Model.IncludeSpares ? "block" : "none")">Show history/forecast for spares:</span></label>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@Html.CheckBoxFor(model => model.IncludeBookedInOrders, new { @class = "form-check-input" })
+				<label class="form-check-label"> Include booked-in orders</label>
+			</div>			
+		</div>
+		<div class="col-md-4">
+			<div class="form-check form-check-inline">
+				@if (Model.EnableExtraValueFieldsSelection)
+				{
+					@Html.CheckBoxFor(model => model.ShowExtraValueFields, new { @class = "form-check-input" })
+					<label class="form-check-label"> Show extra fields</label>
+				}
+				else
+				{
+					@Html.CheckBoxFor(model => model.Last12mClientBreakdown, new { @class = "form-check-input" })
+					<label class="form-check-label"> Last 12m per client</label>
+				}
+			</div>
+		</div>
+	</div>
+	<div class="row bordered">
+		@if (Model.EnableExtraValueFieldsSelection)
+		{
+			<div class="col-md-4">
+				<div class="form-check form-check-inline">
+					@Html.CheckBoxFor(model => model.Last12mClientBreakdown, new { @class = "form-check-input" })
+					<label class="form-check-label"> Last 12m per client</label>
+				</div>				
+			</div>
+			<div class="col-md-4">
+				<div class="form-inline">
+					<label>Date format:</label>
+					@Html.DropDownListFor(m => m.DateFormat, new SelectList(Model.DateFormats), new { @class = "form-control" })
+				</div>				
+			</div>
+			<div class="col-md-4"></div>
+		}
+		else
+		{
+			<div class="col-md-4">
+				<div class="form-inline">
+					<label class="mr-2">Date format:</label>
+					@Html.DropDownListFor(m => m.DateFormat, new SelectList(Model.DateFormats), new { @class = "form-control" })
+				</div>				
+			</div>
+			<div class="col-md-8"></div>
+		}
+
+	</div>
+	<div class="row bordered">
+		<div class="col-md-8">
+			<div class="form-group row">
+				<label class="col-sm-2">Order codes:</label>
+				<div class="col-sm-10">
+					@Html.TextBoxFor(m => m.POCriteria, new { @class = "form-control" })
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-2">Products:</label>
+				<div class="col-sm-10 input-group" style="padding-left: 15px">
+					<input id="txtProductSearch" name="txtProductSearch" type="text" class="form-control" style="width:90%" />
+					<span class="input-group-btn" style="display: inline-block">
+						<button type="button" class="btn btn-primary" value="Search" onclick="ProductSearch()">Search</button>
+					</span>
+
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<table style="width: 100%" id="tblResults">
+				<thead>
+					<tr>
+						<th style="width:85px">MFG Code</th>
+						<th style="width: 70px">Client code</th>
+						<th>Description</th>
+						<th style="width: 20px" class="dt-body-center"><input type="checkbox" id="checkall" name="checkall" checked /></th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+	</div>
+	<button type="submit" value="Export" class="btn btn-success" onclick="return CheckProducts()">Export</button>
+	@*
+
+		<tr>
+			<td></td>
+			<td colspan="5">
+				<div id="cw_options" style="display: none;font-weight: normal">
+					Incl. products: <input type="radio" name="cw" value="0" checked="checked"/> All <input type="radio" name="cw" value="1"/> BS only  <input type="radio" name="cw" value="2"/> non-BS
+				</div>
+				<table style="width: 100%" id="tblResults">
+					<thead>
+					<tr>
+						<th style="width:85px">MFG Code</th>
+						<th style="width: 70px">Client code</th>
+						<th>Description</th>
+						<th style="width: 20px" class="dt-body-center"><input type="checkbox" id="checkall" name="checkall" checked/></th>
+					</tr>
+					</thead>
+
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td colspan="5">
+				<input type="submit" value="Export" onclick="return CheckProducts()"/>
+			</td>
+		</tr>*@
+	@Html.HiddenFor(m => m.Excel)
+
+}
+
+@section head
+{
+	@*@Styles.Render("~/bundles/bootstrapStyle")
+		<link href="~/Scripts/bootstrap-multiselect/Css/bootstrap-multiselect.css" rel="stylesheet" />*@
+	<link href="~/Content/DataTables/css/jQuery.datatables.css" rel="stylesheet" />
+	@Styles.Render("~/Content/themes/smoothness/css")
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.css" 
+		  integrity="sha256-bLNUHzSMEvxBhoysBE7EXYlIrmo7+n7F4oJra1IgOaM=" crossorigin="anonymous" />
+	<link href="~/Scripts/jquery-multiselect/jquery.multiselect.css" rel="stylesheet" />
+	<link href="~/Scripts/jquery-multiselect/jquery.multiselect.filter.css" rel="stylesheet" />	
+	<style>
+		label {
+			font-size: 1em;
+			font-weight: normal;
+		}
+
+		.bordered {
+			border-bottom: 1px solid #E0E0E0;
+			padding-top: 2px;
+			padding-bottom: 2px;
+		}
+	</style>
+}
+
+
+@section Scripts {
+	@Scripts.Render("~/bundles/globalize")
+	@Scripts.Render("~/bundles/jqueryval")
+	@Scripts.Render("~/bundles/jqueryui")
+	@Scripts.Render("~/bundles/jquery-multiselect")
+	@Scripts.Render("~/bundles/Datatable")
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+	
+	<script type='text/javascript'>
+		
+
+	</script>
+
+	@Html.GlobalizationScript()
+
+
+	<script type="text/javascript">
+
+        function PrepareDate(dmyDate) {
+            var arr = dmyDate.split('/');
+            return arr[2] + '/' + arr[1] + '/' + arr[0];
+        }
+
+        function ProductSearch() {
+            dt.ajax.reload();
+
+            //$('#productsList').show();
+        }
+
+        function CollectParameters()
+        {
+            var loc = $('[name="location_id"]:checked').val();
+            if (loc == 0)
+                loc = null;
+            var analysis_d = $('[name="cboXYBrand"]').val();
+            if (analysis_d != null)
+                analysis_d = analysis_d.join(',');
+            var client_id = $('#client_id').val();
+            if (client_id != "45" && client_id != "55")
+                analysis_d = '';
+
+            var sFactoryIds = '';
+            var factoryIds = $('#factory').val();
+            @if(!Model.IsCurrentUserFactoryUser || Model.Factories.Count > 1)
+            {
+                @:if(factoryIds != null)
+                @:sFactoryIds = factoryIds.join(',');
+            }
+            else
+            {
+                @:sFactoryIds = factoryIds;
+            }
+
+            var data = {
+                location_id: loc,
+                factory_ids: sFactoryIds,
+                client_id: client_id,
+                text: $('#txtProductSearch').val().length > 0 ? escape($('#txtProductSearch').val()) : '',
+                spares: $('#IncludeSpares').attr('checked') == 'checked',
+                discontinued: $('#IncludeDiscontinued').attr('checked') == 'checked',
+                analysis_d: analysis_d,
+                brand_user_id: $('#brand_user_id').val()
+            };
+            return data;
+        }
+
+        var dt;
+
+        $(document)
+            .ready(function() {
+                $('#factory')
+                    .change(function () {
+
+                        LoadClients($('#factory').val(), true);
+                    });
+				$('#ETD_From').datepicker({
+					dateFormat: 'dd/mm/yy'
+				});
+				$('#ETD_To').datepicker({
+					dateFormat: 'dd/mm/yy'
+				});
+                dt = $('#tblResults').DataTable({
+                    ajax: {
+                            type: "GET",
+                            contentType: "application/json; charset=utf-8",
+                            url: "@Url.Action("ProductList")",
+                            dataType: "json",
+                            dataSrc: '',
+                            data: function(d)  {
+                                return CollectParameters();
+                            }
+                        },
+                    columnDefs: [{
+                        orderable: false,
+                        sortable: false,
+                        className: 'dt-body-center',
+                        'render': function (data, type, full, meta){
+                            return '<input type="checkbox" name="chk_' + data.toString() + '" checked id="chk_' + data.toString() + '" value="' + data.toString() + '">';
+                        },
+                        targets: 3
+                    }],
+                    columns: [
+                        { data: "factory_ref" }, { data: "cprod_code1" }, { data: "cprod_name" },{data: "id"}
+                    ],
+                    'scrollY': 400,
+                    deferLoading: 0,
+                    processing: true,
+                    paging: false
+                });
+
+                $('[name="location_id"]')
+                    .click(function() {
+                        var loc = $(this).val();
+                        LoadFactories(loc == 0 ? null : loc);
+                    });
+
+
+                $('#client_id')
+                    .change(function() {
+                        var id = $(this).val();                        
+                        $('[name="cboXYBrand"] option:eq(0)').prop('selected', true);
+                        ProductSearch();                        
+
+                    });
+
+                $('[name="cboXYBrand"]')
+                    .multiselect({
+                        minWidth: 160
+                    });
+                $('[name="cboXYBrand"]').multiselect("checkAll");
+
+                @if (!Model.IsCurrentUserFactoryUser || Model.Factories.Count > 1)
+{
+                    @:$('[name="factory"]').multiselect({minWidth: 160});
+                }
+
+
+
+
+                $('[name="cboXYBrand"]')
+                    .change(function() {
+                        ProductSearch();
+                    });
+
+                $('[name="cw"]')
+                    .change(function() {
+                        CWProductsFilter($(this).val());
+                    });
+                $('#IncludeSpares')
+                    .change(function() {
+                        ProductSearch();
+                    });
+                $('#brand_user_id')
+                    .change(function() {
+                        ProductSearch();
+                    });
+
+                $('#IncludeDiscontinued')
+                    .change(function() {
+                        ProductSearch();
+                    });
+
+                @if (!Model.IncludeSalesForecast)
+                {
+                    @:$('#ListOnlyOutOfStock').hide();
+                }
+
+                @*@if (Model.IsCurrentUserFactoryUser)
+                {
+                    @:LoadClients($('#factory_id').val(), true);
+
+                }*@
+
+
+                $('#IncludeSalesForecast')
+                    .change(function() {
+                        if ($(this).prop('checked')) {
+                            $('#ListOnlyOutOfStock').show();
+                            $('#spListOnlyOutOfStock').show();
+                        } else {
+                            $('#ListOnlyOutOfStock').hide();
+                            $('#spListOnlyOutOfStock').hide();
+                        }
+
+                    });
+
+                $('#IncludeSpares')
+                    .change(function() {
+                        $('[id="showSparesHistory"]').toggle();
+                    });
+
+
+                $('[id$="__Calendar"]')
+                    .change(function() {
+                        var sdate = $(this).val();
+                        if (sdate.length > 0) {
+                            var date = new Date(PrepareDate(sdate));
+
+                            var basename = $(this).attr('id').replace('___Calendar', '');
+                            $('#' + basename + '___Day').val(date.getDate());
+                            $('#' + basename + '___Month').val(date.getMonth() + 1);
+                            $('#' + basename + '___Year').val(date.getFullYear());
+                        }
+                    });
+
+                $("input[name='MonthlySummaryBy']")
+                    .change(function(){
+                        var value = $(this).val();
+
+                        $("select[name='OrderBy']").val(value);
+                    });
+
+                $('#checkall').change(function () {
+                    var checked = $('#checkall').attr('checked');
+                    if (checked != null && checked.length > 0)
+                        $('[id^=chk_]').attr('checked', 'checked');
+                    else {
+                        $('[id^=chk_]').removeAttr('checked');
+                    }
+                });
+
+
+
+            });
+
+        function CWProductsFilter(value) {
+            if (value == "0") {
+                $('#productsList').find('.tablerow').show();
+                $('#productsList').find('input[type="checkbox"]').attr("checked", "checked");
+            } else {
+                $('#productsList')
+                    .find('.tablerow td:nth-child(2)')
+                    .each(function() {
+                        var val = $.trim($(this).text());
+                        var show = true;
+
+                        if (val.length == 11 && IsNumeric(val)) {
+                            show = (value == "1");
+                        } else {
+                            show = (value == "2");
+                        }
+                        if (show) {
+                            $(this).parent().show();
+                            $(this).parent().find('input[type="checkbox"]').attr("checked", "checked");
+                        } else {
+                            $(this).parent().hide();
+                            $(this).parent().find('input[type="checkbox"]').removeAttr("checked");
+                        }
+
+                    });
+            }
+        }
+
+        function IsNumeric(input) {
+            return (input - 0) == input && (input + '').replace(/^\s+|\s+$/g, "").length > 0;
+        }
+
+        function LoadClients(factory_ids, loadProducts) {
+
+            //if (factory_id.length > 0) {
+            //if (factory_ids != null)
+            {
+                var sFactoryids = factory_ids != null ? factory_ids.join(',') : '';
+                $('#factoryids').val(sFactoryids);
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: "@Url.Action("GetClientsForFactory")",
+                    dataType: "json",
+                    data: factory_ids != null && factory_ids.length > 0
+                        ? "{" +
+                        "'factory_ids': '" +
+                        sFactoryids +
+                        "'}"
+                        : "{}",
+                    success: function(data) {
+                        $('#client_id').empty();
+                        $('#client_id').append('<option value="">All</option>');
+                        $('#client_id').append('<option value="-1">Brands</option>');
+                        for (var i = 0; i < data.length; i++) {
+                            var client = data[i];
+                            $('#client_id')
+                                .append($.validator.format('<option value="{0}">{1}</value>',
+                                    client.user_id,
+                                    client.customer_code))
+                        }
+                        $('#divCWBrand').hide();
+                        $('#divBrand').show();
+                        if (loadProducts)
+                            ProductSearch();
+                    },
+                    error: function(a, b, c) {
+                    }
+                });
+            }
+
+            //}
+        }
+
+        function LoadFactories(location_id) {
+
+            $.ajax({
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                url: "@Url.Action("GetFactories")",
+                dataType: "json",
+                data: "{" +
+                    "'location_id': '" +
+                    location_id +
+                    "'}",
+                success: function(data) {
+                    $('#factory').empty();
+                    $('#factory').append('<option value="">All</option>');
+
+                    for (var i = 0; i < data.length; i++) {
+                        var f = data[i];
+                        $('#factory')
+                            .append($.validator.format('<option value="{0}">{1}</value>', f.user_id, f.factory_code));
+                    }
+                    $('[name="factory"]')
+                    .multiselect("refresh");
+                    ProductSearch();
+                }
+            });
+
+        }
+
+        function CheckProducts() {
+            var selectedCount = $('[id^=chk_]:checked').length;
+            if (selectedCount == 0) {
+                alert("Please select at least one product.");
+                return false;
+            }
+            return true;
+        }
+
+        function testSubmit() {
+            $('#Excel').val('false');
+            $('#mainForm').removeAttr('target');
+            $('#mainForm').submit();
+        }
+	</script>
+}

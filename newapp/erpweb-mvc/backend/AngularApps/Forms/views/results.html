@@ -1,0 +1,25 @@
+﻿
+<h4>{{form}} submissions</h4>
+<button class="btn btn-default" ui-sref="home">Back to forms</button>
+<div class="row" style="margin-top:5px">
+    <div class="col-lg-6">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th style="width: 120px"></th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="s in submissions">
+                    <td>{{s.user.userwelcome}}</td>
+                    <td>{{s.dateCreated | date:'dd/MM/yyyy'}}</td>
+                    <td><button class="btn btn-default" ui-sref="result({id: s.id})" style="width: 115px">Show</button></td>
+                    
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,250 @@
+﻿@model InstructionsModel
+@{
+    ViewBag.Title = "Upload";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    th{
+        font-size:12px !important;
+    }
+    select{
+        width:195px !important
+    }
+    .over-input-xs{
+        height:22px !important;
+        padding:1px !important;
+        width:140px !important;*/
+    }
+    .over-button-dimension{
+        width:140px;
+    }
+</style>
+<link href="~/Content/bootstrap/bootstrap.css" rel="stylesheet" />
+<link href="~/Content/bootsrapfix.css" rel="stylesheet" />
+
+
+<div ng-controller="instructionCtrl" ng-app="instructions">
+    <table class="table table-condensed over-table-width" style="border:none">
+        <tr>
+            <td style="width:150px">Choose language: </td>
+            <td>
+                <div class="input-group">
+                    <select class="form-control over-input-xs"
+                            ng-model="model.language">
+                        <option ng-repeat="opt in languages"
+                                value="{{opt.language_id}}"
+                                ng-selected="{{opt.language_id === model.language}}">
+                            {{opt.name}}
+                        </option>
+                    </select>
+                </div>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>
+                Search for product:
+            </td>
+            <td>
+                <div class="input-group">
+                    <input class="form-control over-input-xs" type="text" value="" ng-model="prod_code1" />
+                    </span>
+                </div>
+            </td>
+            <td>
+                <span class="input-group-btn">
+                    <button ng-click="getProduct()" class="btn btn-primary btn-xs over-button-dimension">Get product</button>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <img src="~/Images/animated_spinner.gif" style="width:20px" ng-show="uploadInProgress" /></td>
+            <td>
+                <button class="new_point btn btn-primary btn-xs over-button-dimension pull-right" id="uploadImage"
+                        plupload="fileUpload.url"
+                        plplupload-options="fileUpload.options"
+                        plupload-callbacks="fileUpload.callbacks">
+                    Upload file
+                </button>
+            </td>
+            <td>
+                {{model.fileName}}
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td>
+                <span class="input-group-btn">
+                    <button class="new_point btn btn-success btn-xs over-button-dimension pull-left"
+                            ng-click="createInstruction()"
+                            ng-disabled="!showButtonAddToInstruction">
+                        Create New Instruction
+                    </button>
+                    </span>
+</td>
+        </tr>
+    </table>
+    <table class="table table-bordered over-table-width" >
+        <thead >
+            <th style="width:50px">
+                cprod_code1
+            </th>
+            <th>cprod_name</th>
+            <th style="width:40px">brand</th>
+            <th>file_name</th>
+        </thead>
+        <tr ng-repeat ="prod in model.prod">
+            <td>
+                {{prod.cprod_mast}}
+            </td>
+            <td>
+                {{prod.cprod_name}}
+            </td>
+            <td>
+                {{prod.brand_id}}
+            </td>
+            <td ng-if ="$index < 1" rowspan="{{model.prod.length}}">
+                <span ng-repeat="inst in prod.instruction">
+                    {{inst.instruction_filename}}<br />
+                </span>
+                </td>
+                    
+                </tr>
+</table>
+
+
+
+
+</div>
+
+
+@section scripts{
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/jqueryui")
+@Scripts.Render("~/bundles/angular")
+@Scripts.Render("~/bundles/plupload2")
+@Scripts.Render("~/bundles/jqueryval")
+
+ 
+
+
+@* Upload *@
+<script src="~/Scripts/autocomplete.js"></script>
+<script src="~/Scripts/lodash.js"></script>
+<script src="~/Scripts/functions.js"></script>
+<script src="~/Scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
+   </script>
+<script src="~/Scripts/angular-plupload/angular-plupload.js"></script>
+
+<script src="~/Scripts/angular-aria.js"></script>
+<script src="~/Scripts/angular-animate.js"></script>
+<script src="~/Scripts/GreenSock-JS-master/src/minified/TweenMax.min.js"></script>
+<script src="~/Scripts/ngFx-master/dist/ngFx.js"></script>
+
+    <script type="text/javascript">
+        var instructions = angular.module('instructions', ['angular-plupload','ngFx','ngAnimate'])
+        .config(function(pluploadOptionProvider){
+            pluploadOptionProvider.setOptions({
+                flash_swf_url: '/Scripts/plupload-2.0.0/js/Moxie.swf',
+                silverlight_xap_url: '/Scripts/plupload-2.0.0/js//Moxie.xap',
+                max_file_size: '32mb'
+            });
+        })
+        .controller("instructionCtrl", function ($scope, $http,$timeout,dataService) {
+            $scope.model = {};
+            $scope.model.language=4;
+            
+            $scope.languages=@Html.Raw(Json.Encode(Model.Languages));
+
+            $scope.getProduct=function(){
+              //  $scope.model={};
+                dataService.getProduct($scope.prod_code1).then(
+                        function(response){
+                            console.log(response.data);
+                            $scope.model.prod=response.data;
+                            $scope.model.Instruction={};
+                            $scope.model.Instruction.mast_id = response.data[0].cprod_mast;
+                            $scope.model.Instruction.language_id=$scope.model.language;
+                            //$scope.model.language_id=response.data[0.]
+                            //$scope.model.cprod_name=response.data[0].cprod_name;
+                            //$scope.model.brand=response.data[0].brand_id;
+                        },
+                        function(response){
+                            console.log("ERROR");
+                            console.log(response);
+                        }
+                    );
+            }
+            $scope.createInstruction=function(){
+                dataService.createInstruction($scope.model.Instruction)
+                    .then(
+                        function(results){
+                            /*add to list saved instruction*/
+                            $scope.model.prod[0].instruction.push($scope.model.Instruction);
+                            /*clear save-model*/
+                            //model.Instruction={};
+                        },
+                        function(){}
+                    )
+            }
+
+            /*FILES*/
+            $scope.uploadedFiles=[];
+            $scope.fileUpload = {
+                url: '@Url.Action("Files")',
+                options: {
+                    multi_selection: true,
+                    max_file_size: '32mb',
+                    browse_button: 'uploadImage',
+                   // resize: { width: 800, height: 600, quality: 90 },
+                    filters: [
+                        {
+                            title:'Document',extensions:'pdf'}
+                            
+                    ]
+                },
+                callbacks: {
+                    filesAdded: function (uploader, files) {
+                        $scope.uploadInProgress = true;
+                        $timeout(function () {
+                            uploader.start();
+                        }, 1);
+                    },
+                    fileUploaded: function (uploader, file, response) {
+                        $scope.uploadInProgress=false;
+                        $scope.showButtonAddToInstruction=true;
+                        $scope.uploadedFiles.push({image:file.name,sid:file.id,meeting_detail_id:1})
+                        $scope.model.fileName="Uploaded: "+ file.name;
+                        $scope.model.Instruction.instruction_filename=file.name;
+                        //  console.log("UPLOADED FILES",$scope.uploadedFiles);                       
+
+                        for (var i = 0; i < $scope.uploadedFiles.length; i++) {
+                            //console.log($scope.uploadedFiles[i].image);
+                        }
+                        console.log("RESPONSE", response);
+                        //$scope.uploader("UPLOADER",uploader);
+                    },
+                    error: function (uploader, error) {
+                        $scope.loading = false;
+                        alert(error.message, uploader);
+                    }
+                }
+            }
+
+        }).factory('dataService',function($http){
+            var getProduct = function(data){               
+                return $http.get("/Instructions/GetProduct",{params:{prod_code1:data}});
+            }
+            var createInstruction=function(data){
+                return $http.post("/Instructions/CreateInstruction/",data);
+            }
+            return{
+                getProduct:getProduct,
+                createInstruction:createInstruction
+        };
+        });
+
+    </script>
+   
+    }

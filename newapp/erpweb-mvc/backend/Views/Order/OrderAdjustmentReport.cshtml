@@ -1,0 +1,69 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>OrderAdjustmentReport</title>
+    <style>
+        table {
+            padding: 2px;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 5px;
+            font-weight: bold;
+            border: 1px solid black;
+        }
+
+        td {
+            padding: 5px;
+            border: 1px solid black;
+        }
+
+        .number {
+            text-align: right;
+        }
+
+        
+    </style>
+
+</head>
+<body>
+    @{ 
+        var data = ViewBag.Data as List<Tuple<Order_header, double?>>;
+        var adjustment = ViewBag.Minimum as double?;
+    }
+    <h2>Orders with adjustment greater than @adjustment.ToString() %</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Customer</th>
+                <th>Custpo</th>
+                <th>ETD</th>
+                <th>Original %</th>
+                <th>Current %</th>
+                <th>Difference</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var d in data.OrderBy(o=>o.Item1.po_req_etd))
+            {
+                <tr>
+                    <td>@(d.Item1.Client?.customer_code)</td>
+                    <td>@d.Item1.custpo</td>
+                    <td>@(d.Item1.po_req_etd.ToString("d"))</td>
+                    <td class="number">@d.Item1.loading_perc.ToString()</td>
+                    <td  class="number">@d.Item2.ToString()</td>
+                    <td  class="number">@((d.Item2 - d.Item1.loading_perc).ToString())</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>

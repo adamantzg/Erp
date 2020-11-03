@@ -1,0 +1,145 @@
+﻿@model UsCallLog2Model
+
+@{
+    Layout = null;
+
+    var date = (DateTime)ViewBag.Date;
+    var dateTo = (DateTime)ViewBag.Date;
+
+    if (ViewBag.DateTo != null)
+    {
+        dateTo = (DateTime)ViewBag.DateTo;
+    }
+
+    var rows = Model.CallLogList;
+}
+
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Big Company - US phone call logs</title>
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width" />
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>US phone call logs</title>
+    
+    <style type="text/css">
+        html {
+            /*background-color: #e2e2e2;*/
+            margin: 10px;
+            padding: 10px;
+        }
+
+        body {
+            font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+            font-size: 10px;
+            line-height: 1.42857143;
+            color: #666666;
+            background-color: #ffffff;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            margin: 5px;
+            display: block;
+        }
+
+        *:before, *:after {
+            box-sizing: border-box;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        th {
+            border: 1px solid #dddddd;
+            padding: 1px 5px;
+            font-size: 12px;
+        }
+
+        td {
+            border: 1px solid #dddddd;
+            padding: 1px 5px;
+            font-size:12px;
+        }
+
+        .logo {
+            width: 100%;
+            float: left;
+            /*background:#999;*/
+        }
+
+            .logo img {
+                width: 300px;
+                margin: 10px 10px 50px 10px;
+                float: left;
+                text-align: left;
+            }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+        <div class="main">
+            <div id="content" class="content">
+                <div>
+                    <div style="margin: 10px;">
+                        <table style="table-layout:auto;  margin-bottom:0px;border-width: 1px; border: 1px solid #dddddd; border-spacing: 0px;border-collapse:collapse">
+                            <thead>
+                                <tr>
+                                    <th colspan="11"><div class="text-left">@(Model.IsTimeSpan ? String.Format("US communication logs {0} - {1}", date.ToString("dd/MM/yyyy"), dateTo.ToString("dd/MM/yyyy")) : String.Format("US communication logs - {0}", date.ToString("dd/MM/yyyy")))</div></th>
+                                </tr>
+                                <tr>
+                                    <td colspan="11">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <th style="width:3%"><div class="text-left">US time</div></th>
+                                    <th style="width:12%"><div class="text-left">Dealer name</div></th>
+                                    <th style="width:12%;text-align:right"><div class="text-center">Customer service calls last 12m</div></th>
+                                    <th style="width:5%"><div class="text-left">State</div></th>
+                                    <th style="width:10%;text-align:right"><div class="text-center">Ammara orders last 12m</div></th>
+                                    <th style="width:8%; text-align:right"><div class="text-center">CW orders last 12m</div></th>
+                                    <th style="width:5%"><div class="text-left">CRM user</div></th>
+                                    <th style="width:8%"><div class="text-left">Name of caller</div></th>
+                                    <th style="width:8%"><div class="text-left">Type</div></th>
+                                    <th style="width:5%"><div class="text-left">Category</div></th>
+                                    <th style="width:45%"><div class="text-left">Note</div></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var v in rows)
+                                {
+
+                                <tr>
+                                    <td>@(Model.IsTimeSpan ? v.US_datetime?.AddHours(Model.IsDayLightSaving ? 1 : 0).ToString("dd/MM/yyyy HH:mm:ss") : v.US_datetime?.AddHours(Model.IsDayLightSaving ? 1 : 0).ToString("HH:mm:ss"))</td>
+                                    <td>@v.dealername</td>
+                                    <td style="text-align:right">@(!string.IsNullOrEmpty(v.dealerid) ? Model.CallCount.ContainsKey(v.dealerid) ? Model.CallCount[v.dealerid] : 0  : 0)</td>
+                                    <td>@v.state</td>
+                                    <td style="text-align:right">@(v.ammara_ORDERS_YTD != null ? v.ammara_ORDERS_YTD : 0)</td>
+                                    <td style="text-align:right">@(v.CW_ORDERS_YTD != null ? v.CW_ORDERS_YTD : 0)</td>
+                                    <td>@v.username</td>
+                                    <td>@v.caller_name</td>
+                                    <td>@v.type_name</td>
+                                    <td>@v.category</td>
+                                    <td>@v.note</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

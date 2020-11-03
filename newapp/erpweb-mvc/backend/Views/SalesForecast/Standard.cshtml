@@ -1,0 +1,72 @@
+﻿@model StandardForecastModel
+@{
+    ViewBag.Title = "Standard sales forecast";
+    
+}
+
+
+<DIV class=aftersales_groupheader>Standard sales forecast</DIV>
+
+@using (Html.BeginForm(actionName: "StandardUpdate", controllerName: "SalesForecast", method: FormMethod.Post,routeValues: new {id=Model.User_id}))
+{ 
+    <div style="float: left">
+        @if (Model.Companies != null)
+        {
+            <span>Brands</span><br/>
+            @Html.RadioButton("company","", Model.User_id == null) <span>All</span>
+            foreach (var company in Model.Companies)
+            {
+                @Html.RadioButton("company",company.user_id , Model.User_id == company.user_id)@company.customer_code
+                @:&nbsp;&nbsp;
+            }
+        }
+        <br />
+        <table class="table">
+            <tr class="table_headerrow">
+                <td width="250">Range</td>
+                <td width="60" style="text-align: right"><span class="column_right">%</span></td>
+            </tr>
+            @{
+                var i = 0;
+            }
+            @foreach (var range in Model.Ranges)
+            {
+                <tr class="@(i%2==0? "tablerow" : "tablerow_alt")" brand="@range.">
+                    <td>@range.range_name @range.range_desc</td>
+                    <td>@Html.TextBox(string.Format("txt_Percent_{0}",range.rangeid), range.forecast_percentage*100) </td>
+                </tr>
+                i++;
+            }
+        </table>
+    </div>
+    <div class="forecast_note">
+        The Standard sales forecast is calculated from last year's actual sales plus a percentage change. 12% for example will indicate a 12% increase on last year's sales by month.
+    </div>
+    <div style="width:100%;float:left"><input type="submit" value="Update"/></div>
+    
+}
+@section head
+{
+    <style>
+        td input
+        {
+            width: 60px;
+            text-align: right;
+        }
+        .column_right
+        {
+            text-align: right;
+        }
+    </style>
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('input[name="company"]').click(function() {
+                location.href = '/SalesForecast/Standard/' + $(this).val();
+            });
+        });
+    </script>
+}

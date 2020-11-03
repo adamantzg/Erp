@@ -1,0 +1,72 @@
+﻿@model NpdListModel
+
+@{
+    Layout = "_NpdLayout.cshtml";
+}
+
+
+<div class="main">
+        <span class="title">VIEW EXISTING DEVELOPMENTS</span>
+      
+    @using (Html.BeginForm())
+    {
+        <table class="table_two" style="width:94%;float:left" border="0" cellspacing="1" cellpadding="1">
+            <tr>
+                <td width="130" height="50">filter</td>
+                <td> 
+                    @Html.DropDownListFor(m => m.category_id, new SelectList(Model.Categories, "category1_id", "cat1_name"), "(All)",new {@class="simple-input_dropDown"})
+                </td>
+            </tr>
+            <tr>
+                <td width="130" height="50">search</td>
+                <td>@Html.TextBoxFor(m => m.text,new {@class="simple-input"})</td>
+            </tr>
+            <tr>
+                <td colspan="2"><input class="button"  type="submit" value="SEARCH" /></td>
+            </tr>
+    
+        </table>
+    }
+    <!--npd_holder-->
+  
+
+    <table class="table_two" width="94%" border="0" cellspacing="1" cellpadding="1" style="margin-top: 10px;float:left">
+    <tr>
+        <td class="title_row2" width="150" >NPD code</td>
+	<td class="title_row2"  width="250">name</td>
+      <td width="150" class="title_row2">status</td>
+        <td class="title_row2" style="font-size: 14px;text-align: center">days since last comment
+        </td>
+    
+    
+    </tr>
+    </table>
+
+    <div class="npd_holder">
+        
+        <table class="table_two" width="100%" border="0" cellspacing="1" cellpadding="1" style="margin-top: 10px">
+            @if (Model.Npds != null)
+            {
+                foreach (var n in Model.Npds)
+                {
+                    <tr>
+                        <td width="150"><a href="@Url.Action("Edit", new {id = n.prod_id})">@n.tracking_num</a></td>
+                        <td  width="250"><a href="@Url.Action("Edit", new {id = n.prod_id})">@n.prod_name</a></td>
+                        <td width="150">@n.status_name</td>
+                        @{
+                            var diff = 0D;
+                            if (n.LastCommentDate != null)
+                            {
+                                diff = Math.Truncate((DateTime.Now - n.LastCommentDate.Value).TotalDays);
+                            }
+                        }
+                        <td><div align="center">@(diff)</div></td>
+                    </tr>
+                }
+            }
+        </table>
+
+    </div>
+
+
+</div>

@@ -1,0 +1,271 @@
+﻿@model StockOrderEditModel
+
+<h3>@(Model.EditMode == EditMode.New ? "Create" : "Edit") stock order</h3>
+
+@using (Html.BeginForm(Model.EditMode == EditMode.New ? "Create" : "Edit", "StockOrder", FormMethod.Post))
+{
+    <table class="table" style="width: 400px">
+        <tr>
+            <td class="table_main_td_label">From:</td>
+            <td >@Html.HiddenFor(m=>m.Order.porderid) @Html.DropDownListFor(m => m.Order.from_id, new SelectList(Model.Companies, "user_id", "user_name")) </td>
+        </tr>
+        <tr>
+            <td class="table_main_td_label">To:</td>
+            <td >@Html.DropDownListFor(m => m.Order.userid, new SelectList(Model.Factories, "user_id", "factory_code"))</td>
+        </tr>
+        <tr>
+            <td class="table_main_td_label">P.O. number:</td>
+            <td ><span id="po">@Model.Order.poname</span></td>
+        </tr>
+        <tr>
+            <td class="table_main_td_label">Date:</td>
+            <td>@*@{ var d = Html.DateTimeFor(m => m.Order.orderdate, true); }
+                @d.DateCalendar(inLine: false, calendarOptions: WebUtilities.GetDefaultCalendarOptions())*@
+                @Html.TextBoxFor(m => m.Order.orderdate, "{0:d}", new { isDate = true })
+            </td>
+        </tr>
+        <tr>
+            <td class="table_main_td_label">ETD:</td>
+            <td>@*@{ var d1 = Html.DateTimeFor(m => m.Order.po_ready_date, true); }
+                @d1.DateCalendar(inLine: false, calendarOptions: WebUtilities.GetDefaultCalendarOptions())*@
+                @Html.TextBoxFor(m => m.Order.po_ready_date, "{0:d}", new { isDate = true })
+            </td>
+        </tr>
+
+    </table>
+    <table class="table" style="width: 700px;font-size: 11px">
+        <tr class="table_headerrow">
+            <td style="width: 80px">MFG CODE</td>
+            <td style="width: 80px">B Code</td>
+            <td style="width: 350px">Product Description</td>
+            <td style="text-align: right">Qty.</td>
+            <td style="text-align: right">Price/set</td>
+            <td style="text-align: right">Total Price</td>
+            <td></td>
+        </tr>
+        @if (Model.Order.Lines != null)
+        {
+            foreach (var line in Model.Order.Lines)
+            {
+                <tr id="line_@line.linenum">
+                    <td><span id="mfg_@line.linenum">@line.Product.MastProduct.factory_ref</span></td>
+                    <td><span id="code_@line.linenum">@line.Product.cprod_code1</span></td>
+                    <td>@Html.TextBox(string.Format("prod_{0}", line.linenum), line.Product.cprod_name, new { @class = "textboxcell" }) @Html.Hidden(string.Format("prodid_{0}",line.linenum),line.cprod_id) @Html.Hidden(string.Format("line_{0}", line.linenum), line.linenum)</td>    
+                    <td>@Html.TextBox(string.Format("cost_{0}", line.linenum), line.unitprice, new { @class = "textboxcell", style = "text-align: right" })</td>
+                    <td>@Html.TextBox(string.Format("quantity_{0}", line.linenum), line.orderqty, new { @class = "textboxcell", style = "text-align: right" })</td>
+                    <td style="text-align: right"><span id="total_@line.linenum">@((line.unitprice * line.orderqty).ToString("N2"))</span></td>
+                    <td><a href="javascript:void(0)" onclick=" DeleteLine(@line.linenum) "><img src="/Images/menus/Delete.gif"/></a></td>
+                </tr>
+            }
+        }
+        <tr id="trTotal" style="height: 25px">
+            <td colspan="5" style="text-align: center">TOTAL</td>
+            <td style="text-align: right"><span id="grandtotal">@(Model.Order.Lines != null ? Model.Order.Lines.Sum(l => l.unitprice * l.orderqty).ToString("N2") : "")</span></td>
+            <td></td>
+        </tr>
+        <tr id="line_0">
+            <td><span id="mfg_0"></span></td>
+            <td><span id="code_0"></span></td>
+            <td>@Html.TextBox("prod_0", "", new { @class = "textboxcell" }) @Html.Hidden("line_0", "0")  @Html.Hidden(string.Format("prodid_{0}",0))</td>
+            <td >@Html.TextBox("cost_0", "", new { @class = "textboxcell", style = "text-align: right" })</td>
+            <td >@Html.TextBox("quantity_0", "", new { @class = "textboxcell", style = "text-align: right" })</td>
+            <td style="text-align: right"><span id="total_0"></span></td>
+            <td><a href="javascript:void(0)" onclick=" AddLine() "><img src="/Images/menus/add1.gif" /></a></td>
+        </tr>
+    </table>
+    <input type="submit" value="@(Model.EditMode == EditMode.New ? "Create" : "Update")" /> @Html.Partial("_LinkButtonPartial", new LinkButtonModel { NavigateUrl = Url.Action("Index", new {factory_id = Model.Order.userid}), Text = "Back to orders" })
+    
+        if (Model.EditMode == EditMode.Edit)
+        {
+            <input type="button" value="Print" onclick="Print(@Model.Order.porderid)" />
+            <input type="button" value="Export to pdf" onclick="Pdf(@Model.Order.porderid)"/>
+        }
+}
+
+@section head
+{
+    <style>
+    .textboxcell {width: 90%}    
+    
+    input[type=text],select,textarea,span { font-size: 11px;margin-top:1px}
+    textarea {width:auto}
+    input[type=text] {width:85%}
+    table td {padding:0}
+
+</style>
+}
+
+@section scripts
+{
+@Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="/Scripts/MVCControlToolkit.Controls-2.2.5.min.js" type="text/javascript"></script>
+    <script type='text/javascript' >
+        //$.validator.setDefaults({
+        //    ignore: "not([data-elementispart]):hidden"
+        //});
+    </script>
+    
+    @Html.GlobalizationScript()   
+    
+
+    <script type="text/javascript">
+        $(function() {
+            BindProdAutocomplete();
+            BindCalculations();
+
+            $('#Order_userid').change(function() {
+                var factory = $('#Order_userid option:selected').text();
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: '@Url.Action("GetNextPoName")',
+                    dataType: "json",
+                    data: "{" +
+                        "'factory_id': '" + $(this).val() + "'}",
+                    success: function(data) {
+                        var today = new Date();
+                        var month = ('0' + (today.getMonth() + 1).toString());
+
+                        var formatted = today.getDate().toString() + month.substring(month.length - 2, 2) + (today.getFullYear() - 2000).toString();
+                        $('#po').text($.validator.format('{0}-{1}-{2}',factory,formatted,data));
+                    },
+                    error: function(data) {
+                    }
+                });
+            });
+        });
+
+        var newId = -1;
+        var products = [];
+
+        function AddLine() {
+
+            //$('#line_' + newId + ' > td:last').html($.validator.format('<a href="javascript:void(0)" onclick="DeleteLine({0})"><img src="/Images/menus/delete.gif"/></a>', newId));
+            //$('#trTotal').before($('#line_' + newId));
+            var prod = $('#prod_0').val();
+            var prodid = $('#prodid_0').val();
+            var cost = $('#cost_0').val();
+            var mfg = $('#mfg_0').text();
+            var code = $('#code_0').text();
+            var qty = $('#quantity_0').val();
+            var tr = $('<tr id="line_' + newId + '"></tr>');
+            tr.append($.validator.format('<td><span id="mfg_{0}">{1}</span></td><td><span id="code_{0}">{2}</span></td>', newId, mfg, code));
+            tr.append($.validator.format('<td><input type="text" id="prod_{0}" name="prod_{0}" class="textboxcell" value="{1}"/><input type="hidden" id="line_{0}" name="line_{0}" value="{0}"/><input type="hidden" id="prodid_{0}" name="prodid_{0}" value="{2}"/></td> ', newId, prod, prodid));
+            tr.append($.validator.format('<td><input type="text" id="cost_{0}" name="cost_{0}" class="textboxcell" value="{1}" style="text-align: right" /></td>', newId, cost));
+            tr.append($.validator.format('<td><input type="text" id="quantity_{0}" name="quantity_{0}" class="textboxcell" value="{1}" style="text-align: right"/></td>', newId, qty));
+            tr.append($.validator.format('<td style="text-align: right"><span id="total_{0}"></span></td>' +
+                '<td><a href="javascript:void(0)" onclick="DeleteLine({0})"><img src="/Images/menus/delete.gif" /></a></td>' +
+                '</tr>', newId));
+            $('#trTotal').before(tr);
+            $('#prod_0').val('');
+            $('#cost_0').val('');
+            $('#quantity_0').val('');
+            $('#total_0').text('');
+            $('#mfg_0').text('');
+            $('#code_0').text('');
+            CalculateRow('prod_' + newId, true);
+            newId--;
+            BindCalculations();
+
+        }
+
+        function DeleteLine(id) {
+            $('#line_' + id).remove();
+            CalculateTotal();
+        }
+
+        function BindCalculations() {
+            $('[id^="cost_"],[id^="quantity_"]').change(function() {
+                var id = $(this).attr('id');
+                CalculateRow(id, true);
+                CalculateTotal();
+            });
+        }
+
+        function CalculateRow(id, updateRowTotal) {
+            var num = id.substring(id.indexOf("_") + 1, id.length);
+
+            var cost = $.global.parseFloat($('#cost_' + num).val());
+            if (isNaN(cost))
+                cost = 0;
+            var qty = $.global.parseFloat($('#quantity_' + num).val());
+            if (isNaN(qty))
+                qty = 0;
+            if (updateRowTotal)
+                $('#total_' + num).text(number_format(cost * qty, 2));
+            return cost * qty;
+        }
+
+        function CalculateTotal() {
+            var sum = 0;
+            $('[id^="cost_"]').each(function() {
+                sum = sum + CalculateRow($(this).attr('id'), false);
+            });
+            $('#grandtotal').text(number_format(sum, 2));
+        }
+
+        function Print(id) {
+            var url = '@Url.Action("Print", new {id = "[id]"})';
+            url = url.replace(escape('[id]'), id);
+            window.open(url);
+        }
+        
+        function Pdf(id) {
+            var url = '@Url.Action("Pdf", new {id = "[id]"})';
+            url = url.replace(escape('[id]'), id);
+            window.open(url);
+        }
+
+        function BindProdAutocomplete() {
+            $('[id^="prod_"]').autocomplete({
+                source: function(request, response) {
+
+                    var id = $(this).attr('id');
+                    var factory_id = $('#Order_userid').val();
+                    if (request.term.length >= 3) {
+                        $.ajax({
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            url: '@Url.Action("Products")',
+                            dataType: "json",
+                            data: "{" +
+                                "'prefixText': '" + request.term + "'," +
+                                "'factory_id': '" + factory_id + "'}",
+                            success: function(data) {
+                                var result = [];
+                                products = data;
+                                for (var i = 0; i < data.length; i++) {
+                                    result.push(new LookupItem(data[i].cprod_id, data[i].cprod_code1 + ': ' + data[i].cprod_name));
+                                }
+                                response(result);
+                            },
+                            error: function(data) {
+                            }
+                        });
+                    }
+                },
+                minLength: 0,
+                select: function(event, ui) {
+                    if (ui.item) {
+                        $('#' + $(this).attr('id').replace('prod_', 'prodid_')).val(ui.item.id);
+                        var lineid = $(this).attr('id').replace('prod_', '');
+                        var prods = $.grep(products, function(e) { return e.cprod_id == ui.item.id; });
+                        if (prods.length > 0) {
+                            $('#mfg_' + lineid).text(prods[0].mfgcode);
+                            $('#code_' + lineid).text(prods[0].cprod_code1);
+                        }
+                    }
+                },
+                change: function(event, ui) {
+                    var id = '';
+                    if (ui.item != null)
+                        id = ui.item.id;
+                    $('#' + $(this).attr('id').replace('prod_', 'prodid_')).val(id);
+                    return false;
+                }
+            });
+        }
+
+    </script>
+}

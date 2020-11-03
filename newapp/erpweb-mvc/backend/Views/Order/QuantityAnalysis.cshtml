@@ -1,0 +1,85 @@
+﻿@model QuantityAnalysisModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Order: @Model.Order.custpo</title>
+        <style>
+            .oddrow {
+                background-color: #EEE
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <h2>Order analysis report</h2>
+            @{ var order = Model.Order;}
+            <table style="border: 0">
+                <tr>
+                    <td>Client:</td>
+                    <td>@order.Client.customer_code</td>
+                </tr>
+                <tr>
+                    <td>PO#: </td>
+                    <td>@order.custpo</td>
+                </tr>
+                <tr>
+                    <td>Date: </td>
+                    <td>@order.orderdate.ToString("d")</td>
+                </tr>
+            </table>
+             
+            <table style="width:80%;border: 1px solid black">
+                <tr>
+                    <td rowspan="2" style="width: 40%">Product</td>
+                    <td rowspan="2"  style="text-align: right">Order qty</td>
+                    <td colspan="3" style="text-align: center">last 12 months</td>
+                    <td rowspan="2">warnings</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right">no of orders</td>
+                    <td style="text-align: right">total qty</td>
+                    <td style="text-align: right">average order qty</td>
+                    
+                </tr>
+                @{ var counter = 1;}
+                @foreach (var line in order.Lines.Where(l=>l.Cust_Product != null))
+                {
+                    <tr @Html.Raw(counter++ % 2 == 1 ? "class=oddrow" : "" )>
+                        <td>@line.Cust_Product.cprod_code1</td>
+                        <td  style="text-align: right">@line.orderqty</td>
+                        @{ var history = Model.ProductLineHistory[line.Cust_Product.cprod_id];}
+                        <td style="text-align: right">
+                            @{ var orderCount = history.GroupBy(l => l.orderid).Count();
+                                var total = history.Sum(l => l.orderqty);
+                                var avg = total/orderCount;
+                               }
+                            @orderCount
+                        </td>
+                        <td  style="text-align: right">
+                            @total
+                        </td>
+                        <td style="text-align: right">
+                            @avg.ToString("N0")
+                        </td>
+                        <td>@if (line.orderqty > total)
+                            {
+                                @Html.Raw("order qty > last 12 months total")
+                            }
+                            @if (line.orderqty < avg/2)
+                            {
+                                @Html.Raw("order qty < averageqty/2")
+                            }
+                        </td>
+                    </tr>
+                }
+            </table>
+
+        </div>
+    </body>
+</html>

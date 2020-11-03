@@ -1,0 +1,88 @@
+﻿@using System.Text
+@model ImageModel
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Image in Database</h2>
+
+<style>
+    .target {
+        border: solid 1px #aaa;
+        min-height: 200px;
+        width: 30%;
+        margin-top: 1em;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 300ms all;
+        position: relative;
+    }
+    .contain {
+    background-size: cover;
+  position: relative;
+  z-index: 10;
+  top: 0px;
+  left: 0px;
+}
+textarea {
+  background-color: white;
+}
+.active {
+  box-shadow: 0px 0px 10px 10px rgba(0,0,255,.4);
+}
+</style>
+@{
+    ViewBag.Title = "Index";
+   
+}
+<h2>Pictures in database</h2>
+<br/> <br/>
+<br/> <br/>
+<br/> <br/>
+
+<div class="containerbox body-content" >
+    @foreach (var image in Model.ImagesList)
+    {
+  @*<img src="@imageSrc" width="100"/>*@
+@*<img src="@(Url.Action("Display",new { idIm=image.IdImage}))" data-form-method="post" width="500" alt="sranje od slike"/>*@
+    
+    
+        <div class="zoomContainer" style="border: 1px beige solid;float: left; padding: 10px" >
+
+            
+            <img  src="@Encoding.ASCII.GetString(image.BigImage)" width="250" height="250"  />
+            
+            
+            <table>
+                <tr>
+                    <td><span>
+                            Id:&nbsp; @image.IdImage
+                        </span> </td>
+                </tr>
+                <tr>
+                    <td> @image.Description</td>
+                </tr>
+            </table>
+            
+        
+           
+            
+            <span></span>
+
+        </div>@* 
+  <img src="@Url.Action("GetImage","Image",new {id= image.IdImage})" width="120"/>*@
+        <span>@Url.Action("GetImage","Image",new {id= image.IdImage})"</span>
+        
+        @*<span> 
+        @Html.Action("GetImage",new {id=@image.IdImage})
+        </span>*@
+    
+    }   </div>
+
+<script type="text/javascript">
+    $('#zoom_05').elevateZoom({
+        zoomType: "inner",
+        cursor:"crosshair"
+    });
+</script>

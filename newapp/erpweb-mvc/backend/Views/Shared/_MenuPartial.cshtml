@@ -1,0 +1,288 @@
+﻿@if (ViewBag.isDist != null)
+{
+    if (ViewBag.isDist || (!ViewBag.isHeadDist && ViewBag.ShowNewDesign))
+    {
+        if (ViewBag.ShowNewDesign)
+        {
+            @*<div class="menu">
+                    @{
+                        List<SiteMenuItem> menuItems = (List<SiteMenuItem>) ViewBag.MenuItems;
+                        if (menuItems != null)
+                        {
+                            <ul id="css3menu1">
+                                @foreach (var item in menuItems)
+                                {
+                                    <li ><a href="@item.Url" @if (item.OpenInNewWindow)
+                                                                            {
+                                                                                Html.Raw("target=\"_blank\"");
+                                                                            }>@if (!string.IsNullOrEmpty(item.ImageUrl))
+                                                                              {
+                                                                                  <img src="/Images/menus/@item.ImageUrl"/>
+                                                                              }<span>@item.Text</span></a>
+                                        @if (item.Children != null && item.Children.Count>0)
+                                        {
+                                            <ul>
+                                            @foreach (var childItem in item.Children)
+                                            {
+                                                <li><a href="@childItem.Url" @if (childItem.OpenInNewWindow)
+                                                                            {
+                                                                                Html.Raw("target=\"_blank\"");
+                                                                            }>@if (!string.IsNullOrEmpty(childItem.ImageUrl))
+                                                                              {
+                                                                                  <img src="/Images/menus/@childItem.ImageUrl"/>
+                                                                              }@childItem.Text</a></li>
+                                            }
+                                            </ul>
+                                        }
+                                    </li>
+                                }
+                                @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new {id = "logoutForm"}))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <li class="toplast"><a href="javascript:document.getElementById('logoutForm').submit()"><img src="/images/menus/exit2.png" alt=""/><span>Exit</span></a></li>
+                                }
+
+
+                            </ul>
+                        }
+                    }
+                </div>*@
+            <nav class="navbar navbar-default" style="padding-top:0; padding-bottom:0;">
+                <div class="container-fluid">
+                    <div class="collapse navbar-collapse">
+                        @{
+                            List<SiteMenuItem> menuItems = (List<SiteMenuItem>)ViewBag.MenuItems;
+                            if (menuItems != null)
+                            {
+                                <ul class="nav navbar-nav" style="display:inline">
+                                    @foreach (var item in menuItems)
+                                    {
+                                        <li @Html.Raw(item.Children?.Count > 0 ? "class=dropdown" : "")>
+                                            @if (item.Children == null || item.Children.Count == 0)
+                                            {
+                                                <a href="@item.Url" @if (item.OpenInNewWindow) { Html.Raw("target=\"_blank\""); }>
+                                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                                {
+                                                    <img src="/Images/menus/@item.ImageUrl" />
+                                                }<span>@item.Text</span>
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <a href="@item.Url" @if (item.OpenInNewWindow) { Html.Raw("target=\"_blank\""); } style="display: inline-block">
+                                                @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                                {
+                                                    <img src="/Images/menus/@item.ImageUrl" />
+                                                }<span>@item.Text</span>
+                                                </a>
+                                               <a style="display:inline-block" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                                                <span class="caret"></span>
+                                                </a>
+                                            
+                                                <ul class="dropdown-menu">
+                                                    @*@if (!string.IsNullOrEmpty(item.Url)) 
+                                                    {
+                                                    <li>
+                                                      <a href="@item.Url" @if (item.OpenInNewWindow) { Html.Raw("target=\"_blank\""); }>
+                                                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                                            {
+                                                                <img src="/Images/menus/@item.ImageUrl" />
+                                                            }<span>@item.Text</span>
+                                                        </a>
+                                                     </li>
+                                                    }*@
+                                                    @foreach (var childItem in item.Children)
+                                                    {
+                                                        <li>
+                                                            <a href="@childItem.Url" @if (childItem.OpenInNewWindow) { Html.Raw("target=\"_blank\""); }>
+                                                                @if (!string.IsNullOrEmpty(childItem.ImageUrl))
+                                                                {
+                                                                    <img src="/Images/menus/@childItem.ImageUrl" />
+                                                                }<span>@childItem.Text</span>
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            
+                                            }
+                                            
+                                        </li>
+                                    }
+                                    <li style="border-right: 0">
+                                        <a href="javascript:document.getElementById('logoutForm').submit()"><img src="/images/menus/exit2.png" alt="" /><span>Exit</span></a>
+                                    </li>
+
+                                </ul>
+                            }
+                        }
+                    </div>
+                </div>
+            </nav>
+            using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
+            {
+                @Html.AntiForgeryToken()                
+            }
+
+        }
+        else
+        {
+            <div id="barmenu" class="menu">
+                @{
+                    var menuItems = (List<SiteMenuItem>)ViewBag.MenuItems;
+                    if (menuItems != null)
+                    {
+                        <ul>
+                            @foreach (var item in menuItems)
+                            {
+                                <li><a href="@item.Url" @if (item.OpenInNewWindow) { Html.Raw("target=\"_blank\""); }>@item.Text</a></li>
+                            }
+                        </ul>
+                    }
+                }
+            </div>
+            <div class="end_session">
+                @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <a href="javascript:document.getElementById('logoutForm').submit()"><img id="imgEndSession" src="/images/menus/end_session_y_sm.jpg" alt="Log off" /></a>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        if (ViewBag.isHeadDist)
+        {
+
+            if (ViewBag.ShowNewDesign)
+            {
+                <div class="menu">
+                    @{
+                        List<SiteMenuItem> menuItems = (List<SiteMenuItem>)ViewBag.MenuItems;
+                        if (menuItems != null)
+                        {
+                            <ul id="css3menu1">
+                                @foreach (var item in menuItems)
+                                {
+                                    <li>
+                                        <a href="@item.Url" @if (item.OpenInNewWindow) { Html.Raw("target=\"_blank\""); }>
+                                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                            {
+                                                <img src="/Images/menus/@item.ImageUrl" />
+                                            }@item.Text
+                                        </a>
+                                        @if (item.Children != null && item.Children.Count > 0)
+                                        {
+                                            <ul>
+                                                @foreach (var childItem in item.Children)
+                                                {
+                                                    <li>
+                                                        <a href="@childItem.Url" @if (childItem.OpenInNewWindow) { Html.Raw("target=\"_blank\""); }>
+                                                            @if (!string.IsNullOrEmpty(childItem.ImageUrl))
+                                                            {
+                                                                <img src="/Images/menus/@childItem.ImageUrl" />
+                                                            }@childItem.Text
+                                                        </a>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        }
+                                    </li>
+                                }
+                                @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <li class="toplast"><a href="javascript:document.getElementById('logoutForm').submit()"><img src="/images/menus/exit2.png" alt="" />Exit</a></li>
+                                }
+
+
+                            </ul>
+                        }
+                    }
+                </div>
+            }
+            else
+            {
+
+
+                <div id="barmenu" class="menu">
+                    @{
+                        var menuItems = (List<SiteMenuItem>)ViewBag.MenuItems;
+                        if (menuItems != null)
+                        {
+                            <ul>
+                                @foreach (var item in menuItems)
+                                {
+                                    <li>
+                                        <a href="@item.Url" @if (item.OpenInNewWindow) { Html.Raw("target=\"_blank\""); }>@item.Text</a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    }
+                </div>
+                <div class="end_session">
+                    @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <a href="javascript:document.getElementById('logoutForm').submit()"><img id="imgEndSession" src="/images/menus/end_session_y_sm.jpg" alt="Log off" /></a>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+
+            var company = ViewBag.CurrentUser != null ? (ViewBag.CurrentUser as User)?.Company : null;
+            
+            var menuItems = (List<SiteMenuItem>)ViewBag.MenuItems;
+            if (menuItems != null && menuItems.Count > 0)
+            {
+                <div class="right_main">
+                    <div class="right_main_header">
+                        @{
+
+
+                            <ul>
+                                @foreach (var item in menuItems)
+                                {
+                                    <li>
+                                        <a href="@item.Url" @if (item.OpenInNewWindow) { Html.Raw("target=\"_blank\""); }>@item.Text</a>
+                                    </li>
+                                }
+                                @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <li><a href="javascript:document.getElementById('logoutForm').submit()">log off</a></li>
+                                }
+                            </ul>
+                        }
+
+                    </div>
+                </div>
+                <div class="right_main_header2">
+                    @if (ViewBag.CurrentItem != null && ViewBag.CurrentItem.Parent?.Children != null)
+                    {
+                        <ul>
+                            @foreach (var item in ViewBag.CurrentItem.Parent.Children)
+                            {
+                                if (item == ViewBag.CurrentItem)
+                                {
+                                    <li class="active">
+                                        <a href="@item.Url" @if (item.OpenInNewWindow) { Html.Raw("target=\"_blank\""); }>@item.Text</a>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li>
+                                        <a href="@item.Url" @if (item.OpenInNewWindow) { Html.Raw("target=\"_blank\""); }>@item.Text</a>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    }
+                </div>
+            }
+        }
+    }
+}

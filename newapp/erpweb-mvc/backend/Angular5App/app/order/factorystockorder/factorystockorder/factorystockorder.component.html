@@ -1,0 +1,30 @@
+<div class="form-group">
+    <label for="cboFactory">Factory</label>
+    <select class="form-control" name="cboFactory" [(ngModel)]="model.order.factory_id" >
+        <option *ngFor="let f of model.factories" value="{{f.user_id}}">{{f.factory_code}}</option>
+    </select>
+</div>
+<div class="form-group">
+    <label for="poref">PO Ref</label>
+    <input type="text" class="form-control" name="poref" [(ngModel)]="model.order.po_ref" />
+</div>
+<div class="form-group">
+    <label for="poref">Customer PO Ref</label>
+    <input type="text" class="form-control" name="customerporef" [(ngModel)]="model.order.po_customer_ref" />
+</div>
+<div class="form-group">
+    <label for="etd">Order date:</label>
+    <input type="date" class="form-control" name="datecreated" [ngModel]="model.order.datecreated | date:'yyyy-MM-dd'"
+    (ngModelChange)="model.order.datecreated = $event" />
+</div>
+<div class="form-group">
+    <label for="etd">ETD:</label>
+    <input type="date" class="form-control" name="etd" [ngModel]="model.order.etd | date:'yyyy-MM-dd'"
+    (ngModelChange)="model.order.etd = $event" />
+</div>
+<div class="form-group">
+    <label for="cboCurrency">Currency</label>
+    <select class="form-control" name="cboCurrency" [(ngModel)]="model.currencyId" (change)="onCurrencyChanged()">
+        <option *ngFor="let c of model.currencies" [value]="c.curr_code" >{{c.curr_symbol}}</option>
+    </select>
+</div>

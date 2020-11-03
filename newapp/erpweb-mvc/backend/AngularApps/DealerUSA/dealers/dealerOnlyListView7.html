@@ -1,0 +1,77 @@
+﻿<div loading class="loading-dialog"></div>
+<h2 ng-if="types.showTest">{{ctrlName}} - dealerOnlyListView.html</h2>
+<div class="row">
+    <!-- LEFT SIDE -->
+    <div class="col-sm-12 col-xs-12">
+        <section class="panel" style="margin-bottom:8px">
+            <!--<header class="panel-heading" style="background-color:white;text-align:center;">
+                <span class="h1">DEALERS</span>
+
+            </header>-->
+            <h3 style="text-align:center">DEALERS</h3>
+            <div class="panel-body">
+                <section class="panel general table-responsive" style="overflow:visible">
+
+
+                    <table datatable="ng"
+                           class="table table-striped m-t-15"
+                           dt-options="tableOptions">
+                        <thead>
+                            <tr>
+                                <th style="pointer-events:none;width:30px">Nr</th>
+                                <th style="pointer-events:none;width:180px">Company Name</th>
+                                <th style="pointer-events:none">Alpha</th>
+                                <th style="pointer-events:none">Sage Account/s</th>
+
+                                <th style="pointer-events:none;min-width:300px">Address</th>
+                                <th>&nbsp;</th>
+                                <th style="pointer-events:none;">State</th>
+                                <!--<th style="width:110px; pointer-events:none">Contact/E-mail</th>-->
+                                <th style="pointer-events:none;width:150px">Telephone</th>
+
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr ng-repeat="dealer in dealers | filter : searchDealers">
+                                <td style="width:30px">{{$index+1}}</td>
+                                <td>
+                                    <!--<a ui-sref="detail({id:dealer.customer})">-->
+                                    <a style="cursor:pointer" ng-click="gotoState(dealer.firstCustomer, dealer.name,dealer.alpha)">
+                                        {{dealer.name}}
+                                    </a>
+                                </td>
+                                <td> {{dealer.alpha}}</td>
+                                <td>{{dealer.customer}}</td>
+
+                                <td >
+                                    <div> {{dealer.address1[0]}} - {{dealer.town_city[0]}}</div>
+                                </td>
+                                <td>
+                                    <span ng-if="(dealer.address1.length-1) > 0"
+                                          data-placement="top" data-animation="am-flip-x" data-title="<span class='h4'>Others addresses</h4>" data-content="{{getText(dealer.moreAddresses)}}" bs-popover                                         
+                                          class="badge" style="cursor:pointer">
+                                        <i class="ion ion-home"></i> &nbsp;{{dealer.address1.length - 1}}
+                                        <span style="font-weight:100">&nbsp;more</span>
+                                    </span>
+
+                                </td>
+                                <td>{{dealer.state_region}}</td>
+                                <!--<td>{{dealer.address4}} </td>-->
+                                <td>{{dealer.address5}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </section>
+
+            </div>
+        </section>
+
+
+
+
+    </div>
+
+
+</div>

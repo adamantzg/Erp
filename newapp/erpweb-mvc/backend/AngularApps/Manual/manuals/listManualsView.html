@@ -1,0 +1,46 @@
+﻿<div loading class="loading-dialog"></div>
+<div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-xs-12">
+        <section class="panel">
+            <header class="panel-heading">
+                EXISTING DOCUMENTS
+            </header>
+            <div class="panel-body">
+                <section class="panel general">
+                    <button class="btn btn-info pull-left" ng-click="vm.OpenNewManual()">UPLOAD NEW DOCUMENT</button>
+                    <table id="maintableManuals" datatable="ng" class="table-condensed table-hover m-t-15" dt-options="vm.tableOptions" dt-instance="vm.dtInstance">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Version</th>
+                                <th>Short description</th>
+                                <th>Creator</th>
+                                <th>Created</th>
+                                <th>Modified</th>
+                                <th>Last Modified by</th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="clickable" ng-repeat="m in vm.manuals track by $index">
+                                <td>{{m.title}}</td>
+                                <td>{{m.version}}</td>
+                                <td>{{m.short_description}}</td>
+                                <td>{{vm.GetCreatorUserName(m)}}</td>   
+                                <td>{{vm.GetCreatedDate(m)}}</td>
+                                <td>{{vm.GetLastModifiedDate(m)}}</td>
+                                <td>{{vm.GetLastEditorUserName(m)}}</td>
+                                <td><a title="Edit"><i ng-click="vm.EditManual(m)" class="fa fa-pencil-square-o" aria-hidden="true"></i></a></td>
+                                <td><a title="Copy"><i ng-click="vm.CopyManual(m)" class="fa fa-files-o" aria-hidden="true"></i></a></td>
+                                <td><a title="Delete"><i ng-click="vm.DeleteManual(m)" class="fa fa-times" aria-hidden="true"></i></a></td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
+        </section>
+    </div>
+</div>

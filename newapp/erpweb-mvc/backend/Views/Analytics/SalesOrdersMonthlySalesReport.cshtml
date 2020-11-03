@@ -1,0 +1,23 @@
+﻿@model SalesOrdersMonthlyReportModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@(Model.Warehouse) Sales Report</title>
+</head>
+<body>
+    <div>
+        <h2>@(Model.Warehouse) Sales - @Model.ForDate.ToString("MMMM yyyy")</h2>
+
+        <div>
+            <img src="@WebUtilities.GetSiteUrl()@Path.Combine(Settings.Default.Analytics_ImagesFolder,$"{ViewBag.ChartKey}_SalesOrdersMonthlyReport.jpg")" />
+        </div>
+    </div>
+</body>
+</html>

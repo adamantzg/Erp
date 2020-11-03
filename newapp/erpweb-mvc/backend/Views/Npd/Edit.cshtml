@@ -1,0 +1,301 @@
+﻿@using company.Common
+@model NpdEditModel
+
+@{
+    Layout = "_NpdLayout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+    <div class="main">
+        <span class="title">
+            
+            @if (Model.EditMode == EditMode.New)
+            {
+                @((Model.cprod != null ? "DEVELOP AN EXISTING" : "DEVELOP A NEW") + " PRODUCT")
+                
+            }
+            else
+            {
+                @(Model.EditMode == EditMode.New ? string.Format("{2}PD-{0}-{1}",DateTime.Today.ToString("MMyyyy"),Model.Npd.Month_Sequence,Model.cprod != null ? "E" : "N") : Model.Npd.tracking_num)@Html.HiddenFor(m=>m.Npd.Month_Sequence)
+            }
+        </span>
+        @if (Model.EditMode == EditMode.Edit)
+        {
+            <div class="status_holder">status
+               @Html.DropDownListFor(m => m.Npd.status_id, new SelectList(Model.Statuses, "npdstatus_id", "name"), "", new {@class = "simple-input_dropDown"})
+            </div>
+        }
+        <table class="table_two" width="94%" border="0" cellspacing="1" cellpadding="1">
+            <tr>
+                <td  style="width: 200px" height="30">brands</td>
+                <td @Html.Raw(Model.EditMode == EditMode.Edit ? "colspan=\"3\"" : "") >@Html.EditorFor(m=>m.Brands)@Html.HiddenFor(m=>m.Npd.prod_id)</td>
+            </tr>
+
+            <tr>
+                <td height="30" style="width: 200px">product type</td>
+                <td @Html.Raw(Model.EditMode == EditMode.Edit ? "colspan=\"3\"" : "")>
+                @if (Model.EditMode == EditMode.New)
+                {
+                    @Html.DropDownListFor(m => m.Npd.prod_type, new SelectList(Model.Categories, "category1_id", "cat1_name"), "(All)", new {@class = "simple-input_dropDown"})
+                }
+                else
+                {
+                    @Html.HiddenFor(m=>m.Npd.prod_type)<span>@Model.Npd.prod_type_text</span>
+                }
+                    
+            </tr>
+            @if (Model.EditMode == EditMode.New)
+            {
+                <tr>
+                    <td height="40">product name</td>
+                    <td >@Html.TextBoxFor(m => m.Npd.prod_name, new {@class = "simple-input"})</td>
+                </tr>
+                <tr>
+                    <td height="50">product code</td>
+                    <td>@Html.TextBoxFor(m => m.Npd.prod_code, new {@class = "simple-input"})@Html.HiddenFor(m => m.Npd.cprod_id)</td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td height="40">product name</td>
+                    <td  >@Html.TextBoxFor(m => m.Npd.prod_name, new {@class = "simple-input"})</td>
+                    <td height="40" style="text-align: center">product code</td>
+                    <td >@Html.TextBoxFor(m => m.Npd.prod_code, new {@class = "simple-input",style="width:95%"})@Html.HiddenFor(m => m.Npd.cprod_id)</td>
+                </tr>
+            }
+            @if (Model.EditMode == EditMode.New)
+            {
+                <tr>
+                    <td height="50">PD file</td>
+                    <td><span class="number" id="tracking">@(Model.EditMode == EditMode.New ? string.Format("{2}PD-{0}-{1}", DateTime.Today.ToString("MMyyyy"), Model.Npd.Month_Sequence, Model.cprod != null ? "E" : "N") : Model.Npd.tracking_num)@Html.HiddenFor(m => m.Npd.Month_Sequence)</span></td>
+                </tr>
+
+                <tr>
+                    <td height="50">status</td>
+                    <td>@Html.DropDownListFor(m => m.Npd.status_id, new SelectList(Model.Statuses, "npdstatus_id", "name"), "", new {@class = "simple-input_dropDown"})</td>
+                </tr>
+            }
+            <tr>
+                <td height="50">notes</td>
+                <td @Html.Raw(Model.EditMode == EditMode.Edit ? "colspan=\"3\"" : "")>@Html.TextAreaFor(m=>m.Npd.description,new {style="width: 98%; min-height: 50px",@class="simple-input"})</td>
+            </tr>
+            @if (Model.EditMode == EditMode.Edit)
+            {
+                <tr id="tr_addNew"><td><a href="javascript:void(0)" onclick="ShowAddNew()" class="add_new">add new comment</a></td>
+                </tr>
+            }
+        </table>
+        @if (Model.EditMode == EditMode.Edit)
+        {
+            //comments
+            <table id="addNewComment" class="table_two" width="94%" border="0" cellspacing="1" cellpadding="1" style="margin-top:10px;display: none">
+                <tr>
+                    <td style="width:200px;background-color: #eeeeee" height="60">Add new comment</td>
+                    <td colspan="2" style="background-color: #eeeeee">@Html.TextAreaFor(m => m.NewComment, new { @class = "simple-input",style="min-height:40px" })</td>
+                </tr>
+                <tr>
+                    <td style="width: 150px;background-color: #eeeeee;height: 25px" ></td>
+                    <td style="width: 350px;background-color: #eeeeee"><div id="uploader">
+                                                                           <div id="files"></div>
+                                                                           <input type="button" class="button" id="pickfiles" value="Select files" style="float: none"/>&nbsp;<input type="button" class="button" id="uploadFiles" value="Upload files" style="float:none"/>
+                                                                       </div></td>
+                    <td bgcolor="#eeeeee"><span class="upload_text">to upload files with this comment click "select files" then "upload"</span></td>
+                </tr>
+            </table>
+            
+            <table class="table_two" width="94%"  border="0" cellspacing="1" cellpadding="1" style="margin-top:5px;">
+                <tr>
+                    <td class="title_row2" width="100">DATE</td>
+                    <td class="title_row2" width="100">USER</td>
+                    <td class="title_row2">COMMENTS</td>
+                </tr>
+            </table>
+            
+            <div class="npd_holder2">
+                <table width="100%" border="0" cellspacing="1" cellpadding="1">
+                    @if (Model.Npd.Comments != null)
+                    {
+                        var counter = 0;
+                        foreach (var c in Model.Npd.Comments.OrderByDescending(c => c.comments_date))
+                        {
+                            var tdClass = string.Format("row{0}", (counter++ % 2) + 1);
+                            <tr>
+                                <td width="180" class="@tdClass">@c.comments_date.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td width="150" class="@tdClass">@c.FromUser.userwelcome</td>
+                                <td class="@tdClass">@c.comments</td>
+                            </tr>
+                            @Html.Hidden("hidDeletedFiles")
+                            if (c.Files != null && c.Files.Count > 0)
+                            {
+                                <tr class="npd_details_imageRow">
+                                    <td width="180" class="@tdClass">&nbsp;</td>
+                                    <td width="150" class="@tdClass">&nbsp;</td>
+                                    <td  class="@tdClass">
+                                        <div>
+                                            @foreach (var f in c.Files)
+                                            {
+                                                var ext = Path.GetExtension(f.filename).Replace(".", "").ToLower();
+                                                if (ext.In("jpg", "gif", "png"))
+                                                {
+                                                    <a href="@Path.Combine(Settings.Default.npdFilesFolders, f.filename)" class="lytebox"><img src="@Path.Combine(Settings.Default.npdFilesFolders, f.filename)" style="max-height: 30px"/></a>
+                                                }
+                                                else
+                                                {
+                                                    <a title="@f.filename" href="@Path.Combine(Settings.Default.npdFilesFolders, f.filename)" target="_blank"><img src="/Images/doctypes/@(ext)32.png" /></a>
+                                                }
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                </table>
+            </div>
+            
+        }
+        <table>
+            <tr>
+                <td>&nbsp;</td>
+                <td><input class="button" name="" type="submit" value="SAVE" /></td>
+            </tr>
+        </table>
+
+    </div><!--main-->
+    
+}
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/lytebox/lytebox.js"></script>
+    <script src="~/Scripts/plupload/plupload.full.js"></script>
+    <script src="~/Scripts/plupload/jquery.plupload.queue/jquery.plupload.queue.js"></script>
+    
+    <script type="text/javascript">
+        var newFileId = -1;
+
+        var runtimes;
+        $.browser.safari = ($.browser.safari && /chrome/.test(navigator.userAgent.toLowerCase())) ? false : true;
+        if ($.browser.safari) {
+            runtimes = 'flash,silverlight,html5,html4';
+        } else {
+            runtimes = 'gears,html5,flash,silverlight, browserplus';
+        }
+
+        $(function() {
+                                    @*$('#uploader').pluploadQueue({
+                runtimes: runtimes,
+                browse_button: 'Choose files',
+                max_file_size: '@Settings.Default.Enquiries_MaxFileSize mb',
+                url: '@Url.Action("Files")',
+                flash_swf_url: '/Scripts/plupload/plupload.flash.swf',
+                silverlight_xap_url: '/Scripts/plupload/plupload.silverlight.xap',
+
+                init: {
+                    FileUploaded: function(uploader, file, response) {
+                        var div = $.validator.format('<div id="file_{0}">{1}<a href="javascript:void(0)" onclick="DeleteFile({0},\'{1}\')"><img src="/images/menus/delete.gif" /></a></div>', newFileId, file.name);
+                        $("#files").append(div);
+                        newFileId--;
+
+                    },
+                    FilesAdded: function (uploader, files) {
+                        $('.plupload_file_name').css('width', '165px');
+                    }
+                }
+            });
+            $('.plupload_header').hide();*@
+
+            var uploader = new plupload.Uploader({
+                runtimes: 'gears,html5,flash,silverlight,browserplus',
+                browse_button: 'pickfiles',
+                container: 'uploader',
+                max_file_size: '@Settings.Default.Enquiries_MaxFileSize mb',
+                url: '@Url.Action("Files")',
+                flash_swf_url: '/Scripts/plupload/plupload.flash.swf',
+                silverlight_xap_url: '/Scripts/plupload/plupload.silverlight.xap'
+            });
+
+            uploader.bind('Init', function(up, params) {
+                $('#filelist').html("<div>Current runtime: " + params.runtime + "</div>");
+            });
+
+            $('#uploadFiles').click(function(e) {
+                uploader.start();
+                e.preventDefault();
+            });
+
+            uploader.init();
+
+            uploader.bind('FilesAdded', function(up, files) {
+                $.each(files, function(i, file) {
+
+                    var div = $.validator.format('<div id="file_{0}" style="width:440px"><div style="width:410px;float:left" >{1} ({2}) <b></b></div><div style="float:left;width:30"><a href="javascript:void(0)" onclick="DeleteFile(\'{0}\',\'{1}\')"><img src="/images/menus/delete.gif" /></a></div></div>', file.id, file.name, plupload.formatSize(file.size));
+                    $("#files").append(div);
+
+                });
+
+                up.refresh(); // Reposition Flash/Silverlight
+            });
+
+            uploader.bind('UploadProgress', function(up, file) {
+                $('#file_' + file.id + " b").html(file.percent + "%");
+            });
+
+            uploader.bind('Error', function(up, err) {
+                $('#files').append("<div>Error: " + err.code +
+                    ", Message: " + err.message +
+                    (err.file ? ", File: " + err.file.name : "") +
+                    "</div>"
+                );
+
+                up.refresh(); // Reposition Flash/Silverlight
+            });
+
+            uploader.bind('FileUploaded', function(up, file) {
+                $('#file_' + file.id).attr('upload', '1');
+
+            });
+
+        });
+
+        var deletedFiles = [];
+
+        function DeleteFile(id, name) {
+
+            if ($('#file_' + id).attr('upload') == '1') {
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    url: '@Url.Action("DeleteTempFile")',
+                    async: false,
+                    dataType: "json",
+                    data: "{" +
+                        "'name': '" + name + "'}",
+                    success: function() {
+                        $("#file_" + id).remove();
+                    },
+                    error: function(a, b, c) {
+                        alert("Error in deleting file");
+                    }
+                });
+            } else {
+                $("#file_" + id).remove();
+            }
+
+
+        }
+        
+        function ShowAddNew() {
+            $('#addNewComment').show();
+            $('#tr_addNew').hide();
+        }
+    </script>
+}
+@section head
+{
+    <link href="~/Scripts/lytebox/lytebox.css" rel="stylesheet" />
+    <link href="~/Scripts/plupload/jquery.plupload.queue/css/jquery.plupload.queue.css" rel="stylesheet" />
+}

@@ -1,0 +1,330 @@
+
+
+<form #editForm="ngForm">
+     <div style="margin: 5px 0 0 0"><button type="button" class="btn btn-primary mr-2" (click)="update(editForm)">Update</button> 
+        <button type="button" class="btn btn-default" (click)="back()">Back to first page</button>
+    </div>
+    <h3>{{title}}</h3>
+    <div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
+    <div class="alert alert-danger" *ngIf="validationMessage && showValidation && editForm.invalid">{{validationMessage}}</div>
+    <div class="form form-horizontal col-lg-10 col-sm-12">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Factory</label>
+                    <div class="col-sm-9">
+                        <select class="form-control" [(ngModel)]="product.mastProduct.factory" name="factory" [disabled]="checkDisabled(product)" required>
+                            <option value="">(Select)</option>
+                            <option *ngFor="let f of factories | orderBy: 'factory_code'" [ngValue]="f">{{f.factory_code + ' ' + f.user_name}}</option>
+                        </select>
+                    </div>            
+                </div>
+                    <div class="form-group">
+                    <label class="col-sm-3 control-label">Category</label>
+                    <div class="col-sm-9">
+                        <select class="form-control" [(ngModel)]="product.mastProduct.category1" name="category1" [disabled]="checkDisabled(product)">
+                            <option value="">(Select)</option>
+                            <option *ngFor="let c of categories | orderBy: 'cat1_name'" [value]="c.category1_id">{{c.cat1_name}}</option>
+                        </select>
+                    </div>            
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Tariff</label>
+                    <div class="col-sm-9">
+                        <select class="form-control" [(ngModel)]="product.mastProduct.tariff" name="tariff" [disabled]="checkDisabled(product)">
+                            <option value="">(Select)</option>
+                            <option *ngFor="let t of tariffs | orderBy: 'Description'" [ngValue]="t">{{t.Description}}</option>
+                        </select>
+                    </div>        
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Client</label>
+                    <div class="col-sm-9">
+                        <select class="form-control" [(ngModel)]="product.cprod_user" name="client" [disabled]="checkDisabled(product)" required>
+                            <option value="">(Select)</option>
+                            <option *ngFor="let c of clients | orderBy: 'customer_code'" [value]="c.user_id">{{c.customer_code}}</option>
+                        </select>
+                    </div>            
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Code</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" [(ngModel)]="product.cprod_code1" name="cprod_code1" [disabled]="checkDisabled(product)" required>            
+                    </div>
+                
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">Description</label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control" [(ngModel)]="product.cprod_name" name="cprod_name" [disabled]="checkDisabled(product)" required></textarea>
+                    </div>            
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="text-center"><img style="width: 100%;max-height: 230px;margin-bottom:5px" [src]="getImage()"></div>
+                <div *ngIf="!checkDisabled(product)" class="drop-container text-center" ngFileDrop [options]="options" (uploadOutput)="onUploadOutput($event)" [uploadInput]="uploadInput" [ngClass]="{ 'is-drop-over': dragOver }">
+                    <label>Drop image here</label>
+                </div>
+                <label class="upload-button" *ngIf="!checkDisabled(product)">
+                        <input type="file" class="form-control" class="btn btn-block btn-default" ngFileSelect [options]="options" (uploadOutput)="onUploadOutput($event)" [uploadInput]="uploadInput" >
+                </label>
+                
+                <progressbar *ngIf="uploading" [value]="uploadProgress"></progressbar>
+            </div>
+        </div>        
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Barcode</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" [(ngModel)]="product.barcode" name="barcode" [disabled]="checkDisabled(product)">            
+            </div>      
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Tooling cost</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control numeric-control" [(ngModel)]="product.mastProduct.productPricingData.tooling_cost" 
+                name="toolingcost" [disabled]="checkDisabled(product)">            
+            </div>      
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Tooling currency</label>
+            <div class="col-sm-10">
+                <select class="form-control" [(ngModel)]="product.mastProduct.productPricingData.tooling_currency_id" name="toolingcurrency" 
+                    [disabled]="checkDisabled(product)">
+                    <option [value]="null">(Select)</option>
+                    <option *ngFor="let c of model.currencies" [value]="c.curr_code">{{c.curr_symbol}}</option>
+                </select>         
+            </div>      
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Initial stock</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control numeric-control" [(ngModel)]="product.mastProduct.productPricingData.initial_stock" 
+                name="initialstock" [disabled]="checkDisabled(product)">            
+            </div>      
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Display qty</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control numeric-control" [(ngModel)]="product.mastProduct.productPricingData.display_qty" 
+                name="displayqty" [disabled]="checkDisabled(product)">            
+            </div>      
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">MOQ</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control numeric-control" [(ngModel)]="product.mastProduct.factory_moq" 
+                name="moq" [disabled]="checkDisabled(product)">            
+            </div>      
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">FOB price</label>
+            <div class="col-sm-10">
+                
+                <div class="form-group row">
+                <!-- <label class="col-sm-2 control-label">Currency</label> -->
+                    <div class="col-sm-3">
+                        <span *ngFor="let p of product.mastProduct.prices">
+                            <input type="text" [(ngModel)]="p.price" [name]="'price' + p.currency_id" class="form-control numeric-control" [disabled]="checkDisabled(product)" 
+                            *ngIf="currency.curr_code == p.currency_id" required>
+                        </span>                
+                    </div>     
+                    <div class="col-sm-3">
+                        <select class="form-control" [(ngModel)]="currency" name="currency" [disabled]="checkDisabled(product)">
+                            <option *ngFor="let c of model.currencies" [ngValue]="c">{{c.curr_symbol}}</option>
+                        </select>
+                    </div>         
+                </div>            
+            </div>
+        </div>
+        <div class="form-group" *ngIf="checkLme(product)">
+            <label class="col-sm-2 control-label">LME base rate</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control numeric-control" [(ngModel)]="product.mastProduct.lme" name="lme" [disabled]="checkDisabled(product)">            
+            </div>      
+        </div>
+        <div class="form-group" *ngIf="checkLme(product)">
+            <label class="col-sm-2 control-label">Adjusted FOB based on LME</label>
+            <div class="col-sm-10">
+                {{calculateLme()}} {{currency.curr_symbol}} (based on LME rate = {{lmeRate}})
+            </div>      
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Shipment type</label>
+            <div class="col-sm-10">
+                <select class="form-control" [(ngModel)]="shipmentType" name="shipmentType" [disabled]="checkDisabled(product)">
+                    <option value="">(Select)</option>
+                    <option *ngFor="let c of model.containerTypes" [ngValue]="c">{{c.shortname}}</option>
+                </select>
+            </div>      
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Units</label>
+            <div class="col-sm-10">
+                <input type="text" [(ngModel)]="product.mastProduct.units_per_40pallet_gp" name="units_per_40pallet_gp" class="form-control numeric-control" [disabled]="checkDisabled(product)" 
+                *ngIf="shipmentType.shortname == 'GP40'">
+                <input type="text" [(ngModel)]="product.mastProduct.units_per_20pallet" name="units_per_20pallet" class="form-control numeric-control" [disabled]="checkDisabled(product)"
+                *ngIf="shipmentType.shortname == 'GP20'">
+                <input type="text" [(ngModel)]="product.mastProduct.units_per_pallet_single" name="units_per_pallet_single" class="form-control numeric-control" [disabled]="checkDisabled(product)"
+                *ngIf="shipmentType.shortname == 'pallet'">
+            </div>      
+        </div>        
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Retail prices</label>
+            <div class="col-sm-10">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th *ngFor="let m of model.markets | orderBy: 'id'" class="text-right">{{m.name}}</th>
+                        </tr>                    
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Retail price ex VAT</td>
+                            <td *ngFor="let md of product.marketData | orderBy: 'market_id'">
+                                <input type="text" class="form-control numeric-control pull-right" [(ngModel)]="md.retail_price" [name]="'retail_price' + md.market_id" [disabled]="checkDisabled(product)">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Retail price inc VAT</td>
+                            <td *ngFor="let md of product.marketData | orderBy: 'market_id'" class="text-right">
+                                {{(md.retail_price * (1 + md.market.vat)) | number:numFormat}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="form-group" >
+            <label class="col-sm-2 control-label">Discounted selling prices</label>
+            <div class="col-sm-10">
+                <app-pricingmodel [mode]="pricingModelMode.CalculatePrices" [prices]="product.marketData" [models]="model.pricingModels"></app-pricingmodel>
+            </div>      
+        </div>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Market</label>
+            <div class="col-sm-10">
+                <select class="form-control" [(ngModel)]="market" name="market">
+                    <option value="">(Select)</option>
+                    <option *ngFor="let m of model.markets" [ngValue]="m">{{m.name}}</option>
+                </select>
+            </div>      
+        </div>
+        <div class="form-group" *ngIf="market">
+            <label class="col-sm-2 control-label">Freight cost</label>
+            <div class="col-sm-10">
+                {{getFreightCost()}}
+            </div>
+        </div>
+        <div class="form-group" *ngIf="market">
+            <label class="col-sm-2 control-label">Costs ({{market.currency.curr_symbol}})</label>
+            <div class="col-sm-10">
+                <table class="table">
+                    <thead>
+                        <th colspan="2"></th>
+                        <th class="text-right">SAGE</th>
+                        <th class="text-right">GATEWAY</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="2">FOB cost</td>
+                            <td class="text-right">{{toMarketCurrency(getFOBPrice()) | number:numFormat}}</td>
+                            <td class="text-right">{{toMarketCurrency(getFOBPrice()) | number:numFormat}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Freight cost</td>
+                            <td class="text-right">{{toMarketCurrency(getFOBPrice() * getSetting(settingId.SageFreight)) | number:numFormat}}</td>
+                            <td class="text-right">{{toMarketCurrency(getFreightCostPerUnit()) | number:numFormat}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Cost of fiscal agent</td>
+                            <td class="text-right">-</td>
+                            <td class="text-right">{{toMarketCurrency(getFOBPrice() * getSetting(settingId.FiscalAgent)) | number:numFormat}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Import duty</td>
+                            <td class="text-right">{{toMarketCurrency(getImportDuty()) | number:numFormat}}</td>
+                            <td class="text-right">{{toMarketCurrency(getImportDuty()) | number:numFormat}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">BB Asia cost duty</td>
+                            <td class="text-right">{{toMarketCurrency(getCommission()) | number:numFormat}}</td>
+                            <td class="text-right">{{toMarketCurrency(getCommission()) | number:numFormat}}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Internal cost of delivery in {{market.name}}</td>
+                            <td class="text-right"></td>
+                            <td class="text-right">
+                                {{ toMarketCurrency((getFOBPrice() * (1 + getSetting(settingId.FiscalAgent)) + getFreightCostPerUnit() + 
+                                     + getImportDuty()) * market.internal_cost ) | number:numFormat}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">Landed unit cost based on {{shipmentType.shortname}}</td>
+                            <td class="text-right">{{ 
+                                getLandedCostSage()  | number:numFormat
+                            }}</td>
+                            <td class="text-right">{{
+                                getLandedCostGateway() | number:numFormat
+                                }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3"><label>Forecasts</label></td>
+                            <td><button type="button" class="btn btn-default" (click)="showForecasts()">Update</button></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">next 12 months unit sales</td>
+                            <td class="text-right">{{ getForecastSaleTotal()}}</td>
+                            <td class="text-right">
+                                {{getForecastSaleTotal()}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">total cost</td>
+                            <td class="text-right">{{getTotalCostSage() | number:numFormat}}</td>
+                            <td class="text-right">{{getTotalCostGateway() | number:numFormat}}</td>
+                        </tr>
+                        <tr *ngFor="let m of getMarketPricingModels() | slice:0:1">
+                            <td [rowSpan]="getMarketPricingModels().length">total sales</td>
+                            <td>{{m.name}}</td>
+                            <td class="text-right">{{getTotalSales(m) | number:numFormat}}</td>
+                            <td class="text-right">{{getTotalSales(m) | number:numFormat}}</td>
+                        </tr>
+                        <tr *ngFor="let m of getMarketPricingModels() | slice:1">
+                            <td>{{m.name}}</td>
+                            <td class="text-right">{{getTotalSales(m) | number:numFormat}}</td>
+                            <td class="text-right">{{getTotalSales(m) | number:numFormat}}</td>
+                        </tr>
+                        <tr *ngFor="let m of getMarketPricingModels() | slice:0:1">
+                            <td [rowSpan]="getMarketPricingModels().length">GP</td>
+                            <td>{{m.name}}</td>
+                            <td class="text-right">{{getTotalSales(m) - getTotalCostSage() | number:numFormat}}</td>
+                            <td class="text-right">{{getTotalSales(m) - getTotalCostGateway() | number:numFormat}}</td>
+                        </tr>
+                        <tr *ngFor="let m of getMarketPricingModels() | slice:1">
+                            <td>{{m.name}}</td>
+                            <td class="text-right">{{getTotalSales(m) - getTotalCostSage() | number:numFormat}}</td>
+                            <td class="text-right">{{getTotalSales(m) - getTotalCostGateway() | number:numFormat}}</td>
+                        </tr>
+                        <tr *ngFor="let m of getMarketPricingModels() | slice:0:1">
+                            <td [rowSpan]="getMarketPricingModels().length">GPM</td>
+                            <td>{{m.name}}</td>
+                            <td class="text-right">{{(getTotalSales(m) - getTotalCostSage()) / getTotalSales(m) | percent:'1.2-2'}}</td>
+                            <td class="text-right">{{(getTotalSales(m) - getTotalCostGateway()) / getTotalSales(m) | percent:'1.2-2'}}</td>
+                        </tr>
+                        <tr *ngFor="let m of getMarketPricingModels() | slice:1">
+                            <td>{{m.name}}</td>
+                            <td class="text-right">{{(getTotalSales(m) - getTotalCostSage()) / getTotalSales(m) | percent:'1.2-2'}}</td>
+                            <td class="text-right">{{(getTotalSales(m) - getTotalCostGateway()) / getTotalSales(m) | percent:'1.2-2'}}</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+    </div>
+    <div style="margin: 5px 0 0 0;clear: both" class="mb-2"><button type="button" class="btn btn-primary mr-2" (click)="update(editForm)">Update</button> 
+        <button type="button" class="btn btn-default" (click)="back()">Back to first page</button>
+    </div>
+</form>

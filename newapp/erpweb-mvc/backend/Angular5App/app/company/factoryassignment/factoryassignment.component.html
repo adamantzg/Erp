@@ -1,0 +1,22 @@
+<h3>Factory user assignment</h3>
+<app-errormessage [errorMessage]="errorMessage"></app-errormessage>
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label>Factory: </label>
+            <select class="form-control" [(ngModel)]="factoryId" (change)="factorySelected()">
+                <option *ngFor="let f of factories" [value]="f.user_id">{{f.factory_code}}</option>
+            </select>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" [(ngModel)]="useAllLocations" (change)="onUseAllLocationsChanged()"> Show QCs from other locations
+            </label>
+        </div>
+        <app-grid [definition]="gridDefinition" [data]="users" (CheckboxClicked)="onCheckBoxClicked($event)" ></app-grid>
+    </div>
+</div>

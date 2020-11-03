@@ -1,0 +1,7 @@
+﻿
+@*@model backend.Models.ReportProductImagesModel
+<span>
+    @Html.HiddenFor(m=>m.ProductList.Select(s=>s.Products.web_name))
+    @Html.CheckBoxFor(m=>m.Selected)
+    @Html.LabelFor(m=>m.Selected,Model.ProductList)
+</span>*@

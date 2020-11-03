@@ -1,0 +1,104 @@
+﻿@model InspectionExportModel
+
+<h2>Inspection export</h2>
+
+Select factories:<br/>
+@{
+    var locations = Model.Factories.GroupBy(f => f.consolidated_port).Select(g => g.Key).OrderBy(i => i).ToList();
+    var model = Model;
+    using (Html.BeginForm("ExportForFactories", "Inspection", FormMethod.Post))
+    {
+        <table style="width:100%">
+        @foreach (var loc in locations)
+        {
+            <tr>
+                <td colspan="2" style="font-weight: bold">Location@(loc)</td>
+            </tr>
+            <tr>
+                <td style="width: 50px"><input type="checkbox" id="chkall_@(loc)" name="chkall_@(loc)" value="@loc"/> ALL</td>
+                <td >
+                    @foreach (var fact in Model.Factories.Where(f => f.consolidated_port == loc).OrderBy(f=>f.factory_code))
+                    {
+                        <span style="white-space: nowrap"><input type="checkbox" id="chk_@(loc)_@(fact.user_id)" name="SelectedFactories" value="@fact.factory_code"/>@Html.Raw("&nbsp;")@(fact.factory_code) </span>
+                    }
+                </td>
+            </tr>
+        }
+        @*@{
+            var d = Html.DateTimeFor(m => m.From, DateTime.Now, dateInCalendar: true);
+            var d1 = Html.DateTimeFor(m => m.To, DateTime.Now, true);
+        }*@
+            @*<tr>
+                <td colspan="2">Inspection date from: @(d.DateCalendar(inLine: false, calendarOptions: new CalendarOptions { ShowButtonPanel = true, ShowOn = CalendarOptionsShowOn.button, ButtonImage = "/images/calendar.gif", ButtonImageOnly = true })) to 
+                @(d1.DateCalendar(inLine: false, calendarOptions: new CalendarOptions { ShowButtonPanel = true, ShowOn = CalendarOptionsShowOn.button, ButtonImage = "/images/calendar.gif", ButtonImageOnly = true }))</td>
+                
+            </tr>*@
+            <tr>
+                <td colspan="2">
+                    Inspection date from: @Html.TextBoxFor(m => m.From) to @Html.TextBoxFor(m => m.To)
+                </td>
+
+            </tr>
+        </table>
+        <input type="submit" value="export"/>
+    }
+}
+
+@section head
+{
+    <style>
+        input[type=text] { width: auto}
+    </style>
+}
+
+@section scripts
+{
+@Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/jqueryval")
+    @*<script src="/Scripts/MVCControlToolkit.Controls-2.2.5.min.js" type="text/javascript"></script>*@
+    <script type='text/javascript' >
+        //$.validator.setDefaults({
+        //    ignore: "not([data-elementispart]):hidden"
+        //});
+    </script>
+    @*<script src="/Scripts/globalize.js" type="text/javascript"></script>*@
+    @Html.GlobalizationScript()
+    @*Html.JQueryDatePickerGlobalizationScript(globalizationFolder: "/Scripts/i18n/")*@
+
+    <script type="text/javascript">
+        $(window).load(function () {
+            var from = $("#From").val();
+            var to = $("#To").val();
+            $("#From").val(from.split(' ')[0]);
+            $("#To").val(to.split(' ')[0]);
+        })
+        $(function () {
+            $("#From").datepicker({
+                showOn: "button",
+                buttonImage: "/images/calendar.gif",
+                buttonImageOnly: true,
+                buttonText: "Select date",
+                dateFormat: "dd/mm/yy"
+            });
+        });
+        $(function () {
+            $("#To").datepicker({
+                showOn: "button",
+                buttonImage: "/images/calendar.gif",
+                buttonImageOnly: true,
+                buttonText: "Select date",
+                dateFormat: "dd/mm/yy"
+            });
+        });
+        $(document).ready(function() {
+            $('[id^="chkall"]').click(function () {
+                var checked = $(this).attr('checked') == 'checked';
+                var loc = $(this).val();
+                if (checked)
+                    $('[id^="chk_' + loc + '_"]').attr('checked', 'checked');
+                else
+                    $('[id^="chk_' + loc + '_"]').removeAttr('checked');
+            });
+        });
+    </script>
+}

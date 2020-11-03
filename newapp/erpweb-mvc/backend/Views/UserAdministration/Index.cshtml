@@ -1,0 +1,229 @@
+﻿@model UserAdministrationModel
+
+@section title
+{
+    User and roles administration
+}
+
+<div class="container-fluid" ng-app="UserAdministrationApp">
+    <div ng-controller="UserAdminController" ng-cloak>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <header class="card-header">Roles</header>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    @*<th></th>*@
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="r in Roles" ng-class="r == selected_role ? 'row_selected' : ''" ng-click="SelectRole(r)">
+                                    <td><a class="pointer" >{{r.name}}</a></td>
+                                    @*<td class="text-right"><button value="Users" class="btn" ng-click="ShowUsersInRole(r)" >Users</button></td>*@
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>            
+            </div>
+            <div class="col-md-4">
+                <div class="card" ng-show="selected_role" ng-cloak>
+                    <header class="card-header">Users in role: {{selected_role.name}}</header>
+                    <div class="card-body">
+                        <form class="form-inline mb-2">
+                            <div class="form-group">
+                                <label class="control-label">Add user:</label>
+                                <input type="text" class="form-control ml-2" ng-model="NewUser" uib-typeahead="u as u.userwelcome for u in GetUsers($viewValue)" typeahead-on-select="UserSelected($item, $model, $label, $event)" />
+                                <button value="Add" ng-click="AddUserToRole()" class="btn btn-primary ml-2" ng-show="userSelected">Add</button>
+                            </div>
+                        </form>                                        
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Full name</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="u in Users">
+                                    <td>{{u.username}}</td>
+                                    <td>{{u.userwelcome}}</td>
+                                    <td class="text-right"><button value="Remove" class="btn btn-danger" ng-click="RemoveUserFromRole(u)">Remove</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <header class="card-header">Navigation</header>
+                    <div class="card-body">
+                        <form class="form-inline">
+                            <label class="form-check-label mr-2">Filter:</label>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" name="filter" value="1" ng-model="filter" 
+                                       class="form-check-inline"/> 
+                                <label class="form-check-label">All</label> 
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" name="filter" value="2" ng-model="filter" class="form-check-inline"/>
+                                <label class="form-check-label">For role: </label>                                
+                            </div>
+                            <div class="form-group">
+                                <select ng-model="filter_role" class="form-control">
+                                    <option ng-repeat="r in Roles" value="{{r.id}}">{{r.name}}</option>
+                                </select>
+                            </div>
+                            <div class="form-check form-check-inline ml-2">
+                                <input type="radio" name="filter" value="3" ng-model="filter" class="form-check-inline"/>
+                                <label class="form-check-label">For user:</label>
+                            </div>
+                            <div class="form-group">
+                                <input type="text" class="form-control mr-2" ng-model="filter_user" uib-typeahead="u as u.userwelcome for u in GetUsers($viewValue)"/>
+                                <button class="btn btn-secondary" value="Filter" ng-click="FilterItems()">Filter</button>
+                            </div>
+                        </form>
+                        <div id="tree" class="mt-2">
+                            <tree-grid tree-data="tree_data" expand-on="expand_on" col-defs="col_defs" on-click="ItemSelected(branch)" expand-level="1"></tree-grid>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <script type="text/ng-template" id="managePermissions.html">
+            <div class="modal-header">
+                <h4 class="modal-title">Permissions</h4>
+                <button class="close" ng-click="close()">&times;</button>
+            </div>
+            <div class="modal-body">
+
+                <h4>Roles</h4>
+                <form class="form-inline">
+                    <div class="form-group">
+                        <label>Add role: </label>
+                        <select ng-model="permission_new_role" class="form-control ml-2">
+                            <option ng-repeat="r in Roles" value="{{r.id}}">{{r.name}}</option>
+                        </select>                        
+                    </div>
+                    <button class="btn btn-primary ml-2" value="Add" 
+                            ng-click="AddPermissionForRole()">Add</button>
+                </form>
+                <table class="table table-striped mt-2">
+                    <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="p in NavigationItemPermissions | filter: FilterRoles">
+                        <td>{{p.Role.name}}</td>
+                        <td class="text-right"><button value="Remove" class="btn btn-danger" ng-click="RemovePermission(p)">Remove</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+                <h4>Users</h4>
+                <form class="form-inline">
+                    <div class="form-group">
+                        
+                        <label>
+                            Add user:
+                        </label>
+                        <input type="text" class="form-control ml-2" ng-model="permission_new_user" 
+                               uib-typeahead="u as u.userwelcome for u in GetUsers($viewValue)"/>                        
+                    </div>
+                    <div class="form-check form-check-inline ml-2">
+                        <label class="form-check-label">Exclude from role: </label>
+                        <input type="checkbox" class="form-check-inline ml-2" ng-model="permission_new_remove"/>                        
+                    </div>
+                    <button class="btn btn-primary" value="Add" ng-click="AddPermissionForUser()">Add</button>
+                </form>
+
+                <table class="table table-striped mt-2">
+                    <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Full name</th>
+                        <th>Excluded</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="p in NavigationItemPermissions | filter: FilterUsers">
+                        <td>{{p.User.username}}</td>
+                        <td>{{p.User.userwelcome}}</td>
+                        <td>{{p.remove ? 'Yes' : ''}}</td>
+                        <td class="text-right"><button value="Remove" class="btn btn-danger" ng-click="RemovePermission(p)">Remove</button></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </div>        
+        </script>          
+        
+        <script id="modalAlert">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h4 class="modal-title">Warning</h4>
+                    </div>
+                    <div class="modal-body">
+                        {{message}}
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-danger" ng-click="alertClose()" type="button"> Ok</button>
+                    </div>
+                </div>
+            </div>
+        </script>
+
+    </div>
+</div>
+
+@section head
+{
+    
+<link href="~/Scripts/treeview/treeGrid.css" rel="stylesheet" />
+}
+
+@section scripts {
+    @Scripts.Render("~/bundles/angular")
+    <script src="~/Scripts/angular-ui/ui-bootstrap-tpls-3.0.6.min.js"></script>
+    
+    <script src="~/Scripts/treeview/tree-grid-directive.js"></script>
+    
+    <script>
+    var model = @Html.Raw(WebUtilities.JsonSerialize(Model));
+    var usersInRolesUrl = '@Url.Action("GetUsersInRole")';
+    var getUsersByTextUrl = '@Url.Action("GetUsersByCriteria","Common")';
+    var addUserToRoleUrl = '@Url.Action("AddUserToRole")';
+        var removeUserFromRoleUrl = '@Url.Action("RemoveUserFromRole")';
+        var navigationItemPermissionsUrl = '@Url.Action("GetNavigationItemPermissions")';
+        var addPermissionForRoleUrl = '@Url.Action("AddPermissionForRole")';
+        var addPermissionForUserUrl = '@Url.Action("AddPermissionForUser")';
+        var removePermissionUrl = '@Url.Action("RemovePermission")';
+        var navigationItemsForRoleUrl = '@Url.Action("GetNavigationItemsForRole")';
+        var navigationItemsForUserUrl = '@Url.Action("GetNavigationItemsForUser")';
+    var navigationItemsUrl = '@Url.Action("GetNavigationItems")';
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.15/lodash.min.js" 
+            integrity="sha256-VeNaFBVDhoX3H+gJ37DpT/nTuZTdjYro9yBruHjVmoQ=" crossorigin="anonymous"></script>
+    <script src="~/AngularApps/UserAdministration/js/app.js"></script>
+    <script src="~/AngularApps/UserAdministration/js/controller.js"></script> 
+
+    
+}
+
+    
+
+

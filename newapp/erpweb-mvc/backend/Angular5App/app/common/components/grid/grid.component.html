@@ -1,0 +1,45 @@
+<div [ngStyle]="style">
+    <table class="table" style="margin-bottom: 0px" #headtable>
+        <thead style="display: table-header-group;">
+          <tr>
+            <th *ngFor="let c of definition.columns" [ngStyle]="c.headerStyle">{{c.title}}
+                <span *ngIf="c.type == columnTypes.Checkbox && c.showInHeader && headerData"><input type="checkbox" [(ngModel)]="headerData[c.headerSelectField]" 
+                    (click)="onHeaderCheckBoxClicked(c, $event)"></span>
+            </th>
+          </tr>
+        </thead>        
+            <ng-container *ngIf="!definition.fixedHeaders">
+                <ng-container *ngTemplateOutlet="bodytemplate">
+                </ng-container>  
+            </ng-container>
+    </table>
+    <div *ngIf="definition.fixedHeaders" [ngStyle]="fixedHeaderStyle">
+      <table class="table" style="margin-top:0px" #bodytable>
+        <ng-container *ngTemplateOutlet="bodytemplate">
+          </ng-container>  
+      </table>
+    </div>
+    <ng-template #bodytemplate>
+      <tbody>
+          <tr *ngFor="let d of _data">
+              <td *ngFor="let c of definition.columns" [ngStyle]="c.style">
+                  <span *ngIf="c.type == columnTypes.Label" [title]="c.tooltipField != null ? getValue(d, c, 'tooltipField') : ''">
+                        {{getValue(d,c) | columnFormat:c.dataType:c.format}}
+                    </span>
+                  <span *ngIf="c.type == columnTypes.Checkbox"><input type="checkbox" [(ngModel)]="d[c.field]" (change)="checkboxClicked(d,c)"></span>
+                  <span *ngIf="c.type == columnTypes.Button"><button class="btn btn-default" type="button" [ngClass]="c.buttonCss" 
+                    (click)="buttonClicked(d, c)" [title]="c.buttonTooltip">
+                      <span *ngIf="!c.buttonIcon">{{c.title}}</span>
+                      <span *ngIf="c.buttonIcon" [className]="'fa fa-' + c.buttonIcon"></span>
+                    </button></span>
+                  <span *ngIf="c.type == columnTypes.Custom"><app-customcolumn [row]="d" [column]="c" (ColumnClicked)="columnClicked($event)"></app-customcolumn></span>
+                  <span *ngIf="c.type == columnTypes.Link" [title]="c.tooltipField != null ? getValue(d, c, 'tooltipField') : ''">
+                      <a [href]="getValue(d,c,'linkField')" [target]="c.linkTarget">{{getValue(d, c)}}</a> </span>
+                  <span *ngIf="c.type == columnTypes.List" [title]="c.tooltipField != null ? getValue(d, c, 'tooltipField') : ''">
+                      {{joinListValue(d, c)}}
+                  </span>
+              </td>          
+          </tr>
+        </tbody>  
+    </ng-template>
+</div>

@@ -1,0 +1,86 @@
+﻿@model ProductBundleReportModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Bundle analysis report</title>
+    <style>
+        table {
+            padding: 2px;
+            border-collapse: collapse;
+        }
+        th {
+            padding: 2px;
+            font-weight: bold;
+            border: 1px solid black;
+        }
+        td {
+            padding: 2px;
+            border: 1px solid black;
+        }
+        .number 
+        {
+            text-align: right;
+        }
+        .bundle 
+        {
+            background-color: #E0E0E0
+        }
+        .components_num {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h2>Bundle analysis report for @Model.Date.ToString("d")</h2>
+        <h4><span class="components_num">[x]</span> The number in red indicates how many bundles the component appears on.</h4>
+        @{
+            var componentCounts = Model.Bundles.SelectMany(b => b.Components).GroupBy(c => c.cprod_id).ToDictionary(g => g.Key, g => g.Count());
+        }
+        <table>
+            <thead>
+                <tr>
+                    <th>Price Book SKU</th>
+                    <th>Component SKU's</th>
+                    <th>Description</th>
+                    <th>Finish</th>
+                    <th class="number">Physical On Hand</th>
+                    <th class="number">Allocated</th>
+                    <th class="number">Available</th>
+                    <th class="number">On Order (ETA)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var b in Model.Bundles) {
+                    <tr class="bundle">
+                        <td>@b.code</td>
+                        <td></td>
+                        <td>@b.description</td>
+                        <td>@(b.Option?.option_name)</td>
+                        <td colspan="4"></td>
+                    </tr>
+                    foreach (var c in b.Components.OrderBy(c => c.sequence)) {
+                        <tr>
+                            <td></td>
+                            <td>@(c.Component?.cprod_code1) <span class="components_num">[@(componentCounts.ContainsKey(c.cprod_id) ? componentCounts[c.cprod_id] : 0)] </span></td>
+                            <td>@(c.Component?.cprod_name)</td>
+                            <td></td>
+                            <td class="number">@(c.Component?.cprod_stock2)</td>
+                            <td class="number">@(c.Component?.cprod_stock2 - c.Component?.cprod_stock)</td>
+                            <td class="number">@(c.Component?.cprod_stock)</td>
+                            <td class="number">@(Model.Arriving.ContainsKey(c.cprod_id) ? Model.Arriving[c.cprod_id] : 0)</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

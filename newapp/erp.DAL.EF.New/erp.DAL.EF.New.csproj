@@ -1,0 +1,175 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{236906E0-9B1A-4B89-9784-E8AEB4F35BE6}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>erp.DAL.EF.New</RootNamespace>
+    <AssemblyName>erp.DAL.EF.New</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Web.Release.UK.configh|AnyCPU'">
+    <OutputPath>bin\Web.Release.UK.configh\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release.UK|AnyCPU'">
+    <OutputPath>bin\Release.UK\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.3.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
+      <HintPath>..\..\packages\BouncyCastle.1.8.3.1\lib\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Protobuf, Version=3.6.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Google.Protobuf.3.6.1\lib\net45\Google.Protobuf.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data, Version=8.0.18.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MySql.Data.8.0.18\lib\net452\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data.EntityFramework, Version=8.0.17.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MySql.Data.EntityFramework.8.0.17\lib\net452\MySql.Data.EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="RefactorThis.GraphDiff, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\RefactorThis.GraphDiff.2.0.1\lib\RefactorThis.GraphDiff.dll</HintPath>
+    </Reference>
+    <Reference Include="Renci.SshNet, Version=2016.1.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SSH.NET.2016.1.0\lib\net40\Renci.SshNet.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Design" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Configuration.cs" />
+    <Compile Include="Mappings\ConfigurationMappings.cs" />
+    <Compile Include="Mappings\CustProductFilesMappings.cs" />
+    <Compile Include="Mappings\CustProductMapping.cs" />
+    <Compile Include="Mappings\CWProductMappings.cs" />
+    <Compile Include="Mappings\DealerMappings.cs" />
+    <Compile Include="Mappings\ExternalDealerMappings.cs" />
+    <Compile Include="Mappings\FactoryOrderMapping.cs" />
+    <Compile Include="Mappings\FormMappings.cs" />
+    <Compile Include="Mappings\InspectionCriteriaMappings.cs" />
+    <Compile Include="Mappings\InspectionMappings.cs" />
+    <Compile Include="Mappings\InspectionV2Mappings.cs" />
+    <Compile Include="Mappings\InvoiceMappings.cs" />
+    <Compile Include="Mappings\ManualV2Mappings.cs" />
+    <Compile Include="Mappings\MeetingMappings.cs" />
+    <Compile Include="Mappings\MiscMapping.cs" />
+    <Compile Include="Mappings\NavigationItemMappings.cs" />
+    <Compile Include="Mappings\NRMappings.cs" />
+    <Compile Include="Mappings\OrderMappings.cs" />
+    <Compile Include="Mappings\ProductFilesMappings.cs" />
+    <Compile Include="Mappings\ProductPricingMapping.cs" />
+    <Compile Include="Mappings\ReturnsMapping.cs" />
+    <Compile Include="Mappings\SalesOrdersMappings.cs" />
+    <Compile Include="Mappings\TechnicalDataMappings.cs" />
+    <Compile Include="Mappings\TrainingDocumentMapping.cs" />
+    <Compile Include="Mappings\UserCompanyMappings.cs" />
+    <Compile Include="Mappings\WebProductMappings.cs" />
+    <Compile Include="Mappings\WhitebookMappings.cs" />
+    <Compile Include="Model.cs" />
+    <Compile Include="Repositories\ChangeNoticeRepository.cs" />
+    <Compile Include="Repositories\CompanyRepository.cs" />
+    <Compile Include="Repositories\ContainerCalcRepository.cs" />
+    <Compile Include="Repositories\CustProductRepository.cs" />
+    <Compile Include="Repositories\FactoryStockOrderRepository.cs" />
+    <Compile Include="Repositories\GenericRepository.cs" />
+    <Compile Include="Repositories\IChangeNoticeRepository.cs" />
+    <Compile Include="Repositories\ICompanyRepository.cs" />
+    <Compile Include="Repositories\ICustProductRepository.cs" />
+    <Compile Include="Repositories\IGenericRepository.cs" />
+    <Compile Include="Repositories\IInspectionV2CustomCriteriaRepository.cs" />
+    <Compile Include="Repositories\IInspectionV2Repository.cs" />
+    <Compile Include="Repositories\IInspV2TemplateRepository.cs" />
+    <Compile Include="Repositories\IInvoiceRepository.cs" />
+    <Compile Include="Repositories\IMastProductRepository.cs" />
+    <Compile Include="Repositories\INrHeaderRepository.cs" />
+    <Compile Include="Repositories\InspectionV2CustomCriteriaRepository.cs" />
+    <Compile Include="Repositories\InspectionV2Repository.cs" />
+    <Compile Include="Repositories\InspV2TemplateRepository.cs" />
+    <Compile Include="Repositories\InvoiceRepository.cs" />
+    <Compile Include="Repositories\IProductPricingModelRepository.cs" />
+    <Compile Include="Repositories\IProductPricingProjectRepository.cs" />
+    <Compile Include="Repositories\IProductTrackNumberQcRepository.cs" />
+    <Compile Include="Repositories\IReturnRepository.cs" />
+    <Compile Include="Repositories\IUserRepository.cs" />
+    <Compile Include="Repositories\MastProductRepository.cs" />
+    <Compile Include="Repositories\NrHeaderRepository.cs" />
+    <Compile Include="Repositories\ProductPricingModelRepository.cs" />
+    <Compile Include="Repositories\ProductPricingProjectRepository.cs" />
+    <Compile Include="Repositories\ProductTrackNumberQcRepository.cs" />
+    <Compile Include="Repositories\ReturnRepository.cs" />
+    <Compile Include="Repositories\UserRepository.cs" />
+    <Compile Include="UnitOfWork.cs" />
+    <Compile Include="IUnitOfWork.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\company.Common\company.Common.csproj">
+      <Project>{5d6281ae-2a42-4e1c-af64-684907f43ba8}</Project>
+      <Name>company.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\erp.Model\erp.Model.csproj">
+      <Project>{32737149-900c-4b37-af6e-52ea8b16f1fe}</Project>
+      <Name>erp.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

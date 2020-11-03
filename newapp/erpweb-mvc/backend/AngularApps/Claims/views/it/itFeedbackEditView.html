@@ -1,0 +1,344 @@
+﻿
+<div class="row">
+    <div class="col-sm-12">
+        <div class="panel">
+            <header class="panel-heading">
+                <span class="heading-text">
+                    FEEDBACK DISCUSSION
+                </span>
+            </header>
+            <div class="panel-body table-responsive">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-5">
+                        <table class="table table-striped " id="tableOne">
+                            <tbody>
+                                <tr>
+                                    <th class="">Feedback Ref.</th>
+                                    <td>
+                                        <span>{{claim.return_no}}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>
+                                            Date Submited
+                                        </span>
+                                    </th>
+                                    <td>{{claim.request_date|date}}</td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>
+                                            Ticked created by
+                                        </span>
+                                    </th>
+                                    <td>{{claim.creator.userwelcome}}</td>
+                                </tr>
+
+                                <tr>
+                                    <th>
+                                        <span>
+                                            Urgency
+                                        </span>
+                                    </th>
+                                    <td>
+                                        <span ng-cloak >
+                                            &nbsp;{{claim.importance.importance_text}}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="">Problem Category</th>
+                                    <td>
+                                        <span> {{claim.category.name}}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="">Issue type</th>
+                                    <td>
+                                        <span> {{claim.issueType.name}}</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-7">
+                        <table class="table table-striped" id="tableTwo">
+                            <tbody>
+
+                                <tr>
+                                    <th>
+                                        <span>
+                                            Short description
+                                        </span>
+                                    </th>
+                                    <td>
+                                        {{claim.client_comments}}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th colspan="2" style="border-bottom:none;">
+                                        <span>
+                                            Original Client Uploaded files
+                                        </span>
+                                    </th>
+                                </tr>
+
+                                <tr>
+                                    <th colspan="2" style="border-top:none">
+                                        <div ng-repeat="image in claim.images" class="img-thumbnail">
+                                            <div style="min-height:89px"  ng-if="isPicture(image.return_image)">
+                                                <!--<img ng-href="vm.GetFileUrl(image.)" alt="Alternate Text" />-->
+                                                <a ng-href="{{getImageUrl(image,1)}}" ng-click="openLightboxModal(claim.images,$index)" data-lightbox="images">
+                                                    <img style="max-height:79px"
+                                                         ng-src="{{getImageUrl(image,1)}}" alt="{{image.return_image}}" />
+                                                </a>
+                                            </div>
+                                            <a ng-href="{{getImageUrl(image,1)}}" style="cursor: pointer" ng-if="!isPicture(image.return_image)">{{getFileName(image.return_image)}}</a>
+                                            
+                                        </div>
+                                        
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--<div class="col-xs-12 col-sm-12">
+                        <table id="tableTwo" class="table table-striped">
+                            <tr>
+                                <th style="width:217px">                                   
+                                       Subscibers                                      
+                                    <span></span>
+                                </th>
+                                <td>
+                                    <span style="font-family: Verdana, Arial, Helvetica, sans-serif;font-size:13px"
+                                          ng-repeat=" subs in claim.subscriptions">
+                                        <span ng-if="$index !== 0">&sbquo;&nbsp;&nbsp;</span>{{subs.user.userwelcome}}
+                                    </span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>-->
+                </div>
+                <!--<div class="row">
+                    <div class="col-xs-12 col-sm-3 col-md-2">
+                        <label for="subscribers" style="font-size:13px;font-family: Verdana, Arial, Helvetica, sans-serif;margin-left:10px">Subscibers:	</label>
+                    </div>
+                    <div class="col-xs-12 col-sm-9 col-md-10" style="border-bottom:1px solid lightgray">
+                        <span>&nbsp;</span>
+                        <span style="font-family: Verdana, Arial, Helvetica, sans-serif;font-size:13px"
+                              ng-repeat=" subs in claim.subscriptions">
+                            <span ng-if="$index !== 0">&sbquo;&nbsp;&nbsp;</span>{{subs.user.userwelcome}}</span>
+                    </div>
+                </div>-->
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <div class="panel">
+            <header class="panel-heading" style="clear:both;height:40px">
+                <span class="col-sm-2" > Subscribers</span>
+                <span class="col-sm-9" style="padding-left:58px">
+                <span class="label label-default label-inverse" 
+                      style="font-family: Verdana, Arial, Helvetica, sans-serif;text-transform:none;margin-right:5px"
+
+      ng-repeat="subs in claim.subscriptions">
+                    
+    <!--<span ng-if="$index !== 0">&sbquo;&nbsp;&nbsp;</span>-->
+                    {{subs.user.userwelcome}}&nbsp;<span style="color:#fa8564;font-size:14px;cursor:pointer"
+            class="ion ion-ios7-close-outline"
+            ng-click="removeSubscription($index,true)"></span>
+</span></span>
+                    <!--<div class="input-group col-sm-5" style="margin-top:-7px">
+                        <span class="input-group-addon" style="font-size:20px;padding-bottom:5px"><i class="ion ion-ios7-personadd"></i></span>
+                        <input type="text"
+                               name="subscribers"
+                               class="form-control"
+                               placeholder="Select who to subscribe to this ticket"
+                               ng-model="selectedSub"
+                               uib-typeahead="user as user.userwelcome for user in vm.GetUsers($viewValue)" />
+
+                    </div>-->
+                <div col-sm-1>
+                    <!--<div class="btn btn-primary btn-xs pull-right" 
+                         style="margin-right:19px"
+                         ng-click="addNewSubscriber = !addNewSubscriber">
+                        Edit <i class="ion ion-edit"></i>
+                    </div>-->
+                </div>
+            </header>
+            <div class="panel-body" >                  
+                <div class="col-xs-12 col-sm-12  col-md-10">
+                    <label 
+                           class="control-label col-sm-2" 
+                           for="subscribers" 
+                           style="font-size:13px;font-family: Verdana, Arial, Helvetica, sans-serif; ">&nbsp;</label> 
+                        <div class="input-group col-sm-6" style="padding-left:76px">                           
+                                <span class="input-group-addon" style="font-size:20px;padding-bottom:5px"><i class="ion ion-ios7-personadd"></i></span>
+                                <input type="text" 
+                                       name="subscribers"
+                                       class="form-control"
+                                       placeholder="Select who to subscribe to this ticket" 
+                                       ng-model="selectedUser"
+                                       uib-typeahead="user as user.userwelcome for user in getUsers($viewValue)"
+                                       typeahead-on-select="addSubscription(true)"/>
+                           
+                        </div>
+                </div>
+            </div>
+            <div class="panel-footer">
+                <div class="row">
+                    <div class="float-right" ng-show="canClose">
+                        <div class="btn btn-primary" style="margin-right:33px" ng-click="openClose()">
+                            {{getOpenCloseCaption()}}
+                        </div>
+                    </div>
+                    <div class="float-right" ng-show="canAuthorize && showAuthorizeButton">
+                        <div class="btn btn-primary" style="margin-right:33px" ng-click="authorize()">
+                            Authorize
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" >
+    <div class="col-sm-12">
+        <div class="panel">
+            <!-- PANEL TABS -->
+            <!--<header class="panel-heading tab-bg-dark-navy-blue">
+                <ul class="nav nav-tabs">
+                    <li ng-class="[vm.internal?'active':'']">
+                        <a data-toggle="tab" ng-click="vm.setActive()">
+                            <i class="ion ion-arrow-right-b ">
+                                <i class="ion ion-document-text"></i>
+                            </i> Internal
+                        </a>
+                    </li>
+                    <li ng-class="[vm.external?'active':'']">
+                        <a data-toggle="tab" ng-click="vm.setActive()">
+                            
+                            <i class="ion ion-arrow-left-b">
+                                <i class="ion ion-document-text"></i>
+                            </i>
+                            External
+                        </a>
+                    </li>
+
+                </ul>
+
+            </header>-->
+            <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-12 table-responsive">
+                            <table class="table table-striped" id="tableExternal">
+                                <!-- HEADER -->
+                                    <tr>
+                                        <th><i class="ion ion-ios7-person-outline" style="font-size:13px">
+                                            </i>&nbsp;User</th>
+                                        <th><i class="ion ion-ios7-calendar-outline"></i>
+                                        <span>&nbsp;Date</span></th>
+                                        <th>
+                                            <i class="ion ion-ios7-albums-outline"></i>
+                                        &nbsp;Comments</th>
+                                        <th style="width:145px">
+                                            <span ng-click="newCommentRow = !newCommentRow"
+                                                    ng-show="!newCommentRow && !busy">
+                                                <span href="javascript:void(0)"
+                                                    class="btn btn-xs btn-primary"
+                                                    style="color:white">
+                                                    <i class="fa fa-plus"> </i><span> New Comment</span>
+                                                </span>
+                                                        
+                                            </span>
+                                        </th>
+                                    </tr>
+                                <!-- HIDDE/SHOW ADD NEW COMMENT ROW-->
+                                <tr class="second_row" ng-show="newCommentRow">
+                                            
+                                    <td colspan="3">
+                                        <textarea class="form-control" id="txtNewCommentExt" name="" rows="3"
+                                                    ng-model="commentTypes[0].newComment.comments" ng-paste="paste($event)"
+                                                    placeholder="Write new comment"></textarea>
+                                        <br />
+                                        <!-- IMAGES TEMP -->
+                                        <div class="img-thumbnail" ng-repeat="image in commentTypes[0].newComment.files">
+                                            <a ng-href="{{getImageUrl(image,2)}}" ng-click="openLightboxModal(commentTypes[0].newComment.files,$index)" data-lightbox="images" ng-if="isPicture(image.image_name)">
+                                                <img ng-src="{{getImageUrl(image,2)}}" style="max-height: 50px;" />
+                                            </a>
+                                            <a ng-href="{{getImageUrl(image,2)}}" ng-if="!isPicture(image.image_name)" style="cursor:pointer">{{image.image_name}}</a>
+                                            <div style="float:right;margin-right:5px">
+                                                <a ng-click="removeImage(commentTypes[0].newComment.files,$index)" class="pointer">
+                                                    <span class="glyphicon glyphicon-remove"></span>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <!-- BUTTONS -->
+                                    <!-- UPLOAD - CANCEL - SAVE -->
+                                    <td>
+                                        <!-- UPLOAD -->
+                                        <a class="btn btn-xs btn-primary dimension"
+                                            style="color:white;"
+                                            plupload="fileUpload.url"
+                                            plupload-options="fileUpload.options"
+                                            plupload-callbacks="fileUpload.commentCallbacks['comments']">
+                                            <i class="fa fa-upload"> </i><span> Upload file</span>
+                                        </a>
+                                        <br />
+                                        <!-- CREATE -->
+                                        <a href="javascript:void(0)"
+                                            class="btn btn-xs btn-success dimension"
+                                            style="color:white;margin-bottom:5px"
+                                            ng-click="createComment(commentTypes[0])"
+                                            ng-disabled="!commentTypes[0].newComment.comments.length>0">
+                                            <i class="fa fa-check"></i><span> Create Comment</span>
+                                        </a>
+                                        <!-- CANCEL -->
+                                        <a class="btn btn-xs btn-warning dimension"
+                                            style="color:white;margin-bottom:5px;"
+                                            ng-click="cancelComment(commentTypes[0])">
+                                            <!--ng-disabled="!((vm.NewComment.comments.length > 0) || vm.NewComment.Files.length > 0)" >-->
+                                                  
+                                            <i class="fa fa-times" style="color:#666"></i><span style="color:black">&nbsp;Cancel</span>
+                                        </a>
+
+                                    </td>
+                                            
+                                </tr>
+                                        
+                                <!-- DATA-CONTENT -->
+                                <tr 
+                                ng-repeat-start="comment in claim.comments 
+                                    | orderBy: '-comments_id'">
+                                    <!--{ comments_type:'!1' }">-->
+                                    <td>{{comment.creator.userwelcome}}</td>
+                                    <td>{{comment.comments_date | date}}</td>
+                                    <td colspan="2">{{comment.comments}}</td>
+
+                                </tr>
+                                <tr ng-repeat-end>
+                                    <td colspan="4">
+                                        <div ng-repeat="f in comment.files" class="img-thumbnail">
+                                            <a ng-href="{{getImageUrl(f,2)}}" ng-click="openLightboxModal(comment.files,$index)" data-lightbox="images">
+                                                <img ng-src="{{getImageUrl(f,2)}}" title="{{getImageUrl(f,2)}}" style="max-height: 100px;"  ng-if="isPicture(f.image_name)" />                                                    
+                                            </a>
+                                            <a ng-href="{{getImageUrl(f,2)}}" ng-if="!isPicture(f.image_name)" style="cursor: pointer">{{getFileName(f.image_name)}}</a>
+                                        </div>
+                                        
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                        
+                                        
+                
+            </div>
+           
+        </div>
+    </div>
+</div>

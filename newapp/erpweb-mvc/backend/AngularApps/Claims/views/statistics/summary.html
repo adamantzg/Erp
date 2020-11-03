@@ -1,0 +1,279 @@
+﻿<h3>BBD claims analysis</h3>
+<div class="row">
+    <div class="col-md-5" style="font-size: 0.8em">
+        <label>
+            From:
+
+        </label>
+        <div uib-datepicker ng-model="monthStart" datepicker-options="monthSelectorOptions"></div>
+    </div>
+    <div class="col-md-5" style="font-size: 0.8em">
+        <label>
+            To:
+        </label>
+        <div uib-datepicker ng-model="monthEnd" datepicker-options="monthSelectorOptions"></div>
+    </div>
+
+    <div class="col-md-2">
+        <button class="btn btn-primary" ng-click="showSummaryData()" style="margin-top: 22px">Show data</button><p />
+        <button class="btn btn-default" ng-click="exportData()">Export data</button>
+    </div>
+</div>
+<div class="row" style="margin-top:5px">
+    <div class="col-md-4">
+        <label>
+            Brand:
+        </label>
+        <select ng-options="b.brand_id as b.brandname for b in brands" ng-model="filter.brand_id" class="form-control" ng-disabled="disableBrandDropdown()"></select>
+    </div>
+    <div class="col-md-4">
+        <label>
+            Reason:
+        </label>
+        <select ng-options="r.returncategory_id as r.category_name for r in reasons" ng-model="filter.reason_id" class="form-control" ng-disabled="disableReasonDropdown()"></select>
+    </div>
+    <div class="col-md-4">
+        <label>
+            Decision:
+        </label>
+        <select ng-options="d.code as d.description for d in decisions" ng-model="filter.decision_id" class="form-control" ng-disabled="disableDecisionDropdown()"></select>
+    </div>
+</div>
+<div>
+    <uib-tabset style="margin-top:10px">
+        <uib-tab heading="Brands" select="summaryTabSelected(0)">
+            <uib-tab-heading><span>Brands</span></uib-tab-heading>
+            <div class="col-lg-4" style="margin-top:10px">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Brand</th>
+                            <th class="text-right">Total GBP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="b in brandStats">
+                            <td>{{b.brandname}}</td>
+                            <td class="text-right">{{format(b.total)}}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td class="text-right"><strong>{{format(sum(brandStats,'total'))}}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="col-lg-12">
+                <div style="margin-top:10px">
+                    <img ng-if="tabSelection[0]" ng-src="{{brandChartUrl}}" />
+                </div>
+            </div>
+        </uib-tab>
+        <uib-tab heading="Reason" select="summaryTabSelected(1)">
+            <uib-tab-heading><span>Reason</span></uib-tab-heading>
+            <div class="col-lg-4" style="margin-top:10px">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Reason</th>
+                            <th class="text-right">Total GBP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="r in reasonStats">
+                            <td>{{r.reason}}</td>
+                            <td class="text-right">{{format(r.totalAcceptedValue)}}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td class="text-right"><strong>{{format(sum(reasonStats,'totalAcceptedValue'))}}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="col-lg-12">
+                <div style="margin-top:10px">
+                    <img ng-if="tabSelection[1]" ng-src="{{reasonChartUrl}}" />
+                </div>
+            </div>
+        </uib-tab>
+        <uib-tab heading="Decision by Month" select="summaryTabSelected(2)">
+            <uib-tab-heading><span>Decision by Month</span></uib-tab-heading>
+            <div class="col-lg-8" style="margin-top:10px">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th class="text-right" ng-repeat="c in decisionMonthlyStats.columns">{{c}}</th>
+                            <th class="text-right"><strong>Grand total</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="r in decisionMonthlyStats.rows">
+                            <td>{{r.formattedDate}}</td>
+                            <td class="text-right" ng-repeat="c in r.columns">{{format(c.totalAcceptedValue)}}</td>
+                            <td class="text-right"><strong>{{format(r.rowTotal)}}</strong></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td><strong>Grand Total</strong></td>
+                            <td class="text-right" ng-repeat="c in decisionMonthlyStats.grandTotal.columns"><strong>{{format(c.totalAcceptedValue)}}</strong></td>
+                            <td class="text-right"><strong>{{format(decisionMonthlyStats.grandTotal.rowTotal)}}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="col-lg-12">
+                <div style="margin-top:10px">
+                    <img ng-if="tabSelection[2]" ng-src="{{decisionByMonthChartUrl}}" />
+                </div>
+            </div>
+        </uib-tab>
+        <uib-tab heading="Brand by Month" select="summaryTabSelected(3)">
+            <uib-tab-heading><span>Brand by Month</span></uib-tab-heading>
+            <div class="col-lg-8" style="margin-top:10px">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th class="text-right" ng-repeat="c in brandMonthlyStats.columns">{{c}}</th>
+                            <th class="text-right"><strong>Grand total</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="r in brandMonthlyStats.rows">
+                            <td>{{r.formattedDate}}</td>
+                            <td class="text-right" ng-repeat="c in r.columns">{{format(c.totalAcceptedValue)}}</td>
+                            <td class="text-right"><strong>{{format(r.rowTotal)}}</strong></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td><strong>Grand Total</strong></td>
+                            <td class="text-right" ng-repeat="c in brandMonthlyStats.grandTotal.columns"><strong>{{format(c.totalAcceptedValue)}}</strong></td>
+                            <td class="text-right"><strong>{{format(brandMonthlyStats.grandTotal.rowTotal)}}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="col-lg-12">
+                <div style="margin-top:10px">
+                    <img ng-if="tabSelection[3]" ng-src="{{brandByMonthChartUrl}}" />
+                </div>
+            </div>
+        </uib-tab>
+        <uib-tab heading="Reason by Month" select="summaryTabSelected(4)">
+            <uib-tab-heading><span>Reason by Month</span></uib-tab-heading>
+            <div class="col-lg-8" style="margin-top:10px">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th class="text-right" ng-repeat="c in reasonMonthlyStats.columns">{{c}}</th>
+                            <th class="text-right"><strong>Grand total</strong></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="r in reasonMonthlyStats.rows">
+                            <td>{{r.formattedDate}}</td>
+                            <td class="text-right" ng-repeat="c in r.columns">{{format(c.totalAcceptedValue)}}</td>
+                            <td class="text-right"><strong>{{format(r.rowTotal)}}</strong></td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td><strong>Grand Total</strong></td>
+                            <td class="text-right" ng-repeat="c in reasonMonthlyStats.grandTotal.columns"><strong>{{format(c.totalAcceptedValue)}}</strong></td>
+                            <td class="text-right"><strong>{{format(reasonMonthlyStats.grandTotal.rowTotal)}}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="col-lg-12">
+                <div style="margin-top:10px">
+                    <img ng-if="tabSelection[4]" ng-src="{{reasonByMonthChartUrl}}" />
+                </div>
+            </div>
+        </uib-tab>
+        <uib-tab heading="Percentage by distributor" select="summaryTabSelected(5)">
+            <uib-tab-heading><span>Percentage by distributor</span></uib-tab-heading>
+            <div class="col-lg-8" style="margin-top:10px">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Distributor</th>
+                            <th class="text-right">Accepted GBP</th>
+                            <th class="text-right">Total sales GBP</th>
+                            <th class="text-right">%</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="r in distributorPercentageStats">
+                            <td>{{r.code}}</td>
+                            <td class="text-right">{{format(r.acceptedGbp)}}</td>
+                            <td class="text-right">{{format(r.totalSalesGbp)}}</td>
+                            <td class="text-right">{{format(r.acceptedGbp / r.totalSalesGbp * 100)}}</td>
+                        </tr>
+                    </tbody>
+                    <!--<tfoot>
+                        <tr>
+                            <td><strong>Grand Total</strong></td>
+                            <td class="text-right" ng-repeat="c in reasonMonthlyStats.grandTotal.columns"><strong>{{format(c.totalAcceptedValue)}}</strong></td>
+                            <td class="text-right"><strong>{{format(reasonMonthlyStats.grandTotal.rowTotal)}}</strong></td>
+                        </tr>
+                    </tfoot>-->
+                </table>
+            </div>
+            <div class="col-lg-12">
+                <div style="margin-top:10px">
+                    <img ng-if="tabSelection[5]" ng-src="{{percentageByDistributorChartUrl}}" />
+                </div>
+            </div>
+        </uib-tab>
+        <uib-tab heading="Percentage by factory" select="summaryTabSelected(6)">
+            <uib-tab-heading><span>Percentage by factory</span></uib-tab-heading>
+            <div class="col-lg-8" style="margin-top:10px">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Factory</th>
+                            <th class="text-right">Accepted GBP</th>
+                            <th class="text-right">Total sales GBP</th>
+                            <th class="text-right">%</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="r in factoryPercentageStats">
+                            <td>{{r.code}}</td>
+                            <td class="text-right">{{format(r.acceptedGbp)}}</td>
+                            <td class="text-right">{{format(r.totalSalesGbp)}}</td>
+                            <td class="text-right">{{format(r.acceptedGbp / r.totalSalesGbp * 100)}}</td>
+                        </tr>
+                    </tbody>
+                    <!--<tfoot>
+                    <tr>
+                        <td><strong>Grand Total</strong></td>
+                        <td class="text-right" ng-repeat="c in reasonMonthlyStats.grandTotal.columns"><strong>{{format(c.totalAcceptedValue)}}</strong></td>
+                        <td class="text-right"><strong>{{format(reasonMonthlyStats.grandTotal.rowTotal)}}</strong></td>
+                    </tr>
+                </tfoot>-->
+                </table>
+            </div>
+            <div class="col-lg-12">
+                <div style="margin-top:10px">
+                    <img ng-if="tabSelection[6]" ng-src="{{percentageByfactoryChartUrl}}" />
+                </div>
+            </div>
+        </uib-tab>
+
+    </uib-tabset>
+
+</div>
+

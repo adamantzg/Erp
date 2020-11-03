@@ -1,0 +1,44 @@
+﻿@model backend.Models.UserProductSales
+
+@{
+    ViewBag.Title = "Burlington sales";
+}
+
+<h2 style="margin-top: -48px; color: white;">Burlington sales</h2>
+@*<h4>count row: @Model.BurlingtonSeals.Count()</h4>*@
+<br />
+<br />
+<div style="position:relative;">
+    @*<div style="float:left">
+        @foreach (var prod in Model.BurlingtonSeals.GroupBy(m => m.month21))
+        {
+            <span> @prod.First().cprod_code1 </span>
+            <span> @prod.First().month21</span>
+            <strong> @prod.Count()</strong>
+            <strong>@prod.Sum(c => c.orderqty)</strong>
+            <br />
+        }
+    </div>
+    <div style="float:left;margin-left:25px">
+        @foreach (var prod in Model.AcceptedClaims)
+        {
+            <span>@prod.SumReturnsProduct</span>
+            <span>@prod.CountReturns</span>
+            <span>@prod.cprod_code1</span>
+            <span>@prod.created_month</span>
+            <br />
+        }
+    </div>*@
+    @{
+       // var stringCprodCode = Model.CprodCode.ToString();
+        //var listCprodCode = stringCprodCode != null ? stringCprodCode.Split(',').ToList : new List<string>();
+    }
+    @foreach (var cProdCode in Model.ListCprodCode)
+    {
+        <div style="float:left;margin-left:2px;width:900px">
+            <img src="@Url.Action("BurlingtonChart", "Report", new { cprodCode = cProdCode })" />
+   
+        </div>
+    }
+    <div style="clear:both"></div>
+</div>

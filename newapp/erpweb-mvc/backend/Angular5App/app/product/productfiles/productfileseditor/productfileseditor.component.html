@@ -1,0 +1,23 @@
+<div class="d-flex editor">
+    <div class="type">
+        {{type?.name}}
+    </div>
+    <div class="files">
+        <div class="fileBox" *ngFor="let f of readOnlyFiles | orderBy: 'order_index'">
+            <img [src]="getImageUrl(f)" (click)="openLightbox(f, true)">
+        </div>
+        <div class="fileBox" *ngFor="let f of files | orderBy: 'order_index'">
+            <div class="remove" (click)="onRemove(f)"><span class="glyphicon glyphicon-remove"></span></div>
+            <img [src]="getImageUrl(f)" (click)="openLightbox(f)">
+            <div class="moveLeft" *ngIf="!isFirst(f)" (click)="moveLeft(f)"><span class="glyphicon glyphicon-arrow-left"></span></div>
+            <div class="moveRight" *ngIf="!isLast(f)" (click)="moveRight(f)"><span class="glyphicon glyphicon-arrow-right"></span></div>
+        </div>          
+    </div>
+    <div class="addfiles">
+        <label class="upload-button">
+            <input type="file" class="form-control" class="btn btn-block btn-default" 
+            ngFileSelect [options]="options" (uploadOutput)="onUploadOutput($event)" [uploadInput]="uploadInput" multiple>
+        </label>
+    </div>  
+</div>
+<progressbar *ngIf="uploading" [value]="uploadProgress"></progressbar>

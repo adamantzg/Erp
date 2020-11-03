@@ -1,0 +1,77 @@
+<h3>Packaging</h3>
+<div class="row" >
+    <div class="col-md-12">
+      <div class="form-inline" style="padding-bottom:3px;">
+            <div class="form-group padding">
+                <label>Factory:</label>
+                <select class="form-control" [(ngModel)]="filterParams.factoryId">
+                    <option value="">(Select)</option>
+                    <option *ngFor="let f of model.factories | orderBy: 'factory_code'" [value]="f.user_id">{{f.factory_code}}</option>
+                </select>
+            </div>
+            <div class="form-group padding">
+                <label>Client:</label>
+                <select class="form-control" [(ngModel)]="filterParams.clientId">
+                    <option value="">(Select All)</option>
+                    <option *ngFor="let c of model.clients | orderBy: 'customer_code'" [value]="c.user_id">{{c.customer_code}}</option>
+                </select>
+            </div>
+            <div class="form-group padding">
+                <label>Category:</label>
+                <select class="form-control" [(ngModel)]="filterParams.categoryId">
+                    <option value="">(Select All)</option>
+                    <option *ngFor="let c of model.categories | orderBy: 'cat1_name'" [value]="c.category_id">{{c.cat1_name}}</option>
+                </select>
+            </div>                
+            <div class="form-group padding">
+                <label>Product code: </label>
+                <input [(ngModel)]="filterParams.code" style="width: 120px">
+            </div>
+            <button class="btn btn-default" (click)="getProducts()" [disabled]="!filterParams.factoryId">Get products</button> 
+        </div>
+        
+        
+        <!--<div class="form-group">
+          <label>Filter</label>
+          <input #filterText type="text" class="form-control" (input)="filterChange(filterText.value)"> 
+        </div>-->
+        <div style="margin-bottom: 5px;margin-top:5px">
+            <ul class="nav nav-tabs">
+                <li role="presentation" [ngClass]="{'active': p.id == activePackagingId}"
+                    *ngFor="let p of model.packagings"><a style="cursor: pointer" (click)="activePackagingId = p.id">{{p.name}}</a></li>            
+            </ul>
+        </div>
+
+        <div *ngIf="products.length > 0">
+            <pagination [itemsPerPage]="pageSize" [boundaryLinks]="true" [totalItems]="totals.count" 
+            [maxSize]="20" [(ngModel)]="page" (pageChanged)="pageChanged($event)" ></pagination>
+            <div [formGroup]="form">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Product code</th>
+                            <th>MFG code</th>                    
+                            <th>Net weight</th>                    
+                            <th *ngFor="let m of model.materials">{{m.name}}</th>
+                            <th style="width: 100px" class="number">Total gross weight</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let p of products">
+                            <td>{{checkMax(p.product.cprod_codes,25)}}</td>
+                            <td><span title="{{p.product.factory_ref}}">{{checkMax(p.product.factory_ref,25)}}</span></td>                    
+                            <td>{{p.product.prod_nw}}</td>
+                            <td *ngFor="let mat of p.data" class="number">
+                                <input *ngFor="let mmp of mat" type="text" [ngClass]="getInputClass(mmp)" [(ngModel)]="mmp.amount" (blur)="update(mmp)" [formControlName]="getControlName(mmp)">                        
+                            </td>
+                            <td class="number">{{calculateTotal(p)}}</td>                    
+                    </tr>
+                    </tbody>
+                </table>
+            </div>  
+            <pagination [itemsPerPage]="pageSize" [boundaryLinks]="true" [totalItems]="totals.count" 
+            [maxSize]="20" [(ngModel)]="page" (pageChanged)="pageChanged($event)" ></pagination>          
+        </div>
+    
+ </div>

@@ -1,0 +1,43 @@
+﻿@model List<asaq2.Model.OrderRow>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Bathstore outstanding orders</title>
+        <style>
+            body {font-family: arial; font-size:12px}
+            table {font-family: arial; font-size:12px}
+        </style>
+    </head>
+    <body>
+        <div>
+            <h3>Bathstore outstanding orders</h3>
+            <table border="1">
+                <tr style="font-weight: bold">
+                    <td style="width: 120px">Factory code</td>
+                    <td style="width: 120px">bs code</td>
+                    <td style="width: 120px">cust po</td>
+                    <td style="width: 120px">ETD</td>
+                    <td style="width: 120px">GBP</td>
+                    <td style="width: 120px">USD</td>
+                </tr>
+                @foreach (var r in Model.OrderBy(r=>r.po_req_etd))
+                {
+                    <tr>
+                        <td>@(r.userid == 37 ? "BRS" : r.factory_code)</td>
+                        <td>@r.bs_code</td>
+                        <td>@r.custpo</td>
+                        <td>@r.po_req_etd.ToString("d")</td>
+                        <td>@r.valueGBP.ToString("N2")</td>
+                        <td>@r.valueUSD.ToString("N2")</td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </body>
+</html>

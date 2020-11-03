@@ -1,0 +1,22 @@
+<div class="container" (mouseover)="onOver()" (mouseleave)="onLeave($event)">
+  
+    <ng-container *ngIf="showFilter">
+        <div>Calculation</div>
+        <div>
+            <select class="form-control" [(ngModel)]="filterData.calculation_id" >
+                <option *ngFor="let c of calculations" [value]="c.id">{{c.name}}</option>
+            </select>
+        </div>      
+        <div>Market</div>
+        <div>
+            <select class="form-control" [(ngModel)]="filterData.market_id">
+                <option *ngFor="let m of markets" [value]="m.id">{{m.name}}</option>
+            </select>
+        </div>      
+    </ng-container>  
+    <div>
+        <button *ngIf="showButton" class="btn btn-default" (click)="showReport()">Report</button>
+    </div>
+    
+</div>
+

@@ -1,0 +1,1432 @@
+﻿@model AnalyticsModel
+
+@functions {
+	private string GetImageUrl(string chartname)
+	{
+		return string.Format("{0}{1}", WebUtilities.GetSiteUrl(), Url.Action("Image", new {param = string.Format("{0}_{1}", Model.ChartKey, chartname) + "#" + Settings.Default.StatsKey}));
+	}
+
+	private string GetCountryString()
+	{
+		return Model.CountryFilter == CountryFilter.UKOnly ? "UK" : Model.CountryFilter == CountryFilter.NonUK ? "International" : "";
+	}
+
+	private string GetBrandString()
+	{
+		return Model.ReportType == ReportType.Brands ? "Brand" : "";
+	}
+
+	private string FormatGBP(double? gbp)
+	{
+		return gbp.ToString("N0");
+	}
+
+	public DateTime? GetDateValue(Brand_sales_analysis2 s, ProductAnalysisDateMode dateMode)
+	{
+		if (dateMode == ProductAnalysisDateMode.ETA)
+			return s.req_eta_nooffset;
+		else if (dateMode == ProductAnalysisDateMode.ETD)
+			return s.po_req_etd;
+		return s.orderdate;
+	}
+		
+}
+
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>Analytics</title>
+		<style type="text/css">
+
+
+body {
+	font-family:Arial, Helvetica, sans-serif;
+	margin: 0; /* it's good practice to zero the margin and padding of the body element to account for differing browser defaults */
+	padding: 0;
+	text-align: left; /* this centers the container in IE 5* browsers. The text is then set to the left aligned default in the #container selector */
+	position: relative;
+	
+}
+
+.oneColFixCtrHdr #container {
+	width: 980px;  /* using 20px less than a full 800px width allows for browser chrome and avoids a horizontal scroll bar */
+	background: #FFFFFF;
+	margin: 0 auto; /* the auto margins (in conjunction with a width) center the page */
+	border: 1px solid #000000;
+	text-align: left; /* this overrides the text-align: center on the body element. */
+	padding-bottom:18px;
+}
+
+.oneColFixCtrHdr #mainContent {
+	padding: 0 20px; /* remember that padding is the space inside the div box and margin is the space outside the div box */
+	background: #FFFFFF;
+	text-align: left;
+	height: 1400px;
+	overflow: visible;
+	position:relative;
+}
+
+ul {
+	font-family: Arial, Helvetica, sans-serif;
+	margin:4px;
+	padding:0px;
+	padding-left:12px;
+}
+
+li { list-style:circle; 
+list-style-type: circle;
+}
+
+.main_header_section {
+	width:896px; 
+/*	background-color:#EAF5FD; */
+	/*height:35px;*/ 
+	padding-left:2px; 
+	font-family:Arial, Helvetica, sans-serif; 
+	color:#000; 
+	font-size:30px;
+	border-top:none ;
+	border-right: none;
+	border-left:none;
+	border-bottom:3px #999 solid;
+	
+	margin-bottom:10px;
+	/*float:left;*/
+}
+
+.main_header_number {
+	width:60px; 
+	height:35px; 
+	float:left; 
+	font-size:24px; 
+	color:#999;
+}
+
+.main_header_text {
+	width:836px; 
+	/*height:35px;*/ 
+	float:left; 
+	font-size:30px; 
+	
+}
+
+
+
+.header_section {
+	width:896px; 
+
+	height:auto; 
+	padding-left:2px; 
+	font-family:Arial, Helvetica, sans-serif; 
+	color:#000; 
+	font-size:24px;
+}
+
+.header_number {
+	width:60px;
+	/*height:45px;*/
+	float:left;
+	font-size:24px;
+	color:#999;
+}
+
+.header_title {
+	/*width:836px;
+	height:auto;
+	float:left;*/
+	font-size:18px;
+}
+
+.sub_title {
+	/*width:384px;
+	height:auto;
+	float:left;*/
+	text-align:center;
+	font-size:12px;
+	font-weight:bold;
+}
+
+.sub_title2 {
+	/*width:444px;
+	height:auto;
+	float:left;*/
+	text-align:center;
+	font-size:12px;
+	font-weight:bold;
+}
+
+.big_sub_title {
+	width:900px;
+	height:auto;
+	/*float:left;*/
+	text-align:left;
+	font-size:12px;
+	font-weight:bold;
+}
+
+
+.graph_footer {
+	width:900px;
+	/*	background-color:#EAF5FD; */
+	height:40px;
+	padding-left:0px;
+	margin-bottom:10px;
+	font-family:Arial, Helvetica, sans-serif;
+	color:#000;
+	font-size:12px;
+	float:left;/*	border-top:1px; border-right:1px; border-left:1px; border-bottom:0px;
+	border-color:#CCC;
+	border-style:solid;*/
+}
+
+.footer {
+	width:900px;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:11px;
+	color:#999;
+	/*position:absolute;
+	bottom:0;*/
+	height:18px;
+	left:20px;
+	border-top:1px; border-top-color:#333; border-top-style:solid;
+}
+
+
+.header_notes {
+	/*width:836px;
+	height:auto;
+	float:left;*/
+	font-size:12px;
+	color:#666;
+}
+
+.normal_body {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:12px;
+	color:#333;
+}
+.summary {
+	background-color: #CCCCCC;
+	width:900px;
+	border-width: 0;
+	font-size:14px; 
+	font-weight:bold; 
+	border:1px; 
+	border-style:solid;
+	 border-color:#333;
+}
+
+.image {
+	width: 900px
+}
+.clienttable_header {
+	background-color: #B9C9FE; 
+	color:#4033AC
+}
+.clienttable_footer {
+	background-color: #CCC; 
+	color:#4033AC
+}
+
+.clienttable {
+	width: 900px;
+	border: 0;
+	padding: 3px;
+	border-spacing: 0;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:11px;
+}
+.producttable {
+	width: 440px;
+	border: 0;
+	padding: 3px;
+	border-spacing: 0;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:11px;
+}
+.number { text-align: right;}
+.percent { font-size: 14px;font-weight: bold}
+.rightborder {border-right: 1px solid blue}
+.rightbordernumber { border-right: 1px solid blue;text-align: right}
+.bheader {width:42px}
+.fheader {width: 30px}
+.alternaterow {background-color: #DDD}
+.pendingdiscontinuation {background-color: #dda0dd}
+.datatable {
+			width: 920px;
+			font-family:Arial, Helvetica, sans-serif; 
+			font-size:11px; 
+			border-style:solid; 
+			border:1px; 
+			border-color:#000;
+	border-collapse: collapse;
+		}
+.datatable td {
+	padding: 5px;
+}
+	.datatable_header {
+		height: 25px;
+		text-align: left;
+		background-color: #B9C9FE;
+	}
+	.altrow {
+		background-color: #E0E0E0
+	}
+	.distgraph_box {
+		float: left;
+		width: 30%;
+		margin-right: 10px;
+		margin-top: 5px;
+		border: 1px solid black;
+		background-color: #EFEFEF
+	}
+	.distgraph_box img {
+		width: 100%;
+	}
+    .salesorderstable thead tr {
+        font-weight: bold;
+        background-color: #B9C9FE; 
+        color:#4033AC
+    }
+    .salesorderstable td {
+        /*border: 1px solid black;*/
+        padding: 5px;
+    }
+    .salesorderstable {
+        border-collapse: collapse;
+        font-family: Arial;
+        font-size: 11px;
+    }
+</style>
+	</head>
+	<body>
+		 <table style="width:900px;border-width: 0">
+			<tr>
+				<td style="width:140px;height: 85px;vertical-align: top" >&nbsp;</td>
+			    <td align="center" valign="top">
+			        @if (Model.Brand != null)
+			        {
+			            <h1>@(Model.Brand.brandname.ToUpper())</h1>
+                    }
+                    else {
+                        <h1>UNIVERSAL</h1>
+                    }
+			    </td>
+				<td style="width:140px;height: 85px;text-align: right;vertical-align: top" class="normal_body">Page 1<br />
+					@DateTime.Today.ToLongDateString()</td>
+			</tr>
+		</table>
+		<div class="main_header_section" >Notes</div>
+		<div style="width: 900px">
+			<table style="width:900px;border-width: 0;font-family:Arial, Helvetica, sans-serif; font-size:13px;">
+				<tr>
+                    
+                    <td align="left">
+                        <ul>
+                            <li>All values are in @Model.ReportCurrency.</li>
+                            <li>All data excludes spares products.</li>
+                            @if (!Model.ShortNotes) {
+                                <li>Sales data is related to UK/IE</li>
+                                <li>Sales data is based on shipment dates</li>
+                                if (Model.Brand != null) {
+                                    <li>* Items marked with a * represent products that are sold within one or more other brands. The data shown for such items includes sales from other brands.</li>
+                                }
+                            }
+                        </ul>
+                    </td>
+				</tr>
+			</table>
+		</div>
+		<!-- footers-->
+		
+		
+		<!-- SALES - PAGE 1-->
+        <div id="mainContent">
+
+            @{
+
+
+                //if (Model.Brand.brand_id == 3)
+                //{
+                //    //Only for aqua - show instead of sales by category
+                //    sections[0].Subsections[1].Name = "categories and options";
+                //}
+
+                //remove excluded
+                var sections = Model.Sections.Where(s => s.Visible).ToList();
+
+                var section = sections.FirstOrDefault(s => s.Name == "sales");
+                var sectionOrder = sections.FindIndex(s => s.Name == "sales") + 1;
+
+                var currMonthSpan = string.Format("{0} to {1}", ViewBag.to.AddMonths(-1 * Model.MonthSpan).ToString("MMM yyyy"), ViewBag.to.AddMonths(-1).ToString("MMM yyyy"));
+                var prevMonthSpan = string.Format("{0} to {1}", ViewBag.to.AddMonths(-2 * Model.MonthSpan).ToString("MMM yyyy"), ViewBag.to.AddMonths(-1 * Model.MonthSpan - 1).ToString("MMM yyyy"));
+
+            }
+
+            @if (section != null)
+            {
+
+                <table class="main_header_section">
+                    <tr>
+                        <td style="width: 60px">@(sectionOrder).</td>
+                        <td>@GetCountryString() Sales Summary </td>
+                    </tr>
+                </table>
+
+                var subName = "brand shipments";
+                var sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">@GetCountryString() Brand Shipments</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td class="header_notes">
+                                <ul>
+                                    <li>Items to the right of the dashed line represent non-closed months and are susceptible to change.</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+
+
+                    <div class="image">
+                        <img src="@GetImageUrl(string.Format("{0}_Chart_SalesByMonth", Model.Brand.code))" />
+                    </div>
+
+                }
+
+                subName = "sales by category";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">Sales by category</td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="2">
+                                <table>
+                                    <tr>
+                                        <td class="sub_title">last 6 months (@currMonthSpan) </td>
+                                        <td class="sub_title2">previous 6 months (@prevMonthSpan )</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 50%; text-align: center; font-size: 32px">
+                                            <img src="@GetImageUrl(string.Format("{0}_Chart_SalesByCategory_1", Model.Brand.code))" />
+                                        </td>
+                                        <td style="width: 50%; text-align: center; font-size: 32px">
+                                            <img src="@GetImageUrl(string.Format("{0}_Chart_SalesByCategory_0", Model.Brand.code))" />
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+
+                    </table>
+                }
+
+                subName = "categories and options";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">Unit Sales by product categories (last 6 months)</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td class="header_notes">
+                                <ul>
+                                    <li>Excludes spares</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table class="clienttable">
+                        <tr class="clienttable_header">
+                            <td style="width:60%">Category</td>
+                            @foreach (var option in Model.AnalyticsOptions)
+                            {
+                                <td style="text-align: right">@option.option_name</td>
+                            }
+                            <td style="text-align: right;font-weight: bold">TOTAL</td>
+                        </tr>
+                        @{
+                    var i = 0;
+                        }
+                        @foreach (var cat in Model.AnalyticsSubCategories.GroupBy(sc => sc.category_id))
+                        {
+                            var subCats = new List<int>();
+                            foreach (var subCat in cat)
+                            {
+                                subCats.Add(subCat.subcat_id);
+                                <tr style="background-color: @(i%3 == 1 ? "#FFFFFF" : i%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+                                    <td>&nbsp;&nbsp;@subCat.subcategory_name</td>
+                                    @foreach (var option in Model.AnalyticsOptions)
+                                    {
+                                        <td style="text-align: right">
+                                            @{
+                                        var summary = Model.AnalyticsCategorySummaries.FirstOrDefault(s => s.analytics_category_id == subCat.subcat_id && s.analytics_option_id == option.option_id);
+                                        if (summary != null)
+                                        {
+                                            @summary.OrderQty
+                                        }
+                                            }
+
+                                        </td>
+                                    }
+                                    <td style="text-align:right;font-weight: bold">
+                                        @Model.AnalyticsCategorySummaries.Where(s => s.analytics_category_id == subCat.subcat_id).Sum(s => s.OrderQty)
+                                    </td>
+                                </tr>
+                                    i++;
+                            }
+                            <tr style="background-color: #D4D4D4;height:30px">
+                                @{ var category = cat.First().Category; }
+                                <td style="font-weight: bold">@category.category_name</td>
+                                @foreach (var option in Model.AnalyticsOptions)
+                                {
+                                    <td style="text-align: right;font-weight: bold">@Model.AnalyticsCategorySummaries.Where(s => subCats.Contains(s.analytics_category_id) && s.analytics_option_id == option.option_id).Sum(s => s.OrderQty)</td>
+                                }
+                                <td style="text-align: right;font-weight: bold">
+                                    @Model.AnalyticsCategorySummaries.Where(s => subCats.Contains(s.analytics_category_id)).Sum(s => s.OrderQty)
+                                </td>
+                            </tr>
+                                i++;
+                        }
+                        <tfoot>
+                            <tr style="font-weight: bold;background-color: #d4d4d4;height:30px">
+                                <td>TOTAL</td>
+                                @foreach (var option in Model.AnalyticsOptions)
+                                {
+                                    <td style="text-align: right">@Model.AnalyticsCategorySummaries.Where(s => s.analytics_option_id == option.option_id).Sum(s => s.OrderQty)</td>
+                                }
+                                <td style="text-align: right">@Model.AnalyticsCategorySummaries.Sum(s => s.OrderQty)</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+
+                }
+
+                subName = "shipments by customer";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">UK Shipments by Customer</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+
+                        </tr>
+                    </table>
+
+                    <div class="big_sub_title">Brand</div>
+                    <table class="clienttable">
+                        <tr class="clienttable_header">
+                            <td style="width: 300px">Client</td>
+                            <td style="width: 90px; text-align: right">
+                                current<br>
+                                6m Shipments
+                            </td>
+                            <td style="width: 60px; text-align: right">% of total</td>
+                            <td style="width: 90px; text-align: right">
+                                previous<br>
+                                6m Shipments
+                            </td>
+                            <td style="width: 60px; text-align: right">% of total</td>
+                            <td style="width: 70px; text-align: right">Change in sales</td>
+
+                        </tr>
+
+                        @{
+
+                    var currData = Model.CurrentCustomerSalesData.Where(d => !d.isOEM).OrderByDescending(d => d.Amount).ToList();
+                    var currtotal = currData.Sum(d => d.Amount);
+                    var previousTotal = Model.PreviousCustomerSalesData.Where(d => !d.isOEM).Sum(d => d.Amount);
+                    var prevData = Model.PreviousCustomerSalesData.Where(d => !d.isOEM && !Model.CurrentCustomerSalesData.Any(c => !c.isOEM && c.client_id == d.client_id)).ToList();
+                        }
+
+                        @for (int i = 0; i < currData.Count; i++)
+                        {
+                            var data = currData[i];
+                            var previousData = Model.PreviousCustomerSalesData.FirstOrDefault(d => d.client_id == data.client_id && !d.isOEM);
+                            <tr style="background-color: @(i%3 == 1 ? "#FFFFFF" : i%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+                                <td>
+                                    @data.customer_name
+                                </td>
+                                <td style="text-align: right">@data.Amount.ToString("N0")</td>
+                                <td style="text-align: right">@((data.Amount / currtotal).ToString("P0"))</td>
+                                <td style="text-align: right">@(previousData != null ? previousData.Amount.ToString("N0") : string.Empty)</td>
+                                <td style="text-align: right">@(previousData != null && previousTotal > 0 ? (previousData.Amount / previousTotal).ToString("P0") : string.Empty)</td>
+                                <td style="text-align: right">@(previousData != null ? ((data.Amount - previousData.Amount) / previousData.Amount).ToString("+#0%;-#0%") : "+100%")</td>
+                            </tr>
+                        }
+                        @for (int i = 0; i < prevData.Count; i++)
+                        {
+                            var data = prevData[i];
+                            var currentData = Model.CurrentCustomerSalesData.FirstOrDefault(d => d.client_id == data.client_id && !d.isOEM);
+                            <tr style="background-color: @((i + currData.Count)%3 == 1 ? "#FFFFFF" : (i + currData.Count)%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+                                <td>
+                                    @data.customer_name
+                                </td>
+                                <td style="text-align: right">@(currentData != null ? currentData.Amount.ToString("N0") : string.Empty)</td>
+                                <td style="text-align: right">@(currentData != null && currtotal > 0 ? (currentData.Amount / currtotal).ToString("P0") : string.Empty)</td>
+                                <td style="text-align: right">@data.Amount.ToString("N0")</td>
+                                <td style="text-align: right">@((data.Amount / previousTotal).ToString("P0"))</td>
+                                <td style="text-align: right">@(currentData != null ? ((currentData.Amount - data.Amount) / data.Amount).ToString("+#0%;-#0%") : "-100%")</td>
+
+                            </tr>
+                        }
+
+
+
+                        <tr class="clienttable_header">
+                            <td>TOTAL</td>
+                            <td style="text-align: right">@currtotal.ToString("N0")</td>
+                            <td style="text-align: right">100%</td>
+                            <td style="text-align: right">@previousTotal.ToString("N0")</td>
+                            <td style="text-align: right">100%</td>
+                            <td style="text-align: right">@(((currtotal - previousTotal) / previousTotal).ToString("+#0%;-#0%"))</td>
+                        </tr>
+                    </table>
+                    <p></p>
+                }
+
+                subName = "claims analysis";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">UK Claims analysis</td>
+                        </tr>
+
+
+                    </table>
+
+                    <div class="big_sub_title">Brand</div>
+                    <table class="clienttable">
+                        <tr class="clienttable_header">
+                            <td style="width: 300px; vertical-align: middle" rowspan="2">Client</td>
+                            <td style="width: 90px; text-align: center" colspan="2">product claims</td>
+                            <td style="width: 90px; text-align: center" colspan="2">refit claims</td>
+                            <td style="width: 90px; text-align: center" colspan="2">TOTAL</td>
+                        </tr>
+                        <tr class="clienttable_header">
+                            <td style="width: 60px; text-align: right">GBP</td>
+                            <td style="width: 60px; text-align: right">% of sales</td>
+                            <td style="width: 60px; text-align: right">GBP</td>
+                            <td style="width: 60px; text-align: right">% of sales</td>
+                            <td style="width: 60px; text-align: right">GBP</td>
+                            <td style="width: 60px; text-align: right">% of sales</td>
+                        </tr>
+                        @{
+                    var distributors_brands = Model.Distributors.Where(d => d.oem_flag == null || d.oem_flag == 0).Select(d => d.customer_code).OrderBy(s => s).ToList();
+                    var distributors_oem = Model.Distributors.Where(d => d.oem_flag == 1).Select(d => d.customer_code).OrderBy(s => s).ToList();
+                    var currSales = Model.SalesByCustomer.Where(s => distributors_brands.Contains(s.code)).ToList();
+                    var currReturns = Model.ReturnsSummaryByCustomer.Where(r => distributors_brands.Contains(r.code)).ToList();
+                    var PYSales = Model.PYSales.Where(s => distributors_brands.Contains(s.code)).ToList();
+                    var PYReturns = Model.PYReturnsSummaryByCustomer.Where(r => distributors_brands.Contains(r.code)).ToList();
+                        }
+
+                        @for (int i = 0; i < distributors_brands.Count; i++)
+                        {
+                            var dist_code = distributors_brands[i];
+                            var dist_product_claim_total = currReturns.Where(r => r.claim_type != Returns.ClaimType_Refit && r.code == dist_code).Sum(r => r.TotalAccepted);
+                            var dist_refit_total = currReturns.Where(r => r.claim_type == Returns.ClaimType_Refit && r.code == dist_code).Sum(r => r.TotalAccepted);
+                            var dist_sales_total = currSales.Where(s => s.code == dist_code).Sum(s => s.total);
+                            if (dist_product_claim_total + dist_refit_total > 0)
+                            {
+                                <tr style="background-color: @(i%3 == 1 ? "#FFFFFF" : i%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+                                    <td>
+                                        @dist_code
+                                    </td>
+                                    <td style="text-align: right">@dist_product_claim_total.ToString("N0")</td>
+                                    <td style="text-align: right">@((dist_product_claim_total / dist_sales_total).ToString("P1"))</td>
+                                    <td style="text-align: right">@dist_refit_total.ToString("N0")</td>
+                                    <td style="text-align: right">@((dist_refit_total / dist_sales_total).ToString("P1"))</td>
+                                    <td style="text-align: right">@((dist_product_claim_total + dist_refit_total).ToString("N0"))</td>
+                                    <td style="text-align: right">@(((dist_product_claim_total + dist_refit_total) / dist_sales_total).ToString("P1"))</td>
+                                </tr>
+                            }
+                        }
+
+                        @{
+                        var product_claim_total = currReturns.Where(r => r.claim_type != Returns.ClaimType_Refit).Sum(r => r.TotalAccepted);
+                        var refit_total = currReturns.Where(r => r.claim_type == Returns.ClaimType_Refit).Sum(r => r.TotalAccepted);
+                        var sales_total = currSales.Sum(s => s.total);
+
+                        var product_claim_total_py = Model.PYReturnsSummaryByCustomer.Where(r => distributors_brands.Contains(r.code) && r.claim_type != Returns.ClaimType_Refit).Sum(r => r.TotalAccepted);
+                        var refit_total_py = Model.PYReturnsSummaryByCustomer.Where(r => distributors_brands.Contains(r.code) && r.claim_type == Returns.ClaimType_Refit).Sum(r => r.TotalAccepted);
+                        var sales_total_py = Model.PYSales.Sum(s => s.total);
+                        }
+                        <tr class="clienttable_header">
+                            <td>TOTAL (LAST 12 MONTHS)</td>
+                            <td style="text-align: right">@product_claim_total.ToString("N0")</td>
+                            <td style="text-align: right" class="percent">@(sales_total > 0 ? (product_claim_total / sales_total).ToString("P1") : "")</td>
+                            <td style="text-align: right">@refit_total.ToString("N0")</td>
+                            <td style="text-align: right" class="percent">@(sales_total > 0 ? (refit_total / sales_total).ToString("P1") : "")</td>
+                            <td style="text-align: right">@((product_claim_total + refit_total).ToString("N0"))</td>
+                            <td style="text-align: right" class="percent">@(sales_total > 0 ? ((product_claim_total + refit_total) / sales_total).ToString("P1") : "")</td>
+                        </tr>
+                        <tr class="clienttable_footer">
+                            <td>TOTAL (PREVIOUS 12 MONTHS)</td>
+                            <td style="text-align: right">@product_claim_total_py.ToString("N0")</td>
+                            <td style="text-align: right" class="percent">@(sales_total_py > 0 ? (product_claim_total_py / sales_total_py).ToString("P1") : "")</td>
+                            <td style="text-align: right">@refit_total_py.ToString("N0")</td>
+                            <td style="text-align: right" class="percent">@(sales_total_py > 0 ? (refit_total_py / sales_total_py).ToString("P1") : "")</td>
+                            <td style="text-align: right">@((product_claim_total_py + refit_total_py).ToString("N0"))</td>
+                            <td style="text-align: right" class="percent">@(sales_total_py > 0 ? ((product_claim_total_py + refit_total_py) / sales_total_py).ToString("P1") : "")</td>
+                        </tr>
+                    </table>
+
+
+
+                    <br />
+                }
+
+                subName = "top10 selling";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+
+
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">Top 10 selling products (GBP)</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td class="header_notes">
+                                <ul>
+                                    <li>Excludes spares</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div style="width: 900px">
+                        <table style="width: 900px">
+                            <tr>
+                                <td style="width: 50%">
+                                    <div class="sub_title">last @Model.MonthSpan months (@currMonthSpan)</div>
+                                </td>
+                                <td>
+                                    <div class="sub_title2">previous @Model.MonthSpan months (@prevMonthSpan)</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: top">
+                                    <table class="producttable">
+                                        <tr class="clienttable_header">
+
+                                            <td style="width: 90px; height: 30px">Code</td>
+                                            <td style="width: 220px">Description</td>
+                                            <td style="width: 70px; text-align: right">Sales GBP</td>
+                                            <td style="width: 70px; text-align: right">Units</td>
+
+                                        </tr>
+                                        @{ var prodSales = Model.CurrentProductSalesData.OrderByDescending(s => s.Amount).Take(10).ToList(); }
+                                        @for (int i = 0; i < prodSales.Count; i++)
+                                        {
+                                            var prod = prodSales[i];
+                                            <tr style="background-color: @((i + prodSales.Count)%3 == 1 ? "#FFFFFF" : (i + prodSales.Count)%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+
+                                                <td style="height: 30px">@(prod.cprod_code?.Substring(0, Math.Min(10, prod.cprod_code?.Length ?? 0)))</td>
+                                                <td>@prod.cprod_name.Substring(0, Math.Min(34, prod.cprod_name.Length))</td>
+                                                <td style="text-align: right">@prod.Amount.ToString("N0")</td>
+                                                <td style="text-align: right">@prod.numOfUnits.ToString("N0")</td>
+
+                                            </tr>
+                                        }
+                                    </table>
+                                </td>
+                                <td style="vertical-align: top">
+                                    <table class="producttable">
+                                        <tr class="clienttable_header">
+
+                                            <td style="width: 90px; height: 30px">Code</td>
+                                            <td style="width: 220px">Description</td>
+                                            <td style="width: 70px; text-align: right">Sales GBP</td>
+                                            <td style="width: 70px; text-align: right">Units</td>
+
+                                        </tr>
+                                        @{ prodSales = Model.PreviousProductSalesData.OrderByDescending(s => s.Amount).Take(10).ToList(); }
+                                        @for (int i = 0; i < prodSales.Count; i++)
+                                        {
+                                            var prod = prodSales[i];
+                                            <tr style="background-color: @((i + prodSales.Count)%3 == 1 ? "#FFFFFF" : (i + prodSales.Count)%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+
+                                                <td style="height: 30px">@(prod.cprod_code?.Substring(0, Math.Min(10, prod.cprod_code?.Length ?? 0)))</td>
+                                                <td>@prod.cprod_name.Substring(0, Math.Min(34, prod.cprod_name.Length))</td>
+                                                <td style="text-align: right">@prod.Amount.ToString("N0")</td>
+                                                <td style="text-align: right">@prod.numOfUnits.ToString("N0")</td>
+
+                                            </tr>
+                                        }
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                }
+
+                subName = "top10 selling units";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">Top 10 selling products (units)</td>
+                        </tr>
+
+                    </table>
+
+                    <div style="width: 900px">
+                        <table style="width: 900px">
+                            <tr>
+                                <td style="width: 50%">
+                                    <div class="sub_title">last 6 months (@currMonthSpan)</div>
+                                </td>
+                                <td>
+                                    <div class="sub_title2">previous 6 months (@prevMonthSpan)</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="vertical-align: top">
+                                    <table class="producttable">
+                                        <tr class="clienttable_header">
+
+                                            <td style="width: 90px; height: 30px">Code</td>
+                                            <td style="width: 220px">Description</td>
+                                            <td style="width: 70px;text-align: right">Sales GBP</td>
+                                            <td style="width: 70px;text-align: right">Units</td>
+
+                                        </tr>
+                                        @{ var prodSales = Model.CurrentProductSalesData.OrderByDescending(s => s.numOfUnits).Take(10).ToList(); }
+                                        @for (int i = 0; i < prodSales.Count; i++)
+                                        {
+                                            var prod = prodSales[i];
+                                            <tr style="background-color: @((i + prodSales.Count)%3 == 1 ? "#FFFFFF" : (i + prodSales.Count)%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+
+                                                <td style="height: 30px">@(prod.cprod_code?.Substring(0, Math.Min(10, prod.cprod_code?.Length ?? 0)))</td>
+                                                <td>@prod.cprod_name.Substring(0, Math.Min(34, prod.cprod_name.Length))</td>
+                                                <td style="text-align: right">@prod.Amount.ToString("N0")</td>
+                                                <td style="text-align: right">@prod.numOfUnits.ToString("N0")</td>
+
+                                            </tr>
+                                        }
+                                    </table>
+                                </td>
+                                <td style="vertical-align: top">
+                                    <table class="producttable">
+                                        <tr class="clienttable_header">
+
+                                            <td style="width: 90px; height: 30px">Code</td>
+                                            <td style="width: 220px">Description</td>
+                                            <td style="width: 70px;text-align: right">Sales GBP</td>
+                                            <td style="width: 70px;text-align: right">Units</td>
+
+                                        </tr>
+                                        @{ prodSales = Model.PreviousProductSalesData.OrderByDescending(s => s.numOfUnits).Take(10).ToList(); }
+                                        @for (int i = 0; i < prodSales.Count; i++)
+                                        {
+                                            var prod = prodSales[i];
+                                            <tr style="background-color: @((i + prodSales.Count)%3 == 1 ? "#FFFFFF" : (i + prodSales.Count)%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+
+                                                <td style="height: 30px">@(prod.cprod_code?.Substring(0, Math.Min(10, prod.cprod_code?.Length ?? 0)))</td>
+                                                <td>@prod.cprod_name.Substring(0, Math.Min(34, prod.cprod_name.Length))</td>
+                                                <td style="text-align: right">@prod.Amount.ToString("N0")</td>
+                                                <td style="text-align: right">@prod.numOfUnits.ToString("N0")</td>
+
+                                            </tr>
+                                        }
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                }
+
+                subName = "non selling last 12m";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">Non selling products in last 12 months</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td class="header_notes">
+                                <ul>
+                                    <li>Excludes spares</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div style="width: 400px">
+                        <table class="producttable">
+                            <tr class="clienttable_header">
+                                <td style="width: 90px">Code</td>
+                                <td style="width: 220px">Description</td>
+                            </tr>
+                            @foreach (var p in Model.NonSelling.OrderBy(prod => prod.cprod_code1))
+                            {
+                                <tr>
+                                    <td>@p.cprod_code1</td>
+                                    <td>@p.cprod_name</td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                }
+
+                subName = "sales by displays";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">@GetCountryString() sales by number of displays</td>
+                        </tr>
+
+                    </table>
+
+
+                    <div class="image">
+                        <img src="@GetImageUrl("Chart_SalesByDisplay")" />
+                    </div>
+
+                }
+
+                subName = "sales orders";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                
+                if (sub != null) {
+                    var from = Model.SalesOrdersModel.From.Value;
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">Daily Order Intake - Ammara and Crosswater US - Week @System.Globalization.CultureInfo.CurrentCulture.Calendar.GetWeekOfYear((from), System.Globalization.CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday) - @from.ToString("yyyy")</td>
+                        </tr>
+
+                    </table>
+
+                    @Html.Partial("~/Views/Report/_SalesOrdersReportPartial.cshtml",Model.SalesOrdersModel);
+
+
+
+                 }
+
+                subName = "sales orders monthly";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                
+                if (sub != null) {
+                    
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">@(Model.Brand.brandname) Sales</td>
+                        </tr>
+
+                    </table>
+
+                    <div>
+                        <img src="@WebUtilities.GetSiteUrl()@Path.Combine(Settings.Default.Analytics_ImagesFolder,$"{ViewBag.ChartKey}_SalesOrdersMonthlyReport.jpg")" />
+                    </div>
+                    
+
+                 }
+
+             }
+
+            @{
+                section = sections.FirstOrDefault(s => s.Name == "products");
+                sectionOrder = sections.FindIndex(s => s.Name == "products") + 1;
+            }
+
+            @if (section != null)
+            {
+
+                <table class="main_header_section">
+                    <tr>
+                        <td style="width: 60px">@(sectionOrder).</td>
+                        <td>@GetCountryString() Products</td>
+                    </tr>
+                </table>
+                var PAModel = Model.ProductAnalysisModel;
+                            var sortResults = new List<AnalyticsSubCatSummaryRow>();
+
+                            List<STotalsOption> totOption, totOptionPrevious;
+
+                            var rowIndex = 0;
+
+
+                            var subName = "option graph";
+                            var sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+                    var title = Model.ProductAnalysisModel.Distributors.Count > 0 ? "Distributor specific sales percentage by colour" : "Total Unit sales percentage by colour";
+                    var subtitle = Model.ProductAnalysisModel.Distributors.Count > 0 ? "Total Unit sales percentage by colour" : "";
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">@GetCountryString() @title </td>
+                        </tr>
+
+                    </table>
+
+                    <table style="width: 920px" border="0" cellpadding="0" cellspacing="0">
+                        @{ 
+                            var width = PAModel.Distributors.Count > 0 ? 460 : 900;
+                        }
+                        <tr>
+                            <td style="width: @(width)px;vertical-align: top">
+                                <span style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold;">&nbsp;&nbsp;@subtitle</span><br />
+                                &nbsp;&nbsp;<img src="@GetImageUrl("Chart_ByColorTotal")" />
+                            </td>
+                            @if (PAModel.Distributors.Count > 0) {
+                                <td>
+                                    <div>
+                                        @foreach (var d in PAModel.Distributors) {
+                                            <div class="distgraph_box">
+                                                <img src="@GetImageUrl(string.Format("Chart_ByColor_{0}",d.customer_code))" />
+                                            </div>
+                                        }
+                                    </div>
+                                </td>
+                            }
+                            
+
+                        </tr>
+                    </table>
+                }
+
+                    subName = "sales by distributor";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                if (sub != null)
+                {
+                    rowIndex = 0;
+                    var brandSalesData = PAModel.SalesData.Where(s => s.brand_user_id == Model.Brand.user_id).ToList();
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">Total @GetCountryString() GBP sales percentage by range</td>
+                        </tr>
+
+                    </table>
+
+                    <table class="datatable">
+                        <tr class="datatable_header">
+                            <td style="width:40%">Range</td>
+                            @foreach (var dist in PAModel.Distributors)
+                            {
+                                <td style="text-align: right">@dist.user_name</td>
+                            }
+                            <td style="text-align: right">% age of sales</td>
+                            <td style="text-align: right">% age of GP</td>
+                        </tr>
+                        @{
+
+
+                        var totalSales = brandSalesData.Where(s => s.analytics_category != null).Sum(s => s.rowprice_gbp);
+                        var totalSalesGP = brandSalesData.Where(s => s.analytics_category != null).Sum(s => s.rowprice_gbp - s.PO_rowprice_gbp);
+                        var distTotals = new Dictionary<int, double?>();
+                        foreach (var dist in PAModel.Distributors)
+                        {
+                            distTotals[dist.user_id] = brandSalesData.Where(s => s.analytics_category != null && s.customer_code == dist.customer_code).Sum(s => s.rowprice_gbp);
+                        }
+                    }
+
+
+                        @foreach (var category in PAModel.Categories)
+                        {
+                        var totalSaleCat = brandSalesData.Where(s => s.Category != null && s.Category.category_id == category.category_id).Sum(s => s.rowprice_gbp);
+                        var totalGPCat = brandSalesData.Where(s => s.Category != null && s.Category.category_id == category.category_id).Sum(s => s.rowprice_gbp - s.PO_rowprice_gbp);
+                            <tr @Html.Raw(rowIndex++ % 2 == 0 ? "class=\"altrow\"" : "")>
+                                <td >@category.category_name</td>
+                                @foreach (var dist in PAModel.Distributors)
+                                {
+                            var distSale = brandSalesData.Where(s => s.Category != null && s.Category.category_id == category.category_id && s.customer_code == dist.customer_code).Sum(s => s.rowprice_gbp);
+                                    <td style="text-align: right;width:80px">@( (distTotals[dist.user_id] > 0 ? distSale / distTotals[dist.user_id] : 0).ToString("P2"))</td>
+                                }
+                                <td style="text-align: right;background-color: #DAE2FE;width:80px">@((totalSaleCat / totalSales).ToString("P2"))</td>
+                                <td style="text-align: right;background-color: #EBEFFE;width:80px">@((totalGPCat / totalSalesGP).ToString("P2"))</td>
+                            </tr>
+                        }
+                        @{
+                            var salesDataUncategorized = brandSalesData.Where(s => PAModel.Categories.Count(c => c.category_id == s.Category?.category_id) == 0).ToList();
+                            <tr @Html.Raw(rowIndex++ % 2 == 0 ? "class=\"altrow\"" : "")>
+                                <td>Uncategorized</td>
+                                @foreach (var dist in PAModel.Distributors)
+                                {
+                                    var distSale = salesDataUncategorized.Where(s => s.Category != null && s.customer_code == dist.customer_code).Sum(s => s.rowprice_gbp);
+                                    <td style="text-align: right;width:80px">@( (distTotals[dist.user_id] > 0 ? distSale / distTotals[dist.user_id] : 0).ToString("P0"))</td>
+                                }
+                                <td style="text-align: right;background-color: #DAE2FE;width:80px">@((salesDataUncategorized.Sum(s=>s.rowprice_gbp) / totalSales).ToString("P0"))</td>
+                                <td style="text-align: right;background-color: #EBEFFE;width:80px">@((salesDataUncategorized.Sum(s => s.rowprice_gbp - s.PO_rowprice_gbp) / totalSalesGP).ToString("P0"))</td>
+                            </tr>
+                        }
+                        
+
+                    </table>
+                            }
+
+                            subName = "sales by range";
+                            sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                            if (sub != null)
+                            {
+                                var dateCriteria = PAModel.DateMode == ProductAnalysisDateMode.ETA ? "ETA" : PAModel.DateMode == ProductAnalysisDateMode.ETD ? "ETD" : "Order date";
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">Total @GetCountryString() unit sales by range</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td class="header_notes">
+                                <ul>
+                                    <li>Last 6m = Units sold (based on @dateCriteria) in the last 6 months to @DateTime.Today.ToShortDateString()</li>
+                                    <li>Previous 6m – Units sold (based on @dateCriteria) in the previous 6 months to @DateTime.Today.AddMonths(-6).ToShortDateString()</li>
+                                    @if (PAModel.ProductDisplayCounts.Count > 0) {
+                                        <li>Display qty – this represents the quantity of products on display as of @Model.From.ToString("d") at BBD live dealers</li>
+                                    }                                    
+                                </ul>
+                            </td>
+                        </tr>
+                    </table>
+
+                    //foreach (var cat in brandSalesData.Where(s => s.analytics_category != null && s.brand_user_id == Model.Brand.user_id).GroupBy(s => s.Category.category_id).OrderBy(s => s.First().Category.category_seq))
+                    foreach (var category in PAModel.Categories.OrderBy(c => c.category_seq))
+                    {
+                        rowIndex = 0;
+                        //var category = PAModel.Categories.FirstOrDefault(s => s.category_id == cat.Key);
+                        if (category != null)
+                        {
+                            var hasOptions = PAModel.Options.Count > 0;
+                            <table class="datatable">
+                                <tr class="datatable_header" style="font-weight: bold">
+                                    <td style="font-size: 14px;width: 35%;font-weight: bold" @Html.Raw(hasOptions ? "rowspan=2" : "")>@category.category_name</td>
+                                    <td style="font-size: 14px;width: 10%;font-weight: bold" @Html.Raw(hasOptions ? "rowspan=2" : "")>Code</td>
+                                    <td style="text-align: @(hasOptions ? "center" : "right")" @Html.Raw(hasOptions ? string.Format("colspan={0}", PAModel.Options.Count + 1) : "")>previous 6m</td>
+                                    <td style="text-align: @(hasOptions ? "center" : "right")" @Html.Raw(hasOptions ? string.Format("colspan={0}", PAModel.Options.Count + 1) : "")>last 6m</td>
+                                    <td style="text-align: right" @Html.Raw(hasOptions ? "rowspan=2" : "")>Total</td>
+                                    @if (PAModel.ProductDisplayCounts.Count > 0) {
+                                        <td style="text-align: right" @Html.Raw(hasOptions ? "rowspan=2" : "")>Display Qty</td>
+                                    }
+                                    
+                                    <td style="text-align: left" @Html.Raw(hasOptions ? "rowspan=2" : "")>First Ship date</td>
+                                    @*<td style="text-align: right" @Html.Raw(hasOptions ? "rowspan=2" : "")>Factory stock</td>
+                                    <td style="text-align: right" @Html.Raw(hasOptions ? "rowspan=2" : "")>Factory stock value</td>*@
+                                </tr>
+                                @if (hasOptions)
+                                {
+                                    <tr class="datatable_header" style="font-weight: bold">
+                                        @foreach (var option in PAModel.Options)
+                                        {
+                                            <td style="text-align: right">@option.option_name</td>
+                                        }
+                                        <td style="text-align: right">Total previous 6m</td>
+                                        @foreach (var option in PAModel.Options)
+                                        {
+                                            <td style="text-align: right">@option.option_name</td>
+                                        }
+                                        <td style="text-align: right">Total last 6m</td>
+                                    </tr>
+                                }
+
+                                @{ var totalForCat = 0.0;
+                                 Func<Brand_sales_analysis2, double?> sumExpr = s => s.orderqty;
+                                }
+                                @foreach (var subc in PAModel.Subcategories.Where(s => s.category_id == category.category_id).OrderBy(s => s.seq))
+                                {
+                                    var products = PAModel.CustProducts.Where(c => (c.analytics_category == subc.subcat_id
+                                                                                || (PAModel.CustProducts.Any(p => p.cprod_id != c.cprod_id && p.cprod_mast == c.cprod_mast 
+                                                                                                                  && p.analytics_category == subc.subcat_id)))).ToList();
+
+                                    if (products.Count > 0)
+                                    {
+                                        totOption = new List<STotalsOption>();
+                                        totOptionPrevious = new List<STotalsOption>();
+
+                                        foreach (var option in PAModel.Options) {
+
+                                            // doubles.Add((double) Model.SalesData.Where(s => s.analytics_category == sub.subcat_id && s.analytics_option == option.option_id).Sum(s => s.orderqty));
+                                            totOption.Add(new STotalsOption { TotalList = PAModel.SalesData.Where(s => GetDateValue(s, PAModel.DateMode) >= Model.From.AddMonths(-6)
+                                                                  && GetDateValue(s, PAModel.DateMode) < Model.From && s.analytics_category == subc.subcat_id 
+                                                                  && s.analytics_option == option.option_id).Sum(sumExpr) });
+                                            totOptionPrevious.Add(new STotalsOption { TotalList = PAModel.SalesData.Where(s => GetDateValue(s, PAModel.DateMode) < Model.From.AddMonths(-6) 
+                                                                  && s.analytics_category == subc.subcat_id && s.analytics_option == option.option_id).Sum(sumExpr) });
+
+                                        }
+                                        //totOption.Add(new STotalsOption {TotalList = doubles.Select()});
+
+                                        var totalSubCatl6m = (PAModel.SalesData.Where(s => GetDateValue(s, PAModel.DateMode) >= Model.From.AddMonths(-6) 
+                                                            && GetDateValue(s, PAModel.DateMode) < Model.From && products.Count(p => p.cprod_id == s.cprod_id) > 0).Sum(sumExpr) ?? 0);
+                                        var totalSubCatp6m = (PAModel.SalesData.Where(s => GetDateValue(s, PAModel.DateMode) < Model.From.AddMonths(-6) 
+                                                              && products.Count(p => p.cprod_id == s.cprod_id) > 0).Sum(sumExpr) ?? 0);
+                                        totalForCat += totalSubCatl6m + totalSubCatp6m;
+
+                                        string name = subc.subcategory_name;
+                                        if (Model.Brand != null) {
+                                            name += (products.Count(p => p.cprod_status != "D" && p.brand_userid != Model.Brand.user_id && Model.Brands.Count(b => b.user_id == p.brand_userid) > 0) > 0 ? "*" : "");
+                                        }
+                                        sortResults.Add(new AnalyticsSubCatSummaryRow
+                                        {
+                                            Name = (name),
+                                            Code = string.Join("<br/> ", products.Where(p => p.analytics_category == subc.subcat_id).Select(p => p.cprod_code1).Distinct()),
+                                            STotalsOpLast6m = totOption,
+                                            STotalsOpPrevious6m = totOptionPrevious,
+                                            TotalLast6m = totalSubCatl6m,
+                                            TotalPrevious6m = totalSubCatp6m,
+                                            FactoryStock = products.Sum(p => p.MastProduct.factory_stock),
+                                            FactoryStockValue = products.Sum(p => p.MastProduct.factory_stock_value),
+                                            HasPendingDiscontinued = products.Any(p => p.pending_discontinuation == true),
+                                            DisplayQty = products.Sum(p => p.DisplayQty),
+                                            FirstShipDate = products.Min(p => p.FirstShipDate)
+                                        });
+                                    }
+
+
+                                }
+                                @foreach (var nameTotal in sortResults.OrderByDescending(s => s.TotalLast6m)) {
+                                    <tr @Html.Raw(nameTotal.HasPendingDiscontinued ? "class=\"pendingdiscontinuation\"" : rowIndex++ % 2 == 0 ? "class=\"altrow\"" : "")>
+
+                                        <td style="text-align: left"> @nameTotal.Name</td>
+                                        <td>@Html.Raw(nameTotal.Code)</td>
+                                        @*<td>@nameTotal.STotalsOp</td>*@
+
+                                        @foreach (var i in nameTotal.STotalsOpPrevious6m) {
+                                            <td style="text-align: right">@(i.TotalList > 0 ? i.TotalList.ToString() : string.Empty)</td>
+                                        }
+
+                                        <td style="text-align: right"> @nameTotal.TotalPrevious6m</td>
+                                        @foreach (var i in nameTotal.STotalsOpLast6m) {
+                                            <td style="text-align: right">@(i.TotalList > 0 ? i.TotalList.ToString() : string.Empty)</td>
+                                        }
+
+                                        <td style="text-align: right"> @nameTotal.TotalLast6m</td>
+                                        <td style="text-align: right">@(nameTotal.TotalLast6m + nameTotal.TotalPrevious6m)</td>
+                                        @if (PAModel.ProductDisplayCounts.Count > 0) {
+                                            <td style="text-align: right"> @nameTotal.DisplayQty</td>
+                                        }
+                                        
+                                        <td style="text-align: left"> @nameTotal.FirstShipDate.ToString("d")</td>
+                                        @*<td style="text-align:right">@nameTotal.FactoryStock</td>
+                                            <td style="text-align:right">@nameTotal.FactoryStockValue.ToString("N2")</td>*@
+                                    </tr>
+                                }
+
+
+                                <tr class="datatable_header">
+                                    <td colspan="2">TOTAL</td>
+
+
+                                    @for (int i = 0; i < PAModel.Options.Count; i++)
+                                    {
+
+                                        <td style="text-align: right;font-weight: bold">@sortResults.Sum(s => s.STotalsOpPrevious6m[i].TotalList)</td>
+                                    }
+                                    <td style="text-align: right;font-weight: bold">@sortResults.Sum(s => s.TotalPrevious6m)</td>
+                                    @for (int i = 0; i < PAModel.Options.Count; i++)
+                                    {
+
+                                        <td style="text-align: right;font-weight: bold">@sortResults.Sum(s => s.STotalsOpLast6m[i].TotalList)</td>
+                                    }
+                                    <td style="text-align: right;font-weight: bold">@sortResults.Sum(s => s.TotalLast6m)</td>
+                                    <td style="text-align: right; font-weight: bold">@totalForCat</td>
+                                    @if (PAModel.ProductDisplayCounts.Count > 0) {
+                                        <td style="text-align: right; font-weight: bold"> @sortResults.Sum(s => s.DisplayQty)</td>
+                                    }
+                                    
+                                    <td style="text-align: left"></td>
+                                    @*<td colspan="2"></td>*@
+                                </tr>
+                                @{
+                            sortResults.Clear();
+                                }
+                            </table>
+
+
+                            <br />
+                        }
+
+                    }
+                }
+
+                subName = "dealer displays summary";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+                var categoryNames = PAModel.brand_cats != null && PAModel.brand_cats.Count > 0 ? string.Join(",", PAModel.Categories.Where(c => PAModel.brand_cats.Contains(c.category_id)).Select(c => c.category_name)) : "";
+                if (sub != null)
+                {
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">@GetCountryString() Dealer displays @(!string.IsNullOrEmpty(categoryNames) ? "(" + categoryNames + ")" : "")</td>
+                        </tr>
+
+                    </table>
+
+                    <table class="datatable">
+                        <tr class="datatable_header">
+                            <td rowspan="2">Distributor</td>
+                            <td rowspan="2" class="number">total number of displays</td>
+                            <td colspan="2" class="number" style="text-align: center">last 12 months</td>
+                            <td rowspan="2" class="number">GBP sales per display</td>
+                        </tr>
+                        <tr class="datatable_header">
+                            <td class="number">total units sold</td>
+                            <td class="number">GBP sales</td>
+                        </tr>
+                        @{ rowIndex = 0;
+                         int? totalDisplayCount = 0;
+                         double? totalUnits = 0;
+                         double? totalgpb = 0;
+                        }
+                        @foreach (var dist in PAModel.Distributors)
+                        {
+                            int? displayCount = 0;
+                            //distributors.Add(dg.Key);
+                            var distData = PAModel.SalesData.Where(s => s.customer_code == dist.customer_code && s.category1 != Category1.category1_spares && (PAModel.brand_cats == null || (s.Category != null && PAModel.brand_cats.Contains(s.Category.category_id))));
+
+                            displayCount = PAModel.ProductDisplayCounts.Where(dc => dc.distributor_code == dist.customer_code).Sum(dc => dc.DisplayCount);
+
+                            totalDisplayCount += displayCount;
+                            var units = distData.Sum(l => l.orderqty);
+                            var gbp = distData.Sum(l => l.rowprice_gbp);
+                            totalUnits += units;
+                            totalgpb += gbp;
+                            <tr @Html.Raw(rowIndex++ % 2 == 0 ? "class=\"altrow\"" : "")>
+                                <td>@dist.customer_code</td>
+                                <td class="number">@displayCount.ToString("N0")</td>
+                                <td class="number">@units.ToString("N0")</td>
+                                <td class="number">@FormatGBP(gbp)</td>
+                                <td class="number">@FormatGBP(displayCount > 0 ? gbp / displayCount : 0)</td>
+                            </tr>
+                        }
+                        <tr class="altrow" style="font-weight: bold">
+                            <td>TOTAL</td>
+                            <td class="number">@totalDisplayCount.ToString("N0")</td>
+                            <td class="number">@totalUnits.ToString("N0")</td>
+                            <td class="number">@FormatGBP(totalgpb)</td>
+                            <td class="number">@FormatGBP(totalUnits > 0 ? totalgpb / totalDisplayCount : 0)</td>
+                        </tr>
+                    </table>
+
+                }
+                subName = "top20 displaying";
+                sub = section.VisibleSections.FirstOrDefault(s => s.Name == subName);
+
+                if (sub != null)
+                {
+                    <table class="header_section">
+                        <tr>
+                            <td style="width: 60px">@string.Format("{0}.{1}", sectionOrder, section.VisibleSections.FindIndex(s => s.Name == subName) + 1)</td>
+                            <td class="header_title">@GetCountryString() Top displaying products @(!string.IsNullOrEmpty(categoryNames) ? "(" + categoryNames + ")" : "")</td>
+                        </tr>
+                    </table>
+
+                    <table class="datatable">
+                        <tr class="datatable_header">
+                            @{
+                                var rowspan = Html.Raw(PAModel.Distributors.Count > 0 ? "rowspan=2" : "");
+                            }
+                            <td @rowspan>Product code</td>
+                            <td @rowspan>Product name</td>
+                            @if (PAModel.Distributors.Count > 0)
+                            {
+                                <td colspan="@(PAModel.Distributors.Count)" style="text-align: center">units displayed</td>
+                            }
+                            <td @rowspan class="number" style="width: 35px">TOTAL</td>
+                            @if (PAModel.Distributors.Count > 0)
+                            {
+                                <td colspan="@(PAModel.Distributors.Count)" style="text-align: center">units sold</td>
+                            }
+                            <td @rowspan class="number" style="width: 35px">TOTAL</td>
+                            <td @rowspan class="number" style="width: 35px">units sales/displays</td>
+                        </tr>
+                        @if (PAModel.Distributors.Count > 0)
+                        {
+                            <tr class="datatable_header">
+                                @foreach (var dist in PAModel.Distributors)
+                                {
+                                    <td class="number" style="width: 35px">@dist.customer_code</td>
+                                }
+                                @foreach (var dist in PAModel.Distributors)
+                                {
+                                    <td class="number" style="width: 35px">@dist.customer_code</td>
+                                }
+                            </tr>
+                        }
+                        @{ rowIndex = 0;}
+                        @foreach (var pd in PAModel.ProductDisplayCounts.GroupBy(pd => pd.cprod_id).OrderByDescending(g => g.Sum(pd => pd.DisplayCount)).Take(20))
+                        {
+                            var prod = PAModel.CustProducts.FirstOrDefault(p => p.cprod_id == pd.Key);
+                            if (prod != null)
+                            {
+                                var multipleBrands = prod != null ? PAModel.SalesData.Any(s => s.distributor > 0 && s.cprod_mast == prod.cprod_mast && s.brand_user_id != Model.Brand.user_id) : false;
+                                <tr @Html.Raw(rowIndex++ % 2 == 0 ? "class=\"altrow\"" : "")>
+                                    <td>@pd.First().cprod_code1 @(multipleBrands ? "*" : "")</td>
+                                    <td>@pd.First().cprod_name</td>
+                                    @{ var total = 0; }
+                                    @foreach (var dist in PAModel.Distributors)
+                                    {
+                                        var displaysForDist = pd.Where(p => p.distributor_code == dist.customer_code).Sum(p => p.DisplayCount);
+                                        total += displaysForDist;
+                                        <td class="number">@displaysForDist</td>
+                                    }
+                                    <td class="datatable_header" style="text-align:right">@total</td>
+                                    @{ var totalUnitSales = 0; }
+                                    @foreach (var dist in PAModel.Distributors)
+                                    {
+                                        var salesForDist = PAModel.SalesData.Where(s => s.customer_code == dist.customer_code && s.cprod_mast == prod.cprod_mast).Sum(s => s.orderqty);
+                                        totalUnitSales += Convert.ToInt32(salesForDist);
+                                        <td class="number">@salesForDist</td>
+                                    }
+                                    <td class="datatable_header" style="text-align:right">@totalUnitSales</td>
+                                    <td class="number">@((total > 0 ? totalUnitSales / total : 0).ToString("N1"))</td>
+                                </tr>
+                            }
+                        }
+                    </table>
+
+                }
+            }
+
+        </div>
+		
+		<div class="footer">
+			All data contained within this document is the property of Big Company (Jersey), and is strictly confidential and is prohibited from distribution without written consent.
+		</div>
+
+
+	</body>
+</html>

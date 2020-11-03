@@ -1,0 +1,58 @@
+<h4>Brand product management</h4>
+<app-errormessage [errorMessage]="errorMessage"></app-errormessage>
+<div class="panel panel-primary">
+    <div class="panel-heading">CRITERIA</div>
+    <div class="panel-body">
+        <div>
+            <label class="mr-4">Brands</label>
+            <label class="radio-inline" *ngFor="let b of brands">
+                <input type="radio" name="brands" [value]="b.brand_id" [(ngModel)]="selectedBrandId" (change)="onBrandChanged(b.brand_id)">
+                {{b.code}}
+            </label>
+            <label class="mr-4" style="margin-left: 25px">Live/Disc</label>     
+            <label class="radio-inline" *ngFor="let l of liveDisc">
+                <input type="radio" name="livedisc" [value]="l.value" [(ngModel)]="liveDiscSelected" (change)="onLiveDiscChanged(l.value)">
+                {{l.name}}
+            </label>       
+        </div>        
+        <div class="mt-2">
+            <label class="mr-4" >Product categories</label>     
+            <label class="radio-inline" *ngFor="let c of brandCategories">
+                <input type="radio" name="categories" [value]="c.brand_cat_id" [(ngModel)]="selectedCategoryId" (change)="onCategoryChanged(c.brand_cat_id)">
+                {{c.brand_cat_desc}}
+            </label>       
+        </div>        
+        <div class="form-inline mt-2">
+            <div class="form-group">
+                <label></label>
+                <input type="text" class="form-control" [(ngModel)]="searchText">
+                <button class="btn btn-primary ml-2" (click)="loadProducts()">Search</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <button class="btn btn-primary" (click)="addProducts()">Add new products</button>
+</div>
+
+<pagination [itemsPerPage]="pageSize" [boundaryLinks]="true" [totalItems]="allProducts.length" 
+[maxSize]="20" [(ngModel)]="page" (pageChanged)="pageChanged($event)"></pagination>
+<tabset>
+    <tab heading="General">
+        <app-productbulkedit [products]="products" [categories]="brandCategories" [asproot]="asproot"></app-productbulkedit>
+    </tab>
+    <tab heading="Loading">
+        <app-productloadingedit [products]="products"></app-productloadingedit>
+    </tab>
+    <tab heading="Tariffs">
+        <app-producttariffs [products]="products"></app-producttariffs>
+    </tab>
+    <tab heading="Barcodes">
+        <app-barcodes [products]="products"></app-barcodes>
+    </tab>
+    <tab heading="Status">
+        <app-productstatus [products]="products"></app-productstatus>
+    </tab>
+</tabset>
+<pagination [itemsPerPage]="pageSize" [boundaryLinks]="true" [totalItems]="allProducts.length" 
+[maxSize]="20" [(ngModel)]="page" (pageChanged)="pageChanged($event)"></pagination>

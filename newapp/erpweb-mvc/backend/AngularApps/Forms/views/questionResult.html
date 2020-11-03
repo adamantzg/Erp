@@ -1,0 +1,15 @@
+﻿<div ng-if="$ctrl.question.question_type == $ctrl.QuestionTypeEnum.shorttext || $ctrl.question.question_type == $ctrl.QuestionTypeEnum.longtext" >{{$ctrl.answer.textValue}}</div>
+<div ng-if="$ctrl.question.question_type == $ctrl.QuestionTypeEnum.singlechoice">
+    {{$ctrl.getSingleChoice($ctrl.answer.intValue)}}
+</div>
+<div ng-if="$ctrl.question.question_type == $ctrl.QuestionTypeEnum.yesno">
+    <span ng-if="$ctrl.answer.intValue==1">Yes</span><span ng-if="$ctrl.answer.intValue==0">No</span>
+</div>
+<div ng-if="$ctrl.question.question_type == $ctrl.QuestionTypeEnum.date">
+    {{$ctrl.answer.dateValue | date:'dd/MM/yyyy'}}
+</div>
+<div ng-if="$ctrl.question.question_type == $ctrl.QuestionTypeEnum.multiplechoice">
+    <span ng-repeat="c in $ctrl.answer.choices">
+        {{c.name}}
+    </span>
+</div>

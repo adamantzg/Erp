@@ -1,0 +1,7 @@
+<div class="form-inline">
+  <select class="form-control" [(ngModel)]="month" (change)="change()" [disabled]="disabled">
+    <option *ngFor="let m of months" [value]="m">{{m}}</option>
+  </select>
+  <input type="text" class="form-control" [(ngModel)]="year" (change)="change()" [disabled]="disabled">
+</div>
+

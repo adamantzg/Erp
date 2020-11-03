@@ -1,0 +1,95 @@
+﻿@model List<Brand>
+
+@{
+    Layout = "_NpdLayout.cshtml";
+}
+
+<div class="main">
+    <span class="title">CREATE PRODUCT</span>
+    <table class="table_one" width="94%" border="0" cellspacing="1" cellpadding="1">
+        <tr>
+            <td width="150"></td>
+            <td>@Html.RadioButton("Create",1,true, new {style="width:auto;border:none"}) Develop a new product</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>@Html.RadioButton("Create",2,false,new {style="width:auto;border:none"}) Develop an existing product</td>
+        </tr>
+        <tr id="existing" style="display: none">
+            <td height="50">select brand</td>
+            <td>
+                @foreach (var b in Model)
+                {
+                    @Html.RadioButton("brand",b.brand_id,false,new{style="width:30px;border:none"}) @b.brandname
+                }
+            </td>
+        </tr>
+        <tr id="existing2" style="display: none">
+            <td width="150" height="40">product code/name</td>
+            <td>@Html.TextBox("prod_name","",new{@class="simple-input"})@Html.Hidden("cprod_id")</td>
+        </tr>
+        <tr>
+            <td height="40">&nbsp;</td>
+            <td><input id="edit" class="button" name="" type="button" value="CREATE" style="float: left"/></td>
+        </tr>
+    </table>
+</div>
+
+@section Scripts
+{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script type="text/javascript">
+        $(function() {
+            $('[name="prod_name"]').autocomplete({
+                source: function(request, response) {
+
+                    var id = this.element[0].id;
+
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        url: "@Url.Action("GetCustProductsForBrandCompletionJSON", "Common")",
+                        dataType: "json",
+                        data: $.validator.format("{'prefixText': '{0}','brand_id' :'{1}','count' : '100'}", request.term, $('[name="brand"]:checked').val()),
+                        success: function(data) {
+                            response(ObjectToLookup(data, "cprod_name", "cprod_id", ProductLookups));
+                        },
+                        error:
+                            function(data) {
+                            }
+                    });
+                },
+                minLength: 0,
+                select:
+                    function(event, ui) {
+                        if (ui.item) {
+                            $("#cprod_id").val(ui.item.id);
+                            $('#edit').show();
+                        }
+                    }
+            });
+
+            $('[name="Create"]').click(function() {
+                var value = $(this).val();
+                if (value == '1')
+                    $('[id^="existing"]').hide();
+                else {
+                    $('[id^="existing"]').show();
+                }
+            });
+
+            $('#edit').click(function() {
+                location.href = '@Url.Action("Create")/?cprod_id=' + $('#cprod_id').val();
+            });
+        });
+
+        function ProductLookups(products) {
+            var lookups = [];
+            for (var i = 0; i < products.length; i++) {
+                lookups.push(new LookupItem(products[i].cprod_id, products[i].cprod_code1 + ':' + products[i].cprod_name));
+            }
+            return lookups;
+        }        
+
+    </script>
+}

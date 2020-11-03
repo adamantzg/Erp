@@ -1,0 +1,133 @@
+﻿@{ 
+    Layout = null;
+}
+
+<html>
+<head>
+@Styles.Render("~/Content/font-awesome.css")
+@Styles.Render("~/Content/ionicons.css")
+@Styles.Render("~/Content/style.css")
+@Styles.Render("~/Content/bootstrapStyle/bootstrap")
+
+
+<!-- google font -->
+<link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+
+<style>
+    @@media (min-width: 768px) {
+        #footer {
+            width: 750px
+        }
+    }
+
+    @@media (min-width: 992px) {
+        #footer {
+            width: 970px
+        }
+    }
+
+    @@media (min-width: 1200px) {
+        #footer {
+            width: 1170px
+        }
+    }
+
+    .content {
+        background: none;
+    }
+
+    .main {
+        width: auto;
+    }
+
+    html, body {
+        background: none;
+    }
+
+    .radio-inline > * {
+        padding-top: 0px !important;
+    }
+
+    .imageHolder {
+        position: relative;
+        height: 230px;
+        border: 1px solid black;
+        display: table-cell;
+        vertical-align: middle;
+        width: 300px;
+    }
+
+    .orders_before_ready_date {
+        border: 1px solid red;
+    }
+
+    .badge-success {
+        background: #5cb85c !important
+    }
+
+    .badge-danger {
+        background: #d9534f;
+    }
+
+    label {
+        font-size: 1em !important;
+    }
+
+    .loading-dialog {
+        display: none;
+        position: fixed;
+        z-index: 1100;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: rgba( 0, 0, 0, .3 );
+    }
+</style>
+
+</head>
+<body>
+    <div ng-app="app" style="padding: 5px">
+
+        <div loading class="loading-dialog"></div>
+
+
+        <div ui-view> </div>
+
+    </div>
+
+    
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/globalize")
+    <script src="~/Scripts/logToServer.js"></script>
+    @Scripts.Render("~/bundles/plupload2")
+
+    <script src="~/Scripts/angular-plupload/angular-plupload.js"></script>
+    <script src="~/Scripts/functions.js"></script>
+
+    
+    <script src="~/AngularApps/InspectionV2/app.js"></script>
+    <script src="~/AngularApps/InspectionV2/js/drawing.js"></script>
+    <script src="~/AngularApps/InspectionV2/js/controllers.js"></script>
+    <script src="~/AngularApps/InspectionV2/appdirective.js"></script>
+
+
+    <script src="~/AngularApps/InspectionV2/factory.js"></script>
+    <script src="~/Scripts/loading.js"></script>
+
+
+    
+</body>
+</html>    
+    
+    
+
+
+
+
+
+

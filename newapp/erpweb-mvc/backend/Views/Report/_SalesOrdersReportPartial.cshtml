@@ -1,0 +1,173 @@
+﻿@using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder
+@model SalesOrdersReportModel
+
+@functions
+{
+
+    public string MapWarehouse(string w)
+    {
+        return WebUtilities.MapStockOrdersWarehouse(w);
+    }
+
+    public string MapBrand(string b)
+    {
+        return WebUtilities.MapStockOrdersBrand(b);
+    }
+
+}
+
+@{
+    var rows = Model.Rows.Where(r => !string.IsNullOrEmpty(r.Brand)).ToList();
+    var brands = rows.Select(r => r.Brand).Distinct().OrderBy(MapBrand).ToList();
+    var yearData = Model.YearData;
+    var last12mData = Model.Last12mData;
+    var showLast12mNote = DateTime.Today < new DateTime(2017, 7, 1);
+    var counter = 0;
+
+}
+<table class="salesorderstable">
+    <thead>
+    <tr>
+        <td rowspan="2" style="width: 90px"></td>
+        @foreach (var b in brands)
+        {
+            <td colspan="3" style="text-align: center">@MapBrand(b)</td>
+        }
+        <td colspan="2" style="text-align: center">Total</td>
+    </tr>
+    <tr>
+        @foreach (var b in brands)
+        {
+            <td class="number" style="width: 75px">@Model.Headers[0]</td>
+            <td class="number" style="width: 80px">@Model.Headers[1]</td>
+            <td style="width: 5px"></td>
+        }
+        <td class="number" style="width: 90px">@Model.Headers[0]</td>
+        <td class="number" style="width: 80px">@Model.Headers[1]</td>
+    </tr>
+
+    </thead>
+    @{
+        var rowsOrdered = rows.Where(r => r.Day >= Model.From).GroupBy(r => r.Day);
+        rowsOrdered = Model.DescendingOrder ? rowsOrdered.OrderByDescending(r => r.Key).ToList() : rowsOrdered.OrderBy(r => r.Key).ToList();
+    }
+    @foreach (var g in rowsOrdered)
+    {
+        <tr @Html.Raw((counter++) % 2 == 1 ? "class=altrow" : "")>
+            <td>@(g.Key == DateTime.MinValue ? Model.MinDateText : g.Key.ToString(Model.DayFormat))</td>
+            @foreach (var b in brands)
+            {
+                <td class="number">$ @(g.Where(r => r.Brand == b).Sum(r => r.Value).ToString("N2"))</td>
+                <td class="number">@(g.Where(r => r.Brand == b).Sum(r => r.NoOfOrders))</td>
+                <td style="width: 5px"></td>
+            }
+            <td class="number">$ @(g.Sum(r => r.Value).ToString("N2"))</td>
+            <td class="number">@(g.Sum(r => r.NoOfOrders))</td>
+        </tr>
+    }
+
+    <tfoot>
+    <tr>
+        <td colspan="@(3 + brands.Count * 2)"></td>
+    </tr>
+        @if (Model.ShowWTD)
+        {
+            <tr class="clienttable_header">
+                <td>WTD</td>
+                @foreach (var b in brands)
+                {
+                    <td class="number">$ @rows.Where(r => r.Brand == b && r.Day >= Model.From).Sum(r => r.Value).ToString("N2")</td>
+                    <td class="number">@rows.Where(r => r.Brand == b && r.Day >= Model.From).Sum(r => r.NoOfOrders)</td>
+                    <td style="width: 5px"></td>
+                }
+                <td class="number">$ @rows.Where(r => r.Day >= Model.From).Sum(r => r.Value).ToString("N2")</td>
+                <td class="number">@rows.Where(r => r.Day >= Model.From).Sum(r => r.NoOfOrders)</td>
+            </tr>
+        }
+    
+        @if (Model.ShowMTD)
+        {
+            <tr class="clienttable_header_darker">
+                <td>MTD</td>
+                @{ var lastMonthRows = rows.Where(r => Month21.FromDate(r.Day).Value == Month21.FromDate(Model.To.Value).Value).ToList();}
+                @foreach (var b in brands)
+                {
+                    <td class="number">$ @lastMonthRows.Where(r => r.Brand == b).Sum(r => r.Value).ToString("N2")</td>
+                    <td class="number">@lastMonthRows.Where(r => r.Brand == b).Sum(r => r.NoOfOrders)</td>
+                    <td style="width: 5px"></td>
+                }
+                <td class="number">$ @lastMonthRows.Sum(r => r.Value).ToString("N2")</td>
+                <td class="number">@lastMonthRows.Sum(r => r.NoOfOrders)</td>
+            </tr>
+        }
+    @if (Model.ShowYTD)
+    {
+        <tr class="clienttable_header">
+            <td>YTD</td>
+            @foreach (var b in brands)
+            {
+                <td class="number">$ @yearData.Where(r => r.Brand == b).Sum(r => r.Value).ToString("N2")</td>
+                <td class="number">@yearData.Where(r => r.Brand == b).Sum(r => r.NoOfOrders)</td>
+                <td style="width: 5px"></td>
+            }
+            <td class="number">$ @yearData.Sum(r => r.Value).ToString("N2")</td>
+            <td class="number">@yearData.Sum(r => r.NoOfOrders)</td>
+        </tr>
+    }
+    
+    @if (Model.ShowLast12m)
+    {
+        <tr class="clienttable_header_darker">
+            <td>12m TD@(showLast12mNote ? "*" : "")</td>
+            @foreach (var b in brands)
+            {
+                <td class="number">$ @last12mData.Where(r => r.Brand == b).Sum(r => r.Value).ToString("N2")</td>
+                <td class="number">@last12mData.Where(r => r.Brand == b).Sum(r => r.NoOfOrders)</td>
+                <td style="width: 5px"></td>
+            }
+            <td class="number">$ @last12mData.Sum(r => r.Value).ToString("N2")</td>
+            <td class="number">@last12mData.Sum(r => r.NoOfOrders)</td>
+        </tr>
+    }
+    @if (Model.ShowTotal)
+    {
+        <tr class="clienttable_header">
+            <td>TOTAL</td>
+            @foreach (var b in brands)
+            {
+                <td class="number">$ @rows.Where(r => r.Brand == b).Sum(r => r.Value).ToString("N2")</td>
+                <td class="number">@rows.Where(r => r.Brand == b).Sum(r => r.NoOfOrders)</td>
+                <td style="width: 5px"></td>
+            }
+            <td class="number">$ @rows.Sum(r => r.Value).ToString("N2")</td>
+            <td class="number">@rows.Sum(r => r.NoOfOrders)</td>
+        </tr>
+    }
+    </tfoot>
+</table>
+<div class="salesorderstable">
+<ul>
+    
+    @{
+        var date = Model.From ?? DateTime.Today;
+        var exportRunTime = date.AddHours(17).AddMinutes(30);
+        var ftpTransferTime = date.AddHours(17).AddMinutes(45);
+        var importTime = date.AddHours(17).AddMinutes(50);
+        var reportTime = date.AddHours(18).AddMinutes(0);
+        var usHKOffset = -12;
+    }
+    @if (Model.ShowNotes)
+    {
+        if (showLast12mNote)
+        {
+            <li>* 12 months to date – starts from 1st July 2016</li>
+        }
+        <li>Export run on US server: @exportRunTime.ToString("HH:mm") US server time = @exportRunTime.AddHours(usHKOffset).ToString("HH:mm") FE time</li>
+        <li>FTP file transfer of data from US to HK servers = @ftpTransferTime.ToString("HH:mm") US time, @ftpTransferTime.AddHours(usHKOffset).ToString("HH:mm") FE time</li>
+        <li>Data import routine run on HK server = @importTime.ToString("HH:mm") US time, @importTime.AddHours(usHKOffset).ToString("HH:mm") FE time</li>
+        <li>Report issued from HK server = @reportTime.ToString("HH:mm") US time, @reportTime.AddHours(usHKOffset).ToString("HH:mm") FE time.</li>
+        
+    }
+    
+</ul>
+</div>

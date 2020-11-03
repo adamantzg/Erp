@@ -1,0 +1,55 @@
+﻿@model InspectionPlanEditModel
+
+<style>
+    input[type="text"] {
+        width: 100px;
+    }
+    textarea {
+        width: auto;
+    }
+</style>
+<table style="width:940px;padding: 2px;" class="inspectionplan_edit">
+    <tr>
+        <td>Start Date/Days</td>
+        <td>@*@{ var d = Html.DateTimeFor(m => m.Inspection.insp_start, true); }
+            @d.DateCalendar(inLine: false, calendarOptions: new CalendarOptions { ShowButtonPanel = true, ShowOn = CalendarOptionsShowOn.button, ButtonImage = "/images/calendar.gif", ButtonImageOnly = true })*@
+            @Html.TextBoxFor(m => m.Inspection.insp_start, "{0:d}", new { isDate = true }) &nbsp; </td>
+    </tr>
+    <tr>
+        <td>Comments:  </td>
+        <td>@Html.TextAreaFor(m=>m.Inspection.insp_comments,5,60,null)
+            @Html.HiddenFor(m=>m.Inspection.insp_type)@Html.HiddenFor(m=>m.Inspection.insp_qc1)
+            @Html.HiddenFor(m=>m.location_id)@Html.HiddenFor(m=>m.returnTo)
+            @Html.HiddenFor(m=>m.Inspection.insp_id)
+            @Html.HiddenFor(m=>m.Inspection.insp_days)
+        </td>
+    </tr>
+</table>
+<input type="button" value="Update" onclick="update()"/>
+<input type="button" value="Cancel" onclick="$(this).parent().hide()"/>
+@if (ViewBag.mode != "new")
+{
+    <input type="button" value="Remove" onclick="removeInsp()"/>
+}
+
+<script type="text/javascript">
+    function update() {
+
+        $("#mainForm").attr("action", "@(ViewBag.mode == "new" ? Url.Action("Create") : Url.Action("Edit",new {id=Model.Inspection.insp_unique}))");
+        $("#mainForm").attr("method", "post");
+        $("#mainForm").submit();
+    }
+
+    function removeInsp() {
+
+        if (confirm("Remove entry?")) {
+            $("#mainForm").attr("action", "@Url.Action("Delete",new {id=Model.Inspection.insp_unique})");
+            $("#mainForm").attr("method", "post");
+            $("#mainForm").submit();
+        }
+    }
+
+    $('input[isdate]').datepicker({ changeYear: true });
+
+    @Html.Raw("//@ sourceURL=dynamicScript.js")
+</script>

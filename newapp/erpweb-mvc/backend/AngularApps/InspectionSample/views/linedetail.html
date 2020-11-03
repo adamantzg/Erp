@@ -1,0 +1,62 @@
+﻿<section class="panel panel-success" style="margin-left:40px">
+<div class="panel-heading">
+    <span ng-repeat="i in l.icons">
+                <small>{{iconTexts[$index]}}</small><a ng-show="i.url" ng-href="{{i.url}}" target="_blank"><img src="/images/small/pdf_icon.gif"/></a><img ng-show="!i.url" src="/images/small/pdf_icon2.gif"/>
+            </span>
+</div>
+<div class="panel-body form-horizontal">
+    <!--<div class="form-group">
+        <label class="col-md-2"></label>
+        <div class="col-md-6">
+            <span ng-repeat="i in l.icons">
+                <small>{{iconTexts[$index]}}</small><a ng-show="i.url" ng-href="{{i.url}}" target="_blank"><img src="/images/small/pdf_icon.gif"/></a><img ng-show="!i.url" src="/images/small/pdf_icon2.gif"/>
+            </span>
+        </div>
+    </div>-->
+    <uib-tabset>
+        <uib-tab ng-repeat="t in l.imageTypes" heading="{{t.description}}">
+            <div class="panel-body">
+                <div class="form-group">
+                    <label class="col-md-2">Requirement</label>
+                    <div class="col-md-6">
+                        <textarea ng-if="role == 'fc'" ng-model="t.requirement" class="form-control"/>
+                        <div class="form-control-static" ng-if="role=='qc'">{{t.requirement}}</div>
+                    </div>
+                </div>
+                <div class="form-group" ng-show="role == 'qc' || t.comments">
+                    <label class="col-md-2">Comments</label>
+                    <div class="col-md-6">
+                        <textarea ng-if="role == 'qc'" ng-model="t.comments" class="form-control"/>
+                        <div class="form-control-static" ng-if="role=='fc'">{{t.comments}}</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2">Images</label>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-3" ng-repeat="i in getImages(l,t)">
+                                <a ng-href="{{i.url}}" class="thumbnail" ng-click="openLightboxModal(getImages(l,t),$index)" data-lightbox="images" ng-show="i.id > 0 || i.progress==100">
+                                  <img ng-src="{{i.url}}" alt="">
+                                </a>
+                                <uib-progressbar value="i.progress" ng-show="i.progress > 0 && i.progress < 100"></uib-progressbar>
+                                <span class="glyphicon glyphicon-remove-sign" ng-if="role == 'qc'" style="position:absolute;top:0;right:0" ng-click="removeImage(l,i)"></span>
+                                <!--<div class="caption" ng-if="role=='fc'">{{i.type.description}}</div>
+                                <div class="caption">
+                                    <select ng-if="role=='qc'" class="form-control" ng-model="i.type_id" ng-options="t.id as t.description for t in imageTypes"></select>
+                                </div>-->
+                    
+                            </div>
+                        </div>
+                        <div ng-if="role == 'qc'" class="form-inline" style="margin-top: 5px">
+                        <button class="btn" plupload="lineUpload.url"
+                                                        plupload-options="lineUpload.options"
+                                                        plupload-callbacks="l.callbacks[t.id]" ng-if="role == 'qc'">Upload images</button>
+                            <!--<select ng-if="role=='qc'" class="form-control" ng-model="l.type_id" ng-options="t.id as t.description for t in imageTypes"></select>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </uib-tab>        
+    </uib-tabset>
+</div>
+</section>

@@ -1,0 +1,25 @@
+﻿@model backend.Models.ListSortModel
+
+@{var newSortDir = "";
+  var image = "";
+  }
+@if (Model.fieldName == Model.sortField)
+{
+    if (Model.sortDir == "" || Model.sortDir == " ASC")
+    {
+        newSortDir = " DESC";
+        image = "arrow-top-grey-thin.png";
+    }
+    else
+    {
+        newSortDir = " ASC";
+        image = "arrow-down-grey-thin.png";
+    }
+    @Html.ActionLink(Model.caption, Model.action, new { sortField = Model.sortField, sortDir = newSortDir })
+    <img src="/images/@image" />
+}
+else
+{
+    @Html.ActionLink(Model.caption, Model.action, new { sortField = Model.fieldName, sortDir = " ASC" });
+}
+    

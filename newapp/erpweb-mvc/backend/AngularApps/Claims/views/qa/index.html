@@ -1,0 +1,33 @@
+﻿<div class="row">
+    <div class="col-md-4">
+        <button class="btn fa fa-plus btn-default" ui-sref="create">&nbsp;Create new QA ticket</button>  
+        <button class="btn btn-default fa fa-file-excel-o" ng-click="download()">&nbsp;&nbsp;Export</button>
+    </div>
+    
+</div>
+<div class="row" style="margin-top: 10px">
+    <div class="col-md-12">
+        <table datatable="ng" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Ref.</th>
+                    <th>Factory</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Last updated by</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="c in claims">
+                    <td><a ui-sref="edit({ id: c.returnsid })">{{c.return_no}}</a></td>
+                    <td>{{c.factory}}</td>
+                    <td>{{formatDate(c.request_date)}}</td>
+                    <td>{{c.description}}</td>
+                    <td>{{c.category}}</td>
+                    <td>{{c.lastUpdatedBy}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

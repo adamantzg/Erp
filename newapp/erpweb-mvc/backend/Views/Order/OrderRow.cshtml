@@ -1,0 +1,22 @@
+﻿@model List<OrderRow>
+@{
+    var orders = Model;
+}
+<tr>
+    <td colspan="12" class="om_upperheader"></td>
+    <td class="om_upperheader">client</td>
+    @for (int i = 0; i < orders.Count;i++ )
+    {
+        var order = orders[i];
+        if (order.orderdate != null && (order.orderdate.Value.Month != month || i == orders.Count-1))
+        {
+            month = order.orderdate.Value.Month;
+            <td class="om_month_sum">Summary</td>
+        }
+        if (i != orders.Count - 1)
+        {
+            <td class="om_upperheader">@order.customer_code</td>
+        }
+    }
+</tr>
+

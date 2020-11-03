@@ -1,0 +1,90 @@
+﻿<div class="panel-body" style="overflow-y:scroll">
+    <!--<strong>{{vm.param}}</strong>-->
+    <div class="form-group">
+        <label for="Date">Recheck Date</label>
+        <div class="input-group">
+            <span class="input-group-addon">
+                <i class="glyphicon glyphicon-calendar"></i>
+            </span>
+            <input type="date" name="Date"
+                   ng-model="vm.recheck.recheck_date" class="form-control" />
+           
+        </div>
+        <!--<i>{{vm.recheck.recheck_date}}</i>-->
+        
+       
+    </div>
+    <div class="form-group">
+        <label for="Prior">Resolution</label>
+        <textarea ng-model="vm.recheck.client_comments2" 
+                  ng-focus="vm.focus=true"
+                  ng-blur="vm.focus=false"
+                  class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+        <strong style="margin-right:25px">Recheck OK </strong>
+
+
+        <label class="radio-inline pull-right">
+            <input type="radio" name="optradio" value="" style="margin-top:2px" 
+                   ng-model="vm.recheck.recheck_status"
+                   ng-value="vm.recheckStatus.NA"/>
+            N/A
+        </label>
+        <label class="radio-inline pull-right" style="margin-right:15px">
+            <input type="radio" name="optradio" value="" style="margin-top:2px;"
+                   ng-model="vm.recheck.recheck_status"
+                   ng-value="vm.recheckStatus.OK"
+                   />
+            Ok
+        </label><label class="radio-inline pull-right" style="margin-right:15px">
+            <input type="radio" name="optradio" value="" style="margin-top:2px;"
+                   ng-model="vm.recheck.recheck_status"
+                   ng-value="vm.recheckStatus.NO"/>
+            No
+        </label>
+    </div>
+    <div class="form-group">
+        <label>Recheck photos</label>
+        <span class="badge pull-right" style="margin-right:25px; font-size:18px" >{{vm.imageUrls.length }}</span>
+        
+    </div>
+    <div class="row" style="overflow-y:auto;">
+        <!-- READ FROM SERVER -->
+
+        <div ng-repeat="imageUrl in vm.recheck.Images track by $index" style="display:inline-block">
+            <!--ng-if="imageUrl.indexOf('upload/feedback') >-1"-->
+            <img class="img-thumbnail"
+                 ng-src="{{imageUrl.return_image}}" title="{{imageUrl.return_image}}"
+                 style="float:left;margin-left:10px;margin-top:10px;max-width:78%;" />
+            <!--<i class="fa fa-remove delete-image-rounded" ng-click="vm.deletePhoto($index)"></i>-->
+
+        </div>
+        
+        <div style="display:inline-block"  ng-repeat="image in vm.imagesBlob track by $index"> 
+            <img class="img-thumbnail"
+                
+                 ng-src="{{image.url}}" style="float:left;margin-left:10px;max-width:78%;margin-top:10px" />
+            <i class="fa fa-remove delete-image-rounded" ng-click="vm.deletePhoto($index,image.name)"></i>
+        </div>
+           
+        
+       
+    </div>
+    <div ng-hide="vm.focus" id="getImage" style="position:fixed;bottom:110px;right:10px;z-index:99">
+        <a id="upload"
+           plupload="vm.fileUpload.url"
+           plupload-options="vm.fileUpload.options"
+           plupload-callbacks="vm.fileUpload.callbacks"
+           class="btn btn-lg btn-default" style="border-radius:45%">
+            <i class="fa fa-2x fa-camera"></i>
+        </a>
+    </div>
+    <div ng-hide="vm.focus" id="saveRecheck" style="position:fixed;bottom:40px;right:10px;z-index;" ng-click="vm.saveRecheck()">
+        <a class="btn btn-lg btn-success " style="border-radius:45%">
+            <i class="fa fa-2x fa-save"></i>
+        </a>
+    </div>
+
+    
+</div>

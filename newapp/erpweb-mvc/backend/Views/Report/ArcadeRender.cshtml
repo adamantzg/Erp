@@ -1,0 +1,130 @@
+﻿@{
+    ViewBag.Title = "ArcadeTest";
+}
+
+@using company.Common
+@using backend.Controllers
+@*@model MonthlyBrochureRequest*@
+@model GoogleMapArcadeModel
+@{
+    ViewBag.Title = "Arcade";
+    //Layout = null;
+}
+
+    
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: black;
+            
+            background-image: url('../../Images/report/monthly_brochure_requests/January-2015.png');
+        }
+
+        .title-map {
+            font-family: MinionPro-Regular;
+        }
+
+        .subtitle {
+            font-weight: bold;
+        }
+
+        .number {
+            text-align: left;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            padding-left: 10px;
+        }
+
+        .text {
+            text-align: left;
+            padding-left: 10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            margin: 5px;
+            line-height: 90%;
+        }
+
+       
+            
+            .tablePdf{
+               /*border-color:black;*/
+               width:950px;
+               margin-left:12%
+           
+
+            }
+            .tablePdf th{
+                color:white;
+                border-bottom:2px solid white;
+                line-height:115%;
+                vertical-align:top;
+                padding:8px;
+                font-size:16px;
+                letter-spacing:1px;
+                
+            }
+            .tablePdf td{
+                 border-bottom: 1px solid white;
+                 padding:2px;
+                 font-size:12px;
+                 color:white;
+                 letter-spacing:2px;
+                 
+            }
+            #td-wide{
+                width:375px;
+            }
+       
+
+          
+       
+    </style>
+   
+   
+<h2 style="blue">ovo je taj</h2>
+
+<br />
+<a href="@Url.Action("ArcadePdf")" target="_blank" style="color:red">PDF</a>
+<div style="background-color:black;width:1155px;height:100%;margin-left:-28px">
+    
+    @*@Html.DrawMap("600", "600", "6", Model.Blue)*@
+    @* ovdje sam stao moram dobiti sliu iz memorije moaram izmjestiti u novu metodu u controlleru da bi radila *@
+    @*<img src="@Url.Action("GetImageMap")"/>*@
+    @*<img src="@Html.Action("GetImageMap")" />*@
+    
+    <img src="~/Images/report/monthly_brochure_requests/ime23.png" style="margin-left:300px"/>
+    <table class="tablePdf title-map" style="">
+        <thead>
+            <tr>
+        <th>PIN</th>
+        <th>DISTRIBUTOR</th>
+        <th>SHOWROOM</th>
+        <th>LOCATION</th>
+        <th>POSTCODE</th>
+        </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Pin.OrderBy(c => c.number))
+            {
+                <tr>
+                    <td>@item.number</td>
+                    <td>
+                        @if (item.Distributors != null)
+                        {
+                            var count = 1;
+                            foreach (var distributor in item.Distributors)
+                            {
+                                <span>@(count > 1 ? "," : "") @distributor.customer_code </span>
+                                count++;
+                            }
+                        }
+                    </td>
+                    <td id="td-wide">@item.name</td>
+                    <td>@item.location</td>
+                    <td>@(string.IsNullOrEmpty(item.postcode)?"     - ": item.postcode)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+

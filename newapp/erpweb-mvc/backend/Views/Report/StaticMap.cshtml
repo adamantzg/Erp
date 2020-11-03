@@ -1,0 +1,26 @@
+﻿@using company.Common
+@using backend.Controllers
+@model MonthlyBrochureRequest
+@{
+    ViewBag.Title = "StaticMap";
+    
+}
+<script src="~/Scripts/angular.js"></script>
+<script>
+    
+</script>
+@{
+    //var cord = "";
+    //foreach(var s in Model.RedNew.Take(107))
+    //{
+    //    cord += "|"+s.lat.ToString("F2") + "," + s.lon.ToString("F2");
+    //}
+}
+<div ng-app="">
+    <h2>StaticMap {{2+2}}</h2>
+    <div style="width:1600px">
+        @*<img src="https://maps.googleapis.com/maps/api/staticmap?center=54.79031350062131, -2.9132108593199835&zoom=6&size=1000x1000" />*@        
+        @Html.DrawMap("1200", "1200", "6", Model.RedNew,Model.BlueNew,Model.GreenNew,Model.YellowNew)
+    </div>
+</div>
+

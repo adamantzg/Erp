@@ -1,0 +1,410 @@
+﻿@*@model List<T>*@
+@{
+    Layout = "~/Views/shared/_Layout.cshtml";
+    ViewBag.Title = "Displaying Product";
+}
+@section head{
+        <style>
+            .sort{
+                cursor:pointer
+            }
+            .container{
+                width:1000px;
+                padding:0px;
+
+            }
+            .local-container{
+                position:relative;
+                margin-top:-40px;
+                min-height:450px;
+                clear:both;
+
+            }
+            .page_title{
+                background-color:#FFF;
+            }
+            .navbar{
+                background-image:linear-gradient(#AAA, #888 50%, #666);
+            }
+            .navbar-default .navbar-brand {
+                color: #FFF;
+            }
+            ul#css3menu1,ul#css3menu1 ul{
+                width:978px;
+                background-color:#fff;
+
+            }
+            li.toplast{
+                width:121px;
+            }
+
+        </style>
+    }
+
+
+
+<div ng-app="prodApp" class="local-container">
+
+
+
+    <div  ng-controller="productCtrl">
+        <script type="text/ng-template" id="customTemplate.html">
+            <a>
+                <img ng-src="/Images/favicon/{{match.model.favicon}}.png" ng-show="match.model.favicon != ''" width="20" />&nbsp;
+                <span bind-html-unsafe="match.label | typeaheadHighlight:query"></span>
+                <span>{{match.label}}</span>
+
+            </a>
+        </script>
+        <div>
+            <div class="panel panel-default" style="width:100%">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+
+                            <a class="navbar-brand">
+                                Product display locations
+                            </a>
+                        </div>
+                    </div>
+                </nav>
+
+                <div class="panel">
+
+                    <div class="panel ">
+                        <div class="panel-body">
+                            <form class="form-horizontal">
+                                <div class="form-group">
+
+                                    <label class="col-md-2 col-sm-12 col-xs-12 " style="margin-top:10px">Select product:</label>
+
+                                    <div class="col-md-9 col-sm-11 col-xs-11">
+                                        <input type="text"
+                                               class="form-control"
+                                               style="height:38px"
+                                               placeholder="Type in product code or product name"
+                                               ng-model="currentProduct"
+                                               uib-typeahead="product as product.web_code +' - '+ product.web_name for product in products | filter:$viewValue|limitTo:20"
+                                               typeahead-on-select="listDealerData()"
+                                                typeahead-template-url="customTemplate.html"/>
+                                               @*/>*@
+                                    </div>
+
+                                    <div classs="col-sm-1 form-control">
+                                        <img src="~/Images/Spinning_wheel_throbber.gif" ng-show="loading" style="margin-left:-18px" width="38" />
+
+                                        <span ng-show="!loading"><img style="margin-left:-18px" width="38" ng-src="/Images/favicon/{{currentProduct.favicon}}_inactive.png" ng-show="currentProduct.favicon != ''" /></span>&nbsp;
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                  @*table 1*@
+                    <div class="panel panel-default" style="margin-left:-2px;margin-right:-2px;">
+                        <div class="panel-heading" ng-click="isCollapsed=!isCollapsed">
+                            <span ng-show="listDealers.length > 0">
+                                <i class="pull-right glyphicon glyphicon-chevron-down" ng-show="!isCollapsed"></i>
+                                <i class="pull-right glyphicon glyphicon-chevron-right" ng-show="isCollapsed"></i>
+                            </span>
+                            <strong>Current Dealers</strong>
+
+                        </div>
+                        <div class="panel-body" @*ng-show="listDealers.length > 0"*@ style="margin:-15px" collapse="isCollapsed">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>
+
+                                                Dealer
+                                                <span ng-click="sortby='user_name';reverse = !reverse" >
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    <span class="glyphicon glyphicon-sort sort" tooltip-placement="right" tooltip="sort by" ng-show="sortby == '' "></span>
+                                                    <span class="glyphicon glyphicon-sort-by-alphabet sort" tooltip-placement="left" tooltip="toogle sorting" ng-show="!reverse && sortby!=''"></span>
+                                                    <span class="glyphicon glyphicon-sort-by-alphabet-alt sort" tooltip-placement="left" tooltip="toogle sorting" ng-show="reverse && sortby!=''"></span>
+                                                </span>
+                                                <span class="glyphicon glyphicon-remove-circle sort"
+                                                      ng-click="sortby = ''"
+                                                      ng-show="sortby !=''"
+                                                      tooltip-placement="right"
+                                                      tooltip="clear sorting"></span>
+                                            </th>
+                                            <th colspan="4">
+                                                <span tooltip-placement="bottom" tooltip="Sort by Address"
+                                                       ng-click="sortby = 'user_address1';reverse = !reverse"> Address</span>
+                                            </th>
+
+                                            <th style="cursor:pointer"><span  tooltip-placement="bottom" tooltip="Sort by postcode"
+                                                       ng-click="sortby = 'postcode';reverse= !reverse">Postcode</span> </th>
+                                            <th >Tel</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-show="loading">
+                                            <td colspan="8">
+
+                                                <div class="text-center"><img src="~/Images/Spinning_wheel_throbber.gif" /></div>
+                                            </td>
+                                        </tr>
+                                        <tr ng-show="!currentDelaerExist">
+                                            <td><b></b></td>
+                                            <td> <b> - </b></td>
+                                            <td colspan="4"> <b> - </b></td>
+                                            <td> <b> - </b></td>
+                                            <td> <b> - </b></td>
+                                        </tr>
+                                        <tr ng-repeat="prod in listDealers |filter:{hide_1:1}|orderBy:sortby:reverse  ">
+                                            <td>
+                                                <span></span>
+                                                <span ng-if="prod !== 'undefined'">
+                                                    <a ng-href="{{goto(prod.user_id)}}" target="_blank" ng-show="linkVisible">
+                                                        <span class="glyphicon glyphicon-zoom-in"></span>
+                                                    </a>
+
+                                                </span>
+                                            </td>
+                                            <td>
+
+                                                <b> {{prod.user_name|capitalize}}</b>
+
+                                            </td>
+                                            <td colspan="4">
+                                                <span ng-show="prod.user_address1.length>1">{{prod.user_address1|noComma|capitalize}}</span><span ng-show="prod.user_address2.length>1">, {{prod.user_address2|noComma|capitalize}}</span><span ng-show="prod.user_address3.length>1">, {{prod.user_address3|noComma|capitalize}}</span><span ng-show="prod.user_address4.length>1">, {{prod.user_address4|noComma|capitalize}}</span>
+                                            </td>
+                                            <td>{{prod.postcode|noSpace|uppercase}}</td>
+                                            <td>{{prod.tel|noSpace}}</td>
+                                        </tr>
+
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+                   @* table 2 *@
+                    <div class="panel panel-default" style="margin-left:-2px;margin-right:-2px">
+                        <div class="panel-heading"
+                             ng-click="isCollapsed_II = !isCollapsed_II">
+                            <span ng-show="listDealers.length > 0">
+                                <i class="pull-right glyphicon glyphicon-chevron-down" ng-show="!isCollapsed_II"></i>
+                                <i class="pull-right glyphicon glyphicon-chevron-right" ng-show="isCollapsed_II"></i>
+                            </span>
+                            <strong>Old records</strong>
+
+                        </div>
+                        <div class="panel-body" @*ng-show="listDealers.length > 0"*@ style="margin:-15px" collapse="isCollapsed_II">
+
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>
+                                                <span ng-click="oldsortby='user_name';reverse = !reverse">
+                                                    Dealer
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                    <span class="glyphicon glyphicon-sort sort" tooltip-placement="right" tooltip="sort by" ng-show="oldsortby == '' "></span>
+                                                    <span class="glyphicon glyphicon-sort-by-alphabet sort" ng-show="!reverse && oldsortby!=''"></span>
+                                                    <span class="glyphicon glyphicon-sort-by-alphabet-alt sort" ng-show="reverse && oldsortby!=''"></span>
+                                                </span>
+                                                <span class="glyphicon glyphicon-remove-circle sort"
+                                                      ng-click="oldsortby = ''"
+                                                      ng-show="oldsortby !=''"
+                                                      tooltip-placement="right"
+                                                      tooltip="clear sorting"
+                                                      ></span>
+                                            </th>
+                                            <th colspan="4">Address</th>
+
+                                            <th style="cursor:pointer">
+                                                <span tooltip-placement="bottom" tooltip="Sort by postcode"
+                                                       ng-click="oldsortby = 'postcode';reverse= !reverse" >Postcode</span>
+                                            </th>
+                                            <th>Tel</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-show="!oldDelaerRecordExist" >
+                                            <td><b></b></td>
+                                            <td> <b> - </b></td>
+                                            <td colspan="4"> <b> - </b></td>
+                                            <td> <b> - </b></td>
+                                            <td> <b> - </b></td>
+                                        </tr>
+                                        <tr ng-repeat="prod in listDealers|filter:{hide_1:2}|orderBy:oldsortby:reverse">
+                                            <td>
+                                                <span ng-if="prod.usert_id !== 'undefined'">
+
+                                                    <a ng-href="{{goto(prod.user_id)}}" target="_blank" ng-show="linkVisible">
+                                                        <span class="glyphicon glyphicon-zoom-in"></span>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                            <td>
+
+                                                <b>{{prod.user_name}}</b>
+
+                                            </td>
+                                            <td colspan="4">
+                                                {{prod.user_address1|noComma}}
+                                                <span ng-show="prod.user_address2.length>1 ">, {{prod.user_address2|noComma}}</span><span ng-show="prod.user_address3.length>1 ">, {{prod.user_address3|noComma}}</span>
+                                                <span ng-show="prod.user_address4.length>1 ">, {{prod.user_address4|noComma}}</span>
+                                            <td>  {{prod.postcode|uppercase|noSpace}}</td>
+                                            <td>{{prod.tel |noSpace}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    @*<meta name="viewport" content="width=device-width" />
+        <title>DisplayingProduct</title>*@
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap/bootstrap-theme-spacelab.css" rel="stylesheet" />
+
+    <script src="~/Scripts/angular.js"></script>
+    <script src="~/Scripts/angular-route.js"></script>
+    <script src="~/Scripts/angular-ui/ui-bootstrap-tpls.js"></script>
+    <script>
+
+        var prodApp = angular.module('prodApp', ['ngRoute', 'ui.bootstrap'])
+        .constant("baseUrl", "/Product/")
+
+        .controller("productCtrl", function ($scope, $http, $timeout, baseUrl, dataService) {
+            //$scope.products =  @Html.Raw(WebUtilities.JsonSerialize(Model));
+
+            var gProducts = function () {
+                dataService.getProducts().then(function (response) {
+                    $scope.products = response.data;
+                });
+            };
+            var gWebSites = function () {
+                dataService.getWebSites().then(function (response) {
+                    $scope.webSites = response.data;
+                    angular.forEach($scope.webSites, function (item) {
+                    })
+                }).finally()
+            };
+
+            gProducts();
+
+            $scope.isCollapsed = true;
+            $scope.isCollapsed_II = true;
+            //$scope.oldDelaerRecordExist = false;
+            $scope.sortby = '';
+            $scope.oldsortby = '';
+            $scope.tooltip = '',
+            $scope.linkVisible = true;
+            $scope.loading = false;
+            $scope.listDealerData = function () {
+                $scope.isCollapsed = false;
+                $scope.isCollapsed_II = false;
+                $scope.loading = true;
+                $scope.listDealers = [];
+                $scope.webSites = [];
+                //$timeout(function () {
+                dataService.getDealers($scope.currentProduct.web_unique).then(function (response) {
+
+                    $scope.currentDelaerExist = false;
+                    $scope.oldDelaerRecordExist = false;
+
+                    $scope.listDealers = response.data;
+                    if ($scope.listDealers.length > 0) {
+                        angular.forEach($scope.listDealers, function (item) {
+                            if (item.hide_1 == 1) {
+                                //count++;
+                                $scope.currentDelaerExist = true;
+                            } else if (item.hide_1 == 2) {
+                                $scope.oldDelaerRecordExist = true;
+                            }
+                        });
+                    } else {
+                        $scope.currentDelaerExist = false;
+                        $scope.oldDelaerRecordExist = false;
+                    }
+                    gWebSites();
+                }).finally(function () {
+                    $scope.loading = false;
+                });
+                //}, 2000);
+
+
+            }
+
+            $scope.goto = function (user_id) {
+                if ($scope.webSites[0] !== 'undefined' && $scope.webSites[1] !== 'undefined' && $scope.webSites[2] && $scope.webSites[3] !== 'undefined' && $scope.webSites[10] !== 'undefined') {
+                    if ($scope.currentProduct.web_site_id == $scope.webSites[0].id) {
+                        $scope.linkVisible = true;
+                        return ("http://" + $scope.webSites[0].url + "/Dealer/View/" + user_id);
+
+                    } else if ($scope.currentProduct.web_site_id == $scope.webSites[1].id) {
+                        $scope.linkVisible = true;
+                        return ("http://" + $scope.webSites[2 - 1].url + "/Dealer/View/" + user_id);
+
+                    } else if ($scope.currentProduct.web_site_id == $scope.webSites[3].id) {
+                        $scope.linkVisible = true;
+                        return ("http://" + $scope.webSites[4 - 1].url + "/Dealer/View/" + user_id);
+
+                    } else if ($scope.currentProduct.web_site_id == $scope.webSites[10].id) {
+                        $scope.linkVisible = true;
+                        return ("http://" + $scope.webSites[11 - 1].url + "/Dealer/View/" + user_id);
+                    } else {
+                        $scope.linkVisible = false;
+                    }
+                }
+            }
+        })
+        .filter('noSpace', function () {
+            return function (value) {
+                return (!value ? '' : value.replace(/ /g, ''));
+            }
+        })
+        .filter('noComma', function () {
+            return function (value) {
+                return (!value ? '' : value.replace(',', ''))
+            };
+        })
+       .filter('capitalize', function () {
+           return function (value) {
+               return (!value ? '' : value.substring(0, 1).toUpperCase() + value.substring(1));
+           }
+       })
+
+       .factory('dataService', function ($http, baseUrl) {
+
+           var getProducts = function (webunique) {
+
+               return $http.get(baseUrl + "GetProducts/");
+           };
+
+           var getDealers = function (webunique) {
+
+               return $http.get(baseUrl + "DisplayingProductDealer/", { params: { web_unique: webunique } });
+           };
+           var getWebSites = function () {
+               return $http.get(baseUrl + "WebSite/")
+           };
+           return {
+               getDealers: getDealers,
+               getWebSites: getWebSites,
+               getProducts: getProducts
+           }
+       });
+    </script>
+}

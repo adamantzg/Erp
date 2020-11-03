@@ -1,0 +1,54 @@
+﻿@model MonthlyClaimsReportParamsModel
+@{
+    ViewBag.Title = "MonthlyClaimsReportCriteria";
+}
+
+<h2>Monthly Claims Report</h2>
+
+<div class="container" style="border: none">
+    @using (Html.BeginForm("MonthlyClaimsReport", "Report",FormMethod.Get,new { @class="form-horizontal",target="_blank"})) {
+        <div class="row">
+            <div class="col-md-6">
+                <div class="col-md-2"><span style="font-weight:bold">Month/Year</span></div>
+                <div class="col-md-5">@Html.DropDownListFor(m => m.Month, new SelectList(Model.Months, "Id", "Title"), new { @class = "form-control" }) </div>
+                <div class="col-md-5">@Html.DropDownListFor(m => m.Year, new SelectList(Model.Years, "Id", "Title"), new { @class = "form-control" })</div>
+                <input type="hidden" id="date" name="date" />
+                <input type="hidden" id="statsKey" name="statsKey" value="@Settings.Default.StatsKey" />
+            </div>
+        </div>
+        
+        <div class="row" style="margin-top:10px">
+            <div class="col-md-6">
+                <div class="col-md-3">
+                    @Html.CheckBox("ShowRefit") <span>Show refit</span>
+                </div>
+                <div class="col-md-3">
+                    @Html.CheckBox("excel") <span>Excel</span>
+                </div>                
+            </div>
+        </div>
+        <div class="row" style="margin-top:10px"> 
+            <div class="col-md-2"><input type="submit" class="form-control" value="Show report" /></div>
+            
+        </div>
+    }
+    
+</div>
+
+@section scripts2
+{
+    @Scripts.Render("~/bundles/bootstrap")
+    <script>
+        $(function () {
+            $('#Month,#Year').change(function () {
+                $('#date').val($('#Month').val() + '/01/' + $('#Year').val());
+            });
+        });
+    </script>
+}
+
+@section head
+{
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+}
+

@@ -1,0 +1,89 @@
+﻿@using Utilities = company.Common.Utilities
+@model ClaimsInvestigationModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Product claims investigations</title>
+    </head>
+    <body>
+        <div>
+            <h2>Product Claims investigations</h2>
+        </div>
+        
+        <table>
+            <thead>
+                <tr style="background-color: grey;font-weight: bold">
+                    <td rowspan="2">Code</td>
+                    <td rowspan="2">Description</td>
+                    <td rowspan="2">6m Returns rate up to date added to watch list</td>
+                    <td colspan="6">Units shipped</td>
+                    <td rowspan="2">Date added to watch list</td>
+                    <td colspan="6">Rolling 6 months returns rate to end of</td>
+                </tr>
+                <tr style="background-color: grey;font-weight: bold">
+                    @for (int i = -6; i < 0; i++)
+                    {
+                        <td>@DateTime.Now.AddMonths(i).ToString("MMM-yy")</td>
+                    }
+                    @for (int i = -6; i < 0; i++)
+                    {
+                        <td>@DateTime.Now.AddMonths(i).ToString("MMM-yy")</td>
+                    }
+                </tr>
+
+            </thead>
+            <tbody>
+                @foreach (var prod in Model.Products)
+                {
+                    var dateAdded = prod.DateAdded;
+                    var claims = Model.Claims.Where(c => c.cprod_code1 == prod.Product.cprod_code1).ToList();
+                    var sixMClaims = claims.Count > 0 ? claims[0] : null;
+                    <tr>
+                        <td>@prod.Product.cprod_code1</td>
+                        <td>@prod.Product.cprod_name</td>
+                        <td>@(sixMClaims != null ? sixMClaims.orderqty > 0 ? (1.0* sixMClaims.claims / sixMClaims.orderqty).ToString("P2") : "" : "")</td>
+                        @for (int i = -6; i < 0; i++)
+                        {
+                            var sale = Model.Sales.FirstOrDefault(s =>s.cprod_code == prod.Product.cprod_code1 &&  s.Month21 == Utilities.GetMonthFromNow(i));
+                            <td>
+                                @if (sale != null)
+                                {
+                                    @sale.numOfUnits
+                                }
+                            </td>
+                        }
+                        <td>@dateAdded</td>
+                        @{
+                            int numOfClaims, orderqty;
+                            
+                        }
+                        @for (int i = 1; i < 7; i++)
+                        {
+                            
+                            <td>
+                                @{
+                                    if (i < claims.Count)
+                                    {
+                                        numOfClaims = claims[i].claims;
+                                        orderqty = claims[i].orderqty;
+                                        if (orderqty > 0)
+                                        {
+                                            @((1.0*numOfClaims/orderqty).ToString("P2"))
+                                        }
+                                    }
+                                }
+                            </td>
+                        }
+                        
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </body>
+</html>

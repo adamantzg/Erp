@@ -1,0 +1,14 @@
+﻿@model ProductPricesExportModel
+
+@{
+    ViewBag.Title = "title";
+}
+
+<h2>Client factory prices</h2>
+
+Factory:
+@using (Html.BeginForm("ProductPricesExport", "Product", FormMethod.Post, new {target = "_blank"}))
+{
+    @Html.DropDownListFor(m=>m.factory_id,new SelectList(Model.Factories,"user_id", "factory_code"),"(All)")
+    <input type="submit" value="Export"/>
+}

@@ -1,0 +1,360 @@
+﻿@model backend.Models.StatisticsBrandsModel
+@using asaq2.Model.DAL
+@{
+    ViewBag.Title = "Brands";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var sitesData = Model.SitesVisitsByBrand;
+    var sitesCompareData = Model.SitesVisitsByBrandPrevMonth;
+    var allCountries = Model.Countries;
+    var sites = Model.Websites;
+    var uniqueVisits = Model.UniqueVisits;
+    var chartData = new Dictionary<int,List<Web_site_visits>>();
+    var productListBySite = new Dictionary<int, List<string>>();
+    
+}
+@using (Html.BeginForm("Brands", "Statistics", FormMethod.Post, new { id = "Filters" }))
+{
+    <input type="hidden" name="unique-visits-val" id="unique-visits-val" />
+<table class="filters">
+    <tbody>
+        <tr>
+            <td>
+                <h2>Statistics of Top 10 Products by Brand</h2>
+            </td>
+            <td width="5%">&nbsp;</td>
+            <td align="center" style="padding:0 5px;">
+                <label for="all-visits">All visits</label>
+                <input type="radio" name="visits" id="all-visits" @Html.Raw(uniqueVisits  ? "" : "checked") value="0" />
+            </td>
+            <td align="center" style="padding:0 5px;">
+                <label for="all-visits">Unique visits</label>
+                <input type="radio" name="visits" id="unique-visits" @Html.Raw(uniqueVisits ? "checked" : "") value="1" />
+            </td>
+            <td style="padding-left:5px;">
+                <label for="datefrom-filter">Date from:</label>
+                <input type="text" id="datefrom-filter" name="datefrom-filter" class="datepicker" placeholder="MM/dd/yyyy" value="@(Model.DateFrom != null ? Model.DateFrom.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")" />
+            </td>
+            <td>
+                <label for="dateto-filter">Date to:</label>
+                <input type="text" id="dateto-filter" name="dateto-filter" class="datepicker" placeholder="MM/dd/yyyy" value="@(Model.DateTo != null ? Model.DateTo.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : "")" />
+            </td>
+            <td>
+                <input type="submit" value="Filter" />
+            </td>
+        </tr>
+    </tbody>
+</table>
+}
+@{
+    if (sitesData != null && sitesData.Count > 0)
+    {
+        foreach (var s in sitesData)
+        {
+            var index = 1;
+            if (s.Value != null && s.Value.Count > 0)
+            {
+                var listofcountriesbyproduct = new List<string>();
+                foreach(var t10 in s.Value)
+                {
+                    var countries = Web_site_visitsDAL.GetCountriesByProduct(t10.web_unique.Value, s.Key);
+                    listofcountriesbyproduct.AddRange(countries);
+                }
+                listofcountriesbyproduct = listofcountriesbyproduct.Distinct().ToList();
+                var site = sites.FirstOrDefault(st => st.id == s.Key);
+                chartData.Add(site.brand_id.Value, s.Value);
+                var productList = new List<string>();
+            <div id="website-@site.code">
+                <table class="brand-table">
+                    <thead>
+                        <tr>
+                            <th width="20"></th>
+                            <th width="40%">@site.name</th>
+                            <th>All</th>
+                            @foreach (var loc in listofcountriesbyproduct.Take(10))
+                            {
+                                var country = allCountries.FirstOrDefault(ac => ac.ISO2 == loc);
+                                <th width="45" title="@(country != null ? country.CountryName : "Unknown")">@loc</th>
+                            }
+                            @if (listofcountriesbyproduct.Count < 10)
+                            {
+                                var diff = 10 - listofcountriesbyproduct.Count;
+                                for (var i = 0; i < diff; i++)
+                                {
+                                    <th width ="45">&nbsp;</th>
+                                }
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in s.Value)
+                        {
+
+                            
+                            var totalcount = 0;
+                            var comparetotalcount = 0;
+                            var product = Web_product_newDAL.GetById(t.web_unique.Value);
+                            productList.Add(product.web_name);
+                            var countriesbyproduct = Web_site_visitsDAL.GetCountriesVisitCountByProduct(product.web_unique);
+                            var cbyproductcompare = Web_site_visitsDAL.GetCountriesVisitCountByProduct(product.web_unique, Model.DateFromCompare.ToString("yyyy-MM-dd HH:mm:ss"), Model.DateToCompare.ToString("yyyy-MM-dd HH:mm:ss"));
+                            totalcount = countriesbyproduct.Sum(cbp => cbp.count);
+                            comparetotalcount = cbyproductcompare.Sum(cbp2 => cbp2.count); 
+                            var url = string.Format("http://{0}/Products/productDetail?prodId={1}&name={2}", site.Url, product.web_unique, product.web_name);
+                            <tr>
+                                <td align="center">@(index).</td>
+                                <td title="Go to @product.web_name">
+                                    <a href="@url" target="_blank">
+                                        @(product.web_name.Length > 59 ? (product.web_name.Substring(0, 59) + "...") : product.web_name)
+                                    </a>
+                                </td>
+                                <td align="center">@totalcount</td>
+                                @foreach (var h in listofcountriesbyproduct.Take(10))
+                                {
+                                    var country = allCountries.FirstOrDefault(ac => ac.ISO2 == h);
+                                    var dict = countriesbyproduct.FirstOrDefault(fr => fr.visit_country == h);
+                                    var dictcompare = cbyproductcompare.FirstOrDefault(fr2 => fr2.visit_country == h);
+                                    double percentage = (1 - ((double)(totalcount - (dict != null && dict.count != null ? dict.count : 0)) / (double)totalcount)) * 100;
+                                    var titleData = "<h6>" + product.web_name + "</h6><table class=\"compareData\">";
+                                    var cdbs = sitesCompareData.FirstOrDefault(sdc => sdc.Key == s.Key);
+                                    var compareDataBySite = cdbs.Value.FirstOrDefault(sdc2 => sdc2.visit_country == h);
+                                    if (compareDataBySite != null)
+                                    {
+                                        double cpercentage = comparetotalcount != null && comparetotalcount > 0 && dictcompare != null ? (1 - ((double)(comparetotalcount - (dictcompare != null && dictcompare.count != null ? dictcompare.count : 0)) / (double)comparetotalcount)) * 100 : 0;
+                                        double compresult = cpercentage > 0 ? (percentage / cpercentage) * 100 : 0;
+                                        var image = string.Empty;
+                                        if(compresult == 0 )
+                                        {
+                                            image = "<img src=\"/images/neutral.png\" class=\"arrow-indicator\" />";
+                                        }
+                                        else if(compresult > 0)
+                                        {
+                                            image = "<img src=\"/images/arrow-up.png\" class=\"arrow-indicator\" />";
+                                        }
+                                        else if(compresult < 0)
+                                        {
+                                            image = "<img src=\"/images/arrow-down.png\" class=\"arrow-indicator\" />";
+                                        }
+                                        titleData += "<thead><tr><th>Country</th><th>Change</th><th>Count</th></tr></thead><tbody>";
+                                        titleData += string.Format("<tr><td><img src=\"/images/flags/{4}.png\" class=\"flag-image\" /><span>{0}</span></td><td>{3}<span>{1}%</span></td><td align=\"center\">{2}</td></tr>", dictcompare != null ? dictcompare.visit_country : "", compresult.ToString("N0"), dictcompare != null ? dictcompare.count : 0, image, h.ToLower());
+                                        titleData += "</tbody>";
+                                    }
+                                    else
+                                    {
+                                        titleData += "<tbody><tr><td align=\"center\">There is no data for this product</td></tr></tbody>";
+                                    }
+                                    titleData += "</table>";
+                                    
+                                    <td align="center" title="@titleData">@(percentage.ToString("N0"))%</td>@*@(country != null ? country.CountryName : "Unknown")*@
+                                }
+                                @if (listofcountriesbyproduct.Count < 10)
+                                {
+                                    var diff = 10 - listofcountriesbyproduct.Count;
+                                    for (var i = 0; i < diff; i++)
+                                    {
+                                        <td align="center">&nbsp;</td>
+                                    }
+                                }
+                            </tr>
+                            index++;
+                        }
+                        @{
+                        productListBySite.Add(s.Key, productList);
+                        
+                        }
+                    </tbody>
+                </table>
+                @*<canvas id="chart@(site.brand_id)" height="150" width="1000"></canvas>*@
+            </div>
+            }
+        }
+    }
+}
+
+
+@section head {
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <style>
+        .container .logo-layout  {
+            display:none!important;
+        }
+        table.filters {
+            margin: 1rem 0;
+        }
+
+            table.filters .datepicker {
+                width: 100px;
+            }
+
+            table.filters #limit-filter {
+                width: 50px;
+            }
+
+            table.filters td {
+                padding: 0;
+            }
+
+            table.filters input {
+                  height: 1.3rem;
+                  text-align: center;
+                  margin: 0;
+                  padding: 5px 0;
+                  border: 1px solid gray;
+            }
+
+                table.filters select, table.filters input[type="submit"] {
+                      height: 2.05rem;
+                      padding: 5px 0;
+                      border: 1px solid grey;
+                }
+
+                table.filters input[type="submit"] {
+                    margin-top:1rem;
+                    padding:5px 15px;
+                }
+
+            table.filters a {
+                display: block;
+            }
+
+                table.filters a:hover {
+                    opacity: 0.7;
+                }
+
+                table.filters a img {
+                    position: relative;
+                    top: 3px;
+                }
+        .container table.brand-table {
+            width:100%;
+            border-spacing:0;
+            border-collapse:collapse;
+            margin: 1rem 0;
+            border: 1px solid #ccc;
+        }
+        .container table.brand-table thead th {
+            text-align:center;
+        }
+        .container table.brand-table thead th:hover {
+            cursor:pointer;
+        }
+        .container table.brand-table thead th:nth-child(2) {
+            text-align:left;
+        }
+        .container table.brand-table tbody td {
+            padding: 3px 0;
+        }
+        .container table.brand-table tbody td a {
+            text-decoration:none;
+        }
+        .container table.brand-table tbody tr:hover td{
+            background-color:#F0F0F0;
+            cursor:pointer;
+        }
+        div.ui-tooltip h6 {
+            margin-top:0;
+            margin-bottom:0.3rem;
+        }
+        div.ui-tooltip table th {
+            font-size:0.75rem;
+        }
+        div.ui-tooltip table {
+            max-width:225px;
+            min-width:225px;
+        }
+        div.ui.tooltip table td img.arrow-indicator {
+            display:inline-block;
+            margin-right:3px;
+        }
+        div.ui.tooltip table td img.arrow-indicator+span {
+            display:inline-block;
+        }
+        div.ui-tooltip table td img.flag-image {
+            margin-right:3px;
+        }
+        div.ui-tooltip table td img.flag-image+span {
+            display:inline-block;
+        }
+        table.compareData {
+            width:100%;
+            border-spacing:0;
+            border-collapse:collapse;
+            border: 1px solid #ccc;
+        }
+    </style>
+}
+
+@section scripts {
+    <script src="~/Scripts/chart.js/Chart.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script>
+    $(function () {
+        $(".datepicker").datepicker({ dateFormat: 'mm/dd/yy' });
+        $(document).tooltip({
+            items: "[title]",
+            content: function () {
+                var element = $(this);
+                if (element.is("[title]")) {
+                    return element.attr("title");
+                }
+            }
+        });
+    });
+
+@if(sitesData != null && sitesData.Count > 0)
+{
+foreach(var sd in sitesData)
+{
+    var products = productListBySite.FirstOrDefault(pl => pl.Key == sd.Key).Value;
+@:var chart@(sd.Key) = {
+@:labels: [
+    
+    if (products != null && products.Count > 0)
+    {
+        foreach (var p in products)
+        {
+        @: "@(p)",
+        }
+    }
+@:],
+    @:datasets: [{
+        @:label: "My First dataset",
+        @:fillColor: "rgba(220,220,220,0.2)",
+        @:strokeColor: "rgba(220,220,220,1)",
+        @:pointColor: "rgba(220,220,220,1)",
+        @:pointStrokeColor: "#fff",
+        @:pointHighlightFill: "#fff",
+        @:pointHighlightStroke: "rgba(220,220,220,1)",
+        if (sd.Value != null && sd.Value.Count > 0)
+        {
+        @:data: [
+        foreach(var sdv in sd.Value)
+        {
+        @: @(sdv.Count),
+        }
+        @:],
+        }    
+@:}]
+    @:}
+    }
+    }
+    
+window.onload = function () {
+@if(sitesData != null && sitesData.Count > 0)
+{
+foreach(var sd in sitesData)
+{
+@:var ctx = document.getElementById("chart@(sd.Key)").getContext("2d");
+@:window.myBar = new Chart(ctx).Bar(chart@(sd.Key), {
+@: responsive: true,
+@: scaleShowHorizontalLines: true,
+@: showScale: false,
+@:});
+}
+}
+}
+
+    $(document).on("submit", "#Filters", function () {
+        $("#unique-visits-val").val($("input[type=\"radio\"]:checked").val());
+    })
+</script>
+}

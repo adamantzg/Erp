@@ -1,0 +1,493 @@
+﻿@model ReportProductImagesModel
+@{
+    Layout = null;
+    ViewBag.Title = "Map_static";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UK regions map static - Google Fusion Tables</title>
+
+
+    <style type="text/css">
+        #googft-mapCanvas {
+            height: 950px;
+            margin: 0;
+            padding: 0;
+            width: 850px;
+            background: #f8f8f8;
+            color: #1f1f1f;
+        }
+
+        .labels {
+            color: red;
+            font-family: "Western","Lucida Grande","Arial";
+            opacity: 0.4;
+            filter: alpha(opacity=40);
+            background-color: whitesmoke;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            white-space: nowrap;
+            border: 2px solid black;
+            border-radius: 40px;
+            width: 40px;
+        }
+
+        .labelsB {
+            color: yellow;
+            opacity: 0.4;
+            filter: alpha(opacity=40);
+            background-color: yellow;
+            border-radius: 10px;
+            border: 1px #1f1f1f  outset;
+            width: 5px;
+            height: 5px;
+        }
+
+        .labelsAllDealers {
+            color: red;
+            opacity: 0.4;
+            filter: alpha(opacity=40);
+            background-color: orangered;
+            border-radius: 10px;
+            border: 1px crimson outset;
+            width: 5px;
+            height: 5px;
+        }
+
+        #styled-select select {
+            background: #f8f8f8;
+            color: #1F1F1F;
+            width: 268px;
+            padding: 5px;
+            font-size: 16px;
+            line-height: 1;
+            border: 0;
+            border-radius: 0;
+            /* height: 34px;*/
+            -webkit-appearance: none;
+        }
+
+        .styled-select-dropdown {
+            width: 200px;
+            height: 27px;
+            overflow: no-display;
+            border-radius: 5px;
+            background: url(../../Images/down_arrow_select.jpg) no-repeat right #ddd;
+            border: 3px #dddddd ridge;
+            /*border-right-style: ;*/
+            font-size: 15px;
+            -webkit-appearance: none;
+        }
+
+        .styled-select-omotdropdown {
+            background: transparent;
+            /*width: 268px;*/
+            padding: 5px;
+            font-size: 16px;
+            line-height: 1;
+            border: 0;
+            border-radius: 0;
+            height: 34px;
+            -webkit-appearance: none;
+        }
+
+        .lstStyle {
+        }
+
+        .styled-button {
+        }
+
+        .styled-holder-dropdown-list {
+            padding: 10px 0 0 10px;
+        }
+    </style>
+
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.7.1.js" type="text/javascript"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js" type="text/javascript"></script>
+     <script src="https://maps.google.com/maps/api/js?v=3.exp&sensor=false"></script>
+    @*<script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=true"></script>*@
+    <script src="../../Scripts/markerwithlabel.js" type="text/javascript"></script>
+    <script src="https://www.google.com/jsapi"></script>
+
+    <script type="text/javascript">
+        document.write('<script type="text/javascript" src="../../Scripts/markermanager' + (document.location.search.indexOf('packed') > -1 ? '_packed' : '') + '.js"><' + '/script>');
+    </script>
+    <script>
+        var regionMap = {};
+        regionMap['yorkshireAndHumber'] = {
+            center: new google.maps.LatLng(53.961762, -1.081848),
+            county:"Yorkshire and The Humber",
+            amounth: @ViewBag.regionYorkshireHumber
+            };
+        regionMap['westMidlands'] = {
+            center: new google.maps.LatLng(52.569381, -2.124176),
+            county:"West Midlands",
+            amounth: @ViewBag.regionWestMidlands
+            };
+        regionMap['wales'] = {
+            center: new google.maps.LatLng(51.706311, -3.860016),
+            county:"Wales",
+            amounth: @ViewBag.regionWales
+            };
+        regionMap['southEast'] = {
+            center: new google.maps.LatLng(51.362907, -0.999451),
+            county:"South East",
+            amounth:@ViewBag.regionSouthEast
+            };
+        regionMap['scotland'] = {
+            center: new google.maps.LatLng(55.911523, -4.245911),
+            county:"Scotland",
+            amounth: @ViewBag.regionScotland
+            };
+        regionMap['northernIreland'] = {
+            center: new google.maps.LatLng(54.603117, -5.959778),
+            county:"Northern Ireland",
+            amounth: @ViewBag.regionNorthernIreland
+            };
+
+        regionMap['northWest'] = {
+            center: new google.maps.LatLng(53.402185, -2.597961),
+            county:"North West",
+            amounth:@ViewBag.regionNorthWest
+            };
+        regionMap['northEast'] = {
+            center: new google.maps.LatLng(54.920059, -1.400452),
+            county:"North East",
+            amounth: @ViewBag.regionNorthEast
+            };
+        regionMap['London'] = {
+            center: new google.maps.LatLng(51.517311, -0.123291),
+            county:"London",
+            amounth: @ViewBag.regionLondon
+            };
+        regionMap['eastEngland'] = {
+            center: new google.maps.LatLng(52.207313, 0.128021),
+            county:"East of England",
+            amounth: @ViewBag.regionEastEngland
+            };
+        regionMap['eastMidlands'] = {
+            center: new google.maps.LatLng(52.954968, -1.113434),
+            county:"East Midlands",
+            amounth:@ViewBag.regionEastMidlands
+            };
+        /**/
+
+        regionMap['southWest'] = {
+            center: new google.maps.LatLng(50.762219, -3.317566),
+            county:"South West",
+            amounth:@ViewBag.regionSouthWest
+            };
+        regionMap['outIreland'] = {
+            center: new google.maps.LatLng(53.242743, -7.231445),
+            county:"Ireland",
+            amounth: @ViewBag.regionOut
+            };
+
+        var regionCircle;
+        var text;
+        var map=null;
+        var mgr = null;
+        var icons = {};
+        var allmarkers=[];
+        google.load('visualization', '1', { packages: ['corechart'] });
+        function initialize() {
+            //var myOptions = {
+            //    zoom: 6,
+            //    center: new google.maps.LatLng(54.79031350062131, -2.9132108593199835),
+            //    mapTypeId: google.maps.MapTypeId.ROADMAP
+            //};
+            google.maps.visualRefresh = true;
+            var myOptions = {
+                center: new google.maps.LatLng(54.79031350062131, -2.9132108593199835),
+                zoom: 6,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                styles:[
+                {
+                    "featureType": "administrative.locality",
+                    "elementType": "labels",
+                    "stylers": [
+                    { "visibility": "off" }
+                    ]
+                },{
+                    "featureType": "road",
+                    "stylers": [
+                    { "visibility": "off" }
+                    ]
+                },{
+                    "featureType": "administrative",
+                    "elementType": "labels",
+                    "stylers": [
+                    { "visibility": "off" }
+                    ]
+                },{
+                    "featureType": "poi",
+                    "stylers": [
+                    { "visibility": "off" }
+                    ]
+                },{
+                    "featureType": "landscape",
+                    "stylers": [
+                    { "visibility": "simplified" },
+                    { "weight": 0.1 },
+                    { "color": "#a7a7a6" }
+                    ]
+                },{
+                    "featureType": "administrative.province",
+                    "stylers": [
+                    { "visibility": "off" }
+                    ]
+                }
+                ],
+                zoomControlOptions: {
+                    style:google.maps.ZoomControlStyle.SMALL
+                },
+            };
+            map = new google.maps.Map(document.getElementById('googft-mapCanvas'), myOptions);
+
+            layer = new google.maps.FusionTablesLayer();
+            /***/
+            updateLayerQuery(layer);
+            layer.setMap(map);
+
+
+            /***/
+
+            setupMarkers();
+
+            //promjeni boju kadje strelica iznad, kad se makne vratina staro
+            //klik na regiju zoomIn
+            google.maps.event.addListener(layer, 'click', function(event) {
+                layer.set("styles", [{
+                    where: "County='" + event.row['County'].value + "'",
+                    polygonOptions: { fillColor: "#FFFF33",fillOpacity:0.9 }
+                }]);
+                //style.fillColor = ;
+                //style.fillOpacity = '0.4';
+                /**/
+                for (var a in regionMap) {
+                    if (event.row['County'].value == regionMap[a].county) {
+                        map.setCenter(regionMap[a].center);
+                        map.setZoom(8);
+                        //8
+                        return false;
+                    }
+                }
+            });
+
+             //the text for data from drop down list
+            google.maps.event.addDomListener(document.getElementById('county'),
+            'change',function() {
+                var county = this.value;
+                updateLayerQuery(layer, county);
+            }
+            );
+            
+        }
+        /***/
+
+
+        function updateLayerQuery(layer, county) {
+
+
+            if (county && (county != "All"))
+                var where = " County ='"+ county +"'";
+
+
+            layer.setOptions({
+                //query: {
+                //    select:'geometry',
+                //    from:'1mSb7smookwLKVqP3uKvrvhzy-6T87AdVEiL0_Rw',
+                //    where:where,
+                //    map:map,
+                //    clickable:true,
+                //    delay:1,
+                //    tolerance:8
+                //},
+                //options: {
+                //    styleId:2,
+                //    templateId:2
+                //},
+                //styles:[{
+
+                //    polygonOptions:{fillOpacity:0.8}
+                //}]
+            });
+
+            ///////
+            //for (var a in regionMap) {
+            //    if (county == regionMap[a].county) {
+            //        map.setCenter(regionMap[a].center);
+            //        map.setZoom(8);
+            //        return false;
+
+            //    }
+            //}
+
+
+            if (county == "All") {
+                map.setZoom(6);
+                map.setCenter(new google.maps.LatLng(54.79031350062131, -2.9132108593199835));
+            }
+
+        }
+        /***/
+        /*Postavlja i upravlja markere*/
+        function setupMarkers() {
+
+            mgr = new MarkerManager(map);
+            google.maps.event.addListener(mgr,'loaded',function() {
+
+
+                //mgr.addMarkers(getMarkersZoomForAllDealers(), 7);
+                //Zelene
+                mgr.addMarkers(getMarkersZoom(),5);
+                //velike koje broe po regijama
+               // mgr.addMarkers(getMarkers(),5,6);
+
+                //mgr.addMarkers(getMarkers(),9);
+                mgr.refresh();
+            });
+        }
+        function getMarkers() {
+            var batch = [];
+            for (var regMap in regionMap) {
+                if (regionMap[regMap].amounth != null && regionMap[regMap].amounth != 0) {
+                    //text =	new MarkerWithLabel(textLab);
+                    batch.push(new MarkerWithLabel({
+                        position: regionMap[regMap].center,
+                        labelContent: regionMap[regMap].amounth,
+                        labelAnchor: new google.maps.Point(5, 5),
+                        labelClass: "labels",
+                        //map: map,
+                        labelStyle: { opacity: 1.0 },
+                        icon: {},
+                        title:'',
+                        zindex:12,
+                        optimized:false
+                    })
+                    );
+
+
+                }
+            } return batch;
+            //google.maps.event.addListener();
+        }
+        /*Definirana mala točkica koja zamjenjuje osnovni marker u ovom slučaju zelena*/
+        var circle={
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: 'yellow',
+            fillOpacity: .4,
+            scale: 4.5,
+            strokeColor: 'darkorange',
+            strokeWeight: 1
+        }
+        //DEFINIRA ZELENE TOČKICE
+        function getMarkersZoom() {
+
+            var batch= [];
+            var arrCord = @Html.Raw(ViewBag.arrLaLo);
+
+
+            for(var regM in arrCord){
+                if (arrCord[regM].lat != null && arrCord[regM].lon != null) {
+                    //text =	new MarkerWithLabel(textLab);
+                    var latlng = new google.maps.LatLng(arrCord[regM].lat,arrCord[regM].lon );
+                    batch.push(new MarkerWithLabel({
+                        position: latlng,
+                        //labelContent: regionMap[regMap].amounth,
+                        labelAnchor: new google.maps.Point(10, 10),
+                       // labelClass: "labelsB",
+                        map: map,
+                        labelStyle: { opacity: 0.7 },
+                        icon: circle,
+                        title: arrCord[regM].text,
+                        zindex:8,
+                        //optimized:false
+                    })
+                    );
+
+
+                }
+            } return batch;
+            //google.maps.event.addListener();
+        }
+
+        function getMarkersZoomForAllDealers() {
+            //var arrCord = [];
+            //arrCord = Array();
+            var batch= [];
+            var arrAllDealers = @Html.Raw(ViewBag.arrAllDealersForBrand);
+
+            //for (var regMap in arrCord[r] ) {
+            for(var lanLong in arrAllDealers){
+                if (arrAllDealers[lanLong].lat != 0 && arrAllDealers[lanLong].lon != 0) {
+                    //text =	new MarkerWithLabel(textLab);
+
+                    var latlng = new google.maps.LatLng(arrAllDealers[lanLong].lat,arrAllDealers[lanLong].lon );
+                    batch.push(new MarkerWithLabel({
+                        position: latlng,
+                        //labelContent: regionMap[regMap].amounth,
+                        labelAnchor: new google.maps.Point(5, 5),
+                        labelClass: "labelsAllDealers",
+                        map: map,
+                        labelStyle: { opacity: 1.0 },
+                        icon: {},
+                        title: arrAllDealers[lanLong].text,
+                        zindex:7,
+                        optimized:false
+                    })
+
+
+
+                    );
+
+
+
+                }
+            } return batch;
+            //google.maps.event.addListener();
+        }
+
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+
+        $(document).ready(function() {
+
+            $('#brands').change(function() {
+                $(this).parents('form:first').submit();
+
+
+            });
+            var infoForm = $('#infoForm');
+            $('#btnFilter').click(function(event) {
+                event.preventDefault();
+                $('#name').val(0);
+                // $('#infoForm').attr("action", );
+                $('#infoForm').submit().this.value($('#btnFilter'));
+                //alert('Ja sam kliknut dropdown je očišćen');
+
+                // var url = $(this).attr('href');
+                // $('#privacy').load(url);
+            });
+
+
+        });
+
+    </script>
+</head>
+    
+<body>
+    <div style="width: 1960px;position: absolute;left: 50%; margin-left: -350px;">
+        <div id="googft-mapCanvas" style="float: left;margin-top:10px;"></div>
+    </div>
+    @*<div>
+        <span>@ViewBag.arrLaLo</span><br />
+    </div>*@
+    @*@foreach(var a in  ViewBag.arrLaLo){
+<span>@a</span>
+   }*@
+</body>

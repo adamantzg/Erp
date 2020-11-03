@@ -1,0 +1,70 @@
+﻿@model SalesOrdersReportModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width"/>
+    <style>
+        body {
+            font-family: arial;
+            font-size: 11px;
+        }
+        .salesorderstable thead tr {
+            font-weight: bold;
+            background-color: #B9C9FE; 
+            color:#4033AC
+        }
+        .salesorderstable td {
+            /*border: 1px solid black;*/
+            padding: 5px;
+        }
+        .salesorderstable {
+            border-collapse: collapse;
+        }
+        .number { text-align: right; }
+        .clienttable_header {
+            background-color: #B9C9FE; 
+            color:#4033AC
+        }
+        .clienttable_header_darker {
+            background-color: #99A9DE; 
+            color:#4033AC
+        }
+        .clienttable_footer {
+            background-color: #CCC; 
+            color:#4033AC
+        }
+
+        .clienttable {
+            width: 900px;
+            border: 0;
+            padding: 3px;
+            border-spacing: 0;
+            font-family:Arial, Helvetica, sans-serif;
+            font-size:11px;
+        }
+        .altrow
+        {
+            background-color: #EEF6FF;
+        }
+    </style>
+    <title></title>
+</head>
+
+
+<body>
+    @{ 
+        var from = Model.From ?? DateTime.Today;
+    }
+<h2>Daily Order Intake - Ammara and Crosswater US - Week @System.Globalization.CultureInfo.CurrentCulture.Calendar.GetWeekOfYear((from),System.Globalization.CalendarWeekRule.FirstFourDayWeek,DayOfWeek.Monday) - @from.ToString("yyyy")</h2>
+    <br/>
+    @Html.Partial("_SalesOrdersReportPartial",Model);
+
+
+</body>
+</html>

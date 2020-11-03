@@ -1,0 +1,93 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Big Company</title>
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    <style>
+        .header {
+            background-color: #F4F4F4;
+        }
+
+        .number {
+            text-align: right;
+        }
+
+        .tableheader {
+            background-color: #E0E0E0;
+            font-weight: bold;
+        }
+        .altrow
+        {
+            background-color: #F4F4F4;
+        }
+        .number
+        {
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid" ng-app="app">
+        <div ng-controller="controller">
+            <h3>Tracking Numbers</h3>
+            <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th class="number">Inspection Qty</th>
+                    <th class="number">Tracking Qty</th>
+                    <th>Tracking Numbers</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-show="loading">
+                    <td colspan="4"><img src="~/images/Spinning_wheel_throbber.gif" /></td>
+                </tr>
+                <tr ng-repeat="l in lines" ng-class-odd="altrow">
+                    <td>{{l.factory_ref}}</td>
+                    <td class="number">{{l.qty}}</td>
+                    <td class="number">{{getTrackingCount(l)}}</td>
+                    <td>
+                        <span style="padding: 2px" ng-repeat="t in trackingNumbers | filter: {mastid: l.mast_id}">
+                            <input type="text" ng-model="t.track_number"/><span class="glyphicon glyphicon-remove" ng-click="removeNumber(t)"/>
+                        </span>                        
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <img src="~/images/Spinning_wheel_throbber.gif" ng-show="saving" />
+        <button class="btn btn-default" ng-click="Save()">save</button>
+        <br />
+        <h3>Upload tracking list</h3>
+        <div>Tracking numbers must be uploaded for the products on this inspection indicated above. Please use <a ng-href="@Url.Action("TrackingNumberTemplate")/{{id}}" target="_blank">this template</a> to upload this information</div>
+        <div>
+            <img src="~/images/Spinning_wheel_throbber.gif" ng-show="uploading" />
+            <button class="btn btn-default" plupload="fileUpload.url"
+                                   plupload-options="fileUpload.options"
+                                   plupload-callbacks="fileUpload.callbacks">Upload</button>
+        </div>
+        </div>
+        
+    </div>
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/plupload2")                
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    <script src="~/Scripts/logToServer.js"></script>
+<script src="~/Scripts/functions.js"></script>
+    <script src="~/Scripts/angular-plupload/angular-plupload.js"></script>
+<script src="~/AngularApps/InspectionV2/app.js"></script>
+<script src="~/AngularApps/InspectionV2/factory.js"></script>
+<script src="~/AngularApps/InspectionV2/controller.js"></script>
+</body>
+</html>

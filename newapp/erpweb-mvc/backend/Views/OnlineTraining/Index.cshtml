@@ -1,0 +1,152 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Online training</title>
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+
+    @Styles.Render("~/Content/DataTables/style/css")
+    @Styles.Render("~/Content/font-awesome.css")
+    @Styles.Render("~/Content/ionicons.css")
+
+    
+    <!-- google font -->
+    <link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+    <!-- css template-->
+    <link href="~/Content/style.css" rel="stylesheet" />
+
+    <!-- bootstrap 3.0.2 -->
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        .checkboxList {
+            /* border:1px solid #000; */
+            background-color: #fff;
+            color: #000;
+            /*width:300px;*/
+            max-height: 200px;
+            overflow-y: scroll;
+        }
+         
+        .progress {
+            height: 20px;
+        }
+
+        table.dataTable thead .sorting,
+        table.dataTable thead .sorting_asc,
+        table.dataTable thead .sorting_desc {
+            background: none;
+        }
+
+        .dataTable > thead > tr > th[class*="sort"]:after {
+            content: "" !important;
+        }
+
+        input {
+            max-width: 100%;
+        }
+
+        .online_button {
+            background-color: #39435C !important;
+            color: #fff !important;
+        }
+
+        .panel .panel-heading {
+            padding: 10px 15px;
+            text-transform: uppercase;
+            font-size: 18px;
+        }
+       .putt-in-table {
+            margin-bottom: -40px !important;
+            visibility: collapse;
+        }
+
+        .sorting, .sorting_asc, .sorting_desc {
+            background: none !important;
+        }
+
+        table.dataTable thead .sorting:after {
+            display: none;
+        }
+        .loading-dialog {
+            display: none;
+            position: fixed;
+            z-index: 1100;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background:  url('/images/animated_spinner.gif') 50% 50% no-repeat;
+        }
+        .fa-changed-color{
+            background-color:#39435C!important;text-shadow:2px 0 0 #39435C!important;
+        }
+        .btn-default:hover .fa-changed-color{
+            background-color:white!important;
+
+            text-shadow:2px 0 0 white!important;
+        }
+    </style>
+</head>
+<body ng-app="app" class="skin-black">
+    <div class="wrapper">
+        <!-- Left side column. contains the logo and sidebar -->
+        <!-- Main content -->
+        <section class="content">
+
+            <div loading class="loading-dialog"></div>
+
+            <div class="pull-left image logo">
+                <a href="#"><img src="~/Images/Big Company B.png" alt="logo" width="400" /></a>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    <h1 class="page-header text-center">
+                        ONLINE TRAINING
+                    </h1>
+
+                    <ol class="breadcrumb">
+                        <li>
+                            <i class="fa fa-dashboard"></i> <a ui-sref="home">ONLINE TRAINING</a>
+                        </li>
+                    </ol>
+
+                </div>
+            </div>
+
+            <div ui-view> </div>
+
+            <div class="footer-main">
+                Big Company PLC @DateTime.Today.Year
+            </div>
+        </section> <!--content-->
+
+    </div> <!--wrapper-->
+
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/DataTable")
+    @Scripts.Render("~/bundles/AngularDataTable")    
+    @Scripts.Render("~/bundles/plupload2")
+    <script src="~/Scripts/logToServer.js"></script>
+    <script src="~/Scripts/angular-plupload/angular-plupload.js"></script>
+    <script src="~/Scripts/functions.js"></script>
+    <script src="~/Scripts/lodash.js"></script>
+    
+    <script src="~/AngularApps/OnlineTraining/js/app.js"></script>
+    <script src="~/AngularApps/OnlineTraining/js/controller.js"></script>
+    <script src="~/AngularApps/OnlineTraining/js/factory.js"></script>
+    <script src="~/Scripts/loading.js"></script>
+
+</body>
+</html>

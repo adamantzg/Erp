@@ -1,0 +1,126 @@
+﻿@using System.Web.UI.WebControls
+@model SOAllocationsManagementModel
+
+
+<h2>Stock order allocations management</h2>
+<div ng-app="SoApp">
+    <div ng-controller="SoController" class="container-fluid" ng-cloak>
+        <div class="row">
+            <div class="form-horizontal col-md-8">
+                <div class="form-group">
+                    <label class="control-label col-md-4">Select product</label>
+                    <div class="col-md-8">
+                        <input type="text" ng-model="Product" uib-typeahead="prod as prod.cprod_code1 for prod in GetProducts($viewValue)" typeahead-min-length="3" typeahead-on-select="ProductSelected($item, $model, $label, $event)" class="form-control"/>
+                        <span ng-show="loadingProducts"><img src="/Images/Spinning_wheel_throbber.gif"/></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-4">Call off orders</label>
+                    <div ng-show="loadingOrders"><img src="/Images/Spinning_wheel_throbber.gif"/></div>
+                    <div class="col-md-8" ng-show="!loadingOrders">
+                        <div ng-dropdown-multiselect="" options="COOrders" extra-settings="multiSelectOptions" selected-model="SelectedCOModel"></div>
+                    </div>
+                </div>
+                <button class="btn btn-default" ng-click="ShowAllocations()" ng-show="SelectedCOModel.length > 0">Show Order allocations</button>
+            </div>    
+        </div>
+
+        <div ng-show="loadingAllocations"><img src="/Images/Spinning_wheel_throbber.gif"/></div>
+        <div class="row" ng-show="COLines.length > 0">
+            <table class="table table-responsive">
+                <thead>
+                <tr>
+                    <th colspan="2">&nbsp;</th>
+                    <th ng-repeat="c in COLines | orderBy: 'linenum'" class="text-right">{{c.custpo}}</th>
+                    <th>&nbsp;</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th class="text-right">BALANCE</th>
+                    <th ng-repeat="c in COLines | orderBy: 'linenum'" class="text-right">ALLOC QTY</th>
+                    <th class="text-right">ETD</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td colspan="2">Total order qty</td>
+                    <td ng-repeat="c in COLines | orderBy: 'linenum'" class="text-right">{{c.orderqty}}</td>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td colspan="{{3+COLines.length}}" style="font-weight: bold">Current Allocations</td>
+                </tr>
+                <tr ng-repeat="a in Allocations | toArray | filter: CurrentBalance">
+                    <td>{{a.custpo}}</td>
+                    <td class="text-right">{{a.balance}}</td>
+                    <td ng-repeat="ca in a.COAllocations | orderBy: 'co_line'">
+                        <input type="text" class="form-control text-right" numericbinding ng-model="ca.alloc_qty" ng-blur="Recalculate(a,ca)"/>
+                    </td>
+                    <td>{{formatDate(a.po_req_etd)}}</td>
+                </tr>
+                <tr>
+                    <td colspan="{{3+COLines.length}}" style="font-weight: bold">Available balances</td>
+                </tr>
+                <tr ng-repeat="a in Allocations | toArray | filter: AvailableBalance">
+                    <td>{{a.custpo}}</td>
+                    <td class="text-right">{{a.balance}}</td>
+                    <td ng-repeat="ca in a.COAllocations | orderBy: 'co_line'">
+                        <input type="text" class="form-control text-right" numericbinding ng-model="ca.alloc_qty" ng-blur="Recalculate(a,ca)"/>
+                    </td>
+                    <td>{{formatDate(a.po_req_etd)}}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">TOTAL ALLOCATIONS</td>
+                    <td ng-repeat="cl in COLines | orderBy: 'linenum'" class="text-right">
+                        <span ng-class="GetTotalStyle(cl)">{{GetTotal(cl)}}</span> 
+                    </td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+            <br/>
+            <button class="btn btn-default" ng-click="Update()">Update</button>
+            <div ng-show="updating"><img src="/Images/Spinning_wheel_throbber.gif"/></div>
+        </div>
+
+    </div>
+</div>
+
+@section head
+{
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    <style>
+        .container {
+            overflow: visible;
+        }
+        .wrongAllocations {
+            color: red;
+        }
+    </style>
+}
+
+
+@section scripts2
+{
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/angular-multiselect")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    <script src="~/Scripts/logToServer.js"></script>
+    
+<script src="~/Scripts/customFilters/toArrayFilter.js"></script>
+    
+    <script>
+        var model = @Html.Raw(WebUtilities.JsonSerialize(Model));
+        var productsUrl = '@Url.Action("GetCustProductsJSON","Common")';
+        var coOrdersUrl = '@Url.Action("GetCOOrders")';
+        var coLinesUrl = '@Url.Action("GetDataForAllocations")';
+        var updateUrl = '@Url.Action("UpdateAllocations")';
+    </script>
+<script src="~/AngularApps/SOAllocationManagement/js/app.js"></script>
+<script src="~/AngularApps/SOAllocationManagement/js/controller.js"></script>
+
+}

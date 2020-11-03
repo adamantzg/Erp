@@ -1,0 +1,16 @@
+﻿@using backend.Models
+@model UserProductSales
+@{
+    ViewBag.Title = "Order_line_detail2_v6";
+}
+
+<h2 style="margin:-47px 0 0 -5px; color:white">Order line detail 2_v6</h2>
+<h4>Lista proizvoda: @Model.CustProducts.Count()</h4>
+<h5>filtrirani proizvod: @Model.CustProducts.Where(c => c.cprod_code1 == "STF00S760").Count()</h5>
+@foreach (var i in Model.CustProducts.Where(c => c.cprod_code1 == "STF00S760"))
+{
+    <span> @i.cprod_id</span><span> @i.cprod_user</span><strong> @i.SalesProducts.month21</strong>
+    <br />
+    
+   
+}

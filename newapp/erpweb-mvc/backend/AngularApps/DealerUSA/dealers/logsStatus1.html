@@ -1,0 +1,51 @@
+﻿<h2 ng-if="types.showTest">{{ctrlName}} - logsStatus7.html</h2>
+<h3 style="text-align:center">Open logs test</h3>
+<table datatable="ng"
+       class="table table-striped table-condensed m-t-15"
+       dt-options="tableOptionsCallLogs" style="margin-top:1px">
+    <thead>
+        <tr>
+            <th style="pointer-events:none;"> <i></i> Dealer</th>
+            <th style="pointer-events:none;width:105px">Date</th>
+            <th style="pointer-events:none;width:75px">From</th>
+            <th style="pointer-events:none;width:75px">To</th>
+            <th style="pointer-events:none;">Notes</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr ng-repeat="log in logs ">
+
+            <td style="min-width:275px">
+                <a ui-sref="detailAlpha({id:log.dealer})">
+                    &nbsp;
+                    {{log.usDealer.name}}
+                    {{log.usDealer.name === null || log.usDealer.name ==='' ? "Miscellaneous" : ""}}
+                    {{log.hasOwnProperty("usDealer") ? '' : 'Miscellaneous'}}
+                </a>
+                <!--<button class="btn btn-default btn-xs pull-right" ng-click="openNewClaim(null,log.usDealer.customer)">
+
+                    <i class="fa fa-plus-square"></i>
+                    Claim
+                </button>-->
+            </td>
+            <td style="width:100px">
+                <span style="opacity:.7;float:left; margin-top:2px; margin-right:5px" class="glyphicon ion-calendar "></span>
+                {{log.usaDate|date }}
+            </td>
+            <td>
+                <span style="opacity:.7;float:left; margin-top:2px; margin-right:6px" class="glyphicon ion-person"></span>
+                {{log.from}}
+            </td>
+            <td>
+                <span style="opacity:.7;float:left; margin-top:2px; margin-right:6px" class="glyphicon ion-person"></span>
+                {{log.to}}
+
+            </td>
+            <td  style="min-width:600px">
+                {{log.note}}
+            </td>
+
+        </tr>
+    </tbody>
+</table>

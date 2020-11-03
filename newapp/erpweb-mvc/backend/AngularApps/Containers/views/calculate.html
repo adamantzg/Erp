@@ -1,0 +1,48 @@
+﻿<div loading class="loading-dialog"></div>
+<div class="row">
+    <div class="col-lg-12">
+        <h2>Order container calculation</h2>
+    </div>
+</div>
+<div style="min-height: 300px">
+    <div class="row">
+        <div class="col-lg-8 form-horizontal">
+            <div class="form-group">
+                <label class="col-sm-2">Custpo:</label>
+                <div class="col-sm-6">
+                    <input id="product"
+                           type="text"
+                           ng-model="order"
+                           uib-typeahead="o as o.custpo for o in getOrdersByText($viewValue)"
+                           typeahead-min-length="3"
+                           placeholder="Enter custpo"
+                           class="form-control" />
+                </div>
+                <button class="btn btn-primary" ng-click="calculate()">Calculate</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12" ng-show="calculation">
+            <label>Original %: </label>{{calculation.originalPercentage}}  <label>Adjusted %: </label> {{calculation.adjustedPercentage}}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Volume (m3)</th>
+                        <th>Adjusted volume (m3)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="p in calculation.products">
+                        <td>{{p.factory_ref}}</td>
+                        <td>{{p.qty}}</td>
+                        <td>{{p.volume}}</td>
+                        <td>{{p.adjustedVolume}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

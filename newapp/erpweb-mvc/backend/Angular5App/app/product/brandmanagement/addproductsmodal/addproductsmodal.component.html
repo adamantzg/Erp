@@ -1,0 +1,45 @@
+<div class="modal-header">
+    <h3 class="modal-title" id="modal-title">Add products</h3>
+</div>
+<div class="modal-body" id="modal-body">
+    <app-errormessage [errorMessage]="errorMessage"></app-errormessage>
+    <div class="form form-inline">
+        <div class="form-group">
+            <label>Brand</label>
+            <select class="form-control ml-2" [(ngModel)]="brand_id" (change)="onBrandChanged()">
+                <option *ngFor="let b of brands" [value]="b.brand_id">{{b.brandname}}</option>
+            </select>
+        </div>
+    </div>
+    <div class="form form-inline mt-2">
+        <div class="form-group">
+            <label>BRS Product type</label>
+            <select class="form-control ml-2" [(ngModel)]="type_id" (change)="onCategory1Changed()">
+                <option *ngFor="let c of categories" [value]="c.category1_id">{{c.cat1_name}}</option>
+            </select>
+        </div>
+        <div class="form-group ml-2">
+            <label>Factory</label>
+            <select class="form-control ml-2" [(ngModel)]="factory_id">
+                <option *ngFor="let f of factories" [value]="f.user_id">{{f.factory_code}}</option>
+            </select>
+        </div>
+        <div class="form-group ml-2">
+            <label>Brand range</label>
+            <select class="form-control ml-2" [(ngModel)]="brand_category_id">
+                <option *ngFor="let c of brandCategories" [value]="c.brand_cat_id">{{c.brand_cat_desc}}</option>
+            </select>
+        </div>
+    </div>
+    <div>
+        <button class="btn btn-default" (click)="searchProducts()" [disabled]="!factory_id">Search</button>
+    </div>
+    <div class="mt-2">
+        <app-grid [definition]="gridDefinition" [data]="products" [style]="gridStyle" [headerStyle]="headerStyle"></app-grid>
+    </div>    
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" type="button" (click)="ok()" [disabled]="selectedProducts().length == 0">Add</button>
+    <button class="btn btn-default" type="button" (click)="cancel()">Cancel</button>
+</div>

@@ -1,0 +1,200 @@
+﻿@model ProductReviewModel
+@{
+    ViewBag.Title = "Review";
+}
+
+
+    <h2>BBD Products Review</h2>
+    <div>All data excludes spares</div>
+    <div>Data based on sales to UK/IE distributors only</div>
+    <table >
+        <tr>
+            <td></td>
+            <td colspan="2" class="summary_current_status_head">Current status</td>
+            <td colspan="3" class="summary_removals_head">Proposed removals</td>
+            <td colspan="2" class="summary_adjusted_status_head">Adjusted status</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td class="number summary_head">no. of products</td>
+            <td class="number summary_head">GBP sales last 12m*</td>
+            <td class="number summary_head">no. of products</td>
+            <td class="number summary_head">% of total products</td>
+            <td class="number summary_head">% of last 12m GBP sales</td>
+            <td class="number summary_head">no. of products</td>
+            <td class="number summary_head">GBP sales last 12m*</td>
+        </tr>
+        @{ 
+            var brands = Model.Brands;
+            brands.Add(new Brand { user_id = -1, brandname = "Universal" });
+            brands.Add(new Brand { user_id = 81, brandname = "OEM" });
+            var brandData = Model.AnalyticsSubCatRows.GroupBy(r => r.Category.category_type ?? -1).ToDictionary(d => d.Key);
+        }
+        @{ 
+            int? totalQty = 0, totalDiscontinued = 0, qty, discontQty;
+            double? totalGBP = 0.0, totalGBPDiscontinued = 0.0, gbp, discontGBP;
+
+        }
+        @foreach (var b in brands.Where(b => b.user_id != 81)) {
+            qty = brandData[b.user_id.Value].Sum(r => r.ProductCount);
+            gbp = brandData[b.user_id.Value].Sum(r => r.TotalGBPLast12m);
+            discontQty = brandData[b.user_id.Value].Sum(r => r.Products.Count(p => p.proposed_discontinuation == true));
+            discontGBP = brandData[b.user_id.Value].Sum(r => r.Products.Where(p => p.proposed_discontinuation == true).Sum(p => p.Total));
+            totalQty += qty;
+            totalDiscontinued += discontQty;
+            totalGBP += gbp;
+            totalGBPDiscontinued += discontGBP;
+            <tr >
+                <td class="summary_brandname">@b.brandname</td>
+                <td class="number">@qty</td>
+                <td class="number">@gbp.ToString("N2")</td>
+                <td class="number">@discontQty</td>
+                <td class="number">@((discontQty / qty).ToString("P1"))</td>
+                <td class="number">@((discontGBP / gbp).ToString("P1"))</td>
+                <td class="number">@(qty - discontQty)</td>
+                <td class="number">@((gbp - discontGBP).ToString("N2"))</td>
+            </tr>
+        }
+        
+        <tr class="summary_total">
+            <td>TOTAL</td>
+            <td class="number">@totalQty</td>
+            <td class="number">@totalGBP.ToString("N2")</td>
+            <td class="number">@totalDiscontinued</td>
+            <td class="number">@((totalDiscontinued / totalQty).ToString("P1"))</td>
+            <td class="number">@((totalGBPDiscontinued / totalGBP).ToString("P1"))</td>
+            <td class="number">@(totalQty - totalDiscontinued)</td>
+            <td class="number">@((totalGBP - totalGBPDiscontinued).ToString("N2"))</td>
+        </tr>
+        @{ 
+            var oemid = 81;
+            qty = brandData[oemid].Sum(r => r.ProductCount);
+            gbp = brandData[oemid].Sum(r => r.TotalGBPLast12m);
+            discontQty = brandData[oemid].Sum(r => r.Products.Count(p => p.proposed_discontinuation == true));
+            discontGBP = brandData[oemid].Sum(r => r.Products.Where(p => p.proposed_discontinuation == true).Sum(p => p.Total));
+            totalQty += qty;
+            totalDiscontinued += discontQty;
+            totalGBP += gbp;
+            totalGBPDiscontinued += discontGBP;
+         }
+        <tr>
+            <td class="summary_brandname">OEM</td>
+            <td class="number">@qty</td>
+            <td class="number">@gbp.ToString("N2")</td>
+            <td class="number">@discontQty</td>
+            <td class="number">@((discontQty / qty).ToString("P1"))</td>
+            <td class="number">@((discontGBP / gbp).ToString("P1"))</td>
+            <td class="number">@(qty - discontQty)</td>
+            <td class="number">@((gbp - discontGBP).ToString("N2"))</td>
+        </tr> 
+
+        
+        
+    </table>
+    <div>* GBP values calculated at distributor prices, based on UK sales only except for OEM products</div>
+    <div style="font-weight: bold">Summary of products proposed for deletion
+    </div>
+    <table class="datatable">
+        <tr class="datatable_header" style="font-weight: bold">
+            <td>Brand</td>
+            <td>Description</td>
+            <td>Code</td>
+            <td class="number">previous 6m</td>
+            <td class="number">last 6m</td>
+            <td class="number">Total</td>
+            <td class="number">Display Qty</td>
+            <td class="number">FE Stock Qty</td>
+            <td class="number">Month sales in stock</td>
+        </tr>
+        @{ 
+            var discontinued = Model.AnalyticsSubCatRows.Select(r => r.Products.Where(p => p.proposed_discontinuation == true).ToList()).Aggregate((prev, curr) => prev.Union(curr).ToList());
+        }
+        @foreach (var p in discontinued) {
+            <tr>
+                <td>@(Model.Brands.FirstOrDefault(b => b.user_id == p.brand_user_id)?.brandname)</td>
+                <td>@p.cprod_name</td>
+                <td>@p.cprod_code1</td>
+                <td class="number">@p.TotalPrevious6m</td>
+                <td class="number">@p.TotalLast6m</td>
+                <td class="number">@p.Total</td>
+                <td class="number">@p.DisplayQty</td>
+                <td class="number">@p.FactoryStock</td>
+                <td class="number">@((p.FactoryStock/(p.Total/12.0)).ToString("N1"))</td>
+            </tr>
+        }
+        
+    </table>
+
+       
+        
+
+@section head
+{
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    <style>
+         [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+          display: none !important;
+        }
+        .number {text-align: right;}
+        .bold {
+            font-weight: bold;
+            background-color: #E0E0E0;
+        }
+        .summary_current_status_head {
+            background-color: #ffd800;
+            text-align: center;
+        }
+        .summary_removals_head {
+            background-color: #ed8135;
+            text-align: center;
+        }
+        .summary_adjusted_status_head {
+            background-color: #abe054;
+            text-align: center;
+        }
+        .summary_head {
+            background-color: #E0E0E0;
+        }
+        .summary_total {
+            
+            font-weight: bold;
+        }
+        .summary_brandname {
+            background-color: #808080;
+            font-weight: bold;
+        }
+        .datatable {
+			width: 95%;
+			font-family:Arial, Helvetica, sans-serif; 
+			font-size:11px; 
+			border-style:solid; 
+			border:1px; 
+			border-color:#000;
+	        border-collapse: collapse;
+		}
+        .even
+        {
+            background-color: #E0E0E0;
+        }
+        .datatable td {
+	        padding: 5px;
+        }
+        .datatable tr {
+	        border-right: 1px solid black;
+            border-left: 1px solid black;
+        }
+		.datatable_header {
+			height: 25px;
+			text-align: left;
+			background-color: #B9C9FE;
+            font-weight: bold;
+		}
+        .datatable_header td
+        {
+            border: 1px solid black;
+        }
+
+    </style>
+}
+
+

@@ -1,0 +1,336 @@
+﻿<style>
+    .main-row {
+        /*background-color: rgba(57, 67, 92, .7);*/
+        background: #fff;
+        color: #333;
+    }
+    .table > tbody + tbody {
+        border-top: 2px solid #CCC;
+    }
+    .child-row{
+        background:#dfdfdf;
+        border-bottom:1px solid #aaa;
+    }
+    .child-title-row{
+        background:#ccc
+    }
+    .first-child-row{
+        padding-left:60px!important;
+    }
+</style>
+
+<h2 ng-if="types.showTest">{{ctrlName}} - dealerDetailLogList.html</h2>
+<table class="table ">
+    <tr>
+        <th class="col-lg-2" style="border-top:none">
+            
+            <span class="glyphicon glyphicon-time " ng-class="{'time-btn': !!!showTime,'time-btn-active':!!showTime}"
+                  ng-click="showTime= !showTime"></span>
+            &nbsp;Date&nbsp;
+
+        </th>
+        
+        <th class="col-lg-1 type-call" style="border-top:none">
+            Type
+        </th>
+        <th class="col-lg-1" style="border-top:none">From</th>
+        <th class="col-lg-1" style="border-top:none">To</th>
+
+        <th class="col-lg-1" style="border-top:none">Category</th>
+        <th class="col-lg-1" style="border-top:none">Reference</th>
+
+        <th style="border-top:none">Notes</th>
+        <th col-lg-1 style="border-top:none">&nbsp;</th>
+    </tr>
+    <tbody style="background:white;" ng-repeat="log in logs | filter: {parent_id : '!'}  |orderBy:'-date_created' track by $index" ng-click="showBody = !showBody">
+        <!-- PARENT ROW -->
+        <tr  ng-if="!log.parent_id" >
+            <td class="main-row">
+                
+                    <span uib-tooltip="{{log.status == types.status.open?'status open': log.status == types.status.closed ? 'status closed': 'status undefined'}}"
+                          ng-class="{'status-open-flag': log.status === types.status.open,'status-closed-flag':log.status === types.status.closed,'status-undefined-flag': log.status == undefined }" >
+                        <i class="ion ion-flag"></i>
+                       
+                    </span>
+                
+                <span style="position:absolute;cursor:pointer" ng-if="log.hasChildren">
+                    <i class="ion ion-plus" style="font-weight:100" ng-show="!showBody"></i>
+                    <i class="ion ion-minus" style="font-weight:100" ng-show="!!showBody"></i>
+                </span>
+
+                <span style="margin-left:30px">{{log.usaDate|date:!!showTime?'medium':''}}</span>
+
+            </td>
+            
+            <td class="type-call main-row">
+                <div style="font-size:12px">
+                    <span class="ion icon-color"
+                          tooltip-placement="top"
+                          uib-tooltip="{{log.type===1?'phone':'mail'}}"
+                          ng-class="{'ion-android-mail':log.type===2,'ion-android-call':log.type===1,'ion-minus':log.type===0}"></span>
+                    &nbsp;
+                    <span class="ion icon-color" ng-class="{'ion-android-arrow-down-left':log.in_out===1,'ion-android-arrow-up-right':log.in_out===2,'ion-minus':log.in_out===0}"
+                          tooltip-placement="top"
+                          uib-tooltip="{{log.in_out==1 ? 'incoming call':''}}{{log.in_out==2 ? 'outgoing call':''}}"
+                          >
+
+                    </span>
+                    <!--<span class="ion ion-ios7-email"></span>-->
+                </div>
+            </td>
+            <td class="main-row">
+                <!-- from -->
+                <div ng-if="log.in_out==2">
+                    <span class="ion ion-person icon-color"
+                          tooltip-placement="top"
+                          uib-tooltip="administrator"></span>
+
+
+                    {{log.user.userwelcome}}
+                </div>
+                <div ng-if="log.in_out==1">
+                    {{log.person}}
+                </div>
+
+
+            </td>
+            <td class="main-row">
+                <div ng-if="log.in_out==1">
+                    <span class="ion ion-person icon-color"
+                          tooltip-placement="top"
+                          uib-tooltip="administrator"></span>
+                    <span ng-if="!!!log.user.userwelcome">{{log.userwelcome}}</span>
+                    {{log.user.userwelcome}}
+                </div>
+                <div ng-if="log.in_out==2">
+                    <span class="fa boo"></span>
+                    {{log.person}}
+                </div>
+            </td>
+            <!--<td>
+                <span class="ion" ng-class="{'ion-android-mail':log.type===2,'ion-android-call':log.type===1,'ion-ios7-minus-outline':log.type===0}"></span>
+            </td>-->
+            <td class="main-row">
+                <span>
+                    {{log.category.name}}
+                    <span ng-repeat="cat in log.categories ">
+                        <span ng-if="cat.id !== log.category.id">
+                            <!--<span ng-if="!!log.category.name">, </span>-->
+                            <span ng-if="$index > 0 "> , </span>
+                            &nbsp;{{cat.name}}
+                        </span>
+                    </span>
+                </span>
+            </td>
+            <td class="main-row">
+                {{log.order_return_ref }}
+            </td>
+            <td class="main-row">
+                {{log.note}}
+                <span ng-if="!!log.date_edit"><small> [last edited {{log.date_edit|date}}]</small></span>
+                <div ng-if="log.fedex_ref">Fedex ref: {{log.fedex_ref}}</div>
+            </td>
+            <td class="main-row"> 
+                <div ng-if="currentUser=== log.user.userid"
+                     ng-click="open(log,false)"
+                     class="btn btn-default btn-inverse btn-xs pull-right">
+                    <!--<span class="ion ion-edit"></span>-->
+                    <span class="glyphicon glyphicon-pencil"></span>
+                </div>
+                <div ng-click="open(log,true, log.id)"
+                     class="btn btn-default bnt-inverse btn-xs pull-right">
+                    <i class="glyphicon glyphicon-plus"></i>
+                </div>
+            </td>
+        </tr>
+        
+            <!--<tr ng-repeat="logsub in logs |filter: {parent_id : '!!'} track by $index" ng-if="logsub.parent_id != null  &&  logsub.parent_id === log.id && $index === 0 && !showBody" >-->
+        <!-- CHILDREN TITLE ROW-->
+        <tr ng-if="!!showBody && log.hasChildren">
+                <!--<th style="border:none">{{$index}} {{$first}}</th>-->
+                <!--<th class="child-title-row"></th>-->
+                <th class="col-lg-1 child-title-row first-child-row" style="border-top:none;">
+                    <span class="glyphicon glyphicon-time " ng-class="{'time-btn': !!!showTime,'time-btn-active':!!showTime}"
+                          ng-click="showTime= !showTime"></span>
+                    &nbsp;Date&nbsp;
+
+                </th>
+                <th class="col-lg-1 type-call child-title-row" style="border-top:none">
+                    Type
+                </th>
+                <!--<th class="col-lg-1" style="border-top:none">From</th>
+            <th class="col-lg-1" style="border-top:none">To</th>-->
+
+                <th class="col-lg-2 child-title-row" style="border-top:none">Category</th>
+                <th style="border-top:none" class="child-title-row">Notes</th>
+                <th colspan="3"  style="border-top:none" class="child-title-row">&nbsp;</th>
+            </tr>
+
+        <!-- CHILDREN BODY -->
+            <tr ng-repeat="logsub in logs" ng-if="logsub.parent_id != null &&  logsub.parent_id === log.id" ng-show="!!showBody">
+                <!--<td class="child-row"></td>-->
+
+                <td class="child-row first-child-row" >
+                    {{logsub.usaDate|date:!!showTime?'medium':''}}
+                </td>
+                <td class="type-call child-row">
+                    <div style="font-size:12px">
+                        <span class="ion icon-color"
+                              tooltip-placement="top"
+                              uib-tooltip="{{logsub.type===1?'phone':'mail'}}"
+                              ng-class="{'ion-android-mail':logsub.type===2,'ion-android-call':logsub.type===1,'ion-minus':logsub.type===0}"></span>
+                        &nbsp;
+                        <span class="ion icon-color" ng-class="{'ion-android-arrow-down-left':logsub.in_out===1,'ion-android-arrow-up-right':logsub.in_out===2,'ion-minus':logsub.in_out===0}"
+                              tooltip-placement="top"
+                              uib-tooltip="{{logsub.in_out==1 ? 'incoming call':''}}{{logsub.in_out==2 ? 'outgoing call':''}}">
+
+                        </span>
+                        <!--<span class="ion ion-ios7-email"></span>-->
+                    </div>
+                </td>
+
+            <!-- FROM -->
+            <!--<td>
+
+                <div ng-if="logsub.in_out==2">
+                    <span class="ion ion-person icon-color"
+                          tooltip-placement="top"
+                          uib-tooltip="administrator"></span>
+
+
+                    {{logsub.user.userwelcome}}
+                </div>
+                <div ng-if="logsub.in_out==1">
+                    {{logsub.person}}
+                </div>
+
+
+            </td>-->
+            <!-- TO -->
+            <!--<td>
+                <div ng-if="logsub.in_out==1">
+                    <span class="ion ion-person icon-color"
+                          tooltip-placement="top"
+                          uib-tooltip="administrator"></span>
+                    <span ng-if="!!!logsub.user.userwelcome">{{logsub.userwelcome}}</span>
+                    {{logsub.user.userwelcome}}
+                </div>
+                <div ng-if="logsub.in_out==2">
+                    <span class="fa boo"></span>
+                    {{logsub.person}}
+                </div>
+            </td>-->
+            <!--<td>
+            <span class="ion" ng-class="{'ion-android-mail':logsub.type===2,'ion-android-call':logsub.type===1,'ion-ios7-minus-outline':logsub.type===0}"></span>
+        </td>-->
+                <td class="child-row">
+                    <span>
+                        {{logsub.category.name}}
+                        <span ng-repeat="cat in logsub.categories ">
+                            <span ng-if="cat.id !== logsub.category.id">
+                                <!--<span ng-if="!!logsub.category.name">, </span>-->
+                                <span ng-if="$index > 0 "> , </span>
+                                &nbsp;{{cat.name}}
+                            </span>
+                        </span>
+                    </span>
+                </td>
+                <td colspan="3" class="child-row">
+                    {{logsub.note}}
+                    <span ng-if="!!logsub.date_edit"><small> [last edited {{logsub.date_edit|date}}]</small></span>
+                    <div ng-if="logsub.fedex_ref">Fedex ref: {{logsub.fedex_ref}}</div>
+                </td>
+                <td class="child-row">
+                    <div ng-if="currentUser=== logsub.user.userid"
+                         ng-click="open(logsub,false)"
+                         class="btn btn-default btn-inverse btn-xs pull-right">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                    </div>
+                    <!--<div ng-click="open(logsub,true, logsub.id)"
+                     class="btn btn-default bnt-inverse btn-xs pull-right">
+                    <i class="glyphicon glyphicon-plus"></i>
+                </div>-->
+                </td>
+            </tr>
+       
+    </tbody>
+
+    <tr ng-hide="showNewCallLogBtn">
+        <td>
+            {{Us_call_log.date_created|date:'medium'}}
+
+        </td>
+        <td>{{Us_call_log.userwelcome}}</td>
+        <td>
+            <div ng-class="{'has-error':!!novalidName}">
+
+                <select class="form-control"
+                        ng-model="Us_call_log.person"
+                        placeholder="Please select person"
+                        ng-change="showHide()"
+                        style="padding: 3px; border-radius: 5px;"
+                        ng-if="(!showAddNewPerson  && persons.length > 0)  ">
+                    <option value="">Please select caller name</option>
+                    <option value="value"> - Add new caller name -</option>
+                    <option value="unknown"> Unknown </option>
+                    <option ng-repeat="person in persons  |filter: '!unknown'">{{person}}</option>
+                </select>
+                <div class="btn-group" ng-hide="true">
+
+                    <label class="btn btn-primary" ng-model="Us_call_log.person" uib-btn-radio="'{{person}}'" ng-repeat="person in persons">{{person}}</label>
+                </div>
+                <span ng-if="showAddNewPerson ||( !showAddNewPerson &&  persons.length <1)">
+                    <input style="width:300px; padding-left:5px"
+                           ng-model="Us_call_log.person" placeholder="Please enter new caller name ... " />
+                    <button class="btn btn-default create_new btn-xs"
+                            style="margin-bottom:4px;font-weight:100"
+                            ng-click="backToList()">
+                        <span class="fa fa-chevron-circle-left"></span>
+                        <!--<span class="fa fa-list fa-changed-color"></span>-->
+                        &nbsp;&nbsp;Cancel&nbsp;
+                    </button>
+                </span>
+            </div>
+            <div class="error text-danger" ng-show="novalidName" style="font-size:0.9em">&nbsp;*Pleas enter a name.</div>
+
+            <!-- DESCRIPTION -->
+            <div ng-class="{'has-error':!!novalid}" style="margin-top:5px">
+                <span ng-show=""></span>
+                <textarea name="log"
+                          ng-model="Us_call_log.note"
+                          class="form-control"
+                          rows="2"
+                          required></textarea>
+
+            </div>
+            <div class="error text-danger" ng-show="novalid" style="font-size:0.9em">&nbsp;*Please enter a note.</div>
+            <!--END DESCRIPTION-->
+
+
+        </td>
+    </tr>
+
+    <tfoot>
+        <tr>
+            <td colspan="8" style="text-align:left">
+                <ul uib-pagination
+                    class="pagination-sm pull-right"
+                    total-items="totalLogsItems"
+                    items-per-page="20"
+                    boundary-link-numbers="true"
+                    rotate="true"
+                    max-size="5"
+                    ng-model="currentLogsPage"
+                    ng-change="pageLogsChanged(currentLogsPage)"></ul>
+            </td>
+        </tr>
+    </tfoot>
+
+</table>
+
+<!--<button class="btn btn-default create_new pull-right"
+        ng-if="!isMiscellaneus"
+        ng-click="open(null,true)">
+    <i class="icon ion-plus-round"></i>&nbsp;
+    Create New
+</button>-->

@@ -1,0 +1,164 @@
+﻿@model backend.ReportingModules.SalesBySector.ViewModel
+
+@{ 
+	var totals = new Dictionary<int, double?>();
+	var currMonth21 = Month21.Now;
+}
+
+@functions 
+{
+	public double? GetProRataValue(double? value, Month21 m)
+	{
+		var currMonth21 = Month21.Now;
+		if (m < currMonth21)
+		{
+			return value;
+		}
+		else if (m == currMonth21)
+		{
+			return Model.BudgetProRataCurrMonth;
+		}
+		return null;
+	}
+
+	public string FormatValue(double? value)
+	{
+		return (value / 1000)?.ToString("N0");
+	}
+}
+<table class="datatable">
+    <thead>
+        <tr>
+            <th style="width: 240px">
+
+            </th>
+            @for (var i = Model.From; i <= Model.To; i+=1)
+            {
+				totals[i.Value] = 0;
+            <th style="text-align: right;width: 70px">
+                @i.Date.ToString("MMM-yy")
+            </th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+		@{ 
+			var counter = 0;
+
+		}
+        @foreach (var s in Model.sectors)
+        {
+            <tr @Html.Raw(counter++%2 == 1 ? "class=alternaterow" : "")>
+                <td>
+                    @s
+                </td>
+                @for (var i = Model.From; i <= Model.To; i += 1)
+				{
+                    <td class="number">
+                        @if (Model.Data.ContainsKey(s))
+						{
+							var value = Model.Data[s].FirstOrDefault(d => d.Month21 == i);
+							if (value != null)
+							{
+								totals[i.Value] += value.Amount;
+                                @FormatValue(value.Amount)
+							}
+						}
+						
+                    </td>
+				}
+            </tr>
+        }
+		<tr style="font-weight: bold;background-color: #A0A0A0">
+			<td>TOTAL</td>
+			@for (var i = Model.From; i <= Model.To; i+=1)
+            {
+				<td style="text-align: right">
+					@FormatValue(totals[i.Value])
+				</td>
+            }
+		</tr>
+		<tr @Html.Raw(counter++%2 == 1 ? "class=alternaterow" : "")>
+			<td>Group budget</td>
+			@for (var i = Model.From; i <= Model.To; i += 1)
+			{
+                <td class="number">
+                    @if (Model.Data.ContainsKey("budget"))
+					{
+						var value = Model.Data["budget"].FirstOrDefault(d => d.Month21 == i);
+						if (value != null)
+						{
+							@FormatValue(value.Amount)
+						}
+					}
+						
+                </td>
+			}
+		</tr>
+		<tr @Html.Raw(counter++%2 == 1 ? "class=alternaterow" : "")>
+			<td>Budget pro-rata</td>
+			@for (var i = Model.From; i <= Model.To; i += 1)
+			{
+                <td class="number">
+                    @if (Model.Data.ContainsKey("budget"))
+					{
+						var value = Model.Data["budget"].FirstOrDefault(d => d.Month21 == i);
+						@FormatValue(GetProRataValue(value.Amount, i))
+					}
+						
+                </td>
+			}
+		</tr>
+		<tr @Html.Raw(counter++%2 == 1 ? "class=alternaterow" : "")>
+			<td>Sale vs budget</td>
+			@for (var i = Model.From; i <= Model.To; i += 1)
+			{
+                <td class="number">
+                    @if (Model.Data.ContainsKey("budget"))
+					{
+						var value = Model.Data["budget"].FirstOrDefault(d => d.Month21 == i);
+						if (value != null)
+						{
+							var prorata = GetProRataValue(value.Amount, i);
+							if(prorata > 0)
+							{
+								@(((totals[i.Value] / prorata)-1).ToString("P2"))
+							}							
+						}
+					}
+						
+                </td>
+			}
+		</tr>
+		@{ 
+			double? cummBudget = 0;
+			double? cummSale = 0;
+		}
+		<tr @Html.Raw(counter++%2 == 1 ? "class=alternaterow" : "")>
+			<td>Cummulative sales Vs budget</td>
+			@for (var i = Model.From; i <= Model.To; i += 1)
+			{
+                <td class="number">
+                    @if (Model.Data.ContainsKey("budget"))
+					{
+						var value = Model.Data["budget"].FirstOrDefault(d => d.Month21 == i);
+						if (value != null)
+						{
+							var prorata = GetProRataValue(value.Amount, i);
+							cummBudget += prorata;
+							cummSale += totals[i.Value];
+							@(((cummSale / cummBudget)-1).ToString("P2"))
+						}
+					}
+						
+                </td>
+			}
+		</tr>
+    </tbody>
+</table>
+<br />
+<div class="image">
+	<img src="@Model.ChartUrl" />
+</div>
+
+

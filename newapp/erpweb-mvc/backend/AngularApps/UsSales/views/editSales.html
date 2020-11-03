@@ -1,0 +1,120 @@
+﻿<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        <h1 class="page-header text-center">
+            SALES OUT
+        </h1>
+        <ol class="breadcrumb">
+            <li>
+                <i class="fa fa-dashboard"></i>  <a ui-sref="home">Index</a>
+            </li>            
+            <li class="active">
+                <i class="fa fa-edit"></i>Sales out
+            </li>
+        </ol>
+    </div>
+</div>
+<div class="row"> 
+    <div class="col-lg-2"></div>
+    <div class="col-lg-8 col-xs-12 mid">
+        <section class="panel">
+            <div class="panel-heading">
+                Order: {{salesOrder.order_no}}<br />
+                Shipping address: {{salesOrder.address}}
+            </div>
+            <div class="panel-body">
+                <form class="form-horizontal">
+                    <div class="text-right"><button class="btn" ng-click="copyQtySales(salesOrder.lines)">Copy order qty to shipped qty</button> </div>
+                    <table datatable="ng" dt-options="dtOrders" data-page-length='50'>
+                        <thead>
+                        <tr>
+                            <th>Product code</th>
+                            <th>Bin location</th>
+                            <th>Description</th>
+                            <th class="text-right">Order QTY</th>
+                            <th class="text-right">Physical stock QTY</th>
+                            <th class="text-right">Shipped QTY</th>
+                            <th class="text-right">Balance</th>
+                            <th>rowid</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="l in salesOrder.lines | orderBy: 'rowid'">
+                            <td>{{l.cprod_code1}}</td>
+                            <td>{{l.bin_location}}</td>
+                            <td>{{l.cprod_name}}</td>
+                            <td class="text-right">{{l.order_qty}}</td>
+                            <td class="text-right">{{l.cprod_stock2 - (l.despatched_qty || 0) + (l.orig_despatched_qty || 0) }}</td>
+                            <td><input class="text-right pull-right form-control" style="width:30%" type="number" ng-model="l.despatched_qty" max="{{l.order_qty}}" ng-change="limitInput(l)"/></td>
+                            <td class="text-right">{{l.order_qty - l.despatched_qty}}</td>
+                            <td>{{l.rowid}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <h4>DELIVERY / COLLECTION REFERENCE</h4>
+                            
+                            <div class="form-inline">
+                                this order was <input type="radio" class="form-control" ng-model="salesOrder.delivered" value="1"/> collected <input type="radio" class="form-control" ng-model="salesOrder.delivered" value="2" /> delivered
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="salesOrder.delivered==2">
+
+                        <div class="col-lg-6 fedex">
+                            <h4>FEDEX</h4>
+                                <table class="table table-condensed">
+                                    <tr>  
+                                        <th>Ref Nr.</th>
+                                        <th>Weight</th>
+                                        <th>Document</th>
+                                        <th></th>
+                                        <th></th>
+                                    </tr>
+                                    <tr ng-repeat="s in salesOrder.shippings">
+                                        <td><input type="text" class="form-control" ng-model="s.refnumber" ></td>
+                                        <td><input type="text" class="form-control" ng-model="s.weight" ></td>
+                                        <td>
+                                            <a ng-href="{{getShippingLink(s)}}" ng-show="s.id>0 || s.progress==100">{{s.document}}</a>
+                                            
+                                        </td>
+                                        <td>
+                                            <button class="btn pull-right" type="button" plupload="fileUpload.url"
+                                                    plupload-options="fileUpload.options"
+                                                    plupload-callbacks="fileUpload.callbacks[s.id]">
+                                                Upload
+                                            </button>
+                                            <uib-progressbar value="" ng-show="s.progress > 0 && s.progress < 100"></uib-progressbar>
+                                        </td>
+                                        <td><span class="glyphicon glyphicon-remove" ng-click="removeShipping(s)" title="Remove"></span></td>
+                                    </tr>
+                                    <tr >  
+                                        <td><input type="text" class="form-control" ng-model="newShipping.refnumber" ></td>
+                                        <td><input type="text" class="form-control" ng-model="newShipping.weight" ></td>
+                                        <td></td>
+                                        <td>
+                                            <button class="btn pull-right" type="button" plupload="fileUpload.url"
+                                                    plupload-options="fileUpload.options"
+                                                    plupload-callbacks="fileUpload.callbacks[0]">
+                                                Upload
+                                            </button>
+                                            
+                                            <uib-progressbar value="" ng-show="s.progress > 0 && s.progress < 100"></uib-progressbar>
+                                        </td>
+                                        <td><span class="glyphicon glyphicon-plus" ng-click="addShipping()" title="Add"></span></td>
+                                    </tr>
+                                </table>                                                                    
+                        </div>
+
+                        
+                    </div>                    
+                    <div ng-show="salesOrder.delivered==null" class="alert alert-danger">Please specify if this order was delivered or collected</div>
+                    <div ng-show="shippingsMissing()" class="alert alert-danger">Please enter a delivery reference number (for example Fedex reference).</div>
+                    <button class="btn btn-primary pull-right" type="button" ng-click="updateSalesOrder()">Confirm</button>
+                    
+                </form>
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-2"></div>
+</div>

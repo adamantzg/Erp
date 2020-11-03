@@ -1,0 +1,51 @@
+﻿@model FactoryClaimsMonthlyReportModel
+
+@{ 
+    Layout = null;
+}
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        table {
+            width: 900px;
+            border-collapse: collapse;
+            font-family: arial;
+            font-size: 12px;
+        }
+        thead {
+            font-weight: bold;
+        }
+        td {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+
+<h3>Monthly Claims Report </h3>
+<h4>Factories: @Model.Factories</h4>
+<h4>From: @Model.From.ToString("d") To: @Model.To.ToString("d")</h4>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Description</th>
+            <th style="text-align: right">Qty</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var p in Model.Rows.OrderBy(r=>r.cprod_code1)) {
+            <tr>
+                <td>@p.cprod_code1</td>
+                <td>@p.cprod_name</td>
+                <td style="text-align: right">@p.return_qty</td>
+            </tr>
+        }
+    </tbody>
+</table>
+</body>
+</html>

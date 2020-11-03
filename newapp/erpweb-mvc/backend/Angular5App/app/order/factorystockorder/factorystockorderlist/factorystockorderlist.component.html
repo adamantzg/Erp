@@ -1,0 +1,42 @@
+<h4>Factory stock orders</h4>
+<app-errormessage [errorMessage]="errorMessage"></app-errormessage>
+<div class="form-group" style="width: 30%">
+    <label for="cboFactory">Factory</label>
+    <select class="form-control" id="cboFactory" [(ngModel)]="model.factoryId" (change)="factoryChanged()">
+        <option *ngFor="let f of model.factories" [value]="f.user_id">{{f.factory_code}}</option>
+    </select>
+</div>
+<button class="btn btn-default" value="Create" (click)="create()">Create new order</button>
+
+
+<div class="mt-2">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Order PO</th>
+                <th>Customer PO</th>
+                <th>Order date</th>
+                <th>ETD</th>
+                <th>Currency</th>
+                <th class="number">Balance</th>
+                <th class="number">Balance value</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let o of orders, let ix = index">
+                <td><a [routerLink]="['/factorystockorder/edit/' + o.id]">{{o.po_ref}}</a></td>
+                <td>{{o.po_customer_ref}}</td>
+                <td>{{o.datecreated | date:dateFormat}}</td>
+                <td>{{o.etd | date:dateFormat}}</td>
+                <td>{{o.currencyText}}</td>
+                <td class="number">{{o.balance}}</td>
+                <td class="number">{{o.balanceValue?.toFixed(2)}}</td>
+                <th><button class="btn btn-danger" (click)="deleteOrder(ix )">Delete</button></th>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+

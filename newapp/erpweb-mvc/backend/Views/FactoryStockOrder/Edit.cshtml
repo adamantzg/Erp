@@ -1,0 +1,238 @@
+﻿@model backend.Models.FactoryStockOrderEditModel
+
+<h3>Factory stock order</h3>
+
+<div ng-app="app">
+    <div class="col-md-8" ng-controller="controller" ng-cloak>
+        <form>
+            <div class="form-group">
+                <label for="cboClient">Client</label>
+                <select class="form-control" id="cboClient" ng-model="client_id" ng-change="ClientChanged()">
+                    <option ng-repeat="c in Clients" value="{{c.user_id}}" ng-selected="c.user_id == client_id">{{c.customer_code}}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="cboFactory">Factory</label>
+                <select class="form-control" id="cboFactory" ng-model="Order.factory_id" >
+                    <option ng-repeat="f in Factories" value="{{f.user_id}}" ng-selected="f.user_id == Order.factory_id">{{f.factory_code}}</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="poref">PO Ref</label>
+                <input type="text" class="form-control" id="poref" ng-model="Order.po_ref" />
+            </div>
+            <div class="form-group">
+                <label for="etd">ETD:</label>
+                <input type="date" class="form-control" id="etd" ng-model="Order.etd" />
+            </div>
+            <div class="form-group">
+                <label for="cboCurrency">Currency</label>
+                <select class="form-control" id="cboCurrency" ng-model="currency" ng-change="CurrencyChanged()">
+                    <option ng-repeat="c in Currencies" value="{{c.curr_code}}" ng-selected="c.curr_code == currency">{{c.curr_symbol}}</option>
+                </select>
+            </div>
+        </form>
+        <div ng-show="Order.factory_id != null">
+            <button value="Add new line" ng-click="AddNewLine()">Add new line</button>
+            <p></p>
+            <table class="table table-bordered">
+                <thead>
+                    <tr class="tableheader">
+                        <td style="width:60%">Client product code</td>
+                        <td>Factory code</td>
+                        <td class="number">Qty</td>
+                        <td class="number">Price</td>
+                        <td class="number">Total</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="l in Order.Lines">
+                        <td><input type="text" ng-model="l.Product" uib-typeahead="prod as prod.combined_code for prod in GetProducts($viewValue)" typeahead-on-select="ProductSelected(l,$item, $model, $label, $event)" /></td>
+                        <td>{{l.MastProduct.factory_ref}}</td>
+                        <td><input class="number" type="text" ng-model="l.qty"/></td>
+                        <td><input class="number" type="text" ng-model="l.price"/></td>
+                        <td class="number">{{(l.qty*l.price).toFixed(2)}}</td>
+                        <td><button value="Delete" ng-click="DeleteLine(l)">Delete</button></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4">&nbsp;</td>
+                        <td class="number">{{GetTotal()}}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div ng-cloak ng-show="busy"><img src="~/Images/Spinning_wheel_throbber.gif" /></div>
+            <button value="Update" ng-click="Update()">Update</button> <button value="Back to List" ng-click="Back()">Back to List</button>
+        </div>
+    </div>
+</div>
+
+@section head
+{
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    <style>
+        .number {
+            text-align: right;
+        }
+        input {
+            width: auto;
+        }
+        .container {
+            overflow: visible;            
+        }
+        .tableheader {
+            font-weight: bold;
+        }
+    </style>
+}
+
+@section scripts2
+{
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    @Scripts.Render("~/bundles/utils")
+
+
+    <script>
+        var app = angular.module('app', ['ui.bootstrap']);
+        var model = @Html.Raw(WebUtilities.JsonSerialize(Model));
+        app.controller('controller', ['$scope', '$http',
+            function ($scope, $http) {
+                $scope.Clients = model.Clients;
+                $scope.client_id = "-1";
+                $scope.Order = model.Order;
+                if($scope.Order.Lines == null)
+                    $scope.Order.Lines = [];
+
+                $scope.productSearchTerm = '';
+                $scope.lineid = -1;
+                $scope.busy = false;
+
+                $scope.Factories = model.Factories;
+                $scope.Currencies = model.Currencies;
+                $scope.Products = [];
+
+                if($scope.Order.id <= 0)
+                    $scope.currency = "0";
+                else if($scope.Order.Lines != null && $scope.Order.Lines.length > 0)
+                {
+                    $scope.currency = $scope.Order.Lines[0].currency.toString();
+                    $scope.Order.Lines.forEach(function(l) {
+                        l.Product = {combined_code: l.cprod_code1};
+                    });
+                }
+
+
+                if($scope.Order.etd != null && $scope.Order.etd.length > 0)
+                    $scope.Order.etd = new Date($scope.Order.etd);
+                if($scope.Order.factory_id != null)
+                    $scope.Order.factory_id = $scope.Order.factory_id.toString();
+
+                $scope.ClientChanged = function() {
+                    $scope.LoadFactories();
+                };
+
+                $scope.CurrencyChanged = function() {
+                    if($scope.Order.Lines != null)
+                    {
+                        $scope.Order.Lines.forEach(function(elem) {
+                            elem.currency = parseInt($scope.currency);
+                        });
+                    }
+                }
+
+                $scope.LoadFactories = function ()
+                {
+                    $http.post('@Url.Action("GetFactoriesForClient", "Common")',{client_id:$scope.client_id}).
+                        success(function(data, status, headers, config) {
+                            $scope.Factories = data;
+                        } ).
+                        error(function(data, status, headers, config) {
+                        } );
+                }
+
+                $scope.GetProducts = function(term)
+                {
+                    if($scope.productSearchTerm.length > 0 && term.substring(0,$scope.productSearchTerm.length) == $scope.productSearchTerm)
+                    {
+                        term = term.toUpperCase();
+                        return _.filter($scope.Products, function (p) {
+                            return p.cprod_code1.substring(0,term.length).toUpperCase() == term || p.cprod_name.substring(0,term.length).toUpperCase() == term || p.factory_ref.substring(0,term.length).toUpperCase() == term || p.factory_name.substring(0,term.length).toUpperCase() == term;
+                        });
+                    }
+                    $scope.productSearchTerm = term;
+                    return $http.post('@Url.Action("GetProductsForFactory", "FactoryStockOrder")',{factory_id: $scope.Order.factory_id,prefixText: term}).
+                        then(function(response) {
+                            $scope.Products = response.data;
+                            return response.data;
+                        } );
+                }
+
+                $scope.ProductSelected = function(line, $item, $model, $label, $event)
+                {
+                    line.mast_id = $item.cprod_mast;
+                    line.cprod_code1 = $item.cprod_code1;
+                    line.MastProduct = {mast_id: line.mast_id, factory_ref: $item.factory_ref};
+                    if($scope.currency == 0)
+                        line.price = $item.price_dollar;
+                    else if($scope.currency == 1)
+                        line.price = $item.price_pound;
+                    else if($scope.currency == 2)
+                        line.price = $item.price_euro;
+                }
+
+                $scope.GetTotal = function() {
+                    return _.sumBy($scope.Order.Lines, function(l) {
+                        return (l.qty*l.price);
+                    }).toFixed(2);
+                }
+
+                $scope.DeleteLine = function(line)
+                {
+                    _.remove($scope.Order.Lines, {id: line.id});
+                }
+
+                $scope.AddNewLine = function() {
+                    var l = @Html.Raw(WebUtilities.JsonSerialize(new Factory_stock_order_lines()));
+                    l.id = $scope.lineid;
+                    l.currency = parseInt($scope.currency);
+                    $scope.lineid--;
+                    $scope.Order.Lines.push(l);
+                };
+
+                $scope.LoadFactories();
+
+                $scope.Update = function() {
+                    $scope.busy = true;
+                    if($scope.Order.Lines != null)
+                        $scope.Order.Lines.forEach(function(l) {
+                            l.MastProduct = null;
+                        });
+                    $http.post('@Url.Action("Update")', $scope.Order).
+                        success(function(data, status, headers, config) {
+                            $scope.busy = false;
+                            if($scope.Order.id <= 0)
+                                location.href= '@Url.Action("Edit")/' + data.toString();
+                        }).
+                        error(function(data, status, headers, config) {
+                            alert('Error in updating order');
+                        });
+                }
+
+                $scope.Back = function() {
+                    location.href='@Url.Action("Index")';
+                }
+
+            }
+        ]);
+
+        $(function() {
+            $('.logo-layout').hide();
+        });
+    </script>
+}

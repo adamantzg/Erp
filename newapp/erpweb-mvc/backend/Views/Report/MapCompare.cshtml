@@ -1,0 +1,2168 @@
+﻿@* http://www.codeproject.com/Articles/387626/BikeInCity-KnockoutJS-JQuery-Google-Maps
+    dobar primjer koji moram upotrijebiti
+*@
+@using MvcCheckBoxList
+@model MapCompare
+@{ Layout = "~/Views/Report/_Layout.cshtml"; }
+@{
+    ViewBag.Title = "UK regions map - Google Fusion Tables";
+}
+
+
+@*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />*@
+
+<link href="~/Content/bootstrap/bootstrap.css" rel="stylesheet" />
+<link href="../Content/themes/base/all.css" rel="stylesheet" />
+<link href="../Content/themes/base/button.css" rel="stylesheet"/>
+
+<script src="~/Scripts/lodash.js"></script>
+<style type="text/css">
+    /*
+        heating map
+    */
+    #draggable {
+			z-index:100;
+			background-color: rgba(200,200,255,.7);
+			width: 250px;
+			padding: 20px;
+			position:absolute;
+			top:10px;
+			left:100px;
+			cursor: move;
+			border: black 1px solid;
+		}
+		#radius-label, #opacity-label, #max-label {
+			margin-top: 10px;
+		}
+		#radius-slider, #opacity-slider, #max-slider {
+			width:250px;
+			margin-top: 10px;
+		}
+		#project {
+			font-size: 10pt;
+			font-weight: bold;
+			margin-bottom: 10px;
+		}
+		#radius-slider .ui-slider-handle,
+		#opacity-slider .ui-slider-handle,
+		#max-slider .ui-slider-handle {
+			cursor:pointer;
+		}
+
+    /*
+        end heating map
+
+    */
+     aside{
+         position:absolute;
+         left:700px;
+         top:-50px;
+         min-width:228px;
+         max-width:328px;
+         /*background:hsla(198.2, 46.1%, 62.2%, 0.90);*/
+         /*border:1px solid hsla(0, 0%, 0.4%, 0.50);*/
+         padding:8px;
+         z-index:99;
+
+     }
+
+    /*#googft-mapCanvas {
+            height: 910px;
+            margin: 0;
+            padding: 0;
+            width: 750px;
+            background: #f8f8f8;
+            color: #1f1f1f;
+        }*/
+
+    .labelsGreen{
+
+    }
+    .labels {
+        color: red;
+        font-family: "Western","Lucida Grande","Arial";
+        opacity: 0.4;
+        filter: alpha(opacity=40);
+        background-color: whitesmoke;
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        white-space: nowrap;
+        border: 2px solid black;
+        border-radius: 40px;
+        width: 40px;
+    }
+    .labelsY {
+        color: black;
+        background-color: whitesmoke;
+        font-family: "Lucida Grande", "Arial", sans-serif;
+        font-size: 12px;
+        text-align: center;
+        height: 14px;
+        width: 14px;
+        border-radius: 50%;
+        line-height: 14px;
+        border-color: dimgray;
+        border-width: 1px;
+        border-style: solid;
+        /*white-space: nowrap;*/
+    }
+
+    .labelsArrow {
+        color: black;
+
+        font-family: "Lucida Grande", "Arial", sans-serif;
+        /*font-weight:bold;*/
+        font-size: 10px;
+        text-align: center;
+
+
+        /*white-space: nowrap;*/
+    }
+
+    .labelsB {
+        color: green;
+        opacity: 0.4;
+        filter: alpha(opacity=40);
+        background-color: greenyellow;
+        border-radius: 10px;
+        border: 1px green outset;
+        width: 5px;
+        height: 5px;
+    }
+
+    .labelsAllDealers {
+        color: red;
+        opacity: 0.4;
+        filter: alpha(opacity=40);
+        background-color: orangered;
+        border-radius: 10px;
+        border: 1px crimson outset;
+        width: 5px;
+        height: 5px;
+    }
+
+    #styled-select select {
+        background: #f8f8f8;
+        color: #1F1F1F;
+        width: 268px;
+        padding: 5px;
+        font-size: 16px;
+        line-height: 1;
+        border: 0;
+        border-radius: 0;
+        /* height: 34px;*/
+        -webkit-appearance: none;
+    }
+
+    .styled-select-dropdown {
+        width: 200px;
+        height: 27px;
+        overflow: no-display;
+        border-radius: 5px;
+        background: url(../../Images/down_arrow_select.jpg) no-repeat right #ddd;
+        border: 3px #dddddd ridge;
+        /*border-right-style: ;*/
+        font-size: 15px;
+        -webkit-appearance: none;
+    }
+
+    .styled-select-omotdropdown {
+        background: transparent;
+        /*width: 268px;*/
+        padding: 5px;
+        font-size: 16px;
+        line-height: 1;
+        border: 0;
+        border-radius: 0;
+        height: 34px;
+        -webkit-appearance: none;
+    }
+
+    .lstStyle {
+    }
+
+    .styled-button {
+    }
+
+    .styled-holder-dropdown-list {
+        padding: 10px 0 0 10px;
+    }
+    .btn-map {
+        background: #3498db;
+        background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+        background-image: -moz-linear-gradient(top, #3498db, #2980b9);
+        background-image: -ms-linear-gradient(top, #3498db, #2980b9);
+        background-image: -o-linear-gradient(top, #3498db, #2980b9);
+        background-image: linear-gradient(to bottom, #3498db, #2980b9);
+        -webkit-border-radius: 4;
+        -moz-border-radius: 4;
+        border-radius: 4px;
+        text-shadow: 2px 1px 0px #666666;
+        -webkit-box-shadow: 0px 1px 3px #666666;
+        -moz-box-shadow: 0px 1px 3px #666666;
+        box-shadow: 0px 1px 3px #666666;
+        color: #ffffff;
+        font-size: 12px;
+        padding: 5px;
+        border: solid #1f628d 1px;
+        text-decoration: none;
+    }
+
+    .btn-map:hover {
+        background: #3cb0fd;
+        background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+        background-image: -moz-linear-gradient(top, #3cb0fd, #3498db);
+        background-image: -ms-linear-gradient(top, #3cb0fd, #3498db);
+        background-image: -o-linear-gradient(top, #3cb0fd, #3498db);
+        background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+        text-decoration: none;
+    }
+    .btn-map-remove {
+        background: #d93434;
+        background-image: -webkit-linear-gradient(top, #d93434, #b82b2b);
+        background-image: -moz-linear-gradient(top, #d93434, #b82b2b);
+        background-image: -ms-linear-gradient(top, #d93434, #b82b2b);
+        background-image: -o-linear-gradient(top, #d93434, #b82b2b);
+        background-image: linear-gradient(to bottom, #d93434, #b82b2b);
+        -webkit-border-radius: 4;
+        -moz-border-radius: 4;
+        border-radius: 4px;
+        text-shadow: 2px 1px 0px #666666;
+        -webkit-box-shadow: 0px 1px 3px #666666;
+        -moz-box-shadow: 0px 1px 3px #666666;
+        box-shadow: 0px 1px 3px #666666;
+        color: #ffffff;
+        font-size: 12px;
+        padding: 5px;
+        border: solid #1f628d 1px;
+        text-decoration: none;
+    }
+
+    .btn-map-remove:hover {
+        background: #fc3c3c;
+        background-image: -webkit-linear-gradient(top, #fc3c3c, #d93434);
+        background-image: -moz-linear-gradient(top, #fc3c3c, #d93434);
+        background-image: -ms-linear-gradient(top, #fc3c3c, #d93434);
+        background-image: -o-linear-gradient(top, #fc3c3c, #d93434);
+        background-image: linear-gradient(to bottom, #fc3c3c, #d93434);
+        text-decoration: none;
+    }
+
+    .googft-map-canvas{
+        float: left;
+        margin-top:10px;
+        height:1100px;
+        width:910px;
+    }
+    .googft-map-canvas-wide{
+        background-color:white;
+        position:relative;
+        height:850px;
+        width:1710px;
+    }
+    .hide-map{
+        text-shadow: 2px 2px #888888;
+        font-size:18px;
+        color:darkred;
+        cursor:pointer;
+    }
+
+    .hide-map:hover{
+        font-size:22px;
+        color:red;
+    }
+
+
+    .map-frame-wide{
+        /*width:100%;*/
+        width:1735px;
+        height:900px;
+        border:solid 2px black;
+        margin-left:-320px;
+        /*box-shadow:10px 10px 5px #888888;*/
+        -webkit-box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5);
+        -moz-box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5);
+        box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5);
+        /*position:absolute;*/
+        /*position:relative;*/
+        padding:10px;
+        z-index:999;
+        background-color:white
+    }
+</style>
+@Scripts.Render("~/bundles/plupload")
+<link href="~/Content/Site.css" rel="stylesheet" />
+@section scripts{
+    @* Za heating map *@
+    @*
+    link https://github.com/joyofdata/csv-heatmap
+    tutorial
+    http://www.joyofdata.de/blog/interactive-heatmaps-with-google-maps-api/
+    *@
+    <script src="~/Scripts/Map/papaparse.min.js"></script>
+
+
+    @*<script src="~/Scripts/jquery-1.7.1.js" type="text/javascript"></script>*@
+    @*<script src="~/Scripts/jquery-ui-1.8.20.js"></script>*@
+    <script src="~/Scripts/jquery-ui-1.11.3.js"></script>
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.unobtrusive-2-ajax.js"></script>
+    <script src="~/Scripts/jquery.cookie.js"></script>
+    @*<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>*@
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+    @*<script src="~/Scripts/jquery.unobtrusive-ajax.js" type="text/javascript"></script>*@
+    <script src="https://maps.google.com/maps/api/js?&key=@(Html.Raw(Settings.Default.GoogleMap_Key))&v=3.exp&sensor=false&libraries=visualization"></script>
+    @*<script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=true"></script>*@
+
+
+    <script src="https://www.google.com/jsapi"></script>
+    <script src="~/Scripts/markerwithlabel.js" type="text/javascript"></script>
+    @*<script src="~/Scripts/knockout-2.3.0.js"></script>*@
+    @* <script src="~/Scripts/knockout.mapping-latest.js"></script>*@
+
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    <script type="text/javascript">
+        document.write('<script type="text/javascript" src="../../Scripts/markermanager' + (document.location.search.indexOf('packed') > -1 ? '_packed' : '') + '.js"><' + '/script>');
+
+
+        //function ChangeItem(){
+        //    $("#IdName").val("");
+        //    $("#infoForm1").submit();
+        //};
+        var app = angular.module("app", ['ngAnimate', 'ngSanitize','ui.bootstrap'])
+            .controller('controller', function($scope) {
+                $scope.visible = false;
+            });
+        var countImages;
+        $('#greenInputRadius')
+            .bind('keyup', function(e) {
+                var rad = $(this).val();
+                refreshRadius('greenRadius', rad);
+                $.cookie('dots_radius_green', rad);
+            });
+        $('#redInputRadius')
+            .bind('keyup', function(e) {
+                var rad = $(this).val();
+                refreshRadius('redRadius', rad);
+                $.cookie('dots_radius_red', rad);
+            });
+        $('#whiteInputRadius')
+            .bind('keyup', function(e) {
+                var rad = $(this).val();
+                refreshRadius('whiteRadius', rad);
+                $.cookie('dots_radius_white', rad);
+            });
+        $('#yellowInputRadius')
+            .bind('keyup', function(e) {
+                var rad = $(this).val();
+                refreshRadius('yellowRadius', rad);
+                $.cookie('dots_radius_yellow', rad);
+            });
+        $('#pinkInputRadius')
+            .bind('keyup', function(e) {
+                var rad = $(this).val();
+                refreshRadius('pinkRadius', rad);
+                $.cookie('dots_radius_pink', rad);
+            });
+        $('#orangeInputRadius')
+            .bind('keyup', function(e) {
+                var rad = $(this).val();
+                refreshRadius('orangeRadius', rad);
+                $.cookie('dots_radius_orange', rad);
+            });
+        $('#purpleInputRadius')
+            .bind('keyup', function(e) {
+                var rad = $(this).val();
+                refreshRadius('purpleRadius', rad);
+                $.cookie('dots_radius_purple', rad);
+            });
+
+
+        $('#yellowInputOpacity').bind('keyup', function(e) {
+
+            var op = $(this).val();
+
+            if ('' != $(this).val()) {
+                rereshOpacity('yellowRadius', op);
+            }
+        });
+        $('#greenInputOpacity').bind('keyup', function(e) {
+            var op = $(this).val();
+            if ('' != $(this).val()) {
+                rereshOpacity('greenRadius', op);
+            }
+        });
+        $('#redInputOpacity').bind('keyup', function(e) {
+            var op = $(this).val();
+            if ('' != $(this).val()) {
+                rereshOpacity('redRadius', op);
+            }
+        });
+        $('#whiteInputOpacity').bind('keyup', function(e) {
+            var op = $(this).val();
+            if ('' != $(this).val()) {
+                rereshOpacity('whiteRadius', op);
+            }
+        });
+        $('#pinkInputOpacity').bind('keyup', function(e) {
+            var op = $(this).val();
+            if ('' != $(this).val()) {
+                rereshOpacity('pinkRadius', op);
+            }
+        });
+        $('#orangeInputOpacity').bind('keyup', function(e) {
+            var op = $(this).val();
+            if ('' != $(this).val()) {
+                rereshOpacity('orangeRadius', op);
+            }
+        });
+        $('#purpleInputOpacity').bind('keyup', function(e) {
+            var op = $(this).val();
+            if ('' != $(this).val()) {
+                rereshOpacity('purpleRadius', op);
+            }
+        });
+
+        var sliderVal = 1;
+        $("#slide_me").slider({
+            value: 0,
+            min: 1,
+            max: 10,
+            step: 1,
+            orientation: 'horizontal',
+            slide: function(event, ui) {
+                //$("#my_value").html(ui.value);
+                refreshLayer(ui.value);
+                sliderVal = ui.value;
+            }
+        });
+        $('#layerCountries').bind('keyup', function(e) {
+            var _val = $(this).val();
+            refreshLayer(_val);
+        });
+
+        @*function getMvcModel(dotsGroupName){
+        if(dotsGroupName == "pink"){
+            return {'Html.Raw(Model.PinkNew.First().radius)','@Html.Raw(Model.GreenNew.FirstOrDefault()==null?"":"true")'};
+        }
+        return null;
+    }*@
+        //provjeri dali je '/Model (on je prazan ako View u bazi postoji ali je  prazan) prazan sprečava error aplikacije
+        //za prazan model podesi vrjednosti a aza puni podesi vrijednosti
+
+        function disableInput(group) {
+            $.cookie('dots_' + group, false);
+            $.cookie('dots_' + group + 'Arrow', false);
+            $.cookie('dots_' + group + 'Radius', false);
+            $.cookie('dots_radius_' + group, '');
+
+            $('#' + group + 'Radius').attr('checked', false);
+            $('#' + group + 'InputRadius,#' + group + 'Radius,#' + group + 'InputOpacity,#' + group + 'Arrow,#barCheckbox' + group.capitalizeFirstLetter() + '').prop("disabled", true);
+            $('#' + group + 'InputRadius,#' + group + 'Radius,#' + group + 'InputOpacity,#' + group + 'Arrow,#barCheckbox' + group.capitalizeFirstLetter() + '').parent().css("color", "lightgrey");
+        }
+        var geocoder;
+        function wideMap() {
+            geocoder=new google.maps.Geocoder();
+            $("#googftMapContainer").addClass("map-frame-wide");
+            $("#googft-mapCanvas").addClass("googft-map-canvas-wide");
+            $("#googft-mapCanvas").addClass("googft-map-canvas");
+            $(".container").attr("style", "overflow:visible");
+            google.maps.event.trigger(map, 'resize');
+            geocoder.geocode({'address':'USA'},function(results,status){
+                if(status==google.maps.GeocoderStatus.OK){
+                    map.setCenter(results[0].geometry.location);
+                    map.fitBounds(results[0].geometry.viewport)
+                }else{
+                    console.log("GEOCODE STATUS ERROR");
+                }
+            })
+        }
+
+        function hideWideMap() {
+            geocoder=new google.maps.Geocoder();
+            $("#googftMapContainer").removeClass("map-frame-wide");
+            $("#googft-mapCanvas").removeClass("googft-map-canvas-wide");
+            $("#googft-mapCanvas").addClass("googft-map-canvas");
+            $(".container").attr("style", "width:970px");
+            google.maps.event.trigger(map, 'resize');
+            google.maps.event.trigger(map, 'resize');
+            geocoder.geocode({'address':'USA'},function(results,status){
+                if(status==google.maps.GeocoderStatus.OK){
+                    map.setCenter(results[0].geometry.location);
+                    map.fitBounds(results[0].geometry.viewport)
+                }else{
+                    console.log("GEOCODE STATUS ERROR");
+                }
+            })
+        }
+
+        function colorMap(color) {
+
+            _styleTemp[4].stylers[2].color = color;
+            map.setOptions({ styles: _styleTemp });
+
+        };
+
+/* heating map */
+        var pointarray, heatmap;
+        var csv = [];
+
+// http://stackoverflow.com/a/2901298/562440
+        function numberWithCommas(x) {
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function handleFileSelect(evt) {
+            //var file = evt.target.files[0];
+            var file=evt;
+            Papa.parse(file, {
+                header: true,
+                dynamicTyping: true,
+                complete: function(results) {
+                    csv = [];
+                    if (results.meta.fields.indexOf("weight") == -1) {
+                        for (idx in results["data"]) {
+                            var row = results["data"][idx];
+                            csv.push(new google.maps.LatLng(row["lat"], row["lon"]))
+                        }
+                    } else {
+                        var max = results["data"][0]["weight"];
+                        for (idx in results["data"]) {
+                            var row = results["data"][idx];
+
+                            max = Math.max(max, row["weight"]);
+                            csv.push({
+                                location: new google.maps.LatLng(row["lat"], row["lon"]),
+                                weight: row["weight"]
+                            });
+                        }
+
+                        $("#max-label").html("max: " + 4000000);// numberWithCommas(max));
+                        $("#max-slider").slider("option", "max", max);
+                        $("#max-slider").slider("option", "value", 4000000);
+                    }
+
+                    console.log(results);
+
+                    loadHeatmap(csv);
+                }
+            });
+        }
+
+        function loadHeatmap(csv) {
+            var pointArray = new google.maps.MVCArray(csv);
+            if (heatmap) heatmap.setMap(null);
+            // alert(csv);
+            heatmap = new google.maps.visualization.HeatmapLayer({
+                data: pointArray,
+                radius: $("#radius-slider").slider("value"),
+                opacity: $("#opacity-slider").slider("value"),
+                maxIntensity: $("#max-slider").slider("value")
+                //dissipating: true
+
+        });
+
+            heatmap.setMap(map);
+        }
+
+
+        /*end heating map*/
+        function getCsv() {
+
+
+        }
+
+        $(document).ready(function() {
+            /* heating map */
+            //$("#csv-file").change(handleFileSelect);
+
+            setTimeout(function() {
+               $.ajax({
+                   type: "GET",
+                   url: "../Scripts/Map/population.csv",
+                   success: function(data) { handleFileSelect(data) }
+               });
+                $("#opacity-slider,#radius-slider,#max-slider").slider({ disabled: false });
+            },8000);
+
+            //});
+            $(function() {
+                $("#draggable").draggable();
+            });
+            $(function() {
+                $("#radius-slider").slider({
+                    orientation: "horizontal",
+                    range: "min",
+                    min: 1,
+                    max: 50,
+                    value: 1,
+                    slide: function(event, ui) {
+                        $("#radius-label").html("radius: " + ui.value);
+                        if (heatmap == null) return;
+                        heatmap.set('radius', ui.value);
+                    },
+                    disabled:true
+                });
+                $("#opacity-slider").slider({
+                    orientation: "horizontal",
+                    range: "min",
+                    min: 0,
+                    max: 100,
+                    value: 50,
+                    slide: function(event, ui) {
+                        $("#opacity-label").html("opacity: " + ui.value / 100);
+                        if (heatmap == null) return;
+                        heatmap.set('opacity', ui.value / 100);
+                    },
+                    disabled:true
+                });
+                $("#max-slider").slider({
+                    orientation: "horizontal",
+                    range: "min",
+                    min: 0,
+                    max: 1,
+                    value: 0,
+                    slide: function(event, ui) {
+                        $("#max-label").html("max: " + numberWithCommas(ui.value));
+                        if (heatmap == null) return;
+                        heatmap.set('maxIntensity', ui.value);
+                    },
+                    disabled:true
+                });
+            });
+            /*end heating map*/
+
+            var modelDot = [
+                { radius: 1, group: 'pink', model: @Html.Raw(Json.Encode(Model.PinkNew.FirstOrDefault())) },
+                { radius: 1, group: 'yellow', model: @Html.Raw(Json.Encode(Model.YellowNew.FirstOrDefault())) },
+                { radius: 1, group: 'white', model: @Html.Raw(Json.Encode(Model.WhiteNew.FirstOrDefault())) },
+                { radius: 1, group: 'red', model: @Html.Raw(Json.Encode(Model.RedNew.FirstOrDefault())) },
+                { radius: 1, group: 'green', model: @Html.Raw(Json.Encode(Model.GreenNew.FirstOrDefault())) },
+                { radius: 1, group: 'orange', model: @Html.Raw(Json.Encode(Model.OrangeNew.FirstOrDefault())) },
+                { radius: 1, group: 'purple', model: @Html.Raw(Json.Encode(Model.PurpleNew.FirstOrDefault())) }
+            ];
+
+            $(".container").attr("style", "overflow:visible");
+            $(".container").attr("style", "width:970px");
+
+            $("#type_select").buttonset();
+            $("#country_select").buttonset();
+            $(".radio").change(function() {
+                if ($(this).is(":checked")) {
+                    var val = $(this).val();
+                    //alert(val);
+                    colorMap(val);
+                }
+            });
+            $("#pickColor").on("change", function() {
+                var colorPick = $("#pickColor").val();
+                $(".radio").prop('checked', false);
+                $("#type_select").buttonset();
+                colorMap(colorPick);
+            });
+            var geocoder = new google.maps.Geocoder();
+            $(".radioCountry").change(function() {
+                if ($(this).is(":checked")) {
+                    var name = $(this).val();
+                    geocoder.geocode({ 'address': name }, function(results, status) {
+                        if (status == google.maps.GeocoderStatus.OK) {
+                            map.fitBounds(results[0].geometry.viewport);
+                        } else {
+                            alert("Geocode error");
+                        }
+                    });
+                }
+            });
+            @*$('#pinkInputRadius').val('@Html.Raw(Model.PinkNew.First().radius)');*@
+            //$('#pinkInputRadius').val(modelDot[0].model);
+            //$('#yellowInputRadius').val(modelDot[1].model);
+            //$('#whiteInputRadius').val(modelDot[2]).model;
+            @*var greenExist='@Html.Raw(Model.GreenNew.FirstOrDefault()==null?"":"true")';*@ /*
+        - Prođi kroz model i provjeri dali je koji null ako je postavi na web stranici
+            polja za unos i checkbox na disable a tekst na gray
+        */
+            for (var i = 0; i < modelDot.length; i++) {
+                if (modelDot[i].model !== null) {
+                    $('#' + modelDot[i].group + 'InputRadius').val(modelDot[i].model.radius)
+                    refreshRadius(modelDot[i].group + 'Radius', modelDot[i].model.radius);
+                } else {
+                    disableInput(modelDot[i].group);
+                }
+            } //inicijalizacija - Cookie
+            var cook = $.cookie();
+        });
+
+
+    var regionMap = {};
+    var regionCircle;
+    var text;
+    var map = null;
+    var mgr = null;
+    var icons = {};
+    var allmarkers = [];
+    var gmarkers = [];
+    var gcircle = [];
+    var _styleTemp = null;
+
+    google.load('visualization', '1', { packages: ['corechart'] });
+    var _wide = false;
+    var layer = new google.maps.FusionTablesLayer();
+
+    function initialize() {
+        //var myOptions = {
+        //    zoom: 6,
+        //    center: new google.maps.LatLng(54.79031350062131, -2.9132108593199835),
+        //    mapTypeId: google.maps.MapTypeId.ROADMAP
+        //};
+        google.maps.visualRefresh = true;
+
+        var style1 = [
+        {
+            "featureType": "administrative.locality",
+            "elementType": "labels",
+            "stylers": [
+                { "visibility": "off" }
+            ]
+        }, {
+            "featureType": "road",
+            "stylers": [
+                { "visibility": "off" }
+            ]
+        }, {
+            "featureType": "administrative",
+            "elementType": "labels",
+            "stylers": [
+                { "visibility": "off" }
+            ]
+        }, {
+            "featureType": "poi",
+            "stylers": [
+                { "visibility": "off" }
+            ]
+        }, {
+            "featureType": "landscape",
+            "stylers": [
+                { "visibility": "simplified" },
+                { "weight": 0.1 },
+                { "color": "#808080" }
+            ]
+        }, {
+            "featureType": "administrative.province",
+            "elementType": "all",
+            "stylers": [
+            { "visibility": "on" },
+                    { "invert_lightness": false }, { "color": "#3b050c" }, { "weight": 0.76 }, { "lightness": -10 }, { "gamma": 3.37 }
+            ]
+        }
+        ];
+        var style2 = [
+            {
+                "featureType": "administrative.locality",
+                "elementType": "labels",
+                "stylers": [
+                    { "visibility": "on" }
+                ]
+            }, {
+                "featureType": "road",
+                "stylers": [
+                    { "visibility": "on" }
+                ]
+            }, {
+                "featureType": "administrative",
+                "elementType": "labels",
+                "stylers": [
+                    { "visibility": "on" }
+                ]
+            }, {
+                "featureType": "poi",
+                "stylers": [
+                    { "visibility": "off" }
+                ]
+            }, {
+                "featureType": "landscape",
+                "stylers": [
+                    { "visibility": "on" },
+                    { "weight": 0.1 },
+                    { "color": "#D3D3D3" }
+                ]
+            }, {
+                "featureType": "administrative.province",
+                "stylers": [
+                    { "visibility": "on" },
+                    { "weight":0.3},
+                    {"color":"#ff0000"	}
+
+                ]
+            }, {
+                "featureType": "administrative.country",
+                "stylers": [
+                    { "visibility": "on" }
+                ]
+            }
+        ];
+        var style3 = [
+            {
+                "featureType": "water",
+                "elementType": "all",
+                "stylers": [
+                    { "visibility": "off" }
+                ]
+            },
+            {
+                "featureType": "administrative.locality",
+                "elementType": "labels",
+                "stylers": [
+                    { "visibility": "on" }
+                ]
+            }, {
+                "featureType": "road",
+                "stylers": [
+                    { "visibility": "on" }
+                ]
+            }, {
+                "featureType": "administrative",
+                "elementType": "labels",
+                "stylers": [
+                    { "visibility": "on" }
+                ]
+            }, {
+                "featureType": "poi",
+                "stylers": [
+                    { "visibility": "off" }
+                ]
+            }, {
+                "featureType": "landscape",
+                "stylers": [
+                    { "visibility": "on" },
+                    { "weight": 0.1 },
+                    { "color": "#a7a7a6" }
+                ]
+            }, {
+                "featureType": "administrative.province",
+                "elementType": "all",
+                "stylers": [
+                    { "invert_lightness": false }, { "color": "#000000" }, { "weight": 1.02 }, { "gamma": 3.37 }
+                ]
+            },
+        ];
+        _styleTemp = style2;
+
+        var myOptions = {
+            //center: new google.maps.LatLng(54.79031350062131, -2.9132108593199835),
+            center: new google.maps.LatLng(37.090240, -95.712891),
+
+            zoom: 4,
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            /* Definiranje stila */
+            // http://gmaps-samples-v3.googlecode.com/svn/trunk/styledmaps/wizard/index.html?utm_medium=twitter
+            styles: style2,
+            zoomControlOptions: {
+                style: google.maps.ZoomControlStyle.SMALL
+            },
+        };
+        map = new google.maps.Map(document.getElementById('googft-mapCanvas'), myOptions);
+        /* Definiranje prikazivanja regija */
+        /***/
+        //layer = new google.maps.FusionTablesLayer();
+
+        updateLayerQuery(layer);
+        layer.setMap(map);
+
+
+        /***/
+
+        setupMarkers();
+        /* 'idle' is map loaded*/
+        google.maps.event.addListener(map, 'idle', function() {
+            //var redCookie=
+            if ($.cookie('dots_red') == "true") {
+                $('#barCheckboxRed').attr('checked', true);
+                show("red");
+            } else {
+                $('#barCheckboxRed').attr('checked', false);
+                hide("red")
+            }
+
+            if ($.cookie('dots_white') == "true") {
+                show("white");
+                $('#barCheckboxWhite').attr('checked', true);
+            } else {
+                $('#barCheckboxWhite').attr('checked', false);
+                hide("white");
+            }
+
+            if ($.cookie('dots_yellow') == "true") {
+                show("yellow")
+                $('#barCheckboxYellow').attr('checked', true);
+            } else {
+                $('#barCheckboxYellow').attr('checked', false);
+                hide("yellow")
+            }
+
+            if ($.cookie('dots_pink') == "true") {
+                show("pink");
+                $('#barCheckboxPurple').attr('checked', true);
+            } else {
+                $('#barCheckboxPurple').attr('checked', false);
+                hide("pink");
+            }
+
+            if ($.cookie('dots_green') == "true") {
+                show("green");
+                $('#barCheckboxGreen').attr('checked', true);
+            } else {
+                $('#barCheckboxGreen').attr('checked', false);
+                hide("green");
+            }
+            if ($.cookie('dots_orange') == "true") {
+                show("orange");
+                $('#barCheckboxOrange').attr('checked', true);
+            } else {
+                $('#barCheckboxOrange').attr('checked', false);
+                hide("orange");
+            }
+            if ($.cookie('dots_purple') == "true") {
+                show("purple");
+                $('#barCheckboxPurpleReal').attr('checked', true);
+            } else {
+                $('#barCheckboxPurpleReal').attr('checked', false);
+                hide("purple");
+            }
+
+            //Arrow
+            if ($.cookie('dots_redArrow') == "true") {
+                $('#redArrow').attr('checked', true);
+                show("redArrow");
+            } else {
+                $('#redArrow').attr('checked', false);
+                hide("redArrow")
+            }
+
+            if ($.cookie('dots_whiteArrow') == "true") {
+                show("whiteArrow");
+                $('#whiteArrow').attr('checked', true);
+            } else {
+                $('#whiteArrow').attr('checked', false);
+                hide("whiteArrow");
+            }
+
+            if ($.cookie('dots_yellowArrow') == "true") {
+                show("yellowArrow")
+                $('#yellowArrow').attr('checked', true);
+            } else {
+                $('#yellowArrow').attr('checked', false);
+                hide("yellowArrow")
+            }
+
+            if ($.cookie('dots_pinkArrow') == "true") {
+                show("pinkArrow");
+                $('#pinkArrow').attr('checked', true);
+            } else {
+                $('#pinkArrow').attr('checked', false);
+                hide("pinkArrow");
+            }
+
+            if ($.cookie('dots_greenArrow') == "true") {
+                show("greenArrow");
+                $('#greenArrow').attr('checked', true);
+            } else {
+                $('#greenArrow').attr('checked', false);
+                hide("greenArrow");
+            }
+
+            if ($.cookie('dots_orangeArrow') == "true") {
+                show("orangeArrow");
+                $('#orangeArrow').attr('checked', true);
+            } else {
+                $('#orangeArrow').attr('checked', false);
+                hide("orangeArrow");
+            }
+
+
+            /*RADIUS DIAMETER*/
+            if ($.cookie('dots_radius_green') !== null) {
+                $('#greenInputRadius').val($.cookie('dots_radius_green'));
+                refreshRadius('greenRadius', $.cookie('dots_radius_green'));
+            }
+            if ($.cookie('dots_radius_red') !== null) {
+                $('#redInputRadius').val($.cookie('dots_radius_red'));
+                refreshRadius('redRadius', $.cookie('dots_radius_red'));
+            }
+            if ($.cookie('dots_radius_yellow') !== null) {
+                $('#yellowInputRadius').val($.cookie('dots_radius_yellow'));
+                refreshRadius('yellowRadius', $.cookie('dots_radius_yellow'));
+            }
+            if ($.cookie('dots_radius_pink') !== null) {
+                $('#pinkInputRadius').val($.cookie('dots_radius_pink'));
+                refreshRadius('pinkRadius', $.cookie('dots_radius_pink'));
+            }
+            if ($.cookie('dots_radius_white') !== null) {
+                $('#whiteInputRadius').val($.cookie('dots_radius_white'));
+                refreshRadius('whiteRadius', $.cookie('dots_radius_white'));
+            }
+            if ($.cookie('dots_radius_orange') !== null) {
+                $('#orangeInputRadius').val($.cookie('dots_radius_orange'));
+                refreshRadius('orangeRadius', $.cookie('dots_radius_orange'));
+            }
+            if ($.cookie('dots_radius_purple') !== null) {
+                $('#purpleInputRadius').val($.cookie('dots_radius_purple'));
+                refreshRadius('purpleRadius', $.cookie('dots_radius_purple'));
+            }
+
+
+            /*SHOW HIDE RADIUS*/
+            if ($.cookie('dots_greenRadius') == "true") {
+
+                show("greenRadius");
+                $('#greenRadius').attr('checked', true);
+            } else {
+
+                $('#greenRadius').attr('checked', false);
+                hide("greenRadius");
+            }
+
+            if ($.cookie('dots_pinkRadius') == "true") {
+                show("pinkRadius");
+                $('#pinkRadius').attr('checked', true);
+            } else {
+                $('#pinkRadius').attr('checked', false);
+                hide("pinkRadius");
+            }
+            if ($.cookie('dots_redRadius') == "true") {
+                show("redRadius");
+                $('#redRadius').attr('checked', true);
+            } else {
+                $('#redRadius').attr('checked', false);
+                hide("redRadius");
+            }
+            if ($.cookie('dots_whiteRadius') == "true") {
+                show("whiteRadius");
+                $('#whiteRadius').attr('checked', true);
+            } else {
+                $('#whiteRadius').attr('checked', false);
+                hide("whiteRadius");
+            }
+            if ($.cookie('dots_yellowRadius') == "true") {
+                show("yellowRadius");
+                $('#yellowRadius').attr('checked', true);
+            } else {
+                $('#yellowRadius').attr('checked', false);
+                hide("yellowRadius");
+            }
+            if ($.cookie('dots_orangeRadius') == "true") {
+                show("orangeRadius");
+                $('#orangeRadius').attr('checked', true);
+            } else {
+                $('#orangeRadius').attr('checked', false);
+                hide("orangeRadius");
+            }
+            if ($.cookie('dots_purpleRadius') == "true") {
+                show("purpleRadius");
+                $('#purpleRadius').attr('checked', true);
+            } else {
+                $('#purpleRadius').attr('checked', false);
+                hide("purpleRadius");
+            }
+
+        });
+
+        google.maps.event.addDomListener(document.getElementById('hideWideMap'), 'click', function() {
+            if (_wide == true) {
+                hideWideMap();
+                _wide = false;
+
+            } else {
+                wideMap();
+                _wide = true;
+            }
+
+
+        });
+        /*Fusion layer*/
+        google.maps.event.addDomListener(document.getElementById('county'), 'change', function() {
+            if ($('#county').prop("checked")) {
+                //layer = new google.maps.FusionTablesLayer();
+                //updateLayerQuery(layer);
+                //layer.setMap(map);
+                refreshLayer(sliderVal);
+                $('#slide_me').slider({
+                    disabled: false,
+                    value:sliderVal
+            });
+            } else {
+                //alert("UNChecked");
+                $('#slide_me').slider({disabled:true});
+                layer.setMap(null);
+            }
+
+        });
+
+        google.maps.event.addDomListener(document.getElementById('road'), 'change', function() {
+            if ($('#road').prop("checked")) {
+
+                _styleTemp[1].stylers[0].visibility = "on";
+
+                map.setOptions({ styles: _styleTemp }
+                );
+
+
+
+            } else {
+                // _styleTemp = style1;
+                _styleTemp[1].stylers[0].visibility = "off";
+                map.setOptions({ styles: style2 });
+            }
+        });
+
+        google.maps.event.addDomListener(document.getElementById('city'), 'change', function () {
+            if ($('#city').prop("checked")) {
+                _styleTemp[2].stylers[0].visibility = "on";
+
+                map.setOptions({ styles: _styleTemp }
+                );
+            } else {
+                _styleTemp[2].stylers[0].visibility = "off";
+
+                map.setOptions({ styles: style2 });
+            }
+        });
+
+
+        //google.maps.event.addDomListener(document.getElementById('greenInputRadius'),'change',function(){
+        //    alert("opa");
+        //});
+        //google.maps.event.addDomListener(document.getElementById('water'),'change',function(){
+        //    if($('#water').prop("checked")){
+        //        alert(style3[0].featureType);
+        //        map.setOptions({styles:style2}
+        //        )
+        //    }else{
+        //        map.setOptions({styles:style3});
+        //    }
+        //});
+
+        //promjeni boju kadje strelica iznad, kad se makne vratina staro
+        //klik na regiju zoomIn
+        google.maps.event.addListener(layer, 'click', function(event) {
+            layer.set("styles", [
+                {
+                    where: "County='" + event.row['County'].value + "'",
+                    polygonOptions: { fillColor: "#FFFF33", fillOpacity: 0.9 }
+                }
+            ]);
+            //style.fillColor = ;
+            //style.fillOpacity = '0.4';
+            /**/
+            for (var a in regionMap) {
+                if (event.row['County'].value == regionMap[a].county) {
+                    map.setCenter(regionMap[a].center);
+                    map.setZoom(7);
+                    //8
+                    return false;
+                }
+            }
+        });
+
+    }
+
+    /***/
+    function refreshLayer(_val) {
+        //id="layerCountries"
+        //var _temp = '@Html.Raw(Model.Opacity)';
+        //alert("TEST "+ _val/10);
+        var _temp = layer;
+        //alert(layer.styles[0].polygonOptions.fillOpacity);
+        layer.styles[0].polygonOptions.fillOpacity=_val/10;
+        layer.setMap(map);
+
+    }
+
+    function updateLayerQuery(layer, county) {
+
+
+        if (county && (county != "All"))
+            var where = " County ='" + county + "'";
+
+
+        layer.setOptions(
+            {
+                query: {
+                    select: 'geometry',
+                    from: '1mSb7smookwLKVqP3uKvrvhzy-6T87AdVEiL0_Rw',
+                    where: where,
+                    map: map,
+                    clickable: true,
+                    delay: 1,
+                    tolerance: 8
+                },
+                options: {
+                    styleId: 2,
+                    templateId: 2
+                },
+                styles: [
+                    {
+                        polygonOptions: { fillOpacity: @Html.Raw(Model.Opacity) }
+                    }
+                ]
+            });
+        for (var a in regionMap) {
+            if (county == regionMap[a].county) {
+                map.setCenter(regionMap[a].center);
+                map.setZoom(9);
+                return false;
+
+            }
+        }
+
+
+        if (county == "All") {
+            map.setZoom(7);
+            map.setCenter(new google.maps.LatLng(54.79031350062131, -2.9132108593199835));
+        }
+
+    }
+
+    /***/
+    var yellow = true;
+
+    function setupMarkers() {
+        @*var yellow =@Html.Raw(ViewBag.arrLaLoYellow);*@
+        @*//var green = ""+@Html.Raw(ViewBag.arrLaLoGreen);*@
+        @*////var red = ""+@Html.Raw(ViewBag.arrLaLoRed);*@
+        @*var white = ""+@Html.Raw(ViewBag.arrLaLoWhite);*@
+        @*//var pink = ""+@Html.Raw(ViewBag.arrLaLoPink);*@
+
+        var yellow = @Html.Raw(Json.Encode(Model.YellowNew));
+        var red = @Html.Raw(Json.Encode(Model.RedNew));
+        var white = @Html.Raw(Json.Encode(Model.WhiteNew));
+        var pink = @Html.Raw(Json.Encode(Model.PinkNew));
+        var green = @Html.Raw(Json.Encode(Model.GreenNew));
+        var orange = @Html.Raw(Json.Encode(Model.OrangeNew));
+        var purple = @Html.Raw(Json.Encode(Model.PurpleNew));
+
+        mgr = new MarkerManager(map);
+        google.maps.event.addListener(mgr, 'loaded', function() {
+
+            //postavi crvene točkice
+            if (red.length > 0)
+                mgr.addMarkers(getMarkersRed(), 5);
+            //postavi žute točkice
+            if (yellow.length > 0)
+                mgr.addMarkers(getMarkersYellow(), 5);
+            //postavi bijele točkice
+            if (white.length > 0)
+                mgr.addMarkers(getMarkersWhite(), 5);
+
+            if (green.length > 0)
+                mgr.addMarkers(getMarkersGreen(), 5);
+
+            if (pink.length > 0)
+                mgr.addMarkers(getMarkersPink(), 5);
+
+            if (orange.length > 0)
+                mgr.addMarkers(getMarkersOrange(), 5);
+
+            if (purple.length > 0)
+                mgr.addMarkers(getMarkersPurple(), 5);
+
+            // okrugle koje broje po regijama
+            //  mgr.addMarkers(getMarkers(),5,6);
+
+            //mgr.addMarkers(getMarkers(),9);
+            mgr.refresh();
+            // mgr.updateStatus(25);
+        });
+    }
+
+    //function updateStatus(html){
+    //    document.getElementById("status").innerHtml=html;
+    //}
+
+    function getMarkers() {
+        var batch = [];
+        for (var regMap in regionMap) {
+            if (regionMap[regMap].amounth != null && regionMap[regMap].amounth != 0) {
+                //text =	new MarkerWithLabel(textLab);
+                batch.push(new MarkerWithLabel({
+                    position: regionMap[regMap].center,
+                    labelContent: regionMap[regMap].amounth,
+                    labelAnchor: new google.maps.Point(5, 5),
+                    labelClass: "labels",
+                    //map: map,
+                    labelStyle: { opacity: 1.0 },
+                    icon: {},
+                    title: '',
+                    zindex: 12,
+                    optimized: false
+                })
+                );
+
+
+            }
+        }
+        return batch;
+        //google.maps.event.addListener();
+    }
+
+    var circleYellow = {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: 'yellow',
+        fillOpacity: .8,
+        scale: 3.5,
+        strokeColor: 'darkorange',
+        strokeWeight: 1
+    }
+    var circleRed = {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: 'red',
+        fillOpacity: .8,
+        scale: 3.5,
+        strokeColor: 'maroon',
+        strokeWeight: 1
+    }
+    var circleWhite = {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: 'white',
+        fillOpacity: .8,
+        scale: 3.5,
+        strokeColor: 'darkgray',
+        strokeWeight: 1
+
+    }
+    var circleGreen = {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: 'lawngreen',
+        fillOpacity: .8,
+        scale: 3.5,
+        strokeColor: 'green',
+        strokeWeight: 1
+    }
+
+
+    var circlePink = {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: 'pink',
+        fillOpacity: .8,
+        scale: 3.5,
+        strokeColor: 'deeppink',
+        strokeWeight: 1
+    }
+
+    var circleOrange = {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: 'tomato',
+        fillOpacity: .7,
+        scale: 3.5,
+        strokeColor: 'orange',
+        strokeWeight: 1
+    }
+
+    var circlePurple = {
+        path: google.maps.SymbolPath.CIRCLE,
+        fillColor: 'purple',
+        fillOpacity: .8,
+        scale: 3.5,
+        strokeColor: 'purple',
+        strokeWeight: 1
+    }
+
+    var markersWhite = new google.maps.Marker(circleWhite);
+
+
+    function hideGroupWhite() {
+        $.each(map.markers, function(i, marker) {
+            if (marker.category === 'white')
+                marker.visible = false;
+        });
+    }
+
+    function getMarkersYellow() {
+        var radius = @Html.Raw(Model.Radius);
+        var arrCord = @Html.Raw(Json.Encode(Model.YellowNew));
+        var color = "yellow";
+        return setMarkers(radius, arrCord, color);
+
+
+    }
+
+    String.prototype.capitalizeFirstLetter = function() {
+        return this.charAt(0).toUpperCase() + this.slice(1);
+    }
+
+    /*Postavi markere*/
+    function getMarkersRed() {
+        var radius = @Html.Raw(Model.Radius);
+        var arrCord = @Html.Raw(Json.Encode(Model.RedNew));
+        var color = "red"
+        return setMarkers(radius, arrCord, color);
+    }
+
+    function getMarkersWhite() {
+        var radius = @Html.Raw(Model.Radius);
+        var arrCord = @Html.Raw(Json.Encode(Model.WhiteNew));
+        var color = "white"
+        return setMarkers(radius, arrCord, color);
+    }
+
+    function getMarkersGreen() {
+        var radius = @Html.Raw(Model.Radius);
+        var arrCord = @Html.Raw(Json.Encode(Model.GreenNew));
+        var color = "green"
+        return setMarkers(radius, arrCord, color);
+    }
+
+    function getMarkersPink() {
+        var radius = @Html.Raw(Model.Radius);
+        var arrCord = @Html.Raw(Json.Encode(Model.PinkNew));
+        var color = "pink"
+        return setMarkers(radius, arrCord, color);
+    }
+
+    function getMarkersOrange() {
+        var radius = @Html.Raw(Model.Radius);
+        var arrCord = @Html.Raw(Json.Encode(Model.OrangeNew));
+        var color = "orange"
+        return setMarkers(radius, arrCord, color);
+    }
+
+    function getMarkersPurple(){
+        var radius = @Html.Raw(Model.Radius);
+        var arrCord = @Html.Raw(Json.Encode(Model.PurpleNew));
+        var color = "purple"
+        return setMarkers(radius, arrCord, color);
+    }
+
+
+
+    /*postavi nazive varijabli markera*/
+    function getCircle(color) {
+        if (color == 'green')
+            return circleGreen;
+        if (color == 'yellow')
+            return circleYellow;
+        if (color == 'white')
+            return circleWhite;
+        if (color == "pink")
+            return circlePink
+        if (color == 'red')
+            return circleRed;
+        if (color == 'orange')
+            return circleOrange;
+        if (color == 'purple')
+            return circlePurple;
+    }
+
+    function getStatus(idbox) {
+        if ($("#" + idbox).prop("checked")) {
+            //alert("checked");
+            return true;
+        } else {
+            //alert("Unchecked");
+            return false;
+        }
+
+    }
+
+    function setMarkers(radius, arrCord, color) {
+        var radius = 0;
+        for (var regM in arrCord) {
+            if (arrCord[regM].lat != null && arrCord[regM].lon != null) {
+                //text =	new MarkerWithLabel(textLab);
+                var latlng = new google.maps.LatLng(arrCord[regM].lat, arrCord[regM].lon);
+                //CREATE marker push pin
+                var marker = new google.maps.Marker({
+                    title: 'Id: ' + arrCord[regM].userId + ',\nName: ' + arrCord[regM].text,
+                    position: latlng,
+                    icon: getCircle(color),
+                    map: map,
+                    visible: true
+                });
+                marker.mycategory = color;
+                gmarkers.push(marker);
+                //CREATE label
+                var flagText = (arrCord[regM].action_flag.toString()).length < 2 ? '&nbsp;' + arrCord[regM].action_flag : arrCord[regM].action_flag;
+                //if we have morre then 2 digits adjust show in circle
+                var horPoint=0;
+                if(arrCord[regM].action_flag > 99){
+                    horPoint=9;
+                }else{
+                    horPoint=6;
+                }
+
+                //var vertPoint=arrCord[regM].action_flag.toString()).length < 2 ? 6 : 4;
+                marker = new MarkerWithLabel({
+                    //title: arrCord[regM].text,
+                    map: map,
+                    //animation:google.maps.Animation.DROP,
+                    position: latlng,
+                    //icon:circleYellow,
+                    icon: {
+                        //path: google.maps.SymbolPath.BACKWARD_OPEN_ARROW,
+                        path: google.maps.SymbolPath.CIRCLE,
+
+                        scale: 9.5,
+                        strokeWeight: 0.5,
+                        fillColor: 'white', //+ red[regM].color +'',
+                        fillOpacity: 0.4,
+
+                    },
+                    visible: getStatus(color + "Arrow"),
+                    title: 'Id: ' + arrCord[regM].userId + ',\nName: ' + arrCord[regM].text,
+                    //labelContent:arrCord[regM].action_flag != 0 ? arrCord[regM].action_flag : 0 ,
+                    //labelContent:(flagText.toString()).length,
+                    labelContent: flagText,
+                    /*for arrow*/
+                    //labelAnchor: new google.maps.Point(6, 24),
+                    labelAnchor: new google.maps.Point(horPoint, 7),
+                    labelClass: "labelsArrow"
+                });
+                //alert(arrCord[regM].action_flag);
+                /*Postavi na disable ako su 0 u poljima action_flag*/
+
+
+                marker.mycategory = color + "Arrow";
+                gmarkers.push(marker);
+                //CREATE radius
+                if (radius > 0 || arrCord[regM].radius > 0) {
+                    var circle2 = new google.maps.Circle({
+                        center: latlng,
+                        map: map,
+                        radius: arrCord[regM].radius * 1000,
+                        //radius:5*1000,
+                        //fillOpacity:1.0,
+                        strokeColor: color,
+                        strokeOpacity: 0.5,
+                        strokeWeight: 1,
+                        fillColor: color,
+                        //visible:getStatus(color+"Arrow")
+
+
+                    });
+                    circle2.mycategory = color + "Radius";
+                    gcircle.push(circle2);
+                    circle2.bindTo('latlng', marker, 'position');
+
+                }
+
+            }
+        }
+        return marker;
+
+    }
+
+    function boxClick(box, category) {
+
+        if (box.checked) {
+            show(category);
+            $.cookie('dots_' + category, true);
+        } else {
+            hide(category)
+            $.cookie('dots_' + category, false);
+        }
+    }
+
+    function refreshRadius(category, rad) {
+
+        for (var i = 0; i < gcircle.length; i++) {
+            if (gcircle[i].mycategory == category) {
+                gcircle[i].setRadius(parseInt(rad) * 1000);
+            }
+        }
+    }
+
+    function rereshOpacity(category, op) {
+        for (var i = 0; i < gcircle.length; i++) {
+
+            if (gcircle[i].mycategory == category) {
+                gcircle[i].setOptions({ fillOpacity: parseFloat(op) / 10 });
+            } else {
+
+            }
+        }
+    }
+
+    function show(category) {
+        for (var i = 0; i < gmarkers.length; i++) {
+            if (gmarkers[i].mycategory == category) {
+                gmarkers[i].setVisible(true);
+            }
+        }
+        for (var i = 0; i < gcircle.length; i++) {
+            if (gcircle[i].mycategory == category) {
+                gcircle[i].setVisible(true);
+            }
+        }
+    }
+
+    function hide(category) {
+        //document.write(category);
+        for (var i = 0; i < gmarkers.length; i++) {
+            if (gmarkers[i].mycategory == category) {
+
+                gmarkers[i].setVisible(false);
+            }
+        }
+        for (var i = 0; i < gcircle.length; i++) {
+            if (gcircle[i].mycategory == category) {
+                gcircle[i].setVisible(false);
+            }
+        }
+
+    }
+
+
+    function clearYellowMarkers() {
+        yellow = false;
+        setupMarkers();
+
+    }
+
+    var ruler1;
+    var ruler2;
+    var rulerpoly;
+    var ruler1label;
+    var ruler2label;
+
+    function removepoly() {
+        rulerpoly.setMap(null);
+        ruler1label.setMap(null);
+        ruler2label.setMap(null);
+    }
+
+    function removeruler() {
+        google.maps.event.clearListeners(ruler1, 'drag');
+        ruler1.setMap(null);
+        //rulerpoly.setMap(null);
+        google.maps.event.clearListeners(ruler2, 'drag');
+        ruler2.setMap(null);
+    }
+
+    function addruler() {
+
+
+        ruler1 = new google.maps.Marker({
+            position: map.getCenter(),
+            map: map,
+            draggable: true
+        });
+
+        ruler2 = new google.maps.Marker({
+            position: map.getCenter(),
+            map: map,
+            draggable: true
+        });
+
+        ruler1label = new Label({ map: map });
+        ruler2label = new Label({ map: map });
+        ruler1label.bindTo('position', ruler1, 'position');
+        ruler2label.bindTo('position', ruler2, 'position');
+
+        rulerpoly = new google.maps.Polyline({
+            path: [ruler1.position, ruler2.position],
+            strokeColor: "#FFFF00",
+            strokeOpacity: .7,
+            strokeWeight: 7
+        });
+        rulerpoly.setMap(map);
+
+        ruler1label.set('text', distance(ruler1.getPosition().lat(), ruler1.getPosition().lng(), ruler2.getPosition().lat(), ruler2.getPosition().lng()));
+        ruler2label.set('text', distance(ruler1.getPosition().lat(), ruler1.getPosition().lng(), ruler2.getPosition().lat(), ruler2.getPosition().lng()));
+
+
+        google.maps.event.addListener(ruler1, 'drag', function() {
+            rulerpoly.setPath([ruler1.getPosition(), ruler2.getPosition()]);
+            ruler1label.set('text', distance(ruler1.getPosition().lat(), ruler1.getPosition().lng(), ruler2.getPosition().lat(), ruler2.getPosition().lng()));
+            ruler2label.set('text', distance(ruler1.getPosition().lat(), ruler1.getPosition().lng(), ruler2.getPosition().lat(), ruler2.getPosition().lng()));
+        });
+
+        google.maps.event.addListener(ruler2, 'drag', function() {
+            rulerpoly.setPath([ruler1.getPosition(), ruler2.getPosition()]);
+            ruler1label.set('text', distance(ruler1.getPosition().lat(), ruler1.getPosition().lng(), ruler2.getPosition().lat(), ruler2.getPosition().lng()));
+            ruler2label.set('text', distance(ruler1.getPosition().lat(), ruler1.getPosition().lng(), ruler2.getPosition().lat(), ruler2.getPosition().lng()));
+        });
+
+    }
+
+    function distance(lat1, lon1, lat2, lon2) {
+        var R = 6371; // km (change this constant to get miles)
+        var dLat = (lat2 - lat1) * Math.PI / 180;
+        var dLon = (lon2 - lon1) * Math.PI / 180;
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        var d = R * c;
+        if (d > 1) return Math.round(d) + "km";
+        else if (d <= 1) return Math.round(d * 1000) + "m";
+        return d;
+    }
+
+    function Label(opt_options) {
+        // Initialization
+        this.setValues(opt_options);
+
+        // Label specific
+        var span = this.span_ = document.createElement('span');
+        span.style.cssText = 'position: relative; left: 0%; top: -8px; ' +
+            'white-space: nowrap; border: 0px; font-family:arial; font-weight:bold;' +
+            'padding: 2px; background-color: #ddd; ' +
+            'opacity: .75; ' +
+            'filter: alpha(opacity=75); ' +
+            '-ms-filter: "alpha(opacity=75)"; ' +
+            '-khtml-opacity: .75; ' +
+            '-moz-opacity: .75;';
+
+        var div = this.div_ = document.createElement('div');
+        div.appendChild(span);
+        div.style.cssText = 'position: absolute; display: none';
+    };
+
+    Label.prototype = new google.maps.OverlayView;
+
+    Label.prototype.onAdd = function() {
+        var pane = this.getPanes().overlayLayer;
+        pane.appendChild(this.div_);
+
+
+        // Ensures the label is redrawn if the text or position is changed.
+        var me = this;
+        this.listeners_ = [
+            google.maps.event.addListener(this, 'position_changed',
+                function() { me.draw(); }),
+            google.maps.event.addListener(this, 'text_changed',
+                function() { me.draw(); })
+        ];
+
+    };
+
+    Label.prototype.onRemove = function() {
+        this.div_.parentNode.removeChild(this.div_);
+        // Label is removed from the map, stop updating its position/text.
+        for (var i = 0, I = this.listeners_.length; i < I; ++i) {
+            google.maps.event.removeListener(this.listeners_[i]);
+        }
+    };
+
+    Label.prototype.draw = function() {
+        var projection = this.getProjection();
+        var position = projection.fromLatLngToDivPixel(this.get('position'));
+
+        var div = this.div_;
+        div.style.left = position.x + 'px';
+        div.style.top = position.y + 'px';
+        div.style.display = 'block';
+
+        this.span_.innerHTML = this.get('text').toString();
+    };
+
+    google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+
+    @* navigation *@
+    <script>
+        function drag_start(event) {
+            var style = window.getComputedStyle(event.target, null);
+            event.dataTransfer.setData("text/plain",
+            (parseInt(style.getPropertyValue("left"), 10) - event.clientX) + ',' + (parseInt(style.getPropertyValue("top"), 10) - event.clientY));
+        }
+
+        function drag_over(event) {
+            event.preventDefault();
+            return false;
+        }
+
+        function drop(event) {
+            var offset = event.dataTransfer.getData("text/plain").split(',');
+            var dm = document.getElementById('dragme');
+            dm.style.left = (event.clientX + parseInt(offset[0], 10)) + 'px';
+            dm.style.top = (event.clientY + parseInt(offset[1], 10)) + 'px';
+            event.preventDefault();
+            return false;
+        }
+
+        var dm = document.getElementById('dragme');
+        dm.addEventListener('dragstart', drag_start, false);
+        document.body.addEventListener('dragover', drag_over, false);
+        document.body.addEventListener('drop', drop, false);
+
+
+    </script>
+}
+
+<div class="main">
+    <!-- the draggable input and display controls -->
+    <div @*id="draggable"*@ style="background-color: white; width: 900px;overflow: visible">
+        @*<div id="project"><a href="https://github.com/joyofdata/csv-heatmap" target="X">github.com/joyofdata/csv-heatmap</a></div>*@
+        @*<input type="file" id="csv-file" name="files" />*@
+
+        <div>
+            <div style="float: left;margin-right:10px">
+
+                <div id="radius-label">radius: 1</div>
+                <div id="radius-slider"></div>
+            </div>
+            <div style="float: left;margin-right:10px">
+                <div id="opacity-label">opacity: 0.5</div>
+                <div id="opacity-slider"></div>
+            </div>
+            <div style="float: left">
+                <div id="max-label">max: -</div>
+                <div id="max-slider"></div>
+            </div>
+        </div>
+
+
+
+
+
+    </div>
+
+<div id="country_select" style="position:absolute; margin-left: 350px; margin-top: -50px" title="move to ">
+        <input type="radio" id="radioCountry1" name="radioCountry" class="radioCountry" value="United States" checked/><label for="radioCountry1"><span >United States</span></label>
+        <input type="radio" id="radioCountry2" name="radioCountry" class="radioCountry" value="United Kingdom"  /><label for="radioCountry2"><span>United Kingdom</span></label>
+        @*<input type="radio" id="radio3" name="crature_type" class="radio" value="#D3D3D3" /><label for="radio3"><span style="background-color: lightgray">&nbsp;&nbsp;</span></label>
+        <input type="radio" id="radio4" name="crature_type" class="radio" value="#F5FFFA" /><label for="radio4"><span style="background-color: whitesmoke">&nbsp;&nbsp;</span></label>*@
+
+    </div>
+    <aside draggable="true" id="dragme" ng-app="app">
+        <div style="float:left" >
+            <button id="hideWideMap" class="btn btn-default" style="height:42px"
+                    uib-popover="{{ !!popoverVisible ? 'Decrease chart':'Expand chart'}}"
+                    popover-trigger="'mouseenter'"
+                    popover-popup-delay="1000"
+                    popover-placement="right"
+                    popover-animation="true"
+                    ng-click="popoverVisible = !popoverVisible">
+                <span class="h4"><span class="glyphicon glyphicon-fullscreen"></span></span>
+            </button>
+        </div>
+        <div class="panel panel-primary" ng-controller="controller">
+
+            <div class="panel-heading" ng-click="visible = !visible">
+                <span class="h4">Manage Markers </span>
+                <span style="cursor:pointer" class="glyphicon glyphicon-menu-down pull-right" ng-hide="visible" title="expand"></span>
+                <span style="cursor:pointer" class="glyphicon glyphicon-menu-up pull-right" ng-show="visible" title="collapse"></span>
+            </div>
+
+            <div class="panel-body" ng-show="visible">
+                <div class="row">
+
+                    <div class="col-sm-4">
+                        <span class="h4" style="margin-left:1px;">Dots</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <input style="margin-top:10px" type="checkbox" id="barCheckboxWhite" onclick="boxClick(this,'white')" checked />
+                        <span style="margin-top:10px;margin-left:6px;position:absolute;"> white</span>
+                        <div id="statusWhite"></div>
+                    </div>
+                    <div class="col-sm-4">
+                        <input style="margin-top:10px" type="checkbox" id="barCheckboxRed" onclick="boxClick(this,'red')" checked />
+                        <span style="margin-top:10px;margin-left:6px;position:absolute;"> red</span>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <input style="margin-top:10px" type="checkbox" id="barCheckboxYellow" onclick="boxClick(this,'yellow')" checked />
+                        <span style="margin-top:10px;margin-left:6px;position:absolute;"> yellow</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <input style="margin-top:10px" type="checkbox" id="barCheckboxPurple" onclick="boxClick(this,'pink')" checked />
+                        <span style="margin-top:10px;margin-left:6px;position:absolute;"> pink</span>
+                    </div>
+
+                    <div class="col-sm-4">
+                        <input style="margin-top:10px" type="checkbox" id="barCheckboxGreen"
+                               onclick="boxClick(this,'green')" checked />
+                        <span style="margin-top:10px;margin-left:6px;position:absolute;"> green</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <input style="margin-top:10px" type="checkbox" id="barCheckboxOrange"
+                               onclick="boxClick(this,'orange')" checked />
+                        <span style="margin-top:10px;margin-left:6px;position:absolute;"> orange</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <input style="margin-top:10px" type="checkbox" id="barCheckboxPurpleReal" onclick="boxClick(this,'purple')" checked />
+                        <span style="margin-top:10px;margin-left:6px;position:absolute;"> purple</span>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+
+                    <div class="col-sm-7">
+                        <span class="h4">Action flag</span>
+                    </div>
+
+
+                    <div class="col-sm-6" @*style="background-color:gray"*@>
+                        <input style="margin-top:10px" type="checkbox" id="yellowArrow" onclick="boxClick(this,'yellowArrow')" />
+                        <span style="margin-top:10px;margin-left:6px;position:absolute;"> yellow arrow</span>
+                    </div>
+                    <div class="col-sm-6" @*style="background-color:gold"*@>
+                        <input style="margin-top:10px" type="checkbox" id="greenArrow"
+                               onclick="boxClick(this,'greenArrow')" checked />
+                        <span style="margin-top:10px;margin-left:6px;position:absolute;"> green arrow</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <input style="margin-top:10px" type="checkbox" id="redArrow" onclick="boxClick(this,'redArrow')" />
+                        <span style="margin-top:10px;margin-left:6px;position:absolute;"> red arrow</span>
+                    </div>
+                    <div class="col-sm-6">
+                        <input style="margin-top:10px" type="checkbox" id="whiteArrow" onclick="boxClick(this,'whiteArrow')" />
+                        <span style="margin-top:10px;margin-left:6px;position:absolute;"> white arrow</span>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-sm-8">
+                        <span class="h4">Radius</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <b>color</b>
+                    </div>
+                    <div class="col-sm-4">
+                        <b>diameter</b>
+                    </div>
+                    <div class="col-sm-5" style="padding-left:3px">
+                        <b>opacity 0-9</b>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <input style="margin-top:5px" type="checkbox" id="yellowRadius" onclick="boxClick(this,'yellowRadius')" checked />
+                        <span style="margin-top:5px;margin-left:6px;position:absolute;"> yellow</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" value="" id="yellowInputRadius" style="width:30px;height:15px;font-size:10px;padding:0px;margin-top:5px" />km
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text" value="" id="yellowInputOpacity" style="width:20px;height:15px;font-size:10px;padding:0px;margin-top:5px" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3" @*style="background-color:gray"*@>
+                        <input style="margin-top:5px" type="checkbox" id="greenRadius" onclick="boxClick(this,'greenRadius')" />
+                        <span style="margin-top:5px;margin-left:6px;position:absolute;"> green</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" value="" id="greenInputRadius" style="width:30px;height:15px;font-size:10px;padding:0px;margin-top:5px" />km
+
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text" value="" id="greenInputOpacity" style="width:20px;height:15px;font-size:10px;padding:0px;margin-top:5px" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3" @*style="background-color:gold"*@>
+                        <input style="margin-top:5px" type="checkbox" id="redRadius" onclick="boxClick(this,'redRadius')" checked />
+                        <span style="margin-top:5px;margin-left:6px;position:absolute;"> red </span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" value="" id="redInputRadius" style="width:30px;height:15px;font-size:10px;padding:0px;margin-top:5px" />km
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text" value="" id="redInputOpacity" style="width:20px;height:15px;font-size:10px;padding:0px;margin-top:5px" value="1" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <input style="margin-top:5px" type="checkbox" id="whiteRadius" onclick="boxClick(this,'whiteRadius')" checked />
+                        <span style="margin-top:5px;margin-left:6px;position:absolute;"> white</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" value="" id="whiteInputRadius" style="width:30px;height:15px;font-size:10px;padding:0px;margin-top:5px" />km
+                    </div>
+                    <div class="col-sm-2">
+                        <input type="text" value="" id="whiteInputOpacity" style="width:20px;height:15px;font-size:10px;padding:0px;margin-top:5px" />
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-sm-3">
+                        <input style="margin-top:5px" type="checkbox" id="pinkRadius" onclick="boxClick(this,'pinkRadius')" checked />
+                        <span style="margin-top:5px;margin-left:6px;position:absolute;"> pink</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" value="" id="pinkInputRadius" style="width:30px;height:15px;font-size:10px;padding:0px;margin-top:5px" value="1" />km
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" value="" id="pinkInputOpacity" style="width:20px;height:15px;font-size:10px;padding:0px;margin-top:5px" value="1" />
+                        @*<span style="color:gray">1-9</span>*@
+                    </div>
+                </div>
+                <div class="row">
+
+                    <div class="col-sm-3">
+                        <input style="margin-top:5px" type="checkbox" id="orangeRadius" onclick="boxClick(this,'orangeRadius')" checked />
+                        <span style="margin-top:5px;margin-left:6px;position:absolute;"> orange</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" value="" id="orangeInputRadius" style="width:30px;height:15px;font-size:10px;padding:0px;margin-top:5px" value="1" />km
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" value="" id="orangeInputOpacity" style="width:20px;height:15px;font-size:10px;padding:0px;margin-top:5px" value="1" />
+                        @*<span style="color:gray">1-9</span>*@
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <input style="margin-top:5px" type="checkbox" id="purpleRadius" onclick="boxClick(this,'purpleRadius'" checked />
+                        <span style="margin-top:5px;margin-left:6px;position:absolute;"> purple</span>
+                    </div>
+                    <div class="col-sm-5">
+                        <input type="text" value="" id="purpleInputRadius" style="width:30px;height:15px;font-size:10px;padding:0px;margin-top:5px" />km
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" value="" id="purpleInputOpacity" style="width:20px;height:15px;font-size:10px;padding:0px;margin-top:5px" />
+                    </div>
+                </div>
+
+                @*<div class="row" style="background-color:AppWorkspace">*@
+                @*<div class="col-sm-1" style="background-color:gray">&nbsp;</div>
+                    <div class="col-sm-1" style="background-color:gold">&nbsp;</div>
+                    <div class="col-sm-1" style="background-color:gray">&nbsp;</div>
+                    <div class="col-sm-1" style="background-color:gold">&nbsp;</div>
+                    <div class="col-sm-1" style="background-color:gray">&nbsp;</div>
+                    <div class="col-sm-1" style="background-color:gold">&nbsp;</div>
+                    <div class="col-sm-1" style="background-color:gray">&nbsp;</div>*@
+                @*<div clakss="col-sm-1" style="background-color:gold">&nbsp;</div>*@
+                @*<div class="col-sm-1" style="background-color:gray">&nbsp;</div>
+                    <div class="col-sm-1" style="background-color:gold">&nbsp;</div>
+                    <div class="col-sm-1" style="background-color:gray">&nbsp;</div>
+                    <div class="col-sm-1" style="background-color:gold">&nbsp;</div>*@
+
+                @*</div>*@
+
+                @*<br />*@
+                <div class="row">
+                    <div class="col-sm-10">
+                        <span class="h4">Adjust the map</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <input style="margin-top:5px" type="checkbox" id="county" checked />
+                        <span style="position:absolute;margin-top:5px;margin-left:10px"> countries</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <input style="margin-top: 5px" type="checkbox" id="road" checked />
+                        <span style="position: absolute; margin-top: 5px; margin-left: 10px"> roads</span>
+                    </div>
+                    <div class="col-sm-4">
+                        <input style="margin-top: 5px" type="checkbox" id="city" checked />
+                        <span style="position: absolute; margin-top: 5px; margin-left: 10px"> cities</span>
+                    </div>
+
+
+                    @*<div class="col-sm-12">
+                            <input type="text" name="name" value=" " id="layerCountries"/>
+                        </div>*@
+                    <div class="col-sm-12">
+                        <span id="my_value">&nbsp;</span>
+                    </div>
+                    <div class="col-sm-12">
+                        <div id="slide_me"></div>
+                    </div>
+                    <div class="col-sm-12">
+                        <div>&nbsp;</div>
+                    </div>
+
+
+                    <div class="col-sm-10">
+                        <div id="type_select" style="margin-left:0px">
+                            <input type="radio" id="radio1" name="crature_type" class="radio" value="#808080" />
+                            <label for="radio1"><span style="background-color: gray">&nbsp;&nbsp;</span></label>
+                            <input type="radio" id="radio2" name="crature_type" class="radio" value="#A0A8A0" />
+                            <label for="radio2"><span style="background-color: darkgray">&nbsp;&nbsp;</span></label>
+                            <input type="radio" id="radio3" name="crature_type" class="radio" value="#D3D3D3" checked="" />
+                            <label for="radio3"><span style="background-color: lightgray">&nbsp;&nbsp;</span></label>
+                            <input type="radio" id="radio4" name="crature_type" class="radio" value="#F5FFFA" />
+                            <label for="radio4"><span style="background-color: whitesmoke">&nbsp;&nbsp;</span></label>
+                            @*<input type="radio" id="radio5" name="crature_type" value=" "/>*@
+                        </div>
+                    </div>
+                    <div class="col-sm-1">
+                        <div style="padding: 0px; margin-left: -20px;margin-top:-4px ; margin-bottom: 4px; height: 25px; width: 20px;">
+                            <input type="color" class="btn btn-primary" name="name" value=" " id="pickColor"
+                                   style="width: 25px; height: 26px; cursor: pointer;padding: 0" title="Pick color" />
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="panel-footer" ng-show="visible">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <span class="h4">Ruler</span>
+                        </div>
+                        <div class="col-sm-1">
+                            <button type="button" onclick="addruler()"
+                                    class="btn-map" title="add ruler">
+                                <span class="glyphicon glyphicon-pushpin"> </span>
+                            </button>
+                        </div>
+                        <div class="col-sm-1">
+                            <button type="button" value="marker" onclick="removeruler()"
+                                    class="btn-map-remove" title="remove marker">
+                                <span class="glyphicon glyphicon-pushpin"> </span>
+                            </button>
+                        </div>
+                        <div class="col-sm-1">
+
+                            <button type="button" onclick="removepoly()" class="btn-map-remove" title="ruler line" style="max-width:24px;max-height:24px"><img src="~/Images/ruler-icon.png" width="22" style="margin-left:-5px;margin-top:-2px" /> </span> </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+    </aside>
+    <div class="holder">
+
+        @*<span style="width:50px;margin-left:100px">
+                <input type="checkbox" id="water" checked/>
+                <span style="position:absolute;margin-top:13px;margin-left:10px"> show water</span>
+            </span>*@
+        @*<div style="float:left;width:50px; margin-left:15px">
+                <input type="checkbox" value="ruler" onclick="addruler(this)" />
+                <span style="margin-top:5px;margin-left:6px;position:absolute;"> ruler</span>
+            </div>*@
+        @*<div style="float:left;width:50px;" >
+                <input style="margin-top:5px" type="checkbox" id="countDots" onclick="boxClick(this,'status')" />
+                <span style="margin-top:10px;margin-left:6px;position:absolute;"> Count dots</span>
+            </div>*@
+        <div>
+            @*@if (@Model. != null)
+                {*@
+            <div id="googftMapContainer" class="map-frame">
+                <div id="googft-mapCanvas" class="googft-map-canvas" @*style="float: left;margin-top:10px;height:1100px;width:910px;"*@></div>
+
+
+            </div>
+            @* } *@
+
+
+
+        </div>
+
+    </div>
+
+
+</div>

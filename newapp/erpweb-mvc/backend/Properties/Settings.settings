@@ -1,0 +1,578 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="backend.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="CommentFiles_SessionVar" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Comment_Files</Value>
+    </Setting>
+    <Setting Name="SiteVisit_Price" Type="System.Decimal" Scope="Application">
+      <Value Profile="(Default)">150</Value>
+    </Setting>
+    <Setting Name="Enquiries_FilesFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/Files/</Value>
+    </Setting>
+    <Setting Name="Enquiries_MaxFileSize" Type="System.Single" Scope="Application">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="SMTPPassword" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="SiteVisits_FilesFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/SiteVisitsFiles/</Value>
+    </Setting>
+    <Setting Name="AfterSalesCC" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="AfterSalesBcc" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="GoogleMap_Key" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">AIzaSyCleE5vbeb8HtYMso0gj5btzA2iD4li2nA</Value>
+    </Setting>
+    <Setting Name="dealermanagement_url" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/_user_application/store_management.asp</Value>
+    </Setting>
+    <Setting Name="DealerStore_MaximumPhotos" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">5</Value>
+    </Setting>
+    <Setting Name="dealerImagesFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/dealers/</Value>
+    </Setting>
+    <Setting Name="StoreOpeningTimeValues" Type="System.Collections.Specialized.StringCollection" Scope="Application">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;closed&lt;/string&gt;
+  &lt;string&gt;07:00&lt;/string&gt;
+  &lt;string&gt;07:30&lt;/string&gt;
+  &lt;string&gt;08:00&lt;/string&gt;
+  &lt;string&gt;08:30&lt;/string&gt;
+  &lt;string&gt;09:00&lt;/string&gt;
+  &lt;string&gt;09:30&lt;/string&gt;
+  &lt;string&gt;10:00&lt;/string&gt;
+  &lt;string&gt;10:30&lt;/string&gt;
+  &lt;string&gt;11:00&lt;/string&gt;
+  &lt;string&gt;11:30&lt;/string&gt;
+  &lt;string&gt;12:00&lt;/string&gt;
+  &lt;string&gt;12:30&lt;/string&gt;
+  &lt;string&gt;13:00&lt;/string&gt;
+  &lt;string&gt;13:30&lt;/string&gt;
+  &lt;string&gt;14:00&lt;/string&gt;
+  &lt;string&gt;14:30&lt;/string&gt;
+  &lt;string&gt;15:00&lt;/string&gt;
+  &lt;string&gt;15:30&lt;/string&gt;
+  &lt;string&gt;16:00&lt;/string&gt;
+  &lt;string&gt;16:30&lt;/string&gt;
+  &lt;string&gt;17:00&lt;/string&gt;
+  &lt;string&gt;17:30&lt;/string&gt;
+  &lt;string&gt;18:00&lt;/string&gt;
+  &lt;string&gt;18:30&lt;/string&gt;
+  &lt;string&gt;19:00&lt;/string&gt;
+  &lt;string&gt;20:00&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="StoreClosingTimeValues" Type="System.Collections.Specialized.StringCollection" Scope="Application">
+      <Value Profile="(Default)">&lt;?xml version="1.0" encoding="utf-16"?&gt;
+&lt;ArrayOfString xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema"&gt;
+  &lt;string&gt;closed&lt;/string&gt;
+  &lt;string&gt;08:00&lt;/string&gt;
+  &lt;string&gt;09:00&lt;/string&gt;
+  &lt;string&gt;10:00&lt;/string&gt;
+  &lt;string&gt;11:00&lt;/string&gt;
+  &lt;string&gt;12:00&lt;/string&gt;
+  &lt;string&gt;13:00&lt;/string&gt;
+  &lt;string&gt;14:00&lt;/string&gt;
+  &lt;string&gt;15:00&lt;/string&gt;
+  &lt;string&gt;16:00&lt;/string&gt;
+  &lt;string&gt;17:00&lt;/string&gt;
+  &lt;string&gt;17:30&lt;/string&gt;
+  &lt;string&gt;18:00&lt;/string&gt;
+  &lt;string&gt;18:30&lt;/string&gt;
+  &lt;string&gt;19:00&lt;/string&gt;
+  &lt;string&gt;20:00&lt;/string&gt;
+&lt;/ArrayOfString&gt;</Value>
+    </Setting>
+    <Setting Name="NewDealer_Cc" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="VAT" Type="System.Double" Scope="Application">
+      <Value Profile="(Default)">0.2</Value>
+    </Setting>
+    <Setting Name="imagesRootFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/</Value>
+    </Setting>
+    <Setting Name="distributors_with_old_design" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">208,247</Value>
+    </Setting>
+    <Setting Name="returns_fileroot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/feedback</Value>
+    </Setting>
+    <Setting Name="ManualImagesRoot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/manual/</Value>
+    </Setting>
+    <Setting Name="ManualImagesUpload" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/manual/upload/</Value>
+    </Setting>
+    <Setting Name="EnableNewDesignForHeadDistributor" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="Inspectors_Exclusions" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">282</Value>
+    </Setting>
+    <Setting Name="EventLogSource" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">asaqback</Value>
+    </Setting>
+    <Setting Name="TranslationEditors" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">192</Value>
+    </Setting>
+    <Setting Name="StatsKey" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">{00BAA5E3-2E27-41A8-9032-6E745453489D}</Value>
+    </Setting>
+    <Setting Name="Inspectors_SeeUnallocated" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">282</Value>
+    </Setting>
+    <Setting Name="Analytics_OtherCategories_ids" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">8,11,14,17</Value>
+    </Setting>
+    <Setting Name="Analytics_ImagesFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/analytics</Value>
+    </Setting>
+    <Setting Name="Analytics_ExcludedDistributors" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">273</Value>
+    </Setting>
+    <Setting Name="mobileAppImagesSubfolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">appimages</Value>
+    </Setting>
+    <Setting Name="AdminKey" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">8A4wrZepm64D7sw8b55m6969jZ89WZ</Value>
+    </Setting>
+    <Setting Name="npdFilesFolders" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/npdFiles</Value>
+    </Setting>
+    <Setting Name="StockOrderCalculationThreshold" Type="System.Double" Scope="Application">
+      <Value Profile="(Default)">3</Value>
+    </Setting>
+    <Setting Name="AnalyticsLogoUK" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Ukbbl.gif</Value>
+    </Setting>
+    <Setting Name="Analytics_BrandSales_NumOfProductsPerBrand" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="Analyitics_BrandSales_CleargreenTrays" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">907</Value>
+    </Setting>
+    <Setting Name="StatsKey2" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">{2D632DB6-1996-4B27-84E4-C0614831A1A1}</Value>
+    </Setting>
+    <Setting Name="Analyitics_BrandSales_ClearwaterBaths" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">201</Value>
+    </Setting>
+    <Setting Name="Dealer_BrandsNoEmail" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">7,8,9,10,3,5</Value>
+    </Setting>
+    <Setting Name="nondistributors_with_new_design" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Feedback_subscribers_5" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1,2,282</Value>
+    </Setting>
+    <Setting Name="Feedback_pg_chart_width" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">700</Value>
+    </Setting>
+    <Setting Name="Feedback_pg_chart_height" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
+    <Setting Name="Feedback_subscribers_6" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="StockSummaryChart_width" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">500</Value>
+    </Setting>
+    <Setting Name="StockSummaryChart_height" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
+    <Setting Name="Reports_FilesFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/Files</Value>
+    </Setting>
+    <Setting Name="SurveyChart_Bar_Width" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">750</Value>
+    </Setting>
+    <Setting Name="SurveyChart_Bar_Height" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
+    <Setting Name="SurveyChart_Pie_Width" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
+    <Setting Name="SurveyChart_Pie_Height" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">300</Value>
+    </Setting>
+    <Setting Name="StockSummary_FactoriesIgnoreStock" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">12</Value>
+    </Setting>
+    <Setting Name="OMExport_9RefClients" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">45,55,149,321,1105</Value>
+    </Setting>
+    <Setting Name="SalesRepGraphsFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/salesrep/graphs/</Value>
+    </Setting>
+    <Setting Name="SalesRepGraphWidth" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">570</Value>
+    </Setting>
+    <Setting Name="SalesRepGraphHeight" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">320</Value>
+    </Setting>
+    <Setting Name="CWImportSalesLowerLimit" Type="System.Double" Scope="Application">
+      <Value Profile="(Default)">50</Value>
+    </Setting>
+    <Setting Name="PrintCreditNote_ClientsWithBSLogo" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">37</Value>
+    </Setting>
+    <Setting Name="BrandDocuments_IncludedClients" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">42</Value>
+    </Setting>
+    <Setting Name="SalesRep_SqFeetValues" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">&lt;1500,1500-3000,3000-5000,&gt;5000</Value>
+    </Setting>
+    <Setting Name="SalesRep_TurnoverValues" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">&lt;500k,500k-1m,1m-2m,&gt;2m</Value>
+    </Setting>
+    <Setting Name="BulkDownLoadMultipleUsers" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">200,37</Value>
+    </Setting>
+    <Setting Name="SalesRep_Radiuses" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">5,10,25,50,75</Value>
+    </Setting>
+    <Setting Name="SalesRepGraphWidth2" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">900</Value>
+    </Setting>
+    <Setting Name="StockAllocationClients" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">45,55,149,53</Value>
+    </Setting>
+    <Setting Name="ReturnsImagesFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/clients/returns/</Value>
+    </Setting>
+    <Setting Name="No_image" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/no_image.jpg</Value>
+    </Setting>
+    <Setting Name="Issue_MaxFile" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1.2</Value>
+    </Setting>
+    <Setting Name="SiteVisits_MaxFileSize" Type="System.Single" Scope="Application">
+      <Value Profile="(Default)">1.2</Value>
+    </Setting>
+    <Setting Name="Image_BrandId" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">3</Value>
+    </Setting>
+    <Setting Name="Feedback_subscribers" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1,2,282</Value>
+    </Setting>
+    <Setting Name="Feedback_Subject" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">{0}-New product feedback submitted - {1}</Value>
+    </Setting>
+    <Setting Name="Product_feedback_body" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Client: {0}&lt;br&gt;Factory: {1}&lt;br&gt;&lt;br&gt;Product: {2} - {3}&lt;br&gt;&lt;br&gt;What is the specific issue? {4} &lt;br&gt;&lt;br&gt;What is /are the specific question/s?  {5}  &lt;br&gt;&lt;br&gt;What is your suggestion for the resolution of this issue?  {6}&lt;br&gt;&lt;br&gt;Resolution:  {7}&lt;br&gt;&lt;br&gt;&lt;br&gt;Please check the system for full details&lt;br&gt;&lt;br&gt;&lt;br&gt;This is an automated message. Please do not reply to it</Value>
+    </Setting>
+    <Setting Name="DownloadGroupType" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="SalesRep_TopProducts" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="SalesRep_PieSliceThreshold" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">10</Value>
+    </Setting>
+    <Setting Name="ClaimsReportImage" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/Images/updates/</Value>
+    </Setting>
+    <Setting Name="Analytics_PreviousYearSeriesColor" Type="System.Drawing.Color" Scope="Application">
+      <Value Profile="(Default)">Orange</Value>
+    </Setting>
+    <Setting Name="Analytics_CurrentYearSeriesColor" Type="System.Drawing.Color" Scope="Application">
+      <Value Profile="(Default)">LightSkyBlue</Value>
+    </Setting>
+    <Setting Name="Analytics_PreviousYearBudgetColor" Type="System.Drawing.Color" Scope="Application">
+      <Value Profile="(Default)">102, 255, 102</Value>
+    </Setting>
+    <Setting Name="Analytics_CurrentYearBudgetColor" Type="System.Drawing.Color" Scope="Application">
+      <Value Profile="(Default)">0, 153, 51</Value>
+    </Setting>
+    <Setting Name="Analytics_NextYearSeriesColor" Type="System.Drawing.Color" Scope="Application">
+      <Value Profile="(Default)">255, 51, 0</Value>
+    </Setting>
+    <Setting Name="Analytics_NextYearThreshold" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">11</Value>
+    </Setting>
+    <Setting Name="DealerStatus_Brands" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1,2,4,11</Value>
+    </Setting>
+    <Setting Name="Analytics_BrochureRequest_Months" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">3</Value>
+    </Setting>
+    <Setting Name="Analytics_Brochure_WebSites" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1,2,4,11</Value>
+    </Setting>
+    <Setting Name="InspectionCategories" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Appearance,Dimension,Function,Material,Packaging</Value>
+    </Setting>
+    <Setting Name="LogFilesPath" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">d:\projects\data\logs</Value>
+    </Setting>
+    <Setting Name="BingMapKey" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">AuaCtghDJwoJLxkoE1NvUwLcdmAvOOvVR-sp12ci_D6gML68Ifb_siUO9tXJND-C</Value>
+    </Setting>
+    <Setting Name="Report_BrochureRequests_ImagesFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/Images/report/monthly_brochure_requests</Value>
+    </Setting>
+    <Setting Name="DealerExport_Brands" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1,2,4,11</Value>
+    </Setting>
+    <Setting Name="DealerExport_Distributors" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">79,85,211,103,95,97</Value>
+    </Setting>
+    <Setting Name="CustProductImagesRoot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/cprod/image/</Value>
+    </Setting>
+    <Setting Name="MastProductImagesRoot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload</Value>
+    </Setting>
+    <Setting Name="MastProductInstructionsRoot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/tech/</Value>
+    </Setting>
+    <Setting Name="CustProductDrawingsRoot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/cprod/dwg/</Value>
+    </Setting>
+    <Setting Name="CustProductDrawingsPngRoot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/cprod/dwg_891</Value>
+    </Setting>
+    <Setting Name="MastProductDrawingsRoot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/tech/dwg</Value>
+    </Setting>
+    <Setting Name="MastProductDrawingsPngRoot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/tech/dwg_891</Value>
+    </Setting>
+    <Setting Name="CustProductInstructionsRoot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/cprod/instructions/</Value>
+    </Setting>
+    <Setting Name="BrandCode" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">AR</Value>
+    </Setting>
+    <Setting Name="FirstDealerId" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">464</Value>
+    </Setting>
+    <Setting Name="NewDealerEditUserIds" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="ApplicationKey" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">MDIwNjg2MmJjZmI0NDNlY2I2MWRhZTA3MzlhMDVkNmM=</Value>
+    </Setting>
+    <Setting Name="ApplicationSecret" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">PyE/Pz8/Ckc/Pz9cP2E/b3s9Pz9SLjI/AD8/IT8VbD8=</Value>
+    </Setting>
+    <Setting Name="Delay_grabzit" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">29000</Value>
+    </Setting>
+    <Setting Name="BrandImages_folder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/report/brand_baners/</Value>
+    </Setting>
+    <Setting Name="InspectionDownload_exludedDocType" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="ChangeNoticeRootFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/changenotices</Value>
+    </Setting>
+    <Setting Name="TemplatesFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/templates/</Value>
+    </Setting>
+    <Setting Name="MeetingFilesFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/MeetingFiles/</Value>
+    </Setting>
+    <Setting Name="NewDealerDefaultSiteId" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">11</Value>
+    </Setting>
+    <Setting Name="InspectionImagesFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/qc/</Value>
+    </Setting>
+    <Setting Name="Product_HideInReports" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">G7 2TH,G12</Value>
+    </Setting>
+    <Setting Name="CustomersForOrderingPatterns" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="InstructionExternaFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/instructions</Value>
+    </Setting>
+    <Setting Name="InspectionImagesPre2013Folder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">qc_archive/pre2013</Value>
+    </Setting>
+    <Setting Name="aspsite_root" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://server1:8082</Value>
+    </Setting>
+    <Setting Name="EBInvoiceClientExceptions" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">333</Value>
+    </Setting>
+    <Setting Name="InspectionReport_ClientsForSupplierCodeReplacement" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">333</Value>
+    </Setting>
+    <Setting Name="BrandsWithAnalyticsOption" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">3,6,11</Value>
+    </Setting>
+    <Setting Name="ClaimsReportImagesTempFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ITFeedback_ListLimit" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">20</Value>
+    </Setting>
+    <Setting Name="Feedback_subscribers_7" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="InspectionImages2013Folder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">qc_archive/2013</Value>
+    </Setting>
+    <Setting Name="NonBrandInvoices_IgnoredClients" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">200,292,37,333</Value>
+    </Setting>
+    <Setting Name="BulkDownload_CombineFactories" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="OMExport_ExcludedDistributors" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">43</Value>
+    </Setting>
+    <Setting Name="DealerExport_InternationalDistributors" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">79,85,211,103,95,97,238</Value>
+    </Setting>
+    <Setting Name="imagesFolder_HiRes" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">tech/dwg/large_converted/</Value>
+    </Setting>
+    <Setting Name="Disabled_ForTestingOnStaging" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="ApplicationId" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="InspectionImages2014Folder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">qc_archive/2014</Value>
+    </Setting>
+    <Setting Name="Guarantee_10y" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">10 years domestic installations</Value>
+    </Setting>
+    <Setting Name="Guarantee_1y" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">1 year commercial installations</Value>
+    </Setting>
+    <Setting Name="TrackingNumberFilesFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/Files</Value>
+    </Setting>
+    <Setting Name="connExcelNew" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Provider=Microsoft.ACE.OLEDB.12.0;Data Source={0};Extended Properties="Excel 12.0 Xml;HDR=YES;IMEX=1";</Value>
+    </Setting>
+    <Setting Name="connExcel" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Provider=Microsoft.Jet.OLEDB.4.0;Data Source={0};Extended Properties="Excel 8.0"</Value>
+    </Setting>
+    <Setting Name="DealerConfirmed_CC" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="OnlineTrainingFiles" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/onlinetraining/</Value>
+    </Setting>
+    <Setting Name="HoursAdd_forUsaTime" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">-13</Value>
+    </Setting>
+    <Setting Name="returns_USfileroot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/USfeedback</Value>
+    </Setting>
+    <Setting Name="DealerSequenceExcludedCountries" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">GB,UK,IE,US,CA</Value>
+    </Setting>
+    <Setting Name="FeedbackSubscribers_M_CA" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="NrImagesRootUrl" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/nr</Value>
+    </Setting>
+    <Setting Name="Feedback_Subject_Rejection" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">{0}- Product feedback rejection submitted - {1}</Value>
+    </Setting>
+    <Setting Name="SMTPServerPortNumber" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">587</Value>
+    </Setting>
+    <Setting Name="SMTPSslEnable" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="TestMails" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="NoneEmail" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">none@none.com</Value>
+    </Setting>
+    <Setting Name="Ammara_BrandId" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">14</Value>
+    </Setting>
+    <Setting Name="apimap_key" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">AIzaSyCu3508i9tm_HHGSLlzoXiLqgp-9B-5YKc </Value>
+    </Setting>
+    <Setting Name="sageApiKey" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="sageApiUrl" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://localhost:60375</Value>
+    </Setting>
+    <Setting Name="slaveHostApiKey" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="UsCallLog_fileroot" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">/images/upload/us_call_log</Value>
+    </Setting>
+    <Setting Name="CreditNotes_CompanyMappings" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">283;79</Value>
+    </Setting>
+    <Setting Name="SMTPServer" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">mail.bigcompany.com</Value>
+    </Setting>
+    <Setting Name="SMTPAccount" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">enquiries@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="DealerImagePolicyLink" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://www.bigcompany.com/dealer/imagepolicy?id={0}</Value>
+    </Setting>
+    <Setting Name="AnalyticsLogoNonUK" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Logo.jpg</Value>
+    </Setting>
+    <Setting Name="Feedback_To" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">technical@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="Feedback_From" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">reports@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="OrderQuantityAnalysis_to" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ben@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="EnquiriesFromAccount" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">showroom@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="FromAccount" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">info@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="LogosFolder" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">https://bigcompany.com/clients/logos/</Value>
+    </Setting>
+    <Setting Name="DebugMailReceiver" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">david@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="AutoUpdatersAppInfoMail" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">info@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="Feedback_Bcc" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">tvrtko@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="NewDealer_Bcc" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ben@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="NewDealer_Bcc1" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">ben@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="Feedback_Cc" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">david@bigcompany.com</Value>
+    </Setting>
+    <Setting Name="NewDealer_EmailRecipients" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">monica@bigcompany.com</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

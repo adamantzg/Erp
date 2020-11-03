@@ -1,0 +1,26 @@
+﻿@model IEnumerable<Inspection_criteria>
+
+<table class="table_general" width="100%" border="0" cellspacing="1" cellpadding="1">
+  
+    <tr>
+        
+        <td colspan="3" class="sub_title">@ViewData["title"]</td>
+    </tr>
+    
+    <tr class="first_row">
+        <td width="70">Nr</td>
+        <td width="300">Point</td>
+        <td>Requirement</td>
+    </tr>
+    @{ var rowNo = 1;
+    }
+    @foreach (var crit in Model)
+    {
+        <tr>
+            <td>@(rowNo++)</td>
+            <td>@crit.point</td>
+            <td>@Html.Raw(crit.requirement.Replace("\x2264","&le;").Replace("\x2265","&ge;"))</td>
+        </tr>
+    }
+     
+</table>

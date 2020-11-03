@@ -1,0 +1,219 @@
+﻿@using System.Globalization
+@using company.Common
+@model InspectionsPlanListModel
+
+@functions {
+private string GetInspectionUrl(Inspections ins)
+{
+    //A: If status = 0 AND insp_id = “create report” then the link = “asaq_qc_add2.asp?insp_id=” & inspection_id
+    //B: if status = 0 AND insp_id <> “create report” then link = “asaq_qc_management_detail.asp?insp_id=” & inspection_id
+    //C: if status <> 0 then link = “asaq_qc_management_detail_print.asp?insp_id=” & inspection_id
+    if (ins.insp_status == 0)
+    {
+        if (ins.insp_id == "create report")
+        {
+            return string.Format("{0}/asaq_back/asaq_qc_add2.asp?insp_id={1}", Settings.Default.aspsite_root, ins.insp_unique);
+        }
+        return string.Format("{0}/asaq_back/asaq_qc_management_detail.asp?insp_id={1}", Settings.Default.aspsite_root, ins.insp_unique);
+    }
+    if (ins.insp_type == "SI")
+    {
+        return string.Format("{0}/asaq_back/2012_asaq_qc_management_fc_si_detail.asp?siid={1}", Settings.Default.aspsite_root, ins.insp_unique);
+    }
+    
+    return string.Format("{0}/asaq_back/asaq_qc_management_detail_print.asp?insp_id={1}", Settings.Default.aspsite_root, ins.insp_unique);
+}
+
+}
+<table style="margin-top: 2px" class="table">  
+      <tr > 
+        <td colspan="2" style="width:10%" class="inspectionplan_darkheader">&nbsp;</td>
+        <td style="width:60px;text-align: center" class="inspectionplan_lightheader">&nbsp;</td>
+        <td colspan="7" style="text-align: center" class="inspectionplan_lightheader">Week @CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(Model.DateFrom, CalendarWeekRule.FirstDay, DayOfWeek.Sunday)  &nbsp;@Model.DateFrom.Year</td>
+        <td style="width:60px;text-align: center" class="inspectionplan_lightheader">&nbsp;</td>
+      </tr>
+        <tr >
+            <td colspan="2" class="inspectionplan_darkheader" style="border: 0">QC Inspector</td>
+            <td class="inspectionplan_darkheader" >&nbsp;</td>
+            @for (int i = 0; i < 7; i++)
+            {
+	            <td class="inspectionplan_darkheader">@DateTimeFormatInfo.InvariantInfo.GetDayName(Model.DateFrom.AddDays(i).DayOfWeek)<br/>@Model.DateFrom.AddDays(i).ToString("dd/MM")</td>
+            }
+	        <td class="inspectionplan_darkheader">&nbsp;</td>
+        </tr>
+        @{ var row = 0;
+            var currUser = ViewBag.CurrentUser as User;
+            var isInspector = currUser?.admin_type == 5;
+            var isAdmin = currUser?.inspection_plan_admin == 1;
+           }
+        @foreach (var c in Model.Inspectors.OrderBy(insp => insp.userwelcome))
+        {
+            <tr class="inspectionplan_row">
+                
+                <td>@if (!Model.ForPdf && !Model.ForExport && isAdmin)
+                    {
+                        <a href="javascript:void(0)" onclick="edit(0, @c.userid,false) "><img src="/Images/small/Office.gif" /></a>
+                    }</td>
+                <td>@c.userwelcome</td>
+                @if (row == 0)
+                {
+                    <td rowspan="@Model.Inspectors.Count" style="vertical-align: middle">
+                        @if (!Model.ForPdf && !Model.ForExport)
+                        {
+                            <a href="@Url.Action("Plan", new { DateFrom = Model.DateFrom.AddDays(-1), DateTo = Model.DateTo.AddDays(-1), Model.location_id })"><img src="/Images/small/left_arrow.gif"/></a>
+                            <a href="@Url.Action("Plan", new { DateFrom = Model.DateFrom.AddDays(-7), DateTo = Model.DateTo.AddDays(-7), Model.location_id })"><img src="/Images/small/left_arrow_double.gif"/></a>
+                        }
+                        
+                    </td>
+                }
+                @for (int i = 0; i < 7; i++)
+                {
+                    var day = Model.DateFrom.AddDays(i);
+                    <td class="inspectionplan_datacell @if (day.DayOfWeek.In(DayOfWeek.Saturday, DayOfWeek.Sunday))
+                               {
+                                   @Html.Raw("inspectionplan_weekend")
+                               }
+                               else if (day == DateTime.Now.Date)
+                               {
+                                   @Html.Raw("inspectionplan_current")
+                               }
+                               ">
+                        @{
+                            var inspections = Model.Inspections.Where(ins => ( (day >= ins.insp_start && day <= (ins.insp_start?.AddDays(Convert.ToDouble(ins.insp_days - 1)) ?? DateTime.MinValue)) 
+                                                                                || (ins.Controllers.Count(cont=>cont.controller_id == c.userid) > 0 ) && day >= ins.Controllers?.FirstOrDefault(cont=>cont.controller_id == c.userid)?.startdate &&
+                                                                                       day <= ins.Controllers?.FirstOrDefault(cont => cont.controller_id == c.userid)?.startdate.AddDays(Convert.ToDouble(ins.Controllers?.FirstOrDefault(cont => cont.controller_id == c.userid)?.duration-1)))
+                                                                        && 
+                                                                             ((ins.Controllers.Count == 0 && (ins.insp_qc1 == c.userid || ins.insp_qc2 == c.userid || ins.insp_qc3 == c.userid || ins.insp_qc4 == c.userid || ins.insp_qc5 == c.userid || ins.insp_qc6 == c.userid))
+                                                                              || ins.Controllers.Any(co => co.controller_id == c.userid && day >= co.startdate && day <= co.startdate.AddDays(co.duration - 1)))).ToList();
+                            var counter = 1;
+                            foreach (var ins in inspections)
+                            {
+                                bool hasComment = !string.IsNullOrEmpty(ins.insp_comments);
+                                bool firstController = ins.insp_qc1 == c.userid || (ins.Controllers.Count > 0 && ins.Controllers[0].controller_id == c.userid);
+                                string text;
+                                if (ins.insp_type == "X")
+                                {
+                                    text = ins.insp_id;
+                                }
+                                else
+                                {
+                                    text = string.Format("{0}.{1}.{2}", ins.factory_code, (ins.insp_type == "LO" ? "LI" : ins.insp_type), ins.customer_code);
+                                }
+                                if (hasComment)
+                                {
+                                    text += "*";
+                                }
+                                if (!string.IsNullOrEmpty(ins.insp_comments_admin))
+                                {
+                                    text += "#";
+                                }
+                                if (!Model.ForExport)
+                                {
+                                    if (isAdmin && ins.insp_type != "SI")
+                                    {
+                                         <a href="javascript:void(0)" onclick="edit(@(ins.new_insp_id ?? ins.insp_unique), 0,@(ins.IsV2.ToString().ToLower()))" title="@(ins.custpo + " " +  ins.insp_comments)"  @(firstController ? Html.Raw("") : Html.Raw("style=\"text-decoration:none\""))>
+                                             @text
+                                         </a>
+                                    }
+                                    else
+                                    {
+                                        <a target="_blank" href="@GetInspectionUrl(ins)" title="@ins.custpo" @(firstController ? Html.Raw("") : Html.Raw("style=\"text-decoration:none\""))>@text</a>
+                                    }
+                                }
+                                else
+                                {
+                                    @text
+                                }
+                                if (counter++ != inspections.Count)
+                                {
+                                    <br/>
+                                }
+                            }
+                        }
+                    </td> 
+                    
+                }
+                @if (row == 0)
+                {
+                    <td rowspan="@Model.Inspectors.Count" style="vertical-align: middle;text-align: right">
+                        @if (!Model.ForPdf && !Model.ForExport)
+                        {
+                            <a href="@Url.Action("Plan", new { DateFrom = Model.DateFrom.AddDays(7), DateTo = Model.DateTo.AddDays(7), Model.location_id })"><img src="/Images/small/right_arrow_double.gif"/></a>
+                            <a href="@Url.Action("Plan", new { DateFrom = Model.DateFrom.AddDays(1), DateTo = Model.DateTo.AddDays(1), Model.location_id })"><img src="/Images/small/right_arrow.gif"/></a>
+                        }
+                    </td>
+                }
+                @{ row++;}
+            </tr>
+        }
+        <tr>
+            <td colspan="11" style="height: 5px" class="inspectionplan_darkheader"></td>
+        </tr>
+        @if (!isInspector || Model.Inspectors_Seeunallocated.Contains(currUser?.userid ?? 0) || isAdmin)
+        {
+            var na_inspections = Model.Inspections.Where(ins => ((WebUtilities.IsEmpty(ins.insp_qc1) && WebUtilities.IsEmpty(ins.insp_qc2) && WebUtilities.IsEmpty(ins.insp_qc3) && WebUtilities.IsEmpty(ins.insp_qc4) && WebUtilities.IsEmpty(ins.insp_qc5) && WebUtilities.IsEmpty(ins.insp_qc6))
+                                                                 && ins.Controllers.Count == 0 && (ins.Factory == null || ins.Factory.consolidated_port_mix !=1 || ins.Factory.consolidated_port2 == Model.location_id) && !string.IsNullOrEmpty(ins.factory_code))).ToList();
+
+            foreach (var fcode in na_inspections.Select(insp => insp.factory_code).Distinct())
+            {
+                <tr >
+                    <td colspan="2" class="table_main_td">@fcode</td>
+                    <td class="table_main_td">&nbsp;</td>
+                    @for (int i = 0; i < 7; i++)
+                    {
+                        var day = Model.DateFrom.AddDays(i);
+                        <td class="inspectionplan_datacell table_main_td">
+                            @{
+
+                                var counter = 1;
+                                var filtered_inspections = na_inspections.Where(ins => day >= ins.insp_start.Date() && day <= (ins.insp_start?.AddDays(Convert.ToDouble(ins.insp_days - 1)) ?? DateTime.MinValue) && ins.factory_code == fcode).ToList();
+                                foreach (var ins in filtered_inspections)
+                                {
+                                    bool hasComment = !string.IsNullOrEmpty(ins.insp_comments);
+                                    string text;
+                                    if (ins.insp_type == "X")
+                                    {
+                                        text = ins.insp_id;
+                                    }
+                                    else
+                                    {
+                                        text = string.Format("{0}.{1}.{2}", ins.factory_code, (ins.insp_type == "LO" ? "LI" : ins.insp_type), ins.customer_code);
+                                    }
+                                    if (hasComment)
+                                    {
+                                        text += "*";
+                                    }
+                                    if (!string.IsNullOrEmpty(ins.insp_comments_admin))
+                                    {
+                                        text += "#";
+                                    }
+                                    if (!Model.ForExport)
+                                    {
+                                        if (isAdmin && ins.insp_type != "SI")
+                                        {
+                                            <a href="javascript:void(0)" onclick="edit(@(ins.new_insp_id ?? ins.insp_unique), 0,@(ins.IsV2.ToString().ToLower()))" title="@(hasComment ? ins.insp_comments : ins.custpo)" >@text</a>
+                                        }
+                                        else
+                                        {
+                                            <a target="_blank" href="@GetInspectionUrl(ins)" title="@(ins.custpo + "  " + ins.insp_comments/*hasComment ? ins.insp_comments : ins.custpo*/)" >@text</a>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @text
+                                    }
+                                    if (counter++ != filtered_inspections.Count)
+                                    {
+                                        <br/>
+                                    }
+                                }
+                            }&nbsp;
+                        </td>
+                    }
+                </tr>
+
+            }
+        }
+
+
+    </table>

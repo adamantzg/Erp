@@ -1,0 +1,483 @@
+﻿@using company.Common
+@using backend.Controllers
+@model InspectionProductListModel
+@{
+    Layout = null;
+}
+
+@functions
+{
+    public List<InspectionListFlatLine> FlattenLines(List<Inspection_v2_line> lines)
+    {
+        return lines.Where(l => l.qty > 0 || l.OrderLine.IfNotNull(line => line.orderqty > 0))
+        .Select(l => new InspectionListFlatLine
+        {
+            id = l.id,
+            custpo = l.OrderLine?.Header?.custpo,
+            factory_id = l.OrderLine?.Cust_Product?.MastProduct?.factory_id,
+            factory_code = String.IsNullOrWhiteSpace(l.factory_code) ? Model.Factories.FirstOrDefault(f => f.user_id == l.OrderLine?.Cust_Product?.MastProduct?.factory_id)?.factory_code : l.factory_code,
+            factory_ref = l.OrderLine?.cprod_id != null ? l.OrderLine?.Cust_Product?.MastProduct?.factory_ref : l.insp_mastproduct_code,
+            cprod_code = l.OrderLine?.cprod_id != null ? l.OrderLine?.Cust_Product?.cprod_code1 : l.insp_custproduct_code,
+            cprod_name = l.OrderLine?.cprod_id != null ? l.OrderLine?.Cust_Product?.cprod_name : l.insp_custproduct_name,
+            qty = l.qty != null ? l.qty : l.OrderLine?.orderqty,
+            mast_id = l.OrderLine?.Cust_Product?.cprod_mast,
+            insp_id = l.insp_id,
+            CustProduct = l.OrderLine?.Cust_Product,
+            MastProduct = l.OrderLine?.Cust_Product?.MastProduct
+        })      
+        .ToList();
+    }
+}
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Big Company</title>
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    <style>
+        .header {
+            background-color: #F4F4F4;
+        }
+        .number {
+            text-align: right;
+        }
+        .tableheader {
+            background-color: #E0E0E0;
+            font-weight: bold;
+        }
+        @@media print {
+            * { margin: 1pt !important; padding: 1pt !important; }
+            a[href]:after {
+                content: none !important;
+            }
+            html, body {
+                font-size: 7.5pt;
+                height:100%; 
+                margin: 0 auto;
+            }
+            #container #content #main {
+               width: 90%;
+               margin: 0px;
+               padding: 0px;
+            }
+            aside#sidebar,header[role="banner"],footer,#comments,#respond {
+                display: none;
+            }
+            .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {
+                float: left;
+            }
+            .col-sm-12 {
+                width: 100%;
+            }
+            .col-sm-11 {
+                width: 91.66666666666666%;
+            }
+            .col-sm-10 {
+                width: 83.33333333333334%;
+            }
+            .col-sm-9 {
+                width: 75%;
+            }
+            .col-sm-8 {
+                width: 66.66666666666666%;
+            }
+            .col-sm-7 {
+                width: 58.333333333333336%;
+            }
+            .col-sm-6 {
+                width: 50%;
+            }
+            .col-sm-5 {
+                width: 41.66666666666667%;
+            }
+            .col-sm-4 {
+                width: 33.33333333333333%;
+             }
+             .col-sm-3 {
+                width: 25%;
+             }
+             .col-sm-2 {
+                width: 16.666666666666664%;
+             }
+             .col-sm-1 {
+                width: 8.333333333333332%;
+             }
+        }   
+    </style>
+</head>
+
+<body>
+@{ var insp = Model.Inspection;}
+<div class="container-fluid" ng-app="app">
+    <h3>Inspection List</h3>
+    <div class="col-lg-7 col-md-12 col-sm-12" ng-controller="controller" ng-cloak>
+        <table class="table header">
+            <tr>
+                <td>Factory Code</td>
+                <td>@insp.Factory.IfNotNull(f => f.factory_code)</td>
+                <td>Inspection start date</td>
+                <td>@if (!Model.EditMode) {
+                    <span>@insp.startdate.ToString("d")</span>
+                }
+                else {
+                    <input type="date" ng-show="!Inspection.HasControllers" ng-model="Inspection.startdate" />
+                    <span ng-show="Inspection.HasControllers" >{{FormatDate(Inspection.startdate)}}</span>
+                }
+                </td>
+                <td>Inspection Days</td>
+                <td>@insp.duration</td>
+            </tr>
+            <tr>
+                <td>Client Code</td>
+                <td>@insp.Client.IfNotNull(c => c.customer_code)</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>Report Number</td>
+                <td><a href="@Url.Action("LoadingReport2PDF", new {id=insp.id})">@insp.ComputedCode</a></td>
+        </tr>
+        <tr>
+            <td>PO Numbers</td>
+            <td colspan="3">
+            @if (Model.CombinedInspections?.Count > 0)
+            {
+                var custpos = insp.custpo.Split(',').Select(s => s.Trim()).Distinct().ToList();
+                foreach (var ci in Model.CombinedInspections)
+                {
+                    var inspCustpos = ci.Lines.Select(l => l.OrderLine?.Header?.custpo).Distinct().ToList();
+                    custpos.AddRange(inspCustpos.Where(c=>!custpos.Contains(c)));
+                }
+                @(string.Join(", ", custpos.Distinct()))
+            }
+            else
+            {
+                @insp.custpo
+            }
+            </td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td>QC Inspectors</td>
+            <td colspan="5">@string.Join(",", insp.Controllers.Select(c => c.Controller.IfNotNull(co => co.user_initials)))</td>
+        </tr>
+    </table>
+
+        <table class="table header">
+            <tr>
+                <td>FC Comments:</td>
+                <td>@insp.comments</td>
+            </tr>
+            <tr>
+                <td>Manager Comments:</td>
+                <td>@insp.comments_admin</td>
+            </tr>
+        </table>
+        @if(Model.ShowEditLink && !Model.EditMode) {
+            @Html.ActionLink("Edit page", "InspectionList", new { Model.Inspection.id, edit = true})
+        }
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>PO Number</td>
+                    <td>Factory</td>
+                    <td>Factory Product Code</td>
+                    <td>Client Product Code</td>
+                    <td>Client Description</td>
+                    <td class="number" style="width:10%">Quantity</td>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var counter = 1;
+                    var linesFlat = FlattenLines(insp.Lines);
+                    var combinedInspFlatLines = new List<InspectionListFlatLine>();
+                    foreach(var c in Model.CombinedInspections) {
+                        linesFlat.AddRange(FlattenLines(c.Lines));
+                    }
+                    linesFlat = linesFlat.GroupBy(l => new { l.custpo, l.factory_id, l.factory_code, l.factory_ref, l.cprod_code, l.cprod_name })
+                    .Select(g => new InspectionListFlatLine
+                    {
+                        id = g.First().id,
+                        custpo = g.Key.custpo,
+                        factory_id = g.Key.factory_id,
+                        factory_code = g.Key.factory_code,
+                        factory_ref = g.Key.factory_ref,
+                        cprod_code = g.Key.cprod_code,
+                        cprod_name = g.Key.cprod_name,
+                        qty = g.Sum(l => l.qty),
+                        mast_id = g.First().mast_id,
+                        insp_id = g.First().insp_id,
+                        CustProduct = g.First().CustProduct,
+                        MastProduct = g.First().MastProduct
+                    }).ToList();
+                }
+
+                @if (!Model.EditMode) {
+                    foreach (var l in linesFlat.OrderBy(l => l.factory_code).ThenBy(l => l.custpo).ThenBy(l => l.factory_ref)) {
+                        <tr @(Html.Raw(l.factory_id != null && l.factory_id != insp.factory_id ? "style=font-weight:bold" : ""))>
+                            <td>@(counter++)</td>
+                            <td>@l.custpo</td>
+                            <td>@l.factory_code</td>
+                            <td>@l.factory_ref</td>
+                            <td>@l.cprod_code</td>
+                            <td>@l.cprod_name
+                                @if (l.CustProduct != null && l.CustProduct.Parents != null && l.CustProduct.Parents.Count > 0)
+                                {
+                                    var parent = l.CustProduct.Parents[0];
+                                    <br/>
+                                    <span style="color: red">Note: Spare part for @parent.cprod_code1 (@parent.cprod_name)</span>
+                                }
+                            </td>
+                            <td class="number">
+                                @if (Model.EditMode) {
+                                    <input type="text" ng-model="l.qty" class="number" ng-change="LineChanged(l)" />
+                                }
+                                else {
+                                    @l.qty
+                                }
+                            </td>
+                        </tr>
+                        if (l.MastProduct != null && !string.IsNullOrEmpty(l.MastProduct.special_comments)) {
+                            <tr><td colspan="7"><strong>Product special comments:</strong>@l.MastProduct.special_comments</td></tr>
+                        }
+                        var returns = Model.Returns.Where(r => r.Product.IfNotNull(p => p.cprod_mast == l.mast_id)).ToList();
+                        if (returns.Any()) {
+
+                            <tr>
+                                <td width="20" align="left">&nbsp;</td>
+                                <td colspan="6" align="left">
+                                    <br />
+                                    <table style="border-style: solid; border-width: 3px; border-color: #7F99B2; width: 90%">
+                                        <tr>
+                                            <td height="18" colspan="2" style="background-color: #F4F4F4"><strong>NOTE: PREVIOUS RETURN FOR THIS PRODUCT</strong></td>
+                                        </tr>
+                                        @foreach (var r in returns) {
+                                            <tr>
+                                                <td height="18" style="background-color: #F4F4F4">Inspection Comments</td>
+                                                <td height="18" style="background-color: #F4F4F4">@r.factory_comments</td>
+                                            </tr>
+                                        }
+                                    </table>
+                                    <br />
+
+                                </td>
+                            </tr>
+                        }
+                        var changeNoticeProduct = Model.ChangeNoticesProducts.FirstOrDefault(c => c.MastProduct != null && c.MastProduct.factory_ref == l.factory_ref && c.product_po == l.custpo);
+                        if (changeNoticeProduct != null) {
+                            var factoryChange = Model.Factories.FirstOrDefault(f => f.user_id == changeNoticeProduct.ChangeNotice.IfNotNull(cn => cn.cn_factory));
+                            <tr>
+                                <td width="20" align="left">&nbsp;</td>
+                                <td colspan="6" align="left">
+                                    <br />
+                                    <table style="border-style: solid; border-width: 3px; border-color: #7F99B2; width: 90%">
+                                        <tr>
+                                            <td height="18" colspan="2" style="background-color: #F4F4F4"><strong>NOTE: PRODUCT CHANGE</strong></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td height="18" style="background-color: #F4F4F4;width: 20px">CNID:</td>
+                                            <td height="18" style="background-color: #F4F4F4"><a href="@(Settings.Default.aspsite_root)/asaq_back/2011_asaq_prod_createchange_preview.asp?cnid=@changeNoticeProduct.cn_id" target="_blank">CN-@factoryChange.IfNotNull(f => f.factory_code)-@(changeNoticeProduct.cn_id.ToString().PadLeft(3, '0'))</a></td>
+                                        </tr>
+
+                                    </table>
+                                    <br />
+
+                                </td>
+                            </tr>
+                        }
+
+                    }
+                }
+                else {
+                    <tr ng-repeat="l in Lines">
+                        <td>{{$index+1}}</td>
+                        <td>{{l.custpo}}</td>
+                        <td>{{l.factory_code}}</td>
+                        <td>{{l.factory_ref}}</td>
+                        <td>{{l.cprod_code}}</td>
+                        <td>{{l.cprod_name}}</td>
+                        <td class="number">
+                            <input type="text" ng-model="l.qty" class="number" ng-change="LineChanged(l)" />                            
+                        </td>
+                    </tr>
+                }
+                @if (Model.EditMode) {
+                    <tr class="tableheader">
+                        <td colspan="7">New lines</td>
+                    </tr>
+                    <tr>
+                        <td colspan="7">
+                            <button value="Add new line" ng-click="AddNewLine()">Add new line</button>
+                        </td>
+                    </tr>
+                    <tr class="tableheader">
+                        <td></td>
+                        <td></td>
+                        <td>Factory</td>
+                        <td>Factory product code</td>
+                        <td>Client Product Code</td>
+                        <td>Client Description</td>
+                        <td class="number">Quantity</td>
+                    </tr>
+                    <tr ng-repeat="l in NewLines">
+                        <td></td>
+                        <td><button value="Remove" ng-click="RemoveLine(l)">Remove</button></td>
+                        <td class="text"><input type="text" ng-model=l.factory_code class="text"/></td>
+                        <td class="text"><input type="text" ng-model=l.factory_ref class="text" /></td>
+                        <td><img src="~/images/Spinning_wheel_throbber.gif" ng-show="busy[l.id]" /><input type="text" ng-model="l.Product" typeahead-min-length="3" uib-typeahead="prod as prod.combined_code for prod in GetProducts(l,$viewValue)" typeahead-on-select="ProductSelected(l,$item, $model, $label, $event)" /></td>
+                        <td class="text"><input type="text" ng-model=l.cprod_name class="text" /></td>
+                        <td class="number"><input type="text" ng-model="l.qty" class="number"/></td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="5"></td>
+                    <td>TOTAL QTY</td>
+                    <td class="number">
+                        @if (Model.EditMode) {
+                            <span>{{GetTotal()}}</span>
+                        }
+                        else {
+                            @linesFlat.Sum(l => l.qty)
+                    
+                        }
+                     </td>
+                </tr>
+            </tbody>
+
+        </table>
+        @if (Model.EditMode) {
+            <img src="~/images/Spinning_wheel_throbber.gif" ng-show="update" />
+            <button value="Update" ng-click="Update()">Update</button>
+        }
+       
+</div>
+    <br />
+
+</div>
+
+@if (Model.EditMode) {
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/utils")
+    <script src="/Scripts/functions.js"></script>
+
+    <script>
+        
+        var insp = @Html.Raw(WebUtilities.JsonSerialize(new
+              {
+                  Model.Inspection.id,
+                  Model.Inspection.startdate,
+                  HasControllers = Model.Inspection.Controllers.Count > 0,
+                  Containers = Model.Inspection.Containers
+              }));
+
+        var app = angular.module('app',['ui.bootstrap']);
+
+        app.controller("controller", [
+        '$scope', '$http',
+        function ($scope, $http) {
+            $scope.Lines = @Html.Raw(WebUtilities.JsonSerialize(linesFlat));
+            $scope.NewLines = [];
+            $scope.productSearchTerm = '';
+            $scope.Products = [];
+            $scope.busy = {};
+            $scope.update = false;
+            $scope.newid = -1;
+            $scope.ChangedLines = [];
+            $scope.Inspection = insp;
+            $scope.Inspection.startdate = new Date($scope.Inspection.startdate);
+
+            $scope.AddNewLine = function() {
+                $scope.NewLines.push({factory_code: '', factory_ref:'',Product: {combined_code: ''}, cprod_name: '', qty: 0, cprod_id: null, id: $scope.newid, insp_id: insp.id});
+                $scope.busy[$scope.newid] = false;
+                $scope.newid--;
+            };
+            $scope.RemoveLine = function(l)
+            {
+                _.remove($scope.NewLines, {id: l.id});
+            }
+
+            $scope.GetProducts = function(line,term)
+            {
+                $scope.busy[line.id] = true;
+                if($scope.productSearchTerm.length > 0 && term.substring(0,$scope.productSearchTerm.length) == $scope.productSearchTerm)
+                {
+                    term = term.toUpperCase();
+                    $scope.busy[line.id] = false;
+                    return _.filter($scope.Products, function (p) {
+                        return p.cprod_code1.substring(0,term.length).toUpperCase() == term || p.cprod_name.substring(0,term.length).toUpperCase() == term || p.factory_ref.substring(0,term.length).toUpperCase() == term || p.factory_name.substring(0,term.length).toUpperCase() == term;
+                    });
+                }
+                $scope.productSearchTerm = term;
+                return $http.post('@Url.Action("GetProducts")',{prefixText: term}).
+                    then(function(response) {
+                        $scope.busy[line.id] = false;
+                        $scope.Products = response.data;
+                        return response.data;
+                    } );
+
+            }
+
+            $scope.ProductSelected = function(line, $item, $model, $label, $event)
+            {
+                line.Product = $item;
+                line.factory_code = $item.factory_code;
+                line.factory_ref = $item.factory_ref;
+                line.cprod_name = $item.cprod_name;
+                line.cprod_code = $item.cprod_code1;
+                line.cprod_id = $item.cprod_id;
+                line.factory_code = $item.factory_code;
+            }
+
+            $scope.GetTotal = function() {
+                var sum1 =  _.sumBy($scope.Lines, function(l) { return parseInt(l.qty);});
+                return sum1 + _.sumBy($scope.NewLines, function(l) { return parseInt(l.qty);});
+            }
+
+            $scope.LineChanged = function(l) {
+                if(_.find($scope.ChangedLines, {id: l.id}) == null)
+                    $scope.ChangedLines.push(l);
+            };
+
+            $scope.Update = function() {
+                var data = [];
+                var container_id = insp.Containers.length > 0 ? insp.Containers[0].id : 0;
+                $scope.update = true;                               
+
+                _.union($scope.NewLines, $scope.ChangedLines).forEach(function(l) {
+                    data.push({
+                        id: l.id,
+                        insp_id: l.insp_id,
+                        factory_code: l.factory_code,
+                        insp_mastproduct_code: l.factory_ref,
+                        insp_custproduct_code: l.cprod_id != null ? l.cprod_code : l.Product,
+                        insp_custproduct_name: l.cprod_name,
+                        cprod_id: l.cprod_id,
+                        Loadings: l.id < 0? [{container_id: container_id}] : null,
+                        qty: l.qty
+                    })
+                });
+                $http.post('@Url.Action("Update")', {insp: $scope.Inspection})
+                    .success(function()  {
+                        $http.post('@Url.Action("BulkUpdateLines")', {lines: data}).
+                            success(function(data) {
+                                location.href='@Url.Action("InspectionList", new { id=insp.id})';
+                        });
+                    });
+            };
+
+            $scope.FormatDate = function(date)
+            {
+                return FormatDate(date);
+            }
+
+        }]);
+    </script>
+}
+</body>
+</html>

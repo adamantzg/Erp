@@ -1,0 +1,1578 @@
+﻿@using company.Common
+@using Utilities = company.Common.Utilities
+@model OrderExportModel
+
+@{
+    Layout = null;
+    var extraFieldsCount = 0;   
+}
+
+@functions
+{
+
+    public string FormatDate(DateTime? d)
+    {
+        if(d != null) {
+            return d.ToString(Model.DateFormat/*, System.Globalization.CultureInfo.GetCultureInfo(Request.UserLanguages[0])*/);
+        }
+        return string.Empty;
+    }
+
+    public string Display9Ref(int? orderid)
+    {
+        return string.Format("9{0}", orderid);
+    }
+
+    public string GetOrderTypeDesc(int? type)
+    {
+        var result = "regular order";
+        /*0 = regular order
+        1 = stock order
+        2 = spares order
+        8 = call off order*/
+
+        switch (type)
+        {
+            case 1:
+                result = "stock";
+                break;
+            case 2:
+                result = "spares";
+                break;
+            case 8:
+                result = "call off";
+                break;
+            default:
+                result = "regular";
+                break;
+        }
+        return result;
+    }
+
+    public int GetColSpan(bool showBrandColumn, int orderCount )
+    {
+        return (5 + (Model.ShowBrandRangeColumn ? 1 : 0) + (Model.ShowSpecialComments ? 1 : 0) + (Model.Dimensions ? 3 : 0) + (Model.ShowSales ? 7 : 0) + 1 + (orderCount*2) + (Model.ShowTotalsAfterOrders ? 6 : 0)
+                + (Model.IncludeSalesForecast ? 25 : 0) + (Model.IncludeSalesHistory ? 14 : 0) + (((Model.Client != null && Model.Client.distributor > 0) || Model.client_id == -1 ? 14 : 0)) + 5);
+    }
+
+    public string GetProductColor(Cust_products product)
+    {
+        string color = string.Empty;
+
+        if (product != null && product.Color != null)
+        {
+            color = string.Format("style=\"background-color: {0}\"", product.Color.color_hex_code);
+        }
+
+        return color;
+    }
+
+    public string GetProductDiscontinuedCSS(Cust_products product)
+    {
+        string discount_color_css = "om_productrow_maindata";
+
+        if (product.cprod_status == "D" && product.Color == null)
+        {
+            discount_color_css = "om_discontinued";
+        }
+
+        return discount_color_css;
+    }
+
+    public int? GetMonth(ExportOrder o)
+    {
+        if (Model.MonthlySummaryBy == MonthSummaryBy.ETD)
+            return o.po_req_etd.Month();
+        else if(Model.MonthlySummaryBy == MonthSummaryBy.ETA)
+            return o.req_eta.Month();
+        return o.orderdate.Month();
+    }
+
+    public int? GetYear(ExportOrder o)
+    {
+        if (Model.MonthlySummaryBy == MonthSummaryBy.ETD)
+            return o.po_req_etd.Year();
+        else if (Model.MonthlySummaryBy == MonthSummaryBy.ETA)
+            return o.req_eta.Year();
+        return o.orderdate.Year();
+    }
+
+    public bool CheckMonth(Order_header o, int? month, int? year)
+    {
+        if (Model.MonthlySummaryBy == MonthSummaryBy.ETD)
+            return o.po_req_etd.Month() == month && o.po_req_etd.Year() == year;
+        else if(Model.MonthlySummaryBy == MonthSummaryBy.ETA)
+            return o.req_eta.Month() == month && o.req_eta.Year() == year;
+        return o.orderdate.Month() == month && o.orderdate.Year() == year;
+    }
+
+    public DateTime? ResolveDate(Order_lines l, List<int> companies_BookedInDate)
+    {
+        var result = l.Header.req_eta;
+        if (Model.client_id != null && companies_BookedInDate.Contains(Model.client_id.Value)) {
+            result = l.Header.req_eta_norm;
+        }
+        return result;
+    }
+ }
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>OM export</title>
+        <style type="text/css">
+             .om_upperheader { background-color: #CCFFFF}
+             .om_productrow_maindata {background-color: #CCFFFF}
+             .om_middleheader { background-color: gray; color: white}
+             .om_discontinued {background-color: #D0D0D0}
+             .om_prod_row {text-align: right}
+             .om_prod_row_onwater { background-color: #C0C0C0;text-align: right}
+             .om_prod_row_new {background-color: yellow}
+             .om_prod_row_received { background-color: #FF99CC;text-align: right}
+             .om_month_sum { background-color: #00FF00;text-align: right}
+             .om_saleshistory {background-color: #CCFFFF}
+
+             .om_stock {background-color: #FF99CC}
+             .om_sales {background-color: #C8C8FF}
+             .low_forecast {background-color: yellow}
+             body { font-size: 10px;font-family: arial}
+             .om_table { border-collapse: collapse;font-family: arial;font-size:10px}
+             /*.om_table td {border: 1px solid black}*/
+             .number {text-align: right}
+
+             .prodrow_salesdata {background-color: yellow }
+             .om_rangechange {border-top: 2px solid black}
+             .om_cust_prod_range_header {background-color: black; color: white}
+        </style>
+    </head>
+    <body>
+        @{
+
+
+            var orders = Model.Lines.
+            Where(l=>Model.IncludeBookedInOrders ? true : l.Header.booked_in_date == null).
+            GroupBy(l => l.orderid).
+            Select(g => new ExportOrder
+            {
+                orderid = g.Key,
+                customer_code = g.First().Header.Client.customer_code,
+                custpo = g.First().Header.custpo,
+                OrderType = GetOrderTypeDesc(g.First().Header.stock_order),
+                po_comments = g.First().Header.po_comments,
+                po_instructions = g.First().Header.po_instructions,
+                location = Model.Locations.FirstOrDefault(l=> l.id == (g.First().Header.location_override ?? g.First().Cust_Product.MastProduct.Factory.consolidated_port))?.Name,
+                orderdate = g.First().Header.orderdate,
+                po_req_etd = g.First().Header.po_req_etd,
+                original_po_req_etd = g.First().Header.original_po_req_etd,
+                container = (g.First().Header.container_type != null ? (Model.ContainerTypes.FirstOrDefault(c => c.container_type_id == g.First().Header.container_type) ?? new Container_types()).container_type_desc : string.Empty),
+                req_eta = g.First().Header.req_eta,
+                status =  Model.Processes?.FirstOrDefault(p=>p.code == Math.Min(g.First().Header.process_id ?? 0, g.First().Header.po_process_id ?? 0))?.brief,
+                Shipments = g.First().Header.Shipments,
+                combined_order = g.First().Header.combined_order,
+                ContainerRowPrice = g.Sum(l => l.PORowPrice),
+                ContainerPrice = g.Sum(l => l.orderqty * l.Cust_Product.MastProduct.GetPrice()),
+                ContainerCurrency = Model.Currencies.FirstOrDefault(c => c.curr_code == g.First().POCurrency)?.curr_symbol,
+				userid1 = g.First().Header.userid1,
+				isSpareOrder = g.All(l=>l.Cust_Product?.MastProduct?.category1 == Category1.category1_spares) || g.First().Header.custpo.StartsWith("SP")
+            }).ToList();
+            //Temp fix
+            orders = orders.Where(o => o.po_req_etd != null).ToList();
+
+            if (Model.OrderBy == ExportOrderBy.ETD) {
+                orders = orders.OrderBy(o => o.po_req_etd).ThenBy(o=>o.custpo).ToList();
+            }
+            else if (Model.OrderBy == ExportOrderBy.ETA) {
+                orders = orders.OrderBy(o => o.req_eta).ThenBy(o => o.custpo).ToList();
+            }
+            else if (Model.OrderBy == ExportOrderBy.Client) {
+                orders = orders.OrderBy(o => o.customer_code).ThenBy(o => o.custpo).ToList();
+            }
+            else if (Model.OrderBy == ExportOrderBy.ClientETD) {
+                orders = orders.OrderBy(o => o.customer_code).ThenBy(o => o.po_req_etd).ThenBy(o => o.custpo).ToList();
+            }
+            else {
+                orders = orders.OrderBy(o => o.orderdate).ThenBy(o => o.custpo).ToList();
+            }
+
+            int? month = -1;
+
+            if (orders.Count > 0 && orders[0].po_req_etd != null) {
+                month = GetMonth(orders[0]);
+            }
+            int? startMonth = month;
+
+            var showSummary = Model.MonthlySummary && (Model.OrderBy == ExportOrderBy.ETD || Model.OrderBy == ExportOrderBy.ETA || Model.OrderBy == ExportOrderBy.OrderDate);
+
+            var showBrandColumn = Model.ShowBrandRangeColumn;
+            var orderByCustProductRange = Model.ShowExtraValueFields;
+
+            //var showFactoryETD = !Model.ShowExtraValueFields;
+            var showFirstShipmentETD = !Model.ShowExtraValueFields;
+            bool showClientRow, showOrderDateToETDRow, showOrderTypeRow, showCommentsRow;
+            showClientRow = showOrderDateToETDRow = showOrderTypeRow = showCommentsRow = !Model.ShowExtraValueFields;
+            var renameAndMove9RefRow = Model.ShowExtraValueFields ;
+
+            var prods = Model.OrderBySeqNumber ? Model.Products.OrderBy(p => p.Prod.MastProduct.om_seq_number).ToList() :
+                Model.Products.OrderBy(p => p.Prod.MastProduct.category1 != Category1.category1_spares ? 0 : 1)
+                .ThenBy(p => orderByCustProductRange ? ("000" + p.Prod.ProductRange?.seq.ToString()).Right(4) : p.Prod.MastProduct.Factory.factory_code)
+                .ThenBy(p => Model.ShowBrandRangeColumn ? p.BrandRange : "")
+                .ThenBy(p =>showFirstShipmentETD ?  p.FirstShipmentEtd : DateTime.Today).ToList();
+
+            var factoryCurrenciesId = prods.Select(p => p.Prod?.MastProduct?.CurrencyId).Distinct().ToList();
+            var factoryCurrencies = Model.Currencies.Where(c => factoryCurrenciesId.Contains(c.curr_code)).ToList();
+
+
+        }
+        <table class="om_table">
+            <tr>
+                @{  var fixedRowsCount = 11;
+                    var variableRowsCount = (Model.Show9Ref ? 1 : 0) + (Model.ShowContainerPrice ? 2 : 0) + (showClientRow ? 1 : 0) +
+                        (showOrderDateToETDRow ? 1 : 0) + (showOrderTypeRow ? 1 : 0) + (showCommentsRow ? 1 : 0);
+                    var rowSpan = fixedRowsCount + variableRowsCount;
+                    var showStockAndSold = Model.ShowExtraValueFields;
+                    var last12MSales = Model.AllLines.Where(l => Utilities.GetMonthFromDate(l.Header.po_req_etd.Value) >= Utilities.GetMonthFromNow(-12)
+                                                             && Utilities.GetMonthFromDate(l.Header.po_req_etd.Value) <= Utilities.GetMonthFromNow(-1)
+                                                             && l.Header.stock_order != 1).ToList();
+                    var clients = Model.Last12mClientBreakdown ? last12MSales.GroupBy(l => l.Header.userid1).Select(g => new {
+                        user_id = g.Key,
+                        customer_code = g.First().Header.Client.customer_code
+                    }).OrderBy(g=>g.customer_code).ToList() : null;
+                    
+                    var productclientTotal = Model.Last12mClientBreakdown ?
+                        last12MSales
+                        .GroupBy(l=>Model.client_id != null ? l.cprod_id : l.Cust_Product.cprod_mast).ToDictionary(g=>g.Key, 
+                                                             g=> g.GroupBy(pc=>pc.Header.userid1).
+                                                             ToDictionary(gp=>gp.Key, gp=>gp.Sum(l=>l.orderqty))) : null;
+
+                    var firstColSpan = (Model.ShowFactoryCode ? 2 : 0) +
+                                2 +
+                                (Model.Dimensions ? 3 : 0) +
+                                (Model.ShowSales ? 7 : 0) +
+                                (showBrandColumn ? 1 : 0) +
+                                (Model.ShowSpecialComments ? 1 : 0) +
+                                (Model.ShowExtraValueFields ? factoryCurrencies.Count : 0) +
+                                (showStockAndSold ? Model.UseSalesOrders ? 6 : 5 : 0) +
+                                (Model.Last12mClientBreakdown ? clients.Count + 1 : 0) +
+                                (showFirstShipmentETD ? 1 : 0);
+                }
+                <td colspan="@(firstColSpan)" class="om_upperheader" rowspan="@(fixedRowsCount  + variableRowsCount)">&nbsp;</td>
+                <td class="om_upperheader">&nbsp;</td>
+                @{ 
+                    var totalColSpan = firstColSpan + 1;
+                }
+                @for (int i = 0; i < orders.Count;i++ )
+                {
+                    var order = orders[i];
+                    var monthChanged = GetMonth(order) != month;
+                    if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                    {
+                        if (i == orders.Count - 1 && !monthChanged)
+                        {
+                            totalColSpan ++;
+                            <td class="om_upperheader">&nbsp;</td>
+                        }
+                        month = GetMonth(order);
+                        <td class="om_month_sum">&nbsp;</td>
+                        totalColSpan++;
+                        if (i == orders.Count - 1 && monthChanged)
+                        {
+                            totalColSpan += 2;
+                            <td class="om_upperheader">&nbsp;</td>
+                            <td class="om_month_sum">&nbsp;</td>
+                        }
+                    }
+                    if (i != orders.Count - 1 || !showSummary)
+                    {
+                        totalColSpan++;
+                        <td class="om_upperheader">&nbsp;</td>
+                    }
+                }
+
+                @if(Model.ShowExtraValueFields) {
+                    totalColSpan += factoryCurrencies.Count;
+                    <td colspan="@(factoryCurrencies.Count)" rowspan="@(rowSpan)">&nbsp;</td>
+                }
+
+                @if (Model.ShowTotalsAfterOrders)
+                {
+                    totalColSpan += 6;
+                    <td colspan="5" class="om_upperheader" rowspan="@(rowSpan)">&nbsp;</td>
+                    <td rowspan="@(rowSpan)" >&nbsp;</td>
+                }
+
+
+                @if (Model.IncludeSalesForecast)
+                {
+                    totalColSpan++;
+                    <td rowspan="@(rowSpan)">&nbsp;</td>
+                    if(Model.ShowExtraValueFields) {
+                        totalColSpan += 1 + factoryCurrencies.Count;
+                        <td rowspan="@(rowSpan)" colspan="@(1 + factoryCurrencies.Count + extraFieldsCount)">&nbsp;</td>
+                    }
+                    totalColSpan += 24;
+                    <td class="om_stock" colspan="12" rowspan="@(fixedRowsCount -1 + variableRowsCount)" style="vertical-align: middle;text-align: center">Stock forecast&nbsp;</td>
+                    <td class="om_sales" colspan="12" rowspan="@(fixedRowsCount - 1 + variableRowsCount )" style="vertical-align: middle;text-align: center">Sales forecast</td>
+                    
+                }
+                @if (Model.IncludeSalesHistory)
+                {
+                    totalColSpan += 14;
+                    <td class="om_saleshistory" colspan="14" rowspan="@(fixedRowsCount - 1 + variableRowsCount)" style="vertical-align: middle;text-align: center">Sales history</td>
+                }
+
+                @if ((Model.Client != null && Model.Client.distributor > 0) || Model.client_id == -1)
+                {
+                    totalColSpan += 1;
+                    <td rowspan="@(rowSpan)">&nbsp;</td>
+                }
+                @{
+                    totalColSpan += 5;
+                }
+                <td rowspan="@(rowSpan)" colspan="5">&nbsp;</td>
+                @{ month = startMonth; }
+                
+            </tr>
+            @if(showClientRow) {
+                <tr>
+                    <td class="om_upperheader">client</td>
+                    @for (int i = 0; i < orders.Count;i++ )
+                    {
+                        var order = orders[i];
+                        var monthChanged = GetMonth(order) != month;
+                        if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                        {
+                            month = GetMonth(order);
+                            if (i == orders.Count - 1 && !monthChanged)
+                            {
+                                <td class="om_upperheader">@order.customer_code</td>
+                            }
+                            <td class="om_month_sum">Summary</td>
+                            if (i == orders.Count - 1 && monthChanged)
+                            {
+                                <td class="om_upperheader">@order.customer_code</td>
+                                <td class="om_month_sum">Summary</td>
+                            }
+                        }
+                        if (i != orders.Count - 1 || !showSummary)
+                        {
+                            <td class="om_upperheader">@order.customer_code</td>
+                        }
+                    }
+                
+                    @{ month = startMonth; }
+                </tr>
+            }
+            
+        <tr>
+	        @*<td colspan="12" class="om_upperheader"></td>*@
+	        <td class="om_upperheader">PO#</td>
+	        @for (int i = 0; i < orders.Count;i++ )
+	        {
+		        var order = orders[i];
+		        var monthChanged = GetMonth(order) != month;
+		        if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+		        {
+			        if (i == orders.Count - 1 && !monthChanged)
+			        {
+				        <td class="om_upperheader">@order.custpo</td>
+			        }
+			        month = GetMonth(order);
+			        <td class="om_month_sum">&nbsp;</td>
+			        if (i == orders.Count - 1 && monthChanged)
+			        {
+				        <td class="om_upperheader">@order.custpo</td>
+				        <td class="om_month_sum">&nbsp;</td>
+			        }
+		        }
+		        if (i != orders.Count - 1 || !showSummary)
+		        {
+			        <td class="om_upperheader">@order.custpo</td>
+		        }
+	        }
+	        @{ month = startMonth; }
+        </tr>
+        <tr>
+	        @*<td colspan="12" class="om_upperheader"></td>*@
+	        <td class="om_upperheader">Sale order?</td>
+	        @for (int i = 0; i < orders.Count;i++ )
+			{
+				var order = orders[i];
+
+				var isSale = Settings.Default.OMExport_SaleOrdersCustomerIds != null && Settings.Default.OMExport_SaleOrdersDateFrom != null &&
+				             Settings.Default.OMExport_SaleOrdersDateTo != null && Settings.Default.OMExport_SaleOrdersCustomerIds.Contains(order.userid1) &&
+				             order.orderdate >= Settings.Default.OMExport_SaleOrdersDateFrom && order.orderdate <= Settings.Default.OMExport_SaleOrdersDateTo && !order.isSpareOrder &&
+							 !Settings.Default.OMExport_SaleOrderExceptions.Contains(order.orderid) ?
+					"<span style=\"color:red\">Sale</span>" : "";
+
+				var monthChanged = GetMonth(order) != month;
+				if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+				{
+					if (i == orders.Count - 1 && !monthChanged)
+					{
+				        <td class="om_upperheader">@Html.Raw(isSale)</td>
+			        }
+			        month = GetMonth(order);
+			        <td class="om_month_sum">&nbsp;</td>
+			        if (i == orders.Count - 1 && monthChanged)
+			        {
+						<td class="om_upperheader">@Html.Raw(isSale)</td>
+				        <td class="om_month_sum">&nbsp;</td>
+			        }
+		        }
+		        if (i != orders.Count - 1 || !showSummary)
+		        {
+			        <td class="om_upperheader">@Html.Raw(isSale)</td>
+		        }
+	        }
+	        @{ month = startMonth; }
+        </tr>
+            @if (Model.Show9Ref && renameAndMove9RefRow) {
+                <tr>
+                    <td class="om_upperheader">Sage Ref#</td>
+                    @for (int i = 0; i < orders.Count; i++) {
+                        var order = orders[i];
+                        var monthChanged = GetMonth(order) != month;
+                        if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1)) {
+                            if (i == orders.Count - 1 && !monthChanged) {
+                                <td class="om_upperheader">@Display9Ref(order.orderid)</td>
+                            }
+                            month = GetMonth(order);
+                            <td class="om_month_sum">&nbsp;</td>
+                            if (i == orders.Count - 1 && monthChanged) {
+                                <td class="om_upperheader">@Display9Ref(order.orderid)</td>
+                                <td class="om_month_sum">&nbsp;</td>
+                            }
+                        }
+                        if (i != orders.Count - 1 || !showSummary) {
+                            <td class="om_upperheader">@Display9Ref(order.orderid)</td>
+                        }
+                    }
+                    
+                    @{ month = startMonth; }
+                </tr>
+            }
+            @if(showOrderTypeRow) {
+                <tr>
+                    @*<td colspan="12" class="om_upperheader"></td>*@
+                    <td class="om_upperheader">Order type</td>
+                    @for (int i = 0; i < orders.Count;i++ )
+                    {
+                        var order = orders[i];
+                        var monthChanged = GetMonth(order) != month;
+                        if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                        {
+                            if (i == orders.Count - 1 && !monthChanged)
+                            {
+                                <td class="om_upperheader">@order.OrderType</td>
+                            }
+                            month = GetMonth(order);
+                            <td class="om_month_sum">&nbsp;</td>
+                            if (i == orders.Count - 1 && monthChanged)
+                            {
+                                <td class="om_upperheader">@order.OrderType</td>
+                                <td class="om_month_sum">&nbsp;</td>
+                            }
+                        }
+                        if (i != orders.Count - 1 || !showSummary)
+                        {
+                            <td class="om_upperheader">@order.OrderType</td>
+                        }
+                    }
+                    @{ month = startMonth; }
+                </tr>
+            }
+            
+            <tr>
+                
+                <td class="om_upperheader">Status</td>
+                @for (int i = 0; i < orders.Count; i++)
+                {
+                    var order = orders[i];
+                    var monthChanged = GetMonth(order) != month;
+                    if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                    {
+                        if (i == orders.Count - 1 && !monthChanged)
+                        {
+                            <td class="om_upperheader">@order.status</td>
+                        }
+                        month = GetMonth(order);
+                        <td class="om_month_sum">&nbsp;</td>
+                        if (i == orders.Count - 1 && monthChanged)
+                        {
+                            <td class="om_upperheader">@order.status</td>
+                                <td class="om_month_sum">&nbsp;</td>
+                        }
+                    }
+                    if (i != orders.Count - 1 || !showSummary)
+                    {
+                        <td class="om_upperheader">@order.status</td>
+                    }
+                }
+                @{ month = startMonth; }
+            </tr>
+
+
+
+            @if(showCommentsRow) {
+                <tr>
+                   @* <td colspan="12" class="om_upperheader"></td>*@
+                    <td class="om_upperheader">comments</td>
+                    @for (int i = 0; i < orders.Count;i++ )
+                    {
+                        var order = orders[i];
+                        var monthChanged = GetMonth(order) != month;
+                        if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                        {
+                            if (i == orders.Count - 1 && !monthChanged)
+                            {
+                                <td class="om_upperheader">@order.po_instructions</td>
+                            }
+                            month = GetMonth(order);
+                            <td class="om_month_sum">&nbsp;</td>
+                            if (i == orders.Count - 1 && monthChanged)
+                            {
+                                <td class="om_upperheader">@order.po_instructions</td>
+                                <td class="om_month_sum">&nbsp;</td>
+                            }
+                        }
+                        if (i != orders.Count - 1 || !showSummary)
+                        {
+                            <td class="om_upperheader">@order.po_instructions</td>
+                        }
+                    }
+                    @{ month = startMonth; }
+                </tr>
+            }
+            
+            <tr>
+                @*<td colspan="12" class="om_upperheader"></td>*@
+                <td class="om_upperheader">order date</td>
+                @{
+                    var year = orders.Count > 0 ? GetYear(orders[0]) : 0;}
+                @for (int i = 0; i < orders.Count;i++ )
+                {
+                    var order = orders[i];
+                    var date = order.orderdate;
+    //if(order.combined_order != null) {
+    //    var parent = Model.CombinedOrders.FirstOrDefault(co => co.SourceOrderId == order.orderid);
+    //    if(parent != null) {
+    //        date = parent.COrder.orderdate;
+    //    }
+    //}
+                    var monthChanged = GetMonth(order) != month;
+                    if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                    {
+                        if (i == orders.Count - 1 &&!monthChanged)
+                        {
+                            <td class="om_upperheader">@FormatDate(date)</td>
+                        }
+                        <td class="om_month_sum">
+                            @{
+                                if (Model.MonthlySummaryBy == MonthSummaryBy.OrderDate) {
+                                    var yearChanged = year != GetYear(order);
+                                    year = GetYear(order);
+                                    if (i != orders.Count - 1 || yearChanged) {
+                                        if (month == 12) {
+                                            year--;
+                                        }
+                                    }
+                                    @(string.Format("{0}-{1}", year, month))
+                                }
+                            }
+
+                        </td>
+                        month = GetMonth(order);
+                        if (i == orders.Count - 1 && monthChanged) {
+                            <td class="om_upperheader">@FormatDate(order.orderdate)</td>
+                            <td class="om_month_sum">
+                                @if (Model.MonthlySummaryBy == MonthSummaryBy.OrderDate) {
+                                    @(string.Format("{0}-{1}", GetYear(order), month))
+                                }
+                            </td>
+                            }
+                        }
+                        if (i != orders.Count - 1 || !showSummary) {
+                        <td class="om_upperheader">@FormatDate(date)</td>
+                        }
+                }
+                @{ month = startMonth; }
+            </tr>
+            <tr>
+                @*<td colspan="12" class="om_upperheader"></td>*@
+                <td class="om_upperheader">req ETD</td>
+                @for (int i = 0; i < orders.Count;i++ )
+                {
+                    var order = orders[i];
+                    var monthChanged = GetMonth(order) != month;
+                    if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                    {
+                        if (i == orders.Count - 1 && !monthChanged)
+                        {
+                            <td class="om_upperheader">@FormatDate(order.original_po_req_etd)</td>
+                        }
+                        month = GetMonth(order);
+                        <td class="om_month_sum">&nbsp;</td>
+                        if (i == orders.Count - 1 && monthChanged)
+                        {
+                            <td class="om_upperheader">@FormatDate(order.original_po_req_etd)</td>
+                            <td class="om_month_sum">&nbsp;</td>
+                        }
+                    }
+                    if (i != orders.Count - 1 || !showSummary)
+                    {
+                        <td class="om_upperheader">@FormatDate(order.original_po_req_etd)</td>
+                    }
+                }
+                @{ month = startMonth; }
+            </tr>
+            <tr>
+                @*<td colspan="12" class="om_upperheader"></td>*@
+                <td class="om_upperheader">factory ETD</td>
+                
+                @for (int i = 0; i < orders.Count;i++ )
+                {
+                    var order = orders[i];
+                    var monthChanged = GetMonth(order) != month;
+                    if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                    {
+                        if (i == orders.Count - 1 && !monthChanged)
+                        {
+                            <td class="om_upperheader">@FormatDate(order.po_req_etd)</td>
+                        }
+                        <td class="om_month_sum">
+                            @{
+                                if (Model.MonthlySummaryBy == MonthSummaryBy.ETD) {
+                                    var yearChanged = year != GetYear(order);
+                                    year = GetYear(order);
+                                    if (i != orders.Count - 1 || yearChanged) {
+                                        if (month == 12) {
+                                            year--;
+                                        }
+                                    }
+                                    @(string.Format("{0}-{1}", year, month))
+                                }
+
+                            }
+                        </td>
+                        month = GetMonth(order);
+                        if (i == orders.Count - 1 && monthChanged)
+                        {
+                            <td class="om_upperheader">@FormatDate(order.po_req_etd)</td>
+                            <td class="om_month_sum">
+                                @if (Model.MonthlySummaryBy == MonthSummaryBy.ETD) {
+                                    @(string.Format("{0}-{1}", GetYear(order), month))
+                                }
+                                </td>                                                                    
+                        }
+                    }
+                    if (i != orders.Count - 1 || !showSummary)
+                    {
+                        <td class="om_upperheader">@FormatDate(order.po_req_etd)</td>
+                    }
+                }
+                @{ month = startMonth; }
+            </tr>
+            <tr>
+                @*<td colspan="12" class="om_upperheader"></td>*@
+                <td class="om_upperheader">container type</td>
+                @for (int i = 0; i < orders.Count;i++ )
+                {
+                    var order = orders[i];
+                    var combined = Model.CombinedOrders.FirstOrDefault(c => c.SourceOrderId == order.orderid);
+                    var text = combined != null && combined.COrder != null ? string.Format("Combined with {0}", combined.COrder.custpo) : order.container;
+                    var monthChanged = GetMonth(order) != month;
+                    if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                    {
+                        if (i == orders.Count - 1 && !monthChanged)
+                        {
+                            <td class="om_upperheader">@text</td>
+                        }
+                        month = GetMonth(order);
+                        <td class="om_month_sum">&nbsp;</td>
+                        if (i == orders.Count - 1 && monthChanged)
+                        {
+                            <td class="om_upperheader">@text</td>
+                            <td class="om_month_sum">&nbsp;</td>
+                        }
+                    }
+                    if (i != orders.Count - 1 || !showSummary)
+                    {
+                        <td class="om_upperheader">@text</td>
+                    }
+                }
+                @{ month = startMonth; }
+            </tr>
+            
+            <tr>
+                @*<td colspan="12" class="om_upperheader"></td>*@
+                <td class="om_upperheader">container number</td>
+                @for (int i = 0; i < orders.Count;i++ )
+                {
+                    var order = orders[i];
+                    var text = string.Empty;
+                    if (order.Shipments != null && order.Shipments.Count > 0)
+                    {
+                        text = order.Shipments[0].container_no;
+                    }
+                    var monthChanged = GetMonth(order) != month;
+                    if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                    {
+                        if (i == orders.Count - 1 && !monthChanged)
+                        {
+                            <td class="om_upperheader">@text</td>
+                        }
+                        month = GetMonth(order);
+                        <td class="om_month_sum">&nbsp;</td>
+                        if (i == orders.Count - 1 && monthChanged)
+                        {
+                            <td class="om_upperheader">@text</td>
+                            <td class="om_month_sum">&nbsp;</td>
+                        }
+                    }
+                    if (i != orders.Count - 1 || !showSummary)
+                    {
+                        <td class="om_upperheader">@text</td>
+                    }
+                }
+                @{ month = startMonth; }
+            </tr>
+
+            <tr>
+                
+                <td class="om_upperheader">Location</td>
+                @for (int i = 0; i < orders.Count; i++)
+                {
+                    var order = orders[i];
+                    var monthChanged = GetMonth(order) != month;
+                    if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                    {
+                        if (i == orders.Count - 1 && !monthChanged)
+                        {
+                            <td class="om_upperheader">@order.location</td>
+                        }
+                        month = GetMonth(order);
+                        <td class="om_month_sum">&nbsp;</td>
+                        if (i == orders.Count - 1 && monthChanged)
+                        {
+                            <td class="om_upperheader">@order.location</td>
+                                <td class="om_month_sum">&nbsp;</td>
+                        }
+                    }
+                    if (i != orders.Count - 1 || !showSummary)
+                    {
+                        <td class="om_upperheader">@order.location</td>
+                    }
+                }
+                @{ month = startMonth; }
+            </tr>
+
+            <tr>
+                @*<td colspan="12" class="om_upperheader"></td>*@
+                <td class="om_upperheader">ETA</td>
+                @for (int i = 0; i < orders.Count;i++ )
+                {
+                    var order = orders[i];
+                    var monthChanged = GetMonth(order) != month;
+                    if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                    {
+                        if (i == orders.Count - 1 && !monthChanged)
+                        {
+                            <td class="om_upperheader">@FormatDate(order.req_eta)</td>
+                        }
+                        
+                        <td class="om_month_sum">
+                            @{
+                                if (Model.MonthlySummaryBy == MonthSummaryBy.ETA) {
+                                    var yearChanged = year != GetYear(order);
+                                    year = GetYear(order);
+                                    if (i != orders.Count - 1 || yearChanged) {
+                                        if (month == 12) {
+                                            year--;
+                                        }
+                                    }
+                                    @(string.Format("{0}-{1}", year, month))
+                                }
+                            }
+                            
+                        </td>
+                        month = GetMonth(order);
+                        if (i == orders.Count - 1 && monthChanged)
+                        {
+                            <td class="om_upperheader">@FormatDate(order.req_eta)</td>
+                            <td class="om_month_sum">
+                                @if (Model.MonthlySummaryBy == MonthSummaryBy.ETA) {
+                                    @(string.Format("{0}-{1}", GetYear(order), month))
+                                }
+                            </td>
+                        }
+                    }
+                    if (i != orders.Count - 1 || !showSummary)
+                    {
+                        <td class="om_upperheader">@FormatDate(order.req_eta)</td>
+                    }
+                }
+
+                @if(!showOrderDateToETDRow && !(Model.Show9Ref && !renameAndMove9RefRow) && !Model.ShowContainerPrice)
+                {
+                    if (Model.IncludeSalesForecast)
+                    {
+                        <td class="om_stock" colspan="@(13 - DateTime.Today.AddMonths(1).Month)">@DateTime.Today.AddMonths(1).Year</td>
+                        if (DateTime.Today.Month != 12)
+                        {
+                            <td class="om_stock" colspan="@(DateTime.Today.Month)">@(DateTime.Today.Year + 1)</td>
+                        }
+                        <td class="om_sales" colspan="@(13 - DateTime.Today.Month)">@DateTime.Today.Year</td>
+                        if (DateTime.Today.Month != 1)
+                        {
+                            <td class="om_sales" colspan="@(DateTime.Today.Month - 1)">@(DateTime.Today.Year + 1)</td>
+                        }
+
+                    }
+                    if (Model.IncludeSalesHistory)
+                    {
+                        
+                        <td class="om_saleshistory" colspan="@(13 - DateTime.Today.Month)">@(DateTime.Today.Year - 1)</td>
+
+                        if (DateTime.Today.Month != 1)
+                        {
+                            <td class="om_saleshistory" colspan="@(DateTime.Today.Month - 1)">@(DateTime.Today.Year)</td>
+                        }
+                        <td class="om_saleshistory" colspan="2">&nbsp;</td>
+                    }
+                }
+                
+                @{ month = startMonth; }
+            </tr>
+            @if (showOrderDateToETDRow) {
+                <tr>
+                    @*<td colspan="12" class="om_upperheader"></td>*@
+                    <td class="om_upperheader">order date to ETD</td>
+                    @for (int i = 0; i < orders.Count; i++) {
+                        var order = orders[i];
+                        var monthChanged = GetMonth(order) != month;
+                        if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1)) {
+                            if (i == orders.Count - 1 && !monthChanged) {
+                                <td class="om_upperheader">@WebUtilities.GetDateDifference(order.po_req_etd, order.orderdate)</td>
+                            }
+                            month = GetMonth(order);
+                            <td class="om_month_sum">&nbsp;</td>
+                            if (i == orders.Count - 1 && monthChanged) {
+                                <td class="om_upperheader">@WebUtilities.GetDateDifference(order.po_req_etd, order.orderdate)</td>
+                                <td class="om_month_sum">&nbsp;</td>
+                            }
+                        }
+                        if (i != orders.Count - 1 || !showSummary) {
+                            <td class="om_upperheader">@WebUtilities.GetDateDifference(order.po_req_etd, order.orderdate)</td>
+                        }
+
+                    }
+
+
+                    @if (!(Model.Show9Ref && !renameAndMove9RefRow) && !Model.ShowContainerPrice) {
+                        if (Model.IncludeSalesForecast) {
+
+
+                            <td class="om_stock" colspan="@(13 - DateTime.Today.AddMonths(1).Month)">@DateTime.Today.AddMonths(1).Year</td>
+                            if (DateTime.Today.Month != 12) {
+                                <td class="om_stock" colspan="@(DateTime.Today.Month)">@(DateTime.Today.Year + 1)</td>
+                            }
+                            <td class="om_sales" colspan="@(13 - DateTime.Today.Month)">@DateTime.Today.Year</td>
+                            if (DateTime.Today.Month != 1) {
+                                <td class="om_sales" colspan="@(DateTime.Today.Month - 1)">@(DateTime.Today.Year + 1)</td>
+                            }
+
+                        }
+                        if (Model.IncludeSalesHistory) {
+
+                            <td class="om_saleshistory" colspan="@(13 - DateTime.Today.Month)">@(DateTime.Today.Year - 1)</td>
+
+                            if (DateTime.Today.Month != 1) {
+                                <td class="om_saleshistory" colspan="@(DateTime.Today.Month - 1)">@(DateTime.Today.Year)</td>
+                            }
+                            <td class="om_saleshistory" colspan="2">&nbsp;</td>
+                        }
+                    }
+
+                </tr>
+            }
+            
+            @{ month = startMonth;}
+            @if (Model.Show9Ref && !renameAndMove9RefRow)
+            {
+                <tr>
+
+
+                    <td class="om_upperheader">9Ref</td>
+                    @for (int i = 0; i < orders.Count; i++)
+                    {
+                        var order = orders[i];
+                        var monthChanged = GetMonth(order) != month;
+                        if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                        {
+                            if (i == orders.Count - 1 && !monthChanged)
+                            {
+                                <td class="om_upperheader">@Display9Ref(order.orderid)</td>
+                            }
+                            month = GetMonth(order);
+                            <td class="om_month_sum">&nbsp;</td>
+                            if (i == orders.Count - 1 && monthChanged)
+                            {
+                                <td class="om_upperheader">@Display9Ref(order.orderid)</td>
+                                <td class="om_month_sum">&nbsp;</td>
+                            }
+                        }
+                        if (i != orders.Count - 1 || !showSummary)
+                        {
+                            <td class="om_upperheader">@Display9Ref(order.orderid)</td>
+                        }
+                    }
+                    @if (!Model.ShowContainerPrice) {
+                        if (Model.IncludeSalesForecast) {
+
+                            <td class="om_stock" colspan="@(13 - DateTime.Today.AddMonths(1).Month)">@DateTime.Today.AddMonths(1).Year</td>
+                            if (DateTime.Today.Month != 12) {
+                                <td class="om_stock" colspan="@(DateTime.Today.Month)">@(DateTime.Today.Year + 1)</td>
+                            }
+                            <td class="om_sales" colspan="@(13 - DateTime.Today.Month)">@DateTime.Today.Year</td>
+                            if (DateTime.Today.Month != 1) {
+                                <td class="om_sales" colspan="@(DateTime.Today.Month - 1)">@(DateTime.Today.Year + 1)</td>
+                            }
+
+                        }
+                        if (Model.IncludeSalesHistory) {
+                            <td class="om_saleshistory" colspan="@(13 - DateTime.Today.Month)">@(DateTime.Today.Year - 1)</td>
+
+                            if (DateTime.Today.Month != 12) {
+                                <td class="om_saleshistory" colspan="@(DateTime.Today.Month - 1)">@(DateTime.Today.Year)</td>
+                            }
+                            <td class="om_saleshistory" colspan="2">&nbsp;</td>
+                        }
+                    }
+                    
+                    @{ month = startMonth; }
+                </tr>
+            }
+            @if (Model.ShowContainerPrice) {
+                <tr>
+
+                    <td class="om_upperheader">Container price</td>
+                    @for (int i = 0; i < orders.Count; i++) {
+                        var order = orders[i];
+                        var monthChanged = GetMonth(order) != month;
+                        if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1)) {
+                            if (i == orders.Count - 1 && !monthChanged) {
+                                <td class="om_upperheader">@order.ContainerRowPrice.ToString("N2")</td>
+                            }
+                            month = GetMonth(order);
+                            <td class="om_month_sum">&nbsp;</td>
+                            if (i == orders.Count - 1 && monthChanged) {
+                                <td class="om_upperheader">@order.ContainerRowPrice.ToString("N2")</td>
+                                <td class="om_month_sum">&nbsp;</td>
+                            }
+                        }
+                        if (i != orders.Count - 1 || !showSummary) {
+                            <td class="om_upperheader">@order.ContainerRowPrice.ToString("N2")</td>
+                        }
+                    }
+                    
+                    @{ month = startMonth; }
+                </tr>
+                <tr>
+                    <td class="om_upperheader">Container currency</td>
+                    @for (int i = 0; i < orders.Count; i++) {
+                        var order = orders[i];
+                        var monthChanged = GetMonth(order) != month;
+                        if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1)) {
+                            if (i == orders.Count - 1 && !monthChanged) {
+                                <td class="om_upperheader">@order.ContainerCurrency</td>
+                            }
+                            month = GetMonth(order);
+                            <td class="om_month_sum">&nbsp;</td>
+                            if (i == orders.Count - 1 && monthChanged) {
+                                <td class="om_upperheader">@order.ContainerCurrency</td>
+                                <td class="om_month_sum">&nbsp;</td>
+                            }
+                        }
+                        if (i != orders.Count - 1 || !showSummary) {
+                            <td class="om_upperheader">@order.ContainerCurrency</td>
+                        }
+                    }
+
+                    @{ month = startMonth; }
+                    @if (Model.IncludeSalesForecast) {
+                        <td class="om_stock" colspan="@(13 - DateTime.Today.AddMonths(1).Month)">@DateTime.Today.AddMonths(1).Year</td>
+                        if (DateTime.Today.Month != 12) {
+                            <td class="om_stock" colspan="@(DateTime.Today.Month)">@(DateTime.Today.Year + 1)</td>
+                        }
+                        <td class="om_sales" colspan="@(13 - DateTime.Today.Month)">@DateTime.Today.Year</td>
+                        if (DateTime.Today.Month != 1) {
+                            <td class="om_sales" colspan="@(DateTime.Today.Month - 1)">@(DateTime.Today.Year + 1)</td>
+                        }
+
+                    }
+                    @if (Model.IncludeSalesHistory) {
+                        <td class="om_saleshistory" colspan="@(13 - DateTime.Today.Month)">@(DateTime.Today.Year - 1)</td>
+
+                        if (DateTime.Today.Month != 12) {
+                            <td class="om_saleshistory" colspan="@(DateTime.Today.Month - 1)">@(DateTime.Today.Year)</td>
+                        }
+                        <td class="om_saleshistory" colspan="2">&nbsp;</td>
+                    }
+                </tr>
+            }
+        
+        <tr class="om_middleheader">
+            @if (Model.ShowFactoryCode) {
+                <td>Factory</td>
+                <td>MFG code</td>
+            }
+            <td>Client code</td>
+            <td>Description</td>
+            @if(showStockAndSold) {
+
+                <td>Total Shipped</td>
+                <td>Total Sold</td>
+                if (Model.UseSalesOrders)
+                {
+                    <td>Displays sold</td>
+                }
+                <td>Physical stock</td>
+                <td>Back order qty</td>
+                <td>Free stock</td>
+            }
+            @if (showBrandColumn)
+            {
+                <td>Brand/range</td>
+            }
+            @if (showFirstShipmentETD) {
+                <td>First shipment ETD</td>
+            }
+            
+            @if (Model.ShowExtraValueFields) {
+                foreach (var c in factoryCurrencies) {
+                    <td>unit value @(c?.curr_symbol)</td>
+                }
+
+            }
+            @if (Model.ShowSpecialComments)
+            {
+                <td>Special comments</td>
+            }
+
+            @if (Model.Dimensions)
+            {
+                <td>Length</td>
+                <td>Width</td>
+                <td>Height</td>
+            }
+            @if (Model.ShowSales)
+            {
+                for (int i = -6; i <= -1; i++)
+                {
+                    <td>Sales of@(System.Globalization.DateTimeFormatInfo.InvariantInfo.MonthNames[DateTime.Today.AddMonths(i).Month - 1])</td>
+                }
+                <td>
+                    6 month average
+                </td>
+            }
+            <td>
+                Total last 12 month
+            </td>
+            @if(Model.Last12mClientBreakdown)
+            {
+                foreach(var c in clients)
+                {
+                    <td>@c.customer_code</td>
+                }
+            }
+            @for (int i = 0; i < orders.Count; i++)
+            {
+                var order = orders[i];
+                var monthChanged = GetMonth(order) != month;
+                if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                {
+                    if (i == orders.Count - 1 && !monthChanged)
+                    {
+                        <td >&nbsp;</td>
+                    }
+                    month = GetMonth(order);
+                    <td >&nbsp;</td>
+                    if (i == orders.Count - 1 && monthChanged)
+                    {
+                        <td >&nbsp;</td>
+                        <td >&nbsp;</td>
+                    }
+
+                }
+                if (i != orders.Count - 1 || !showSummary)
+                {
+                    <td >&nbsp;</td>
+                }
+            }
+            @if (Model.ShowExtraValueFields) {
+                foreach (var c in factoryCurrencies) {
+                    <td>Incoming value @(c?.curr_symbol)</td>
+                }
+                
+            }
+            @if (Model.ShowTotalsAfterOrders)
+            {
+                <td>Total OS orders</td>
+                <td>Physical stock</td>
+                <td>Free stock</td>
+                <td>Months sales in free stock</td>
+                <td>stock level (ABCS)</td>
+                <td>total stock minus os orders</td>
+            }
+            @if (Model.IncludeSalesForecast)
+            {
+                <td>Stock</td>
+                if (Model.ShowExtraValueFields) {
+                    foreach (var c in factoryCurrencies) {
+                        <td>stock value @(c?.curr_symbol)</td>
+                    }
+                    <td>est. months of stock</td>
+                }
+                for (int i = 0; i < 12; i++) {
+                    <td class="om_middleheader">@(System.Globalization.DateTimeFormatInfo.InvariantInfo.AbbreviatedMonthNames[DateTime.Today.AddMonths(i + 1).Month - 1]) 1st</td>
+                     @*<td class="om_middleheader">@(System.Globalization.DateTimeFormatInfo.InvariantInfo.AbbreviatedMonthNames[Model.ETD_To.Value.AddMonths(i+1).Month-1])</td>*@
+                }
+                for (int i = 0; i < 12; i++)
+                {
+                    <td class="om_middleheader">@(System.Globalization.DateTimeFormatInfo.InvariantInfo.AbbreviatedMonthNames[DateTime.Today.AddMonths(i).Month - 1])</td>
+                }
+            }
+            @if (Model.IncludeSalesHistory)
+            {
+                for (int i = 0; i < 12; i++)
+                {
+                    <td class="om_middleheader">@(System.Globalization.DateTimeFormatInfo.InvariantInfo.AbbreviatedMonthNames[DateTime.Today.AddMonths(i).Month - 1])</td>
+                }
+                <td class="om_middleheader">3 month avg</td>
+                <td>Total</td>
+            }
+            @if ((Model.Client != null && Model.Client.distributor > 0) || Model.client_id == -1)
+            {
+                <td>Current product group on system (ABCS)</td>
+            }
+            <td>Lead time</td>
+            <td>Master carton</td>
+            <td>Unit/Pallets</td>
+            <td>Client MOQ</td>
+            <td>Factory MOQ</td>
+
+            @{ month = startMonth; }
+        </tr>
+        @{
+            
+    var spareHeaderDisplayed = false;
+            
+        }
+        @{
+            string range = null;
+            int? cust_product_range_id = null;
+            string cust_product_range_name = null;
+            var first = true;
+        }
+
+
+    @foreach (var prod in prods)
+    {
+        
+        var initialBalance = 0.0;
+        var stockForecastsBalances = new double[12];
+        var stockForecastQtys = new double[12];
+        var isSpare = prod.Prod.MastProduct.category1 == Category1.category1_spares;
+        var rangeChange = range != null && range != prod.BrandRange;
+        var custProductRangeChange = orderByCustProductRange ? cust_product_range_id != prod.Prod.cust_product_range_id || first : false;
+        cust_product_range_name = prod.Prod.ProductRange?.name;
+        cust_product_range_id = prod.Prod.cust_product_range_id;
+        first = false;
+
+        range = prod.BrandRange;
+        if (Model.IncludeSalesForecast)
+        {
+            //Calculate stock forecast to decide whether to display product if ListOnlyOutOfStock option selected
+
+            //calculate stock forecast for this month
+            var balance = prod.Prod.cprod_stock ?? 0.0;
+            var stock_date = prod.Prod.cprod_stock_date ?? DateTime.Today;
+
+            var prev_Month = DateTime.Today.AddMonths(-1);
+            if (stock_date < new DateTime(prev_Month.Year, prev_Month.Month, 1))
+            {
+                stock_date = new DateTime(prev_Month.Year, prev_Month.Month, 1);
+            }
+
+            initialBalance = balance;
+
+            var forecast_m_normal = prod.Forecasts.Where(f => f.month21 == Utilities.GetMonthFromDate(stock_date) && f.Type == ForecastType.Normal).Sum(f => f.sales_qty);
+            var forecast_m_contract = prod.Forecasts.Where(f => f.month21 == Utilities.GetMonthFromDate(stock_date) && f.Type == ForecastType.Contract).Sum(f => f.sales_qty);
+            var dayFactor = (DateTime.DaysInMonth(stock_date.Year, stock_date.Month)*1.0 - stock_date.Day)/DateTime.DaysInMonth(stock_date.Year, stock_date.Month);
+            var forecastQty = (forecast_m_normal != null ? Math.Round((forecast_m_normal ?? 0.0)*dayFactor, 0) : 0.0) + (forecast_m_contract ?? 0);
+            var firstDayNextMonth = stock_date.AddDays(-1*stock_date.Day + 1).AddMonths(1).Date;
+
+            var companies_BookedInDate = Utilities.GetIdsFromString(Settings.Default.OMExport_CompaniesUsingBookedInDate);
+            //var cfSum = (prod.CS_Lines.Where(l => l.Forecast.startmonth != null && l.Forecast.monthduration != null && stock_date >= l.Forecast.startmonth && firstDayNextMonth <= l.Forecast.startmonth.Value.AddMonths(l.monthduration != null ? l.monthduration.Value : l.Forecast.monthduration.Value)).Sum(l => l.qty) ?? 0.0 )* dayFactor;
+            var arrivingOrdersSum =
+                Model.ArrivingLines.Where(l => ((prod.Prod.cprod_id > 0 && l.cprod_id == prod.Prod.cprod_id) || (prod.Prod.cprod_id <= 0 && l.Cust_Product.cprod_mast == prod.Prod.MastProduct.mast_id))
+                               && ResolveDate(l,companies_BookedInDate) != null && ResolveDate(l,companies_BookedInDate) > stock_date && ResolveDate(l,companies_BookedInDate) < firstDayNextMonth).Sum(l => l.orderqty) ?? 0.0;
+            //balance = balance - forecast_qty - cfSum + arrivingOrdersSum;
+            balance = balance - forecastQty + arrivingOrdersSum;
+
+            if (stock_date.Month != DateTime.Today.Month)
+            {
+                //stock date was last month
+                var forecast_m = prod.Forecasts.Where(f => f.month21 == Utilities.GetMonthFromDate(DateTime.Today)).Sum(f => f.sales_qty);
+                forecastQty = forecast_m ?? 0.0;
+                var firstDayMonth = company.Common.Utilities.GetMonthStart(DateTime.Today); // DateTime.Today.AddMonths(i).AddDays(-1*DateTime.Today.Day + 1);
+                var lastDayMonth = company.Common.Utilities.GetMonthEnd(DateTime.Today);//DateTime.Today.AddMonths(i + 1).AddDays(-1*DateTime.Today.Day);
+
+                //cfSum = (prod.CS_Lines.Where(l => l.Forecast.startmonth != null && l.Forecast.monthduration != null && firstDayMonth >= l.Forecast.startmonth && lastDayMonth <= l.Forecast.startmonth.Value.AddMonths(l.monthduration != null ? l.monthduration.Value : l.Forecast.monthduration.Value)).Sum(l => l.qty) ?? 0.0);
+                arrivingOrdersSum =
+                    Model.ArrivingLines.Where(l => ((prod.Prod.cprod_id > 0 && l.cprod_id == prod.Prod.cprod_id) || (prod.Prod.cprod_id <= 0 && l.Cust_Product.cprod_mast == prod.Prod.MastProduct.mast_id))
+                                                   && ResolveDate(l,companies_BookedInDate) != null && ResolveDate(l,companies_BookedInDate) >= firstDayMonth && ResolveDate(l,companies_BookedInDate) <= lastDayMonth).Sum(l => l.orderqty) ?? 0.0;
+                //balance = balance - forecast_qty - cfSum + arrivingOrdersSum;
+                balance = balance - forecastQty + arrivingOrdersSum;
+            }
+            stockForecastsBalances[0] = balance;
+
+
+            for (int i = 1; i < 12; i++)
+            {
+                var firstDayMonth = company.Common.Utilities.GetMonthStart(DateTime.Today.AddMonths(i)); // DateTime.Today.AddMonths(i).AddDays(-1*DateTime.Today.Day + 1);
+                var lastDayMonth = company.Common.Utilities.GetMonthEnd(DateTime.Today.AddMonths(i));//DateTime.Today.AddMonths(i + 1).AddDays(-1*DateTime.Today.Day);
+
+                var forecast_m = prod.Forecasts.Where(f => f.month21 == Utilities.GetMonthFromDate(firstDayMonth)).Sum(f => f.sales_qty);
+                forecastQty = forecast_m ?? 0.0;
+                //cfSum = (prod.CS_Lines.Where(l => l.Forecast.startmonth != null && l.Forecast.monthduration != null && firstDayMonth >= l.Forecast.startmonth && lastDayMonth <= l.Forecast.startmonth.Value.AddMonths(l.monthduration != null ? l.monthduration.Value : l.Forecast.monthduration.Value)).Sum(l => l.qty) ?? 0.0);
+                arrivingOrdersSum =
+                    Model.ArrivingLines.Where(l => ((prod.Prod.cprod_id > 0 && l.cprod_id == prod.Prod.cprod_id) || (prod.Prod.cprod_id <= 0 && l.Cust_Product.cprod_mast == prod.Prod.MastProduct.mast_id))
+                                                   && ResolveDate(l,companies_BookedInDate) != null && ResolveDate(l,companies_BookedInDate) >= firstDayMonth && ResolveDate(l,companies_BookedInDate) <= lastDayMonth).Sum(l => l.orderqty) ?? 0.0;
+                //balance = balance - forecast_qty - cfSum + arrivingOrdersSum;
+                balance = balance - forecastQty + arrivingOrdersSum;
+                stockForecastsBalances[i] = balance;
+            }
+
+            for (int i = 0; i < 12; i++)
+            {
+                var firstDayMonth = company.Common.Utilities.GetMonthStart(DateTime.Today.AddMonths(i));
+                var lastDayMonth = company.Common.Utilities.GetMonthEnd(DateTime.Today.AddMonths(i));
+
+                var forecast_m = prod.Forecasts.Where(f => f.month21 == Utilities.GetMonthFromDate(firstDayMonth)).Sum(f => f.sales_qty);
+                forecastQty = forecast_m ?? 0.0;
+                //cfSum = (prod.CS_Lines.Where(l => l.Forecast.startmonth != null && l.Forecast.monthduration != null && firstDayMonth >= l.Forecast.startmonth && lastDayMonth <= l.Forecast.startmonth.Value.AddMonths(l.monthduration != null ? l.monthduration.Value : l.Forecast.monthduration.Value)).Sum(l => l.qty) ?? 0.0);
+
+                    @*<td class="om_sales">@(forecast_qty + cfSum)</td>*@
+                        stockForecastQtys[i] = forecastQty;
+            }
+        }
+
+        if (!Model.IncludeSalesForecast || !Model.ListOnlyOutOfStock || stockForecastsBalances.Take(6).Any(b => b <= 0))
+        {
+            if (isSpare && !spareHeaderDisplayed)
+            {
+                spareHeaderDisplayed = true;
+                <tr>
+                    <td colspan="@GetColSpan(showBrandColumn, orders.Count)"></td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold"colspan="@GetColSpan(showBrandColumn, orders.Count)">Below are the spares@(Model.ShowHistoryForSpares ? "." : " where we do not have sales forecast and history information.") </td>
+                </tr>
+                <tr>
+                    <td colspan="@GetColSpan(showBrandColumn, orders.Count)"></td>
+                </tr>                
+            }
+
+            if(custProductRangeChange) {
+                <tr class="om_cust_prod_range_header">
+                    <td>@(cust_product_range_name ?? "Uncategorized")</td>
+                    @for (int i = 0; i < totalColSpan-1; i++) {
+                        <td>&nbsp;</td>
+                    }                    
+                </tr>
+            }
+
+           <tr @(  Html.Raw(rangeChange ? "class=om_rangechange" : ""))>
+                @if (Model.ShowFactoryCode) {
+                    <td class="@(GetProductDiscontinuedCSS(prod.Prod))" @Html.Raw(GetProductColor(prod.Prod))>@Model.Factories.FirstOrDefault(f => f.user_id == prod.Prod.MastProduct.factory_id).factory_code</td>
+                    <td class="@(GetProductDiscontinuedCSS(prod.Prod))" @Html.Raw(GetProductColor(prod.Prod))>@Html.Raw("" + prod.Prod.MastProduct.factory_ref)</td>
+                }
+                        
+                <td class="@(GetProductDiscontinuedCSS(prod.Prod))" @Html.Raw(GetProductColor(prod.Prod))>@Html.Raw("" + prod.Prod.cprod_code1)</td>
+                <td class="@(GetProductDiscontinuedCSS(prod.Prod))" @Html.Raw(GetProductColor(prod.Prod))>@(prod.Prod.cprod_id > 0 ? prod.Prod.cprod_name : prod.Prod.MastProduct.asaq_name)</td>
+                @if (showStockAndSold) {
+                    var sold = Model.ProductSoldQtys.ContainsKey(prod.id) ? Model.ProductSoldQtys[prod.id] : null;
+                    var displaysSold = Model.DisplaysSoldQtys.ContainsKey(prod.id) ? Model.DisplaysSoldQtys[prod.id] : null;
+                    var delivered = Model.ProductDeliveredQtys.ContainsKey(prod.id) ? Model.ProductDeliveredQtys[prod.id] : null;
+                    <td class="@(GetProductDiscontinuedCSS(prod.Prod))">@delivered</td>
+                    <td class="@(GetProductDiscontinuedCSS(prod.Prod))">@sold</td>
+                    if (Model.UseSalesOrders)
+                    {
+                        <td class="@(GetProductDiscontinuedCSS(prod.Prod))">@displaysSold</td>
+                    }
+                    <td class="@(GetProductDiscontinuedCSS(prod.Prod))">@prod.Prod.cprod_stock2</td>
+                    <td class="@(GetProductDiscontinuedCSS(prod.Prod))">@(prod.Prod.cprod_stock2 - initialBalance)</td>
+                    <td class="@(GetProductDiscontinuedCSS(prod.Prod))">@initialBalance</td>                    
+                }
+                @if (showBrandColumn)
+                {
+                    <td class="@(GetProductDiscontinuedCSS(prod.Prod))" @Html.Raw(GetProductColor(prod.Prod))>
+                        @if (prod.Prod.Brand != null)
+                        {
+                            @prod.Prod.Brand.code
+                        }
+                        else
+                        {
+                            @prod.Prod.client_range
+                        }
+                    </td>
+                }
+                @if (showFirstShipmentETD) {
+                    <td class="@(GetProductDiscontinuedCSS(prod.Prod))" @Html.Raw(GetProductColor(prod.Prod))>
+                        @FormatDate(prod.FirstShipmentEtd)
+                    </td>
+                }
+                
+                @{ 
+                    double? factoryPrice = 0.0;
+                    Currencies factoryCurrency = null;
+                }
+                @if (Model.ShowExtraValueFields) {
+                    foreach (var c in factoryCurrencies) {
+                        <td class="@(GetProductDiscontinuedCSS(prod.Prod))" @Html.Raw(GetProductColor(prod.Prod))>+
+                            @if(prod?.Prod?.MastProduct?.CurrencyId == c.curr_code) {
+                                factoryCurrency = c;
+                                factoryPrice = prod?.Prod?.MastProduct?.GetPrice();
+                                @factoryPrice.ToString("N2")
+                            }
+                        </td>
+                    }
+                }
+                
+                @if (Model.ShowSpecialComments)
+                {
+                        <td class="@(GetProductDiscontinuedCSS(prod.Prod))" @Html.Raw(GetProductColor(prod.Prod))>@prod.Prod.MastProduct.special_comments</td>
+                }
+                @if (Model.Dimensions)
+                {
+                    <td>@prod.Prod.MastProduct.prod_length</td>
+                    <td>@prod.Prod.MastProduct.prod_width</td>
+                    <td>@prod.Prod.MastProduct.prod_height</td>
+                }
+                @if (Model.ShowSales)
+                {
+                    for (int i = -6; i <= -1; i++)
+                    {
+                        @*<td class="number">@(prod.Lines.Where(l => (l.Header.po_req_etd != null && l.Header.po_req_etd.Value.Month == DateTime.Today.AddMonths(i).Month && l.Header.po_req_etd.Value.Year == DateTime.Today.AddMonths(i).Year)).Sum(l => l.orderqty))</td>*@
+                            <td class="number">@(Model.AllLines.Where(l => ((Model.client_id != null && prod.cprod_ids.Contains(l.cprod_id.Value)) ||
+                                                                l.Cust_Product.cprod_mast == prod.Prod.MastProduct.mast_id) && l.Header.po_req_etd != null && l.Header.po_req_etd.Value.Month == DateTime.Today.AddMonths(i).Month && l.Header.po_req_etd.Value.Year == DateTime.Today.AddMonths(i).Year && l.Header.stock_order != 1).Sum(l => l.orderqty))</td>
+
+                    }
+                    <td class="number">@((Model.AllLines.Where(l => (((Model.client_id != null && prod.cprod_ids.Contains(l.cprod_id.Value)) ||
+                                                                        l.Cust_Product.cprod_mast == prod.Prod.MastProduct.mast_id) && l.Header.po_req_etd != null && Utilities.GetMonthFromDate(l.Header.po_req_etd.Value) >= Utilities.GetMonthFromNow(-6)
+                                                        && Utilities.GetMonthFromDate(l.Header.po_req_etd.Value) <= Utilities.GetMonthFromNow(-1)) && l.Header.stock_order != 1).Sum(l => l.orderqty) / 6).ToString("N0"))</td>
+                }
+                <td class="number">@((Model.AllLines.Where(l => (((Model.client_id != null && prod.cprod_ids.Contains(l.cprod_id.Value)) ||
+                                                                    l.Cust_Product.cprod_mast == prod.Prod.MastProduct.mast_id) && l.Header.po_req_etd != null && Utilities.GetMonthFromDate(l.Header.po_req_etd.Value) >= Utilities.GetMonthFromNow(-12)
+                                                                    && Utilities.GetMonthFromDate(l.Header.po_req_etd.Value) <= Utilities.GetMonthFromNow(-1)) && l.Header.stock_order != 1).Sum(l => l.orderqty)).ToString("N0"))</td>
+                @if(Model.Last12mClientBreakdown)
+                {
+                    var id = Model.client_id != null ? prod.Prod.cprod_id : prod.Prod.MastProduct.mast_id;
+                    foreach(var c in clients)
+                    {
+                        <td class="number">@(productclientTotal.ContainsKey(id) && productclientTotal[id].ContainsKey(c.user_id) ? productclientTotal[id][c.user_id] : 0)</td>
+                    }
+                    <td></td>
+                }
+                @for (int i = 0; i < orders.Count; i++)
+                {
+                    if (/*!isSpare*/true)
+                    {
+                        var order = orders[i];
+                        var lineSum = prod.Lines.Where(l => l.orderid == order.orderid).Sum(l => l.orderqty);
+                        var monthChanged = GetMonth(order) != month;
+                        if (showSummary && GetMonth(order) != null && (monthChanged || i == orders.Count - 1))
+                        {
+                            var yearChanged = year != GetYear(order);
+                            year = GetYear(order);
+                            if (i != orders.Count - 1 || yearChanged)
+                            {
+                                if (month == 12)
+                                {
+                                    year--;
+                                }
+                            }
+                                    
+                            var lineSumMonth = prod.Lines.Where(l=>CheckMonth(l.Header, month, year)).Sum(l => l.orderqty);
+                            var className = (order.orderdate >= DateTime.Today.AddDays(-7) && order.orderdate <= DateTime.Today ? "om_prod_row_new" :
+                                order.po_req_etd < DateTime.Today && order.req_eta > DateTime.Today ? "om_prod_row_onwater" :
+                                    order.req_eta <= DateTime.Today ? "om_prod_row_received" : "om_prod_row");
+                            if (i == orders.Count - 1 && !monthChanged)
+                            {
+                                <td class="@className">@(lineSum > 0 ? lineSum.ToString() : string.Empty)</td>
+                            }
+                            <td class="om_month_sum">@lineSumMonth</td>
+                            month = GetMonth(order);
+                            if (i == orders.Count - 1 && monthChanged)
+                            {
+                                <td class="@className">@(lineSum > 0 ? lineSum.ToString() : string.Empty)</td>
+                                <td class="om_month_sum">@(prod.Lines.Where(l => (l.Header.po_req_etd != null && CheckMonth(l.Header, month, year))).Sum(l => l.orderqty))</td>
+                            }
+                        }
+                        if (i != orders.Count - 1 || !showSummary)
+                        {
+                            <td class="@(order.orderdate >= DateTime.Today.AddDays(-7) && order.orderdate <= DateTime.Today ? "om_prod_row_new" :
+                                                order.po_req_etd < DateTime.Today && order.req_eta > DateTime.Today ? "om_prod_row_onwater" :
+                                                    order.req_eta <= DateTime.Today ? "om_prod_row_received" : "om_prod_row")">
+                                @(lineSum > 0 ? lineSum.ToString() : string.Empty)
+                            </td>
+                        }
+                    }
+                    else
+                    {
+                        <td></td>
+                        <td></td>
+                    }
+
+
+                }
+                @if (Model.ShowExtraValueFields) {
+                    foreach (var c in factoryCurrencies) {
+                        <td>
+                            @if(factoryCurrency.curr_code == c.curr_code) {
+                                @((prod.Lines.Where(l=>l.Header.req_eta >= DateTime.Today).Sum(l=>l.orderqty)*factoryPrice).ToString("N2"))
+                            }
+                        </td>
+                    }
+                }
+                @{
+                    var outstand_ordersqty = Model.ArrivingLines.Where(l => ((prod.Prod.cprod_id > 0 && l.cprod_id == prod.Prod.cprod_id) || l.Cust_Product.cprod_mast == prod.Prod.MastProduct.mast_id) && l.Header.req_eta > DateTime.Today).Sum(l => l.orderqty);
+                    var month3Avg = (prod.Lines.Where(l => (l.Header.po_req_etd != null && Utilities.GetMonthFromDate(l.Header.po_req_etd.Value) >= Utilities.GetMonthFromNow(-3)
+                                    && Utilities.GetMonthFromDate(l.Header.po_req_etd.Value) <= Utilities.GetMonthFromNow(-1))).Sum(l => l.orderqty)/3);
+                }
+                @if (Model.ShowTotalsAfterOrders) {
+                if (/*!isSpare*/true) {
+                    <td class="number">@outstand_ordersqty</td>
+                    <td class="number">@prod.Prod.MastProduct.stock_qty</td>
+                    <td class="number">@(prod.Prod.MastProduct.stock_qty - outstand_ordersqty)</td>
+                    <td class="number">@((month3Avg != 0 ? (prod.Prod.MastProduct.stock_qty - outstand_ordersqty) / month3Avg : 0).ToString("N0"))&nbsp;</td>
+                    <td>
+                        @if (prod.Prod.cprod_stock_codes.Count > 0) {
+                                var code = prod.Prod.cprod_stock_codes.FirstOrDefault(c => c > 0);
+                                if (code > 0) {
+                                    switch (code) {
+                                        case 1:
+                                            @Html.Raw("A")
+                                            ;
+                                            break;
+                                        case 2:
+                                            @Html.Raw("B")
+                                                ;
+                                            break;
+                                        case 3:
+                                            @Html.Raw("C")
+                                                ;
+                                            break;
+                                    }
+                                }
+                        }
+
+                    </td>
+                    <td class="number">@(prod.Prod.MastProduct.stock_qty - outstand_ordersqty)</td>
+                    }
+                    else {
+                        for (int i = 0; i < 6; i++)
+                        {
+                            <td></td>
+                        }
+                    }
+
+                }
+                @if (Model.IncludeSalesForecast) {
+                    <td>@(initialBalance.ToString())</td>
+                    if (Model.ShowExtraValueFields) {
+                        foreach (var c in factoryCurrencies) {
+                            <td>
+                                @if(factoryCurrency.curr_code == c.curr_code) {
+                                    @((initialBalance*factoryPrice).ToString("N2"))
+                                }
+                            </td>
+                        }
+                        <td>
+                            <!-- months of stock-->
+                            @if (stockForecastQtys.Average() > 0) {
+                                @( (initialBalance / stockForecastQtys.Average()).ToString("N2") )
+                            }                                    
+                        </td>
+                    }
+                    if (!isSpare || Model.ShowHistoryForSpares) {
+
+
+                        <td class="@(/* isSpare ? "om_stock" :*/stockForecastsBalances[0] >= 1 || !Model.HighlightLowForecasts ? "om_stock" : "low_forecast")">@(/*isSpare ? "" : */stockForecastsBalances[0].ToString())</td>
+                            
+                        for (int i = 1; i < 12; i++)
+                        {
+                            <td class="@(/*isSpare ? "om_stock" : */stockForecastsBalances[i] >= 1 || !Model.HighlightLowForecasts ? "om_stock" : "low_forecast")">@(/*isSpare ? "" : */stockForecastsBalances[i].ToString())</td>
+                        }
+
+                        for (int i = 0; i < 12; i++)
+                        {
+                            <td class="om_sales">@(/*isSpare ? "" : */stockForecastQtys[i].ToString())</td>
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < 24; i++)
+                        {
+                            <td></td>
+                        }
+                    }
+                }
+
+                @if (Model.IncludeSalesHistory) {
+                    if (!isSpare || Model.ShowHistoryForSpares) {
+                        for (int i = -12; i <= -1; i++) {
+                            var firstDayMonth = Utilities.GetMonthStart(DateTime.Today).AddMonths(i);
+                            //DateTime.Today.AddMonths(i).AddDays(-1 * DateTime.Today.Day + 1);
+
+                            <td class="om_saleshistory">@(/*isSpare ? "" : */prod.SalesData.Where(f => f.month21 == Utilities.GetMonthFromDate(firstDayMonth)).Sum(s => s.sales_qty).ToString())</td>
+                        }
+                        <td class="om_saleshistory">@(/*isSpare ? "" : */((prod.SalesData.Where(d => d.month21 >= Utilities.GetMonthFromNow(-3) && d.month21 <= Utilities.GetMonthFromNow(-1)).Sum(d => d.sales_qty) / 3.0).ToString("N0")))</td>
+                        <td class="om_saleshistory">@(/*isSpare ? "" : */prod.SalesData.Where(d => d.month21 >= Utilities.GetMonthFromNow(-12) && d.month21 <= Utilities.GetMonthFromNow(-1)).Sum(d => d.sales_qty * 1.0).ToString("N0"))</td>
+                    }
+                    else {
+                        for (int i = 0; i < 14; i++)
+                        {
+                            <td></td>
+                        }
+                    }
+
+                }
+
+                @{ month = startMonth; }
+
+                @if (!isSpare) {
+                    if ((Model.Client != null && Model.Client.distributor > 0) || Model.client_id == -1) {
+                        <td>@prod.Prod.MastProduct.product_group</td>
+                    }
+                    <td>@prod.Prod.MastProduct.lead_time</td>
+                    <td>@prod.Prod.MastProduct.units_per_carton</td>
+                    <td>@prod.Prod.MastProduct.units_per_pallet_single</td>
+                    <td>@prod.Prod.moq</td>
+                    <td>@prod.Prod.MastProduct.factory_moq</td>
+                }
+                else {
+                    for (int i = 0; i < 6; i++)
+                    {
+                        <td></td>
+                    }
+                }
+                        
+                </tr>
+            }
+        }
+        </table>
+    </body>
+</html>

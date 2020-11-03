@@ -1,0 +1,60 @@
+<div class="page_title" style="display:block">Sales data entry</div>
+<div class="form-inline">
+  <div class="form-group">
+    <label>Market:</label>
+    <input type="radio" name="market" [(ngModel)]="isUk" [value]="true" (change)="criteriaChanged()"> UK 
+    <input type="radio" name="market" [(ngModel)]="isUk" [value]="false" (change)="criteriaChanged()">  Non-UK 
+  </div>
+  <div class="form-group" style="margin-left: 10px; border-left: 1px solid black;padding-left: 10px">
+    <label>Include:</label>
+    <input type="radio" name="include" [(ngModel)]="includeAlreadySet" [value]="false" (change)="criteriaChanged()"> Only records not updated 
+    <input type="radio" name="include" [(ngModel)]="includeAlreadySet"[value]="true" (change)="criteriaChanged()"> All
+  </div>
+  <div class="form-group" style="margin-left: 10px; border-left: 1px solid black;padding-left: 10px">
+    <label>Cust Po:</label>
+    <input type="text" class="form-control" [(ngModel)]="custpo"> 
+    <button class="btn btn-default" (click)="criteriaChanged()" [disabled]="!custpo">Search</button>
+    <button class="btn btn-default" (click)="custpo = '';criteriaChanged()" [disabled]="!custpo">Clear</button>
+  </div>
+</div>
+<div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
+<pagination [itemsPerPage]="pageSize" [boundaryLinks]="true" [totalItems]="totalCount" [maxSize]="20" [(ngModel)]="page" (pageChanged)="pageChanged($event)"></pagination>
+
+<table class="table table-striped">
+<thead>
+  <tr>
+    <th>custpo</th>
+    <th>client</th>
+    <th>ETA</th>
+    <th class="text-right">BDI VAT</th>
+    <th class="text-right">BDI Duty</th>
+    <th class="text-center">Freight invoice no</th>
+    <th class="text-right">Freight value</th>
+    <th class="text-center">BDI Import fees invoice no</th>
+    <th class="text-center">BDI import fees value</th>
+    <th class="text-center">Sale date</th>
+    <th></th>
+  </tr>
+</thead>
+<tbody>
+  <tr *ngFor="let o of orders" >
+    <td>{{o.custpo}}</td>
+    <td>{{o.client?.customer_code}}</td>
+    <td>{{o.req_eta | date:dateFormat}}</td>
+    <td class="text-right"><input type="text" class="form-control text-right" [ngModel]="o.bdi_vat | number:numFormat" (blur)="leaveControl(o,'bdi_vat',$event)"  (change)="valueChanged(o)" (focus)="enterControl(o)"></td>
+    <td class="text-right"><input type="text" class="form-control text-right" [ngModel] ="o.bdi_invoice | number:numFormat" (blur)="leaveControl(o,'bdi_invoice',$event)" (change)="valueChanged(o)" (focus)="enterControl(o)"></td>
+    <td class="text-right"><input type="text" class="form-control text-right" [(ngModel)]="o.freight_invoice_no" (blur)="leaveControl(o,'freight_invoice_no',$event)" (change)="valueChanged(o)" (focus)="enterControl(o)"></td>
+    <td class="text-right"><input type="text" class="form-control text-right" [ngModel]="o.freight_value| number:numFormat" (blur)="leaveControl(o,'freight_value',$event)" (change)="valueChanged(o)" (focus)="enterControl(o)"></td>
+    <td class="text-right"><input type="text" class="form-control text-right" [(ngModel)]="o.bdi_import_fees_invoice_no" (blur)="leaveControl(o,'bdi_import_fees_invoice_no',$event)" (change)="valueChanged(o)" (focus)="enterControl(o)"></td>
+    <td class="text-right"><input type="text" class="form-control text-right" [ngModel]="o.bdi_import_fees | number:numFormat" (blur)="leaveControl(o,'bdi_import_fees',$event)"  (change)="valueChanged(o)" (focus)="enterControl(o)"></td>
+    <td class="text-center"><input  #saledate [name]="'sale_date_' + o.orderid" [class]="getDateControlClass(o)" (change)="dateChanged(o)" (bsValueChange)="dateChanged(o, $event)"
+      required bsDatepicker [(bsValue)]="o.sale_date" [bsConfig]="{ dateInputFormat: 'DD/MM/YYYY' }" (focus)="enterControl(o)" 
+      value="{{o.sale_date | date:dateFormat}}" (blur)="leaveControl(o,null,$event)"></td>
+      <td><span class="glyphicon glyphicon-ok text-success" *ngIf="orderUpdated[o.orderid]"></span>
+        <span class="glyphicon glyphicon-pencil" *ngIf="orderChanged[o.orderid]"></span>
+      </td>
+  </tr>
+</tbody>
+</table>
+<pagination [itemsPerPage]="pageSize" [boundaryLinks]="true" [totalItems]="totalCount" [maxSize]="20" [(ngModel)]="page" (pageChanged)="pageChanged($event)"></pagination>
+

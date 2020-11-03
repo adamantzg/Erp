@@ -1,0 +1,154 @@
+﻿@model ImageModel
+@{
+    
+    ViewBag.Title = "Create";
+}
+
+@{
+    ViewBag.Title = "CopyPaste";
+}
+
+<h2>CopyPaste</h2>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        
+        <title>Ovdje je naslov</title>
+        @*<link rel='stylesheet prefetch' href='http://s.cdpn.io/9729/cyborg_bootstrap.min.css' />*@
+        <link rel="stylesheet" href="~/Content/copy-image/cyborg_bootstrap.css"/>
+        <link rel="stylesheet" href="~/Content/copy-image/myStyle.css"/>
+       @* <link rel="stylesheet" href="~/Content/bootstrap.css"/>*@
+        <style>
+            .target{
+                border: solid 1px #aaa;
+                min-height: 210px;
+                width: 30%;
+                margin-top: 1em;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: 300ms all;
+                position: relative;
+            }
+
+             .target1{
+                border: solid 1px #aaa;
+                min-height: 200px;
+                width: 30%;
+                margin-top: 1em;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: 300ms all;
+                position: relative;
+            }
+
+
+            .contain {
+                background-size: cover;
+                position: relative;
+                z-index: 10;
+                top: 0px;
+                left: 0px;
+            }
+
+            textarea {
+                background-color: white;
+            }
+
+            .active {
+                box-shadow: 0px 0px 10px 10px rgba(0,0,255,.4);
+            }
+        </style>
+        
+        <script src="~/Scripts/my/prefixfree.js"></script>
+       
+
+    </head>
+    <body >
+        <div class="containerbox" style="width: 800px;padding: 10px">
+            @using (Html.BeginForm("Create","Image",FormMethod.Post))
+            {
+
+                <div class="row" style="margin: 10px">
+                    <br/> 
+                    <br/>
+                    <h2>Paste image to page</h2>
+                    <strong>Instructions</strong>: Copy an image to clipboard (For instance: <strong>Mac</strong>: <code>cmd+shift+ctrl+4</code> and  <strong>Win</strong>: <code>Alt+PtrScr</code>), click on the <i>target div</i> to paste the image into, and paste <code>cmd+V</code> or <code>ctrl+v</code>. <br />
+                    <strong class="info">Version 1.0.00<br/></strong><blockquote> bootstrap 2 and bootstrap 3 (It have a conflikts, I need convert all to bootstrap 3)</blockquote>
+                
+                </div>
+                <div class="row" style="margin: 5px">
+                    <div class="span1 target" ></div>
+                    @*<div class="span4 target1"></div>
+                    <div class="span4 target"></div>*@
+                    <div class="input-prepend">
+                        @Html.TextAreaFor(model => model.Image.Description, new { @class = "span8 size", placeholder = "Insert description...", multiple = "multiple", rows = "10", cols = "1",style="width:450px; margin:15px 0 0 10px" })
+                        @*<textarea class="span8 size" ></textarea>*@
+                        @* <input class="span2 size" id="" type="text" placeholder="Insert description..."  />*@
+                    </div>
+                    
+                </div>
+                <div class="row">
+                    <div class="span8">
+                        <br/>
+
+                        
+                    </div>
+
+                </div>
+                
+                <div class="row">
+
+                    <div class="span12">
+                        <br />
+                        <div class="input-prepend">
+                            <span class="add-on">size</span>
+                            <input class="span2 size" id="size" type="text" placeholder="size of pasted image">
+                        </div>
+
+                        <div class="input-prepend">
+                            <span class="add-on">type</span>
+                            <input class="span2 type" id="type" type="text" placeholder="Image type pasted">
+                        </div>
+
+                        <div class="input-prepend">
+                            <span class="add-on">width</span>
+                            <input class="span2 type" id="width" type="text" placeholder="Width">
+                        </div>
+
+                        <div class="input-prepend">
+                            <span class="add-on">height</span>
+                            <input class="span2 type" id="height" type="text" placeholder="Height">
+                        </div>
+                    </div>
+                    <div class="span12">
+                        <legend>The dataURL of the image <a href="" id="test" target="_blank">See image in new window</a></legend>
+                        
+                        @*<textarea name="uploadImages" multiple="multiple" cols="30" rows="10" class="data span12"></textarea>*@
+
+                    </div> 
+                    @* slika u stringu *@
+                    <div style="">
+                    @*@Html.TextAreaFor(model=>model.Image.Big,new { @class="data1 span12",cols="30",rows="10",name="uploadImages"})*@
+
+                    @Html.TextAreaFor(model=>model.Image.Big,new { @class="data span12",name="uploadImages"})
+                    @*@Html.HiddenFor(model=>model.Image.Big,new{@class="data", name="uploadImages"})*@
+                        </div>
+                </div>
+                
+                <div class="row">
+                    <div class="span1">
+                        <input type="submit" name="button" value="Create" class="btn btn-success" />
+                    </div>
+                </div>
+            }
+        </div>
+
+
+    </body>
+    
+    <script src='http://codepen.io/assets/libs/fullpage/jquery.js'></script>
+
+    <script src='~/Scripts/my/ihwco.js'></script>
+    <script src="~/Scripts/my/index.js"></script>
+
+</html>

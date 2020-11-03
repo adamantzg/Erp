@@ -1,0 +1,20 @@
+<div class="strong">Upload new files</div>
+<!-- <div class="drop-container text-center" ngFileDrop [options]="options" (uploadOutput)="onUploadOutput($event)" [uploadInput]="uploadInput" 
+[ngClass]="{ 'is-drop-over': dragOver }">
+    <label>Drop file here</label>
+</div> -->
+<div class="form-group" *ngIf="showDescription">
+    <div class="strong">{{descriptionLabel}}</div>
+    <input class="form-control" type="text" [(ngModel)]="description">
+</div>
+<label class="upload-button">
+        <input type="file" class="form-control" class="btn btn-block btn-default" ngFileSelect [options]="options" #fileUpload
+        (uploadOutput)="onUploadOutput($event)" [uploadInput]="uploadInput" >
+</label>
+
+<progressbar *ngIf="uploading" [value]="uploadProgress"></progressbar>
+
+<div>
+    <div class="strong">or choose existing from the list</div>
+    <app-grid [definition]="gridDefinition" [data]="files" (ButtonClicked)="onGridButtonClicked($event)" [style]="{height: '400px'}"></app-grid>
+</div>

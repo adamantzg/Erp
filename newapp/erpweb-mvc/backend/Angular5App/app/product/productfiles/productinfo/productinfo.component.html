@@ -1,0 +1,42 @@
+<div class="mt-2">    
+    <div class="d-flex">
+        <div>
+            <div class="d-flex">
+                <div class="bold"><span *ngIf="mastProduct">Factory </span>Product code</div>
+                <div class="ml-2">
+                    <span *ngIf="mastProduct">{{mastProduct.factory_ref}}</span>
+                    <span *ngIf="custProduct">{{custProduct.cprod_code1}}</span>            
+                </div>        
+            </div>    
+            <div class="d-flex mt-2">
+                <div class="bold">Description</div>
+                <div class="ml-2"><span *ngIf="mastProduct">{{mastProduct.name}}</span><span *ngIf="custProduct">{{custProduct.cprod_name}}</span></div>
+            </div>   
+            <div *ngIf="!custProduct" class="mt-2">
+                <div class="bold">Client products</div>
+                <div class="mt-2">
+                    <table class="table" style="width: 33%">
+                        <tbody>
+                            <tr *ngFor="let p of mastProduct.products">
+                                <td style="width:80px">{{p.client?.customer_code}}</td>
+                                <td>{{p.cprod_code1}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>        
+            </div>
+        </div>
+        <div class="exportbtn">
+            <button class="btn btn-secondary" (click)="exportpdf()">Export Pdf</button>
+        </div>
+    </div>
+    
+    <div>
+        <div *ngFor="let t of filteredTypes()">
+            <app-productfileseditor [files]="files(t)" [type]="t" (FileRemoved)="onFileRemoved($event)" (FileAdded)="onFileAdded($event)"  
+            [readOnlyFiles]="readOnlyFiles(t)" (FileUpdated)="onFileUpdated($event)">
+
+            </app-productfileseditor>
+        </div>
+    </div>
+</div>

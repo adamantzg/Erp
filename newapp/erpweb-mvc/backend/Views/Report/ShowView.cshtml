@@ -1,0 +1,56 @@
+﻿@using System.Data
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <style>
+        thead tr {
+            font-weight: bold;
+        }
+        td {
+            border: 1px solid black;
+            padding: 3px;
+        }
+        table {
+            border-collapse: collapse;
+        }
+    </style>
+    <title></title>
+</head>
+@{ 
+    var table = (DataTable)ViewBag.Data;
+    var hiddenColumns = ViewBag.HiddenColumns != null ? (List<string>) ViewBag.HiddenColumns : new List<string>();
+    var hiddenIndices = new HashSet<int>();
+}
+<body>
+    <table>
+        <thead>
+            <tr>
+                @for (var i = 0; i < table.Columns.Count; i++) {
+                    if (hiddenColumns.Contains(table.Columns[i].ColumnName)) {
+                        hiddenIndices.Add(i);
+                    }
+                    else {
+                        <td>@table.Columns[i].ColumnName</td>
+                    }
+
+                }
+            </tr>
+        </thead>
+        @foreach(DataRow r in table.Rows) {
+            <tr>
+                @for (var i = 0; i < r.ItemArray.Length; i++) {
+                    if (!hiddenIndices.Contains(i)) {
+                        <td>@r.ItemArray[i]</td>
+                    }
+                }
+            </tr>
+        }
+    </table>
+</body>
+</html>

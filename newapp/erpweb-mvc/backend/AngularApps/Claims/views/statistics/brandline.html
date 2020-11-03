@@ -1,0 +1,30 @@
+﻿<table class="table" datatable="ng" dt-instance="dtInstance" dt-options="dtOptions">
+    <thead>
+        <tr>
+            <th></th>
+            <th>Factory</th>
+            <th class="text-right">Claim value</th>
+            <th class="text-right">Avg. monthly sales</th>
+            <th class="text-right">Percentage</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="d in data">
+            <td>
+                <span class="glyphicon glyphicon-plus" ng-show="!d.expanded" ng-click="expand(d,$index)"></span>
+                <span class="glyphicon glyphicon-minus" ng-show="d.expanded" ng-click="expand(d,$index)"></span>
+            </td>
+            <td>{{d.factory_code}}</td>
+            <td class="text-right">{{format(d.credit_value)}}</td>
+            <td class="text-right">{{format(d.sales)}}</td>
+            <td class="text-right">{{format(d.ratio*100,1)}} %</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>Other factories</td>
+            <td class="text-right">0</td>
+            <td class="text-right">{{format(otherValue)}}</td>
+            <td class="text-right">0</td>
+        </tr>
+    </tbody>
+</table>

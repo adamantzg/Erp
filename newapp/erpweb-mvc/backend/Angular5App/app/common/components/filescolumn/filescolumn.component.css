@@ -1,0 +1,15 @@
+.fileicon {
+    position: relative;
+}
+.deleteicon {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    display: none;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+.fileicon:hover .deleteicon {
+    display:block;
+}

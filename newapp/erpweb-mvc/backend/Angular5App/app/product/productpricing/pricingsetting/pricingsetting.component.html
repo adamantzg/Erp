@@ -1,0 +1,24 @@
+<h3 *ngIf="showTitle">Product pricing settings</h3>
+<div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
+<div *ngIf="showButtons">
+    <button class="btn btn-primary" (click)="update()">Update</button> <button class="btn btn-default" (click)="back()">Back</button>
+</div>
+<div class="row" style="margin-top:5px"> 
+  <div class="col-sm-12">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Setting</th>
+          <th>Value</th>
+        </tr>
+        <tr *ngFor="let s of settings">
+          <td>{{s.name}} <span *ngIf="isPercentage(s)">(%)</span> </td>
+          <td>
+            <input *ngIf="!isPercentage(s)" type="text" class="form-control" [(ngModel)]="s.numValue">
+            <app-percentageinput *ngIf="isPercentage(s)" [(Data)]="s.numValue"></app-percentageinput>
+          </td>
+        </tr>
+      </thead>
+    </table>
+  </div>
+</div>

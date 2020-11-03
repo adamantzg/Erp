@@ -1,0 +1,61 @@
+﻿<div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12">
+        <h1 class="page-header text-center">
+            GOODS RECEIPT
+        </h1>
+        <ol class="breadcrumb">
+            <li>
+                <i class="fa fa-dashboard"></i>  <a ui-sref="home">Index</a>
+            </li>            
+            <li class="active">
+                <i class="fa fa-edit"></i>Goods Receipt
+            </li>
+        </ol>
+    </div>
+</div>
+<div class="row"> 
+    <div class="col-lg-2"></div>
+    <div class="col-lg-8 col-xs-12 mid">
+        <section class="panel">
+            <div class="panel-heading">
+                PO: {{goodsInOrder.custpo}}
+            </div>
+            <div class="panel-body">
+                <form class="form-horizontal">
+                    <div class="text-right"><button class="btn" ng-click="copyQty(goodsInOrder.lines)">Copy order qty to received qty</button> </div>
+                    <table datatable="ng" dt-options="dtGoodsInOptions" data-page-length='50'>
+                        <thead>
+                            <tr>
+                                <th>Item code</th>
+                                <th>Description</th>
+                                <th class="text-right">Physical stock as of {{formatDate(goodsInOrder.stockdate)}}</th>
+                                <th class="text-right">Order QTY</th>
+                                <th class="text-right">Received QTY</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="l in goodsInOrder.lines">
+                                <td>{{l.cprod_code1}}</td>
+                                <td>{{l.cprod_name}}</td>
+                                <td class="text-right">{{l.cprod_stock2 + (l.received_qty || 0) - (l.orig_received_qty || 0) }}</td>
+                                <td class="text-right">{{l.orderqty}}</td>
+                                <td class="text-right"><input class="text-right pull-right form-control" style="width: 50%" type="number" ng-model="l.received_qty" max="{{l.orderqty}}" ng-change="limitInput(l)"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="control-label col-lg-2">Notes</label>
+                            <div class="col-lg-9">
+                                <textarea class="form-control" ng-model="goodsInOrder.notes"></textarea>
+                            </div>
+                        </div>                                                
+                    </div>                    
+                    <button class="btn btn-primary pull-right" type="button" ng-click="updateGoodsInOrder()">Confirm</button>
+                    
+                </form>
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-2"></div>
+</div>

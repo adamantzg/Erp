@@ -1,0 +1,23 @@
+﻿@model ImprovedChangedImagesPartialModel
+
+<table class="prod_img" width="100%" border="0" cellspacing="2" cellpadding="2">
+    @if (Model.ShowCaptions) {
+        <tr>
+            <td colspan="3" class="row_name">@Model.Caption</td>
+
+        </tr>
+        <tr>
+            <td colspan="3" class="row_name">@Model.SubTitle</td>
+        </tr>
+    }
+    <tr>
+        <td>
+            @foreach (var im in Model.Images)
+            {
+                <div class="imagebox">
+                    <img src="https://newapp.bigcompany.com@(im)"/>
+                </div>
+            }
+        </td>
+    </tr>
+</table>

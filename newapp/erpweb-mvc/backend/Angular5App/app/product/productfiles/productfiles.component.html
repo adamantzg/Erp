@@ -1,0 +1,36 @@
+<h3>QA criteria</h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="form-inline">
+            <div class="form-group">
+                <label >Factory: </label>
+                <select class="form-control ml-2" [(ngModel)]="factoryId">
+                    <option *ngFor="let f of factories" [value]="f.user_id">{{f.factory_code}}</option>
+                </select>
+            </div>
+            <button class="btn btn-primary ml-2" [disabled]="!factoryId" (click)="showProducts()">Show products</button>
+            <button class="btn btn-default ml-2" *ngIf="products.length > 0 && !productsHidden" (click)="hideProducts()">Hide list</button>
+        </div>
+    </div>
+</div>
+<div class="row mt-2" *ngIf="products.length > 0 && !productsHidden">
+    <div class="col-md-12">
+        <app-grid [definition]="gridDefinition" [data]="products" [style]="gridStyle" (ButtonClicked)="onGridButtonClicked($event)"></app-grid>
+    </div>
+</div>
+<div class="row">
+     <div class="col-md-12">
+         <app-productsearch [label]="'Find by code'" (productSelected)="onProductSelected($event)"></app-productsearch>
+     </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div *ngIf="mastProduct">
+            <tabset>
+                <tab *ngFor="let t of tabs" [heading]="t.title">
+                    <app-productinfo [product]="t.product" [types]="types"></app-productinfo>
+                </tab>
+            </tabset>
+        </div>
+    </div>
+</div>

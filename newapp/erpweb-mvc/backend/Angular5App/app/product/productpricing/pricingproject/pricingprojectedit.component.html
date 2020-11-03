@@ -1,0 +1,70 @@
+<form #editForm="ngForm">
+  <div style="margin: 5px 0 0 0">
+    <button class="btn btn-primary mr-2" (click)="update(editForm)">{{updateButtonText}}</button> <button class="btn btn-default" (click)="back()">Back to list</button>
+ </div>
+ <h3>{{title}}</h3>
+ <div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
+ <div class="alert alert-danger" *ngIf="validationMessage && showValidation && editForm.invalid">{{validationMessage}}</div>
+ 
+<tabset>
+  <tab heading="Data and settings" [active]="active == 'data'">
+      <div class="form form-horizontal col-lg-10 col-sm-12" style="margin-top: 3px">
+          <div class="row">
+              <div class="col-lg-8">
+                  <div class="form-group">
+                      <label class="col-sm-3 control-label">Name</label>
+                      <div class="col-sm-9">
+                          <input type="text" name="name" class="form-control" [(ngModel)]="editModel.project.name" required>
+                      </div>            
+                  </div>
+                  <div class="form-group">
+                      <label class="col-sm-3 control-label">Pricing model</label>
+                      <div class="col-sm-9">
+                          <select class="form-control" name="pricingModel" [(ngModel)]="editModel.project.pricing_model_id" required>
+                            <option [value]="null">(Select)</option>
+                            <option *ngFor="let m of editModel.pricingModels" [value]="m.id">{{m.name}}</option>
+                          </select>
+                      </div>            
+                  </div>
+                  <div class="form-group">
+                      <label class="col-sm-3 control-label">Currency</label>
+                      <div class="col-sm-9">
+                          <select class="form-control" name="currency" [(ngModel)]="editModel.project.currency_id" required>
+                            <option [value]="null">(Select)</option>
+                            <option *ngFor="let c of editModel.currencies" [value]="c.curr_code">{{c.curr_symbol}}</option>
+                          </select>
+                      </div>            
+                  </div>
+              </div>
+              
+          </div>
+          <hr>
+          <app-pricingsetting [settings]="editModel.project.settings" [autoLoad]="false" [showButtons]="false" [showTitle]="false"></app-pricingsetting>
+      </div>
+  </tab>
+  <tab heading="Products" *ngIf="editModel.project.id > 0" [active]="active == 'products'">
+      <div class="row">
+          <div class="col-lg-12">
+            <div style="margin: 5px 0 5px 0">
+                <button type="button" class="btn btn-primary mr-2" (click)="addNewProduct()">Add new product</button> 
+                <button type="button" class="btn btn-default" (click)="addExisting()">Add existing product</button>
+            </div>            
+            <app-grid [definition]="projectProductsTableDef" [style]="{ height: '30vh', 'margin-top':'5px'}" 
+              [data]="editModel.project.products" (ButtonClicked)="onSelectedProductButton($event)"></app-grid>
+          </div>
+      </div>
+      <div *ngIf="showFilters">
+        <hr>
+        <h4>Select products</h4>
+        
+        <div class="row">
+          <div class="col-lg-12">
+            <app-productselector [multiSelect]="true" [style]="{ height: '300px', 'margin-top':'5px'}" (AddSelected)="onAddSelected($event)"></app-productselector>
+          </div>
+        </div>
+      </div>
+      
+  </tab>
+
+</tabset>
+</form>

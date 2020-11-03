@@ -1,0 +1,68 @@
+﻿<div class="row" style="margin-top: -20px;">
+    <div class="col-sm-2">
+        <div class="btn create_new btn-primary" ui-sref="create">Create New</div>
+    </div>
+</div>
+<div class="row" style="margin-bottom: 14px;">
+    <div class="col-sm-3">&nbsp;</div>
+    <div class="col-sm-1" ng-click="getDate(-1)">
+        <i class="fa fa-2x fa-chevron-left claim-icon"></i>
+    </div>
+    <div class="col-sm-3" style="padding:0; text-align:center">
+        &nbsp;<span class="h2">{{date | date : 'MMMM yyyy'}}</span>
+        <!--<sub style="margin-top: 0px; margin-right: -10px; float: right;">{{date|date:'MM'}}</sub>-->
+    </div>
+    <div class="col-sm-1">
+        <a ng-click="getDate(1)" ng-class="months < 0?'':'inactive'">
+            <i class="fa fa-2x fa-chevron-right pull-right claim-icon" ng-class="months < 0?'':'inactive'"></i>
+        </a>
+    </div>
+
+
+</div>
+<table class="table table-striped" id="claimList">
+    <thead>
+        <tr>
+            <th>Reference</th>
+            <th>Type</th>
+            <th>Brand</th>
+            <th>Code</th>
+            <th>Description</th>
+            <th>Issue type</th>
+            <th>Dealer or Consumer</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td colspan="7" style="text-align:center" ng-if="busy">
+                <i class="fa fa-2x fa-refresh fa-spin" style="color:#fa8564;"></i>
+                <!--<i class="fa fa-2x fa-spinner fa-spin" style="color:#fa8564;"></i>-->
+            </td>
+        </tr>
+        <tr style="text-align:center" ng-if="Feedbacks.length<1 && !busy">
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td></td>
+            <!--<td><i class="fa fa-minus"></i></td>-->
+        </tr>
+        <tr ng-repeat="claim in Feedbacks | orderBy : '-request_date'" ng-class="{'selected-for-delete':claimSelectedForDelete.return_no === claim.return_no}">
+            <td><a ng-click="open(claim)" ng-class="{'link-style':claimSelectedForDelete.return_no !== claim.return_no,'link-delete-style' :claimSelectedForDelete.return_no === claim.return_no}"><strong>{{claim.return_no}}</strong></a></td>
+            <td>{{claimType[claim.claim_type]}}</td>
+            <td>{{claim.factory_id === 406 ? "Ammara":"Crosswater"}}</td>
+            <td class="table-row-two">{{claim.cprod_code1}}</td>
+            <td>{{claim.cprod_name}}</td>
+            <td class="table-row-one">{{claim.reason}}</td>
+            <td class="table-row-one">{{claim.dealer_id != null ? 'Dealer':'Consumer'}}</td>
+            <td>
+                <i class="fa fa-remove delete-row" ng-if="user.userid===claim.request_userid" ng-click="deleteConfirm(claim)"></i>
+            </td>
+        </tr>
+
+    </tbody>
+</table>

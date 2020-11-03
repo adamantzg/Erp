@@ -1,0 +1,76 @@
+<div>
+<div class="form-group row">
+    <div class="col-md-6">
+      <h3>Packaging Materials Export</h3>
+    </div>
+</div>
+  
+<div class="row padding">
+  <div class="form-group">
+    <label class="col-md-1 col-form-label">Client:</label>
+    <div class="col-md-2">
+      <select class="form-control" [(ngModel)]="filterParams.clientId">
+          <option value="-1">All</option>
+          <option *ngFor="let c of model.clients | orderBy: 'customer_code'" [value]="c.user_id">{{c.customer_code}}</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="row padding">
+  <div class="form-group padding">
+  <label class="col-md-1 col-form-label">Factory:</label>
+  <div class="col-md-2">
+    <select class="form-control" [(ngModel)]="filterParams.factoryId">
+        <option value="-1">All</option>
+        <option *ngFor="let f of model.factories | orderBy: 'factory_code'" [value]="f.user_id">{{f.factory_code}}</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="row padding">
+  <div class="form-group">
+    <label class="col-md-1 col-form-label">Category:</label>
+    <div class="col-md-2">
+        <select class="form-control" [(ngModel)]="filterParams.categoryId">
+          <option value="-1">All</option>
+          <option *ngFor="let c of model.categories | orderBy 'cat1_name'" [value]="c.category1_id">{{c.cat1_name}}</option>
+        </select>
+      </div>
+  </div>
+</div>
+
+<div class="row padding">
+  <div class="form-group">  
+      <label for="dateFrom" class="col-md-1 col-form-label">From:</label>
+      <div class="col-md-2">
+        <input class="form-control" style="padding-right: 0px;" id="dateFrom" type="text" [bsValue]="filterParams.dateFrom" [value]="filterParams.dateFrom | date: dateFormat" 
+                [bsConfig]= "{ dateInputFormat:'DD/MM/YYYY' }" ([ngModel])="filterParams.dateFrom" bsDatepicker (bsValueChange)="onValueChange($event)"/>
+      </div>
+      <div clas="col-md-2">
+          <label for="dateTo" class="col-md-1 col-form-label" style="padding: 0px;margin: 0px;">To:</label>        
+          <div class="col-md-2" style="padding-left: 0px;">
+            <input  class="form-control" type="text" id="dateTo" [bsValue]="filterParams.dateTo" [value]="filterParams.dateTo | date: dateFormat"
+                    [bsConfig] = "{ dateInputFormat: 'DD/MM/YYYY'}" ([ngModel])="filterParams.dateTo" bsDatepicker (bsValueChange)="onValueChangeTo($event)"/>    
+      </div>
+      </div>
+  </div>
+</div>
+
+<div class="row padding">
+  <div class="form-group">
+      <div class="col-md-12">
+        <label style="padding: 3px;" class="col-form-label">ETD</label>
+        <input class="form-check-input" type="radio" [(ngModel)]="filterParams.etaetd" [value]="false">
+        <label style = "padding: 3px;" class="col-form-label">ETA</label>
+        <input class="form-check-input" type="radio" [(ngModel)]="filterParams.etaetd" [value]="true">
+      </div>
+  </div>
+</div>
+
+<div class="form-group row">
+  <div class="col-md-3 form-group">
+    <button class="btn btn-primary" (click)="getExport()">EXPORT</button>   
+  </div>
+</div>

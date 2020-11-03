@@ -1,0 +1,88 @@
+﻿<div ng-cloak>
+    <h4>{{title}}</h4>
+    <div class="alert alert-danger" ng-show="errorMessage">{{errorMessage}}</div>
+    <button class="btn btn-primary" ng-click="update()">{{saveButtonText}}</button> <button class="btn btn-default" ui-sref="home">Back to list</button>
+    <div class="row" style="margin-top:5px">
+        <div class="col-md-8">
+            <div class="form-group">
+                <label>Language</label>
+                <select class="form-control" ng-options="l.language_id as l.name for l in model.languages" ng-model="model.instruction.language_id"></select>
+            </div>
+            <div class="form-group">
+                <label>File</label>
+                <input type="text" class="form-control" readonly ng-model="model.instruction.filename" /> <button class="btn btn-default" plupload="fileUpload.url"
+                                                       plupload-options="fileUpload.options" plupload-callbacks="fileUpload.callbacks">Upload</button>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-primary">
+        <div class="panel-heading">Products</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Factory ref</th>
+                                <th>Name</th>
+                                <th>Factory</th>
+                                <th>Cust. products</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="p in model.instruction.products">
+                                <td>
+                                    {{p.factory_ref}}
+                                </td>
+                                <td>{{p.name}}</td>
+                                <td>{{p.factory.factory_code}}</td>
+                                <td><span ng-repeat="cp in p.custProducts">{{cp.cprod_code1}}<span ng-if="!$last">,</span> </span></td>
+                                <td><span class="glyphicon glyphicon-remove" style="cursor:pointer" ng-click="removeProduct(p)"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <hr />
+            <div>
+                <label>Add more products</label>
+
+                <div class="form-inline" style="padding-bottom:3px;">
+                    <div class="form-group">
+                        <label>Client:</label>
+                        <select class="form-control" ng-options="c.user_id as c.customer_code for c in model.clients | orderBy: 'customer_code'" ng-model="searchParams.client_id"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Factory:</label>
+                        <select class="form-control" ng-options="f.user_id as f.factory_code for f in model.factories | orderBy: 'factory_code'" ng-model="searchParams.factory_id"></select>
+                    </div>
+                    <button class="btn" ng-click="searchProducts()">Search products</button>
+                </div>
+
+                <div class="col-md-12" style="margin-top:5px;padding-left:0px">
+                    <button class="btn pull-right" ng-click="addProducts()" ng-disabled="!showAddProducts()">Add selected</button>
+                    <table class="table table-striped" datatable="" dt-options="dtOptions" dt-instance="dt" dt-columns="dtColumns">
+                        <!--<thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Description</th>
+                                <th>Add</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="p in products | filter: filterProducts | orderBy: 'cprod_code1'">
+                                <td>{{p.cprod_code1}}</td>
+                                <td>{{p.cprod_name}}</td>
+                                <td><input type="checkbox" ng-model="p.selected" /></td>
+                            </tr>
+                        </tbody>-->
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-primary" ng-click="update()">{{saveButtonText}}</button>
+    
+</div>

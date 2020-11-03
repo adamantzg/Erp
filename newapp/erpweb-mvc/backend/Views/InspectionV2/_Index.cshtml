@@ -1,0 +1,383 @@
+﻿@model InspectionListModel
+
+@{
+
+}
+<div id="app" ng-app="app">
+    <div class="container-fluid" ng-controller="controller" id="controller">
+        <div class="col-xs-6 col-md-2 small_body">
+            <div class="bordered">
+                <div class="filter_title">Factory</div>
+                <span ng-repeat="f in Factories | orderBy:'order'">
+                    <span ng-if="f.user_id != factory_id"><a ng-click="FactorySelect(f)" class="clickable">{{f.factory_code}}</a> </span>
+                    <span ng-if="f.user_id == factory_id" style="font-weight: bold">{{f.factory_code}} </span>
+                </span>
+            </div>
+            <br/>
+            <div class="bordered">
+
+                <div style="display: table">
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 30%">PO:</div>
+                        <div style="display: table-cell">
+                            <input type="text" ng-model="custpo" />
+                        </div>
+                    </div>
+                    <div style="height: 2px"></div>
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 30%">&nbsp;</div>
+                        <div style="display: table-cell">
+                            <button value="search" ng-click="LoadInspections()">search</button>
+                        </div>
+                    </div>
+                    <br/>
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 30%">from:</div>
+                        <div style="display: table-cell">
+                            <input type="text" ng-model="from" isDate="true" />
+                        </div>
+                    </div>
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 30%">to:</div>
+                        <div style="display: table-cell">
+                            <input type="text" ng-model="to" isDate="true" />
+                        </div>
+                    </div>
+                    <div style="height: 2px"></div>
+                    <div style="display: table-row">
+                        <div style="display: table-cell; width: 30%"></div>
+                        <div style="display: table-cell">
+                            <button value="search" ng-click="LoadInspections()">search</button>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <div class="filter_title">Client</div>
+                <span ng-repeat="c in Clients | orderBy:'order'">
+                    <span ng-if="c.user_id != client_id"><a ng-click="ClientSelect(c)" class="clickable">{{c.customer_code}}</a> </span>
+                    <span ng-if="c.user_id == client_id" style="font-weight: bold">{{c.customer_code}} </span>
+                </span>
+            </div>
+        </div>
+        <div class="col-xs-6 col-md-10 lightbordered small_body">
+            @*<ul class="nav nav-tabs" role="tablist">
+                <li role="presentation" class="active"><a href="#todo" aria-controls="todo" role="tab" data-toggle="tab">To do</a></li>
+                <li role="presentation"><a href="#awaiting" aria-controls="awaiting" role="tab" data-toggle="tab">Awaiting response</a></li>
+                <li role="presentation"><a href="#rejected" aria-controls="rejected" role="tab" data-toggle="tab">Rejected</a></li>
+                <li role="presentation"><a href="#accepted" aria-controls="accepted" role="tab" data-toggle="tab">Accepted</a></li>
+            </ul>*@
+            <div class="bordered">
+                <div ng-repeat="s in statusFilters" style="display: table-cell; padding-right: 10px">
+                    <span ng-if="s.id != activeStatus"><a ng-click="StatusSelect(s)" class="clickable">{{s.value}}</a> </span>
+                    <span ng-if="s.id == activeStatus" style="font-weight: bold">{{s.value}}</span>
+                </div>
+            </div>
+            <br/>
+            <div class="bordered">
+                <table class="table table-responsive small_body_table">
+                    <thead>
+                        <tr class="table_header">
+                            <td style="width: 10%">factory</td>
+                            <td style="width: 10%">client</td>
+                            <td style="width: 8%">PO</td>
+                            <td style="width: 10%">date</td>
+                            <td style="width: 5%"></td>
+                            <td>list</td>
+                            <td>report</td>
+                            <td style="width: 10%">FC review</td>
+                            <td style="width: 10%">del</td>
+                            <td style="width: 10%">CA</td>
+                            <td style="width: 10%">NR</td>
+                        </tr>
+                    </thead>
+                </table>
+                <div id="tableWrapper" style="max-height: 400px; overflow: auto" class="dashbordered">
+                    <img src="/Images/Spinning_wheel_throbber.gif" ng-show="busy"/>
+                    <table class="table table-responsive small_body_table" ng-show="!busy">
+                        <tbody ng-repeat="i in FiLiInspections[activeStatus]">
+                        <tr ng-if="i.FI != null" ng-class="{oddrow: $index % 2 == 0}">
+                            <td style="width: 10%">{{i.FI.factory_code}}</td>
+                            <td style="width: 10%">{{i.FI.customer_code}}</td>
+                            <td style="width: 8%">{{i.FI.custpos.join(' ')}}</td>
+                            <td style="width: 10%">{{FormatInspectionDate(i.FI)}}</td>
+                            <td style="width: 5%">{{i.FI.type}}</td>
+                            <td><a target="_blank" href="@(Url.Action("InspectionList"))/{{i.FI.id}}">view</a></td>
+                            <td></td>
+                            <td style="width: 10%"></td>
+                            <td style="width: 10%">
+                                @if (User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.FactoryController.ToString()))
+                                {
+                                    <img src="/Images/menus/Delete.gif" class="clickable" ng-if="i.FI.insp_status != @((int) InspectionV2Status.ReportSubmitted)" ng-click="DeleteInspection(i,1)">
+                                }
+
+                            </td>
+                            <td style="width: 10%"></td>
+                            <td style="width: 10%"></td>
+                        </tr>
+
+                        <tr ng-if="i.LI != null" ng-class="{oddrow: $index % 2 == 0}">
+                            <td style="width: 10%"><span ng-if="i.FI == null">{{i.LI.factory_code}}</span></td>
+                            <td style="width: 10%"><span ng-if="i.FI == null">{{i.LI.customer_code}}</span></td>
+                            <td style="width: 8%"><span ng-if="i.FI == null">{{i.LI.custpos.join(' ')}}</span></td>
+                            <td style="width: 10%">{{FormatInspectionDate(i.LI)}}</td>
+                            <td style="width: 5%">{{i.LI.type}}</td>
+                            <td><a target="_blank" href="@(Url.Action("InspectionList"))/{{i.LI.id}}">view</a></td>
+                            <td>
+                                <a target="_blank" href="@(Url.Action("LoadingReport2"))/{{i.LI.id}}" ng-if="i.LI.insp_status == @((int) InspectionV2Status.ReportSubmitted)">{{GetInspectionCode(i.LI)}}</a>
+                                <a href="#" ng-if="i.LI.insp_status == @((int) InspectionV2Status.ListReady) && @(User.IsInRole(UserRole.Inspector.ToString()) ? "true" : "false")">create report</a>
+                            </td>
+                            <td style="width: 10%"></td>
+                            <td style="width: 10%">
+                                @if (User.IsInRole(UserRole.Administrator.ToString()) || User.IsInRole(UserRole.FactoryController.ToString()))
+                                {
+                                    <img src="/Images/menus/Delete.gif" class="clickable" ng-if="i.LI.insp_status != @((int) InspectionV2Status.ReportSubmitted)" ng-click="DeleteInspection(i,2)">
+                                }
+
+                            </td>
+                            <td style="width: 10%"></td>
+                            <td style="width: 10%"></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #E0E0E0">
+                            <td colspan="11" style="border-top: 0"></td>
+                        </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+                <br/>
+                <table class="table table-responsive small_body_table">
+                    <thead>
+                    <tr class="table_header">
+                        <td style="width: 10%">factory</td>
+                        <td style="width: 10%">client</td>
+                        <td style="width: 8%">PO</td>
+                        <td style="width: 10%">date</td>
+                        <td style="width: 5%"></td>
+                        <td>list</td>
+                        <td>report</td>
+                        
+                        
+                    </tr>
+                    </thead>
+                </table>
+                <div  style="max-height: 200px; overflow: auto" class="dashbordered">
+                    <table class="table table-responsive small_body_table" ng-show="!busy">
+                        <tbody ng-repeat="i in OtherInspections">
+                            <tr ng-class="{oddrow: $index % 2 == 0}">
+                                <td style="width: 10%">{{i.factory_code}}</td>
+                                <td style="width: 10%">{{i.customer_code}}</td>
+                                <td style="width: 8%">{{i.custpos.join(' ')}}</td>
+                                <td style="width: 10%">{{FormatInspectionDate(i)}}</td>
+                                <td style="width: 5%">{{i.type}}</td>
+                                <td><a target="_blank" href="@(Url.Action("InspectionList"))/{{i.id}}">view</a></td>
+                                <td></td>
+                                
+                            </tr>
+
+                            <tr style="border-bottom: 1px solid #E0E0E0">
+                                <td colspan="11" style="border-top: 0"></td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+                    
+
+            </div>
+            @*<div class="tab-content">
+                <div role="tabpanel" class="tab-pane active" id="todo">
+                    <img src="/Images/Spinning_wheel_throbber.gif" ng-visible="loading"/>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="awaiting">
+                    <img src="/Images/Spinning_wheel_throbber.gif" ng-visible="loading" />
+                </div>
+                <div role="tabpanel" class="tab-pane" id="rejected">
+                    <img src="/Images/Spinning_wheel_throbber.gif" ng-visible="loading" />
+                </div>
+                <div role="tabpanel" class="tab-pane" id="accepted">
+                    <img src="/Images/Spinning_wheel_throbber.gif" ng-visible="loading" />
+                </div>
+            </div>*@
+        </div>
+    </div>    
+</div>
+
+
+@section head
+{
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    <style>
+        .bordered {
+            border: 1px solid black;
+            padding: 2px;
+        }
+        .lightbordered 
+        { 
+            border: 1px solid #E0E0E0;
+            padding: 2px;
+        }
+        .dashbordered {
+            border: 1px dashed #E0E0E0;
+        }
+        .clickable {
+            cursor: pointer;
+        }
+        .small_body {
+            font-size: 0.8em;
+        }
+        .small_body_table {
+            font-size: 0.9em;
+        }
+        .filter_title {
+            font-weight: bold;
+            background-color: #D0D0D0;
+        }
+        input[type="text"] {
+            width: 80%;
+        }
+        .ui-widget {
+            font-size: 0.8em;
+        }
+        /*.col-md-2 {
+            padding-right: 0;
+        }*/
+        .main {
+            width: auto;
+        }
+        .table_header {
+            background-color: #666666;
+            color: #FFF;
+        }
+        .table {
+            border: inherit;
+            margin-bottom: 0px;
+        }
+        .oddrow {
+            background-color: #F4F4F4;
+        }
+    </style>
+}
+
+@section scripts2
+{
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/utils")
+    <script type="text/javascript">
+        var model = @Html.Raw(WebUtilities.JsonSerialize(new
+                    {
+                        Clients = Model.Clients.Select(c => new {c.user_id, c.user_name, c.customer_code, order = c.customer_code}),
+                        Factories = Model.Factories.Select(f => new {f.user_id, f.user_name, f.factory_code, order = f.factory_code}),
+                        Model.StatusFilters
+                    }));
+        var app = angular.module('app', ['ngSanitize']);
+        var date = new Date();
+        date.setDate(date.getDate() - 30);
+        app.controller('controller', [
+            '$scope', '$http', function($scope, $http) {
+                $scope.Factories = model.Factories;
+                $scope.Clients = model.Clients;
+                $scope.custpo = '';
+                $scope.from = FormatDate(date);
+                $scope.to = FormatDate(new Date());
+                $scope.factory_id = null;
+                $scope.client_id = null;
+                $scope.busy = false;
+                $scope.Factories.splice(0, 0, { user_id: null, factory_code: 'ALL', order: ' ' });
+                $scope.Clients.splice(0, 0, { user_id: null, customer_code: 'ALL', order: ' ' });
+
+                $scope.statusFilters = model.StatusFilters;
+                $scope.activeStatus = 1;
+                $scope.FiLiInspections = {};
+                $scope.OtherInspections = [];
+
+                $scope.FactorySelect = function(f) {
+                    $scope.factory_id = f.user_id;
+                    $scope.LoadInspections();
+                }
+
+                $scope.ClientSelect = function(c) {
+                    $scope.client_id = c.user_id;
+                    $scope.LoadInspections();
+                }
+
+                $scope.LoadInspections = function() {
+                    var params = { factory_id: $scope.factory_id, client_id: $scope.client_id, custpo: $scope.custpo, from: $scope.from, to: $scope.to, status: $scope.activeStatus };
+                    $scope.busy = true;
+                    $http.post('@Url.Action("GetInspections")', params).
+                        success(function(data, status, headers, config) {
+                            var i = 1;
+                            data.FiLiInspections.forEach(function(elem) {
+                                elem.id = i++;
+                                if (elem.FI != null)
+                                    elem.FI.startdate = fromJSONDate(elem.FI.startdate);
+                                if (elem.LI != null)
+                                    elem.LI.startdate = fromJSONDate(elem.LI.startdate);
+                            });
+                            $scope.FiLiInspections[$scope.activeStatus] = data.FiLiInspections;
+                            data.OtherInspections.forEach(function(elem) {
+                                elem.startDate = fromJSONDate(elem.startdate);
+                            });
+                            $scope.OtherInspections = data.OtherInspections;
+
+                            $scope.busy = false;
+                        }).
+                        error(function(data, status, headers, config) {
+                            //alert(status);
+                            //$('#wait').hide();
+                            $scope.busy = false;
+                        });
+                };
+
+
+                $scope.StatusSelect = function(s) {
+                    $scope.activeStatus = s.id;
+                    if (!(s.id in $scope.FiLiInspections))
+                        $scope.LoadInspections();
+                }
+
+                $scope.DeleteInspection = function(i, what) {
+                    if (confirm('Are you sure you want to delete this inspection?')) {
+                        var params = { id: what === 1 ? i.FI.id : i.LI.id };
+                        $http.post('@Url.Action("DeleteInspection")', params).
+                            success(function(data, status, headers, config) {
+                                if (what == 1)
+                                    i.FI = null;
+                                else if (what == 2)
+                                    i.LI = null;
+                                if (i.LI == null && i.FI == null)
+                                    _.remove($scope.Inspections, { id: i.id });
+                            }).
+                            error(function(data, status, headers, config) {
+                                alert(status);
+                                //$('#wait').hide();
+
+                            });
+                    }
+                }
+
+                $scope.LoadInspections();
+
+                $scope.GetInspectionCode = function(i) {
+                    return i.factory_code + '-LI-' + dateFormatInspCode(i.startdate) + '-' + i.customer_code;
+                }
+
+                $scope.FormatInspectionDate = function(i) {
+                    return dateFormat(i.startdate);
+                }
+            }
+        ]);
+
+        function dateFormatInspCode(date) {
+            return moment(date).format("YYMMDD");
+        }
+
+        function dateFormat(date) {
+            return moment(date).format("DD/MM/YYYY");
+        }
+
+
+    </script>
+}

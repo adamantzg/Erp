@@ -1,0 +1,109 @@
+﻿@model DopModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Declaration of performance</title>
+        <style>
+            body {
+                font-family: calibri, Verdana, Tahoma,arial;
+                font-size: 22px;
+            }
+            .text {
+                font-weight: bold;
+                margin-top: 20px;
+                margin-bottom: 35px;
+            }
+            #charTable td{
+                border: 1px solid black;
+                font-size: 22px;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body style="width: 900px">
+        <div style="font-size: 26px;text-align: center;height: 40px">
+            DECLARATION OF PERFORMANCE
+        </div>
+        <div style="font-size: 26px;text-align: center;height: 40px;margin-bottom: 50px">
+            No. CPR-@Model.Product.cprod_code1-A
+        </div>
+        1. Unique identification code of product-type:<br/>
+        <div class="text">@Model.Product.cprod_code1</div>
+        2. Type, batch or serial number or any other element allowing identification of the
+        construction product as required pursuant to Article 11(4) of the CPR:
+        <div class="text">@Model.Product.cprod_code1</div>
+        3. Intended use or uses of the construction product, in accordance with the
+        applicable harmonised technical specification, as foreseen by the manufacturer:
+        <div class="text">@Model.Category.intended_use</div>
+        4. Name, registered trade name or registered trade mark and contact address of the
+        manufacturer as required pursuant to Article 11(5):
+        <div class="text">@Model.Client.user_name<br/>@WebUtilities.ArrayToString(new[] {Model.Client.user_address1,
+                                                          Model.Client.user_address2, Model.Client.user_address3,Model.Client.user_address4,Model.Client.user_address5,Model.Client.user_address6, Model.Client.user_country},",")</div>
+        5. Where applicable, name and contact address of the authorised representative
+        whose mandate covers the tasks specified in Article 12(2):
+        <div class="text">@Model.Client.user_name<br/>@WebUtilities.ArrayToString(new[] {Model.Client.user_address1,
+                                                          Model.Client.user_address2, Model.Client.user_address3,Model.Client.user_address4,Model.Client.user_address5,Model.Client.user_address6, Model.Client.user_country},",")</div>
+        6. System or systems if assessment and verification of constancy of performance of
+        the construction product as set our in CPR, Annex V:
+        <div class="text">@Model.Category.avcp_system</div>
+        
+        7. In case of the declaration of performance concerning a construction product
+        covered by a harmonised standard:
+        <div class="text">@Model.Category.en_standard</div>
+        <BR style="page-break-before: always">
+        8. Declared performance:<br/><br/>
+        <table style="border-collapse: collapse" id="charTable" >
+            <tr style="font-weight: bold">
+                <td>
+                    Essential characteristics 
+                </td>
+                <td>
+                    Performance
+                </td>
+                <td>
+                    Harmonised technical specification
+                </td>
+            </tr>
+            @foreach (var c in Model.Category.Characteristics)
+            {
+                var prodChar = (Model.ProductCharacteristic != null ? Model.ProductCharacteristic.FirstOrDefault(p => p.characteristics_id == c.characteristic_id) : null);
+                <tr>
+                    <td>@c.name</td>
+                    <td>@(prodChar != null ? prodChar.value : c.defaultvalue)</td>
+                    @if (c == Model.Category.Characteristics.First())
+                    {
+                        <td rowspan="@Model.Category.Characteristics.Count">@Model.Category.en_standard</td>
+                    }
+                </tr>
+                
+            }
+        </table>
+        <br/>
+        9. The performance of the product identified in point 1 and 2 in conformity with the
+declared performance in point 8,This declaration of performance is issued under the
+        sole responsibility of the manufacturer identified in point 4.
+        <p></p>
+        <div style="font-weight: bold;margin-bottom: 20px">Signed for and on behalf of the manufacturer by:</div>
+        <div style="border-bottom: 1px solid black;height: 30px" ></div>
+        <div style="text-align: center;margin-bottom: 20px">(name and function)</div>
+        <table style="width: 100%;font-size: 20px">
+            <tr style="height: 20px">
+                <td style="border-bottom: 1px solid black;width:33%">&nbsp;</td>
+                <td style="border-bottom: 1px solid white;width:33%">&nbsp;</td>
+                <td style="border-bottom: 1px solid black;width: 33%">&nbsp;</td>
+            </tr>
+            <tr>
+                <td style="text-align: center">(place and date of issue)</td>
+                <td></td>
+                <td style="text-align: center">(signature)</td>
+            </tr>
+        </table>
+
+    </body>
+</html>

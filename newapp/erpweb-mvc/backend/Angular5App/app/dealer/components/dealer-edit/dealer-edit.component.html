@@ -1,0 +1,267 @@
+<div class="row">
+  <div class="col-sm-12">
+    <h4 class="h4" style="border-bottom: 1px solid #555;">
+    <span *ngIf="createForm; else editForm ">Create New Dealer</span >
+      <ng-template #editForm>Edit Dealer </ng-template>
+  </h4>
+</div>
+</div>
+<div class="row">
+  <div class="col-sm-12 dealer-title">
+    <div class="h3">
+      <!-- <span class="pull-left" style="cursor:pointer" (click)="goBack()"> -->
+      <span class="pull-left" style="cursor:pointer" routerLink="/dealers">
+        <i class="ion ion-ios7-arrow-back" style="position:absolute;margin-top:3px"></i>
+        <small style="margin-left:15px">Back to list</small>
+      </span>
+      {{dealer.user_name}}&nbsp;</div>
+    <div class="alert alert-info">
+      <!-- <span><i class="ion ion-pin text-info"></i></span> -->
+      Your store location can be entered directly by updating the longitude and latitude fields or alternatively locate and click
+      on the exact information in the map bellow and coordinates will be updated autmatically.
+      <strong> Remember to click Save Dealer data button to save any changes. </strong>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-sm-6">
+    <!-- <div class="row" style="margin-bottom:5px">
+      <div class="col-sm-1">&nbsp;</div>
+      <div class="col-sm-9 input-group input-group-sm">
+          <div class="input-group-addon"><i class="ion ion-android-social-user"></i> Company Name </div>
+          <input [(ngModel)]="dealer.user_name" type="text" name="company" placeholder="company" class="form-control"></div>
+      
+    </div> -->
+    <div class="row">
+      <div class="col-sm-5">
+        <div class="h5">Country</div>
+      </div>
+      <div class="col-sm-7 input-group input-group-sm flag-input-group">
+        <div class="input-group-addon">
+          <span [ngClass]="setClasses()"> &nbsp; </span>
+        </div>
+        <input [(ngModel)]="dealer.user_country" type="text" name="address2" id="address2" class="form-control input-sm">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-5">
+        <div class="h5">Company Name</div>
+      </div>
+      <div class="col-sm-7">
+        <input [(ngModel)]="dealer.user_name" type="text" name="address2" id="address2" class="form-control input-sm">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-5">
+        <div class="h5">Postcode</div>
+      </div>
+      <div class="col-sm-7">
+        <input [(ngModel)]="dealer.postcode" places-auto-complete (place_changed)="placeChanged($event)" [types]="['geocode']" [componentRestrictions]="{country: ['us','ca']}"
+          type="text" name="address2" id="address2" class="form-control input-sm">
+      </div>
+    </div>
+
+    <!-- <div class="row" style="margin-bottom:5px">
+      <div class="col-sm-4">
+        <div class="h5">Company Name</div>
+      </div>
+      
+      <div class="col-sm-8 input-group input-group-sm">
+          <div class="input-group-addon"><i class="ion ion-android-social-user"></i></div>
+          <input [(ngModel)]="dealer.user_name" type="text" name="company" placeholder="company" class="form-control"></div>
+      
+    </div>
+    <div class="row">
+      <div class="col-sm-4 ">
+        <div class="h5">Postcode</div>
+      </div>
+      <div class="col-sm-8 input-group input-group-sm">
+          <div class="input-group-addon"><i class="ion ion-code"></i></div>
+          <input [(ngModel)]="dealer.postcode" type="text" name="postcode" id="postcode" class="form-control input-sm">
+      </div>
+    </div> -->
+    <div class="row">
+      <div class="col-sm-5">
+        <div class="h5">Address</div>
+      </div>
+      <div class="col-sm-7">
+        <input [(ngModel)]="dealer.user_address1" type="text" name="address2" id="address2" class="form-control input-sm">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-5">
+        <div class="h5">&nbsp;</div>
+      </div>
+      <div class="col-sm-7">
+        <input [(ngModel)]="dealer.user_address2" type="text" name="address2" id="address2" class="form-control input-sm">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-5">
+        <div class="h5">&nbsp;</div>
+      </div>
+      <div class="col-sm-7">
+        <input [(ngModel)]="dealer.user_address3" type="text" name="address3" id="address3" class="form-control input-sm">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-5">
+        <div class="h5">&nbsp;</div>
+      </div>
+      <div class="col-sm-7">
+        <input [(ngModel)]="dealer.user_address4" type="text" name="address4" id="address4" class="form-control input-sm">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-5">
+        <div class="h5">&nbsp;</div>
+      </div>
+      <div class="col-sm-7">
+        <input [(ngModel)]="dealer.user_address5" type="text" name="address5" id="address5" class="form-control input-sm">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-5 user-contact">
+        <div class="h5">
+          <i class="ion ion-ios7-telephone"></i>Telephone</div>
+      </div>
+      <div class="col-sm-7">
+        <input [(ngModel)]="dealer.user_tel" type="text" name="usertel" id="usertel" class="form-control input-sm">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-5 user-contact">
+
+        <div class="h5">
+          <i class="ion ion-ios7-printer"></i>&nbsp;Fax</div>
+      </div>
+      <div class="col-sm-7">
+
+        <input [(ngModel)]="dealer.user_fax" type="text" name="fax" id="fax" class="form-control input-sm">
+      </div>
+    </div>
+    <div class="row form-goup">
+      <div class="col-sm-5 user-contact">
+        <div class="h5"><i class="ion ion-ios7-email"></i> Mail
+        <!-- <span >
+          <span class="h5 text-danger" *ngIf="!!mail?.errors?.required && (mail.dirty || mail.touched)">* Is Required</span>
+          <span class="h5 text-warning" *ngIf="(!!mail?.errors?.email && !mail?.errors?.required) && (mail.dirty || mail.touched)">* Is Not Valid</span>
+        </span> -->
+      </div>
+        <!-- <div *ngIf="(mail?.errors?.email && !mail?.errors?.required) && (mail.dirty || mail.touched)"><i class="ion ion-ios7-email"></i> Mail* Is not valid</div> -->
+        <!-- <div [ngClass]="{'text-danger': !!mail.errors?.required && (mail.dirty || mail.touched)}" class="h5"> -->
+          <!-- <i [ngClass]="{'text-danger':mail.errors.required && (mail.dirty || mail.touched)}" class="ion ion-ios7-email"></i> -->
+          <!-- Mail<span *ngIf="mail?.errors?.required && (mail.dirty || mail.touched)">* is required</span> -->
+          <!-- <span class="text-warning" *ngIf="(mail?.errors?.email && !mail?.errors?.required) && (mail.dirty || mail.touched)">* is not valid</span> -->
+        <!-- </div> -->
+        <div></div>
+      </div>
+      <div class="col-sm-7">
+        <!-- <input [(ngModel)]="dealer.user_email" id="mail" name="mail" required minlength="4" #mail="ngModel" email name="mail"
+          id="mail" class="form-control input-sm"> -->
+          <input [(ngModel)]="dealer.user_email" class="form-control input-sm">
+      </div>
+      <!-- <span *ngIf="mail.errors">{{mail.errors.required|json}}</span> -->
+    </div>
+    <div class="row">
+      <div class="col-sm-5 user-contact">
+        <div class="h5">
+          <i class="ion ion-ios7-world"></i> Website</div>
+      </div>
+      <div class="col-sm-7">
+        <input [(ngModel)]="dealer.user_website" type="text" name="website" id="website" class="form-control input-sm">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-5 user-contact">
+        <div class="h5">
+          <i class="ion ion-ios7-person"></i>&nbsp;Contact name</div>
+      </div>
+      <div class="col-sm-7">
+        <input [(ngModel)]="dealer.user_contact" type="text" name="username" id="username" class="form-control input-sm">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-5 user-contact">
+        <div class="h5">
+          <i class="ion ion-ipad"></i>&nbsp;Contact mobile</div>
+      </div>
+      <div class="col-sm-7">
+        <input [(ngModel)]="dealer.user_mobile" type="text" name="mobile" id="mobile" class="form-control input-sm">
+      </div>
+    </div>
+    <div class="row">
+      <!-- <div class="col-sm-2 text-danger">
+        <strong>Error message:</strong>
+       
+      </div> -->
+      <!-- <div class="col-sm-10">
+          <span>
+              m {{ mail?.errors?.email }} r {{mail?.errors?.required}}
+          </span>
+      </div> -->
+
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="col-sm-2">
+      <div class="h5">Latitude</div>
+    </div>
+    <div class="col-sm-4 no-padding-right">
+      <div class="input-group input-gropu-sm">
+        <div class="input-group-addon">
+          <i class="ion ion-ios7-location" style="margin-right:0;margin-left:5px"></i>
+        </div>
+        <input #inputLat [(ngModel)]="dealer.latitude" type="text" class="form-control input-sm" (keyup.enter)="refreshMap($event)" (blur)="refreshMap($event)">
+      </div>
+    </div>
+    <div class="col-sm-2">
+      <div class="h5">Longitude</div>
+    </div>
+
+    <div class="col-sm-4 no-padding-right">
+      <div class="input-group input-group-sm">
+        <div class="input-group-addon">
+          <i class="ion ion-ios7-location" style="margin-right:0;margin-left:5px"></i>
+        </div>
+        <input #inptLng [(ngModel)]="dealer.longitude" type="text" class="form-control input-sm" (blur)="refreshMap($event)" (keyup.enter)="onEnterRefreshMap($event)">
+      </div>
+    </div>
+    <div class="col-sm-12 no-padding-right">
+      <ngui-map #map [options]="allOptions" (click)="onClickMap($event)">
+        <marker [position]="allOptions.center"></marker>
+      </ngui-map>
+      <!-- <agm-map class="img-rounded" [latitude]="dealer.latitude" [longitude]="dealer.longitude">
+      <agm-marker [latitude]="dealer.latitude" [longitude]="dealer.longitude"></agm-marker>
+    </agm-map> -->
+
+    </div>
+    <div class="row">
+      <div class="col-sm-4 status-col">
+        <span class="h5">Dealer Status</span>
+      </div>
+      <div class="col-sm-8 status-col">
+        <div class="radio-inline pull-right">
+          <label for="">
+            <input type="radio" [(ngModel)]="dealer.hide_1" [value]="1">Live</label>
+        </div>
+        <div class="radio-inline pull-right">
+          <label for="">
+            <input type="radio" [(ngModel)]="dealer.hide_1" [value]="0">Not Live</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-12">
+      <!-- <h4 class="h4">??? {{address | json}} ???</h4> -->
+
+      <div class="pull-right">
+        <!-- <button class="btn btn-danger save-dealer-btn" *ngIf="mail.errors">Save Dealer Data</button> -->
+        <!-- <button class="btn btn-primary save-dealer-btn" (click)="save(mail?.errors)">Save Dealer Data</button> -->
+        <button class="btn btn-primary save-dealer-btn" (click)="save()">Save Dealer Data</button>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,366 @@
+﻿<nav>
+    <ul class="pager" style="position:absolute;margin-top:-35px;">
+        <li class="previous">
+            <a ui-sref="home" ng-class="{'font-success':aftercreate}">
+                <span aria-hidden="true"><span class="fa fa-chevron-left"></span>&nbsp; Back to List</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+<div class="row" ng-cloak>
+    <div class="col-sm-12" ng-show="claim != null">
+        <div class="panel panel-default">
+            <header class="panel-heading"><span><span ng-if="claim.returnsid == 0">create new</span> quality assurance ticket </span></header>
+
+            <div class="panel-body">
+
+                <div class="row">
+                    <div class="form-group col-sm-6">
+                        <label for="returnNo">
+                            <span>Reference</span>
+                        </label>
+                        <input type="text" ng-model="claim.return_no" class="form-control" />
+                    </div>
+                    <div class="col-sm-6" ng-show="showSubscribers"> <!-- claim.subscriptions.length>0 || readOnlySubscribers.length>0-->
+                        <div>Subscribers: </div>
+                        <div>
+                            <span ng-repeat="s in readOnlySubscribers track by $index" style="margin-right:5px;" class="label label-default">
+                                <span title="Not removable from list">{{s}}</span>
+                            </span>
+
+                            <span ng-repeat="s in claim.subscriptions" ng-class="{'label':true}" style="margin-right:5px" class="label label-inverse">
+                                {{s.user.userwelcome }}
+                                &nbsp;
+                                <span class="glyphicon glyphicon-remove-circle"
+                                      style="color:lightcoral; cursor:pointer"
+                                      ng-click="removeSubscription($index)" title="Remove from list"></span>
+                            </span>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-sm-6">
+                        <label>
+                            Select the source of the issue
+                        </label>
+                        <div class=" m-b-10">
+                            <select class="form-control" ng-options="c.feedback_cat_id as c.name for c in categories" ng-model="claim.feedback_category_id" required></select>
+                        </div>
+                    </div>
+
+
+                    <div class="form-grop col-sm-6">
+                        <label>
+                            Select the category of the issue
+                        </label>
+                        <div class="m-b-10">
+                            <select class="form-control" ng-options="rc.category_code as rc.category_name for rc in returnCategories" 
+                                    ng-model="claim.reason"
+                                    ng-change="reasonChanged(claim.reason)"
+                                    required>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-sm-6" ng-show="showSubscribers">
+                        <label for="subscribers">
+                            Select who to subscribe to this ticket
+                        </label>
+                        <div class="input-group m-b-10">
+                            <input type="text" name="subscribers"
+                                   class="form-control"
+                                   ng-model="selectedUser"
+                                   typeahead-min-length="2"
+                                   uib-typeahead="user as user.userwelcome for user in getUsers($viewValue)"
+                                   placeholder="Enter subscriber" />
+                            <span class="input-group-btn">
+                                <a class="btn btn-primary" style="padding:0.5em" ng-click="addSubscription()" ng-disabled="selectedUser == null"> Add </a>
+                            </span>
+                            <i class="fa fa-refresh fa-spin"
+                               style="position:absolute;margin-top: 12px;color: #fa8564;margin-left: -60px;z-index:2"
+                               ng-show="searching"></i>
+                        </div>
+                    </div>
+                </div>
+                <!--<div class="row" ng-show="claim.returnsid > 0">
+                    <div class="form-group col-sm-12">
+                        <label for="product">
+                            <span >Select products.</span>
+                        </label>
+                    </div>
+                </div>-->
+
+                
+                
+
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div ng-show="claim.returnsid > 0">
+                            <label>Existing products</label>
+                            <div style="max-height: 200px;overflow:auto">
+
+                                <table style="width:100%" class="table table-striped">
+                                    <tbody>
+                                        <tr ng-repeat="p in claim.products">
+                                            <td><span style="font-weight: bold">{{p.cprod_code1}}</span></td>
+                                            <td>{{p.cprod_name}}</td>
+                                            <td style="width:20px"><span style="cursor:pointer;" class="glyphicon glyphicon-remove" ng-click="removeProduct(p)"></span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!--<span class="label label-inverse" style="margin-right:3px;margin-bottom: 3px;float:left"
+                                ng-repeat="prod in claim.products">
+                            {{prod.cprod_code1}}&nbsp;
+                            <span class="glyphicon glyphicon-remove-circle"
+                                    style="color:lightcoral; cursor:pointer"
+                                    ng-click="removeProduct($index)" title="Remove from list"></span>
+                        </span>-->
+                        <div class="col-sm-12" style="border-top: 1px solid #ddd; margin-top: 10px; margin-left: -15px; width: 103%;">&nbsp;</div>
+                        <div style="padding: 4px;margin-top:5px">
+                            <label ng-click="isCollapsed = !isCollapsed" class="add-products-show"> 
+                            <span class="glyphicon" ng-class="isCollapsed ?'glyphicon-chevron-left':'glyphicon-chevron-down'"></span>&nbsp; <span class="add-products-show-text">Add new products</span></label>
+                            
+                                <div ng-if="!isCollapsed" class="form-inline">
+                                    <div class="form-group">
+                                        <label>Client: </label>
+
+                                        <select ng-model="claim.client_id" 
+                                                ng-options="c.user_id as c.customer_code for c in model.clients" 
+                                                class="form-control"
+                                                ng-change="userIdChanged(claim.client_id)" required></select>
+                                       
+
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Factory: </label>
+                                        <select ng-model="claim.factory_id" 
+                                                ng-options="f.user_id as f.factory_code for f in model.factories"  
+                                                class="form-control" 
+                                                ng-change="factoryIdChanged(claim.factory_id)" required></select>
+                                    </div> 
+                                    <button class="btn btn-default" ng-click="searchProducts()">Find products</button>
+                                </div>
+                                <div ng-if="!isCollapsed" style="margin-top:3px">
+                                    <table datatable="ng" class="table table-striped" dt-options="productTableOptions" dt-instance="productTableInstance">
+                                        <thead>
+                                            <tr>
+                                                <th>Code</th>
+                                                <th>Name</th>
+                                                <th><input type="checkbox" ng-click="toggleAll()" ng-model="productsToggleAll.checked" /></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr ng-repeat="p in products | orderBy: 'cprod_code1'">
+                                                <td>{{p.cprod_code1}}</td>
+                                                <td>{{p.cprod_name}}</td>
+                                                <td><input type="checkbox" ng-model="p.selected" /></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            
+                        </div>
+                        <div class="col-sm-12" style="border-top: 1px solid #ddd; margin-top: 15px; margin-left: -15px; width: 103%;">&nbsp;</div>
+                    </div>
+
+
+                    <!--<div>
+                        <div class="m-b-10" ng-class="{'has-error':productMissing}">
+                            <input
+                                    type="text"
+                                    ng-model="product"
+                                    uib-typeahead="prod as prod.cprod_code1 for prod in getProducts($viewValue)"
+                                    typeahead-min-length="2"
+                                    typeahead-on-select="productSelected($item, $model, $label, $event)"
+                                    typeahead-wait-ms="300"
+                                    typeahead-show-hint="true"
+                                    placeholder="Enter product id"
+                                    class="form-control" />
+
+
+                        </div>
+
+                        <code class="text-danger error" id="errProduct" ng-show="ProductMissing">
+                            This field is required.
+                        </code>
+
+                    </div>-->
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-sm-6">
+                        <label>
+                            Summary description
+                        </label>
+                        <div class=" m-b-10">
+                            <input type="text" ng-model="claim.client_comments2" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-group col-sm-6">
+                        <label>Description of the issue</label>
+                        <textarea ng-model="claim.client_comments" class="form-control"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <label>Upload files</label>
+                        <div style="margin-right:10px; margin-left:20px;">
+                            <span>
+                                <a id="upload"
+                                   class="btn btn-xs btn-info btn-upload"
+                                   style="font-size:16px;width:33px;height:28px;"
+                                   plupload="fileUpload.url"
+                                   plupload-options="fileUpload.options"
+                                   plupload-callbacks="fileUpload.callbacks"
+                                   title="Upload new image">
+                                    <i class="fa fa-upload"></i>
+                                </a>
+                            </span>
+                        </div>
+                        <div ng-repeat="i in claim.images" style="float:left;margin-right:5px;position:relative">
+                            <div style="float:left">
+                                <a ng-href="{{getImageUrl(i,1)}}" ng-click="openLightboxModal(claim.images,$index)" data-lightbox="images">
+                                    <span style="max-height:150px">
+                                        <img ng-src="{{getImageUrl(i,1)}}" title="{{i.return_image}}" class="thumbnail" style="max-width: 150px;max-height: 150px" />
+                                    </span>
+                                </a>
+                                <div style="position: absolute;top:0;right: 2px">
+                                    <span ng-click="removeImage(claim.images, $index)" class="pointer glyphicon glyphicon-remove">
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div ng-show="claim.returnsid > 0">
+                    <div class="row" style="overflow:visible" ng-cloak>
+                        <div class="col-sm-12">
+                            <div class="panel general">
+                                <uib-tabset style="margin-top:5px;" class="qa-tabs">
+                                    <!-- BOOTSRAP CSS OVERIDED -->
+                                    <uib-tab ng-repeat="t in commentTypes" heading="{{t.id}}">
+                                        <div class="panel-body no-padding">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:50px">User/Date</th>
+                                                        <th>Comments</th>
+                                                        <td style="width:145px">
+
+                                                            <span ng-click="t.newCommentRow = !t.newCommentRow"
+                                                                  ng-show="!t.newCommentRow">
+                                                                <a href="javascript:void(0)"
+                                                                   class="btn btn-xs btn-primary"
+                                                                   style="color:white">
+                                                                    <i class="fa fa-plus"> </i>
+                                                                </a>
+                                                                <span> New Comment</span>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+
+                                                </thead>
+                                                <tbody>
+                                                    <!--Adding ROW-->
+                                                    <tr class="second_row" ng-show="t.newCommentRow">
+                                                        <td></td>
+                                                        <td>
+                                                            <textarea class="form-control" name="" cols="" rows="3"
+                                                                      ng-model="t.newComment.comments"
+                                                                      placeholder="Write new comment"></textarea>
+                                                        </td>
+                                                        <td>
+                                                            <a class="btn btn-xs btn-primary dimension"
+                                                               style="color:white; margin-bottom:5px;"
+                                                               plupload="fileUpload.url"
+                                                               plupload-options="fileUpload.options"
+                                                               plupload-callbacks="fileUpload.commentCallbacks[t.id]">
+                                                                <i class="fa fa-upload"> </i><span> Upload file</span>
+                                                            </a>
+
+                                                            <br />
+                                                            <a href="javascript:void(0)"
+                                                               class="btn btn-xs btn-success dimension"
+                                                               style="color:white;margin-bottom:5px"
+                                                               ng-click="createComment(t)"
+                                                               ng-disabled="!t.newComment.comments.length>0">
+                                                                <i class="fa fa-check"></i><span> Create Comment</span>
+                                                            </a>
+
+                                                            <a class="btn btn-xs btn-warning dimension"
+                                                               style="color:white;margin-bottom:5px;"
+                                                               ng-click="cancelComment(t)"
+                                                               ng-disabled="!((t.newComment.comments.length > 0) || t.newComment.files.length > 0)">
+                                                                <i class="fa fa-times" style="color:#666"></i><span style="color:black">&nbsp;Cancel</span>
+                                                            </a>
+
+                                                        </td>
+                                                    </tr>
+                                                    <!--Upload row-->
+                                                    <tr class="first_row" ng-show="t.newCommentRow && t.newComment.files.length > 0">
+                                                        <td>&nbsp;</td>
+                                                        <td>
+                                                            <div ng-repeat="f in t.newComment.files">
+                                                                <div style="float:left;position:relative">
+                                                                    <a ng-href="{{getImageUrl(f,2)}}" ng-click="openLightboxModal(t.newComment.files,$index)" data-lightbox="images">
+                                                                        <img ng-src="{{getImageUrl(f,2)}}" title="{{f.image_name}}" class="img-thumbnail" style="max-height: 100px" />
+                                                                    </a>
+                                                                    <div style="position: absolute;top:0;right: 2px">
+                                                                        <span ng-click="removeImage(t.newComment.files, $index)" class="pointer glyphicon glyphicon-remove">
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </td>
+                                                        <td></td>
+                                                    </tr>
+
+                                                    <tr class="second_row"
+                                                        ng-repeat-start="c in claim.comments | filter: {comments_to: t.filter} | orderBy: '-comments_id'">
+                                                        <td width="150">
+                                                            <span>{{c.creator.userwelcome}} <span>{{formatDate(c.comments_date, 'd')}}</span></span>
+                                                        </td>
+                                                        <td colspan="2">
+                                                            {{c.comments}}
+                                                        </td>
+                                                    </tr>
+                                                    <tr ng-repeat-end>
+                                                        <td></td>
+                                                        <td colspan="2">
+                                                            <div>
+                                                                <div ng-repeat="f in c.files">
+                                                                    <div style="float:left;">
+                                                                        <a ng-href="{{getImageUrl(f,2)}}" ng-click="openLightboxModal(c.files,$index)" data-lightbox="images">
+                                                                            <img ng-src="{{getImageUrl(f,2)}}" title="{{f.image_name}}" style="max-height: 100px;" class="img-thumbnail" />
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </uib-tab>
+                                </uib-tabset>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="panel-footer">
+                <button class="btn btn-primary" ng-click="update()"><span ng-if="claim.returnsid == 0">Create</span><span ng-if="claim.returnsid > 0">Update</span> issue</button>
+            </div>
+        </div>
+    </div>
+</div>

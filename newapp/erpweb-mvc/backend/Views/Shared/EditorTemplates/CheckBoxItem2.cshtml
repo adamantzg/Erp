@@ -1,0 +1,10 @@
+﻿@* using bootstrap style *@
+
+@model CheckBoxItem2
+     @*<div style="margin-left:5px;float: left">@Html.HiddenFor(m => m.Code)@Html.CheckBoxFor(m => m.IsChecked)
+    &nbsp;@Html.LabelFor(m => m.IsChecked, Model.Label,new {style="display:inline"})
+    </div>*@
+     <div class="col-3">
+         @Html.HiddenFor(m => m.Code)@Html.CheckBoxFor(m => m.IsChecked)
+         &nbsp;@Html.LabelFor(m => m.IsChecked, Model.Label, new { style = "font-size:.9rem; color:#555;" })
+     </div>

@@ -1,0 +1,105 @@
+﻿
+<div class="row">
+    <div class="col-md-8" style="padding-left:0px">
+        <h2>QA system</h2>
+    </div>
+    <div class="col-md-4" style="margin-top:20px;margin-bottom:10px;padding-right:0px">
+        <!-- <button class="btn fa fa-plus btn-default" ng-click="create(7)">&nbsp;Create new CA</button>  -->
+        <button class="btn fa fa-plus btn-default pull-right" ng-click="create(8)">&nbsp;Create new QA ticket</button>  
+    </div>
+</div>
+<div class="row" style="margin-top: 10px">
+    <section class="panel panel-primary">
+        <header class="panel-heading">Criteria</header>
+        <div class="panel-body form-inline">
+            <label class="radio-inline">
+                <input type="radio"  ng-model="criteria.selectedType" value="all"/> All                
+            </label>
+            <label ng-repeat="t in types" class="radio-inline">
+                <input type="radio"  ng-model="criteria.selectedType" value="{{t}}" /> {{t}}
+            </label>
+        </div>
+    </section>
+</div>
+<div class="row" style="margin-top: 10px" ng-repeat="s in pendingStatuses">
+    <section class="panel panel-primary">
+        <header class="panel-heading">
+            {{s.text}}
+        </header>
+        <div class="panel-body">
+            <table datatable="ng" dt-instance="datatables.dtPending[s.value]"  dt-options="tableOptions" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>From</th>
+                        <th style="width:150px">Reference</th>
+                        <th>days since creation</th>
+                        <th>Factory</th>
+                        <th>Category</th>
+                        <th>Qc</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="c in pending | filter: claimsFilter(s.value)">
+                        <td>{{c.type}}</td>
+                        <td>{{c.client}}</td>
+                        <td><a ng-href="{{getEditUrl(c)}}" target="_blank">{{c.return_no}}</a></td>
+                        <td>{{c.days}}</td>
+                        <td>{{c.factory}}</td>
+                        <td>{{c.category}}</td>
+                        <td>{{c.qc}}</td>
+                        <td><span class="btn glyphicon glyphicon-remove" ng-click="removeClaim($parent.pending,c,$parent.datatables.dtPending[$parent.s.value])"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>    
+    
+</div>
+<div class="row" style="margin-top: 10px">
+    <section class="panel panel-primary">
+        <header class="panel-heading">
+            Completed
+        </header>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-4"><button class="btn pull-right glyphicon glyphicon-arrow-left" ng-click="showPreviousMonth()"></button></div>
+                <div class="col-md-4 text-center"><h4>{{month.text}}</h4></div>
+                <div class="col-md-4"><button class="btn pull-left glyphicon glyphicon-arrow-right" ng-click="showNextMonth()"></button></div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <table datatable="ng" dt-instance="datatables.dtCompleted" dt-options="tableOptions" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>From</th>
+                                <th style="width:150px">Reference</th>
+                                <th>days since creation</th>
+                                <th>Factory</th>
+                                <th>Category</th>
+                                <th>Qc</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="c in completed | filter: {status1: 1}">
+                                <td>{{c.type}}</td>
+                                <td>{{c.client}}</td>
+                                <td><a ng-href="{{getEditUrl(c)}}" target="_blank">{{c.return_no}}</a></td>
+                                <td>{{c.days}}</td>
+                                <td>{{c.factory}}</td>
+                                <td>{{c.category}}</td>
+                                <td>{{c.qc}}</td>
+                                <td><span class="btn glyphicon glyphicon-remove" ng-click="removeClaim($parent.completed,c)"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</div>
+    

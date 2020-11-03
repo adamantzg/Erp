@@ -1,0 +1,92 @@
+﻿<div class="row col-lg-8  col-lg-offset-2  col-xs-12" style="margin-bottom:10px">
+    <button class="btn btn-default create_new pull-left" type="submit" ui-sref="home">Back to list</button>
+    <button ng-if="vm.state=='edit'" class="btn btn-default" ng-click="vm.update()">Update</button>
+    <button ng-if="vm.state=='create'" class="btn btn-default" ng-click="vm.update()">Create</button>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-xs-12">
+        <div class="panel-group">
+            <div class="panel">
+                <header class="panel-heading"></header>
+                <div class="panel-body">
+                    <section class="panel general">
+                        <div class="row col-lg-12">
+                            <div class="col-lg-6">
+                                <form name="mainform" class="form-horizontal tasi-form" method="get">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Title</label>
+                                        <div class="col-sm-10">
+                                            <input name="manualTitle" type="text" class="form-control" ng-model="vm.manual.title" required />
+                                            <span ng-show="mainform.manualTitle.$error.required"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Version</label>
+                                        <div class="col-sm-10">
+                                            <input name="manualVersion" type="text" class="form-control" ng-model="vm.manual.version" required />
+                                            <span ng-show="mainform.manualVersion.$error.required"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Short description</label>
+                                        <div class="col-sm-10">
+                                            <textarea name="manualShortDescription" class="form-control" ng-model="vm.manual.short_description"></textarea>
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-heading"></div>
+                <div class="panel general">
+                    <button class="btn btn-default pull-left" ng-click="vm.addNode()">Create node</button>
+                </div>
+            </div>
+            <div class="panel"> 
+                <header class="panel-heading">Node</header>
+                <div class="panel-body">
+                    <div class="panel general">
+                        <div class="row col-lg-12">
+                            <div class="col-lg-6">
+                                <form name="nodeform" class="form-horizontal tasi-form" method="get">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Title</label>
+                                        <div class="col-sm-10">
+                                            <input name="nodeTitle" type="text" class="form-control" ng-model="vm.node.title" required />
+                                            <span ng-show="nodeform.nodeTitle.$error.required"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Header</label>
+                                        <div class="col-sm-10">
+                                            <input name="nodeHeader" type="text" class="form-control" ng-model="vm.node.header" required />
+                                            <span ng-show="nodeform.nodeHeader.$error.required"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Content</label>
+                                        <div class="col-sm-10">
+                                            <textarea name="nodeContent" class="form-control" ng-model="vm.node.content"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Footer</label>
+                                        <div class="col-sm-10">
+                                            <input name="nodeFooter" type="text" class="form-control" ng-model="vm.node.footer" required />
+                                            <span ng-show="nodeform.nodeFooter.$error.required"></span>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

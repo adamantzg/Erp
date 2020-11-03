@@ -1,0 +1,212 @@
+﻿<div ng-app="app" style="padding-left:5px">
+    <div ng-controller="editReportController">
+        <table class="table" style="width:99%" border="0" cellspacing="2" cellpadding="3" style="border-spacing: 2px; border-collapse: inherit">
+            @*<tr>
+                <td colspan="6"><img style="width: 250px;" src="/images/asaq_logo.jpg"/></td>
+            </tr>*@
+            <tr>
+                <td colspan="4" align="center" class="doc_name">{{model.title}}</td>
+            </tr>
+            <tr>
+                <td class="backgr1"><span class="title bold">PO Numbers</span></td>
+                <td class="backgr1">{{getPoNumbers()}}</td>
+                <td class="backgr2"><span class="title bold">Date of Inspection</span></td>
+                <td class="backgr2">{{formatDate(model.inspection.startdate)}}</td>
+            </tr>
+            <tr>
+                <td class="backgr1"><span class="title bold">QC Inspectors</span></td>
+                <td class="backgr1">{{getControllers()}}</td>
+                <td class="backgr2"><span class="title bold">Report Number</span></td>
+                <td class="backgr2">{{model.nrHeader.nR_document_no}}</td>
+
+            </tr>
+            <tr>
+                <td class="backgr1"><span class="title bold" ng-if="model.nrHeader.nr_type_id == model.headerTypes.nt && model.nrHeader.change_notice_id">Change notice</span></td>
+                <td class="backgr1"><a ng-href="/changenoticev2/#/View/{{model.nrHeader.change_notice_id}}" target="_blank" ng-if="model.nrHeader.nr_type_id == model.headerTypes.nt && model.nrHeader.change_notice_id">Click to open</a> </td>
+                <td class="backgr2"><span class="title bold">ETD</span></td>
+                <td class="backgr2"><span class="title bold">ETA</span></td>
+
+            </tr>
+            <tr>
+                <td class="backgr1">&nbsp;</td>
+                <td class="backgr1">&nbsp;</td>
+                <td class="backgr2">{{getETD()}}</td>
+                <td class="backgr2">{{getETA()}}</td>
+
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+
+            </tr>
+        </table>
+        <button class="btn btn-default" ng-click="update(false)">Update</button>
+        <button class="btn btn-default" ng-click="update(true)" ng-show="model.nrHeader.status != 1">Submit report</button>
+        <button class="btn btn-default" ng-click="preview()">Preview pdf</button>
+        <table style="width:99%;margin-top:5px" border="0" cellspacing="2" cellpadding="3" class="table table-striped" >
+            <thead>
+                <tr valign="top">
+                    <th width="50">Factory</th>
+                    <th width="120">Factory Product <br />Code</th>
+                    <th width="120">
+                        Client Product <br />
+                        Code
+                    </th>
+                    <th width="450">Product Description</th>
+                    <th width="80" align="left">
+                        Qty of <br />
+                        Products
+                    </th>
+                    <th>Container number</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="l in model.nrHeader.lines">
+                    <td>{{getMastProductFactory(l.inspectionV2Line)}}</td>
+                    <td>{{getMastProductField(l.inspectionV2Line,'factory_ref','insp_mastproduct_code')}}</td>
+                    <td>{{getCustProductField(l.inspectionV2Line,'cprod_code1','insp_custproduct_code')}}</td>
+                    <td>{{getCustProductField(l.inspectionV2Line,'cprod_name','insp_custproduct_name')}}</td>
+                    <td>{{getQty(l.inspectionV2Line)}}</td>
+                    <td>{{getContainers(l.inspectionV2Line)}}</td>
+                </tr>
+            </tbody>
+            
+
+        </table>
+        <div ng-if="model.nrHeader.nr_type_id == model.headerTypes.ns">
+            The above items are packed in <input type="number" ng-model="model.nrHeader.no_of_cartons" min="{{getMinCartons()}}" ng-change="no_of_cartons_changed()" style="width: 30px" /> cartons.
+
+            <table class="prod_img" style="width:99%" border="0" cellspacing="2" cellpadding="2">
+                <tr>
+                    <td>
+                        <div style="width:310px;float:left;height:500px;margin-right:2px" ng-repeat="c in cartonRange()">
+                            <div ng-repeat="t in model.imageTypes">
+                                <div>Carton: {{c}} {{t.name}}</div>
+                                <div style="position: relative" class="imageHolder">
+                                    <uib-progressbar value="getProgress(c,t.id)" ng-show="getProgress(c,t.id)"></uib-progressbar>
+                                    <img ng-show="getImageUrl(c,t.id)" ng-src="{{getImageUrl(c,t.id)}}" />
+                                    <a ng-click="deleteImage(c,t.id)" ng-show="getImageUrl(c,t.id)" style="position: absolute; top: 2px; right: 36px"><img src="/Images/inspection/status-remove.png" style="width: 32px" /></a>
+                                    <!--<a ng-click="moveUp(c,t.id)" ng-show="getImageUrl(c,t.id).length > 0 && !(t.id == 1)" style="position: absolute; top: 2px; right: 105px"><img src="/Images/inspection/up.png" style="width: 32px" /></a>
+                            <a ng-click="moveDown(c,t.id)" ng-show="getImageUrl(c,t.id).length > 0 && !(t.id == 3)" style="position: absolute; top: 2px; right: 70px"><img src="/Images/inspection/down.png" style="width: 32px" /></a>-->
+                                    <a plupload="fileUpload.url"
+                                       plupload-options="fileUpload.options"
+                                       plupload-callbacks="fileUpload.callbacks[c][t.id]" style="cursor: pointer; position: absolute; top: 2px; right: 2px">
+                                        <img src="/images/inspection/add.png" style="width: 32px" />
+                                    </a>
+                                </div>
+                            </div>
+
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div ng-if="model.nrHeader.nr_type_id == model.headerTypes.nt">
+            <table class="prod_img" style="width:99%" border="0" cellspacing="2" cellpadding="2">
+                <tr>
+                    <td>
+                        <div ng-repeat="t in model.imageTypes" style="margin-top: 5px;clear:both;float:left">
+                            <div class="text-bold">
+                                <span style="font-weight: bold">{{t.name}} images</span>
+                                <button plupload="fileUpload.url"  plupload-options="fileUpload.options"
+                                            plupload-callbacks="fileUpload.callbacks[t.id]" class="btn btn-default">
+                                    Upload images
+                                </button>
+                            </div>
+                            <div style="margin-top:5px">
+                                <div style="position: relative" class="imageHolder2" ng-repeat="i in model.nrHeader.images | filter: {image_type : t.id}">
+                                    <uib-progressbar value="getProgressNt(i)" ng-show="getProgressNt(i)"></uib-progressbar>
+                                    <img ng-show="getImageUrlNt(i)" ng-src="{{getImageUrlNt(i)}}" />
+                                    <a ng-click="deleteImageNt(i)" ng-show="getImageUrlNt(i)" 
+                                       style="position: absolute; top: 2px; right: 2px"><img src="/Images/inspection/status-remove.png" style="width: 32px" /></a>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <div loading class="loading-dialog"></div>    
+    <script type="text/ng-template" id="standardModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Message</h3>
+        </div>
+        <div class="modal-body">
+            <div >
+                {{message}}
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-default" ng-click="close()">OK</button>            
+        </div>
+    </script>
+
+</div>
+
+
+
+
+@section head
+{
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    <link href="~/Content/nr_report/main.css" rel="stylesheet" />
+    <style>
+        @@media (min-width: 768px) {
+            #footer {
+                width: 750px
+            }
+        }
+
+        @@media (min-width: 992px) {
+            #footer {
+                width: 970px
+            }
+        }
+
+        @@media (min-width: 1200px) {
+            #footer {
+                width: 1170px
+            }
+        }
+        th {
+            font-size: 1em;
+        }
+        .imageHolder2 {
+            position: relative;
+            height: 230px;
+            border: 1px solid black;
+            margin-left: 4px;
+            margin-top: 4px;
+            text-align: center;
+            width: 310px;
+            float: left;
+        }
+    </style>
+}
+
+
+@section scripts
+{
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    @Scripts.Render("~/bundles/plupload2")
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/globalize")
+    
+    <script src="~/Scripts/logToServer.js"></script>
+    <script src="~/Scripts/angular-plupload/angular-plupload.js"></script>
+
+    <script src="~/AngularApps/NotificationReport/app.js"></script>
+    <script src="~/AngularApps/NotificationReport/factory.js"></script>
+    <script src="~/AngularApps/NotificationReport/controller.js"></script>
+
+    <script src="~/AngularApps/loading.js"></script>
+    <script src="~/AngularApps/standardDialogController.js"></script>
+}

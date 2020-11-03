@@ -1,0 +1,59 @@
+﻿@model InspectionsPlanListModel
+
+<table width="100%" class="table table-striped">
+    <thead>
+        <tr>
+            <th style="width: 100px">Date</th>
+            <th>Inspection</th>
+            <th>QC</th>
+            <th style="width: 300px">FC comments</th>
+            <th>Manager comments</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{ int counter = 0;}
+        @foreach (var ins in Model.Inspections.OrderBy(i => i.insp_start))
+        {
+            <tr class="tablerow@(counter++ % 2 == 0 ? "" : "_alt")">
+            <td>
+                @ins.insp_start.ToString("d")
+            </td>
+            <td>
+                @if(ins.insp_type == "X")
+                {
+                    @ins.insp_id
+                }
+                else
+                {
+                    @(string.Format("{0}.{1}.{2}", ins.factory_code, (ins.insp_type == "LO" ? "LI" : ins.insp_type), ins.customer_code))
+                }
+            </td>
+            <td>
+                @{ var count2 = 1;
+                    foreach (var cont in ins.Controllers)
+                    {
+                        var controller = Model.Inspectors.FirstOrDefault(i => i.userid == cont.controller_id);
+                        if (controller != null)
+                        {
+                            @controller.userwelcome
+                        }
+                        <text>&nbsp;</text>
+                        if (count2++ != ins.Controllers.Count)
+                        {
+                            <br/>
+                        }
+                    }
+               
+                }
+            </td>
+            <td>
+                @ins.insp_comments  &nbsp;
+            </td>
+            <td>
+                @ins.insp_comments_admin  &nbsp;
+            </td>
+           </tr>
+        }
+    </tbody>
+    
+</table>

@@ -1,0 +1,86 @@
+﻿@model List<OrderSummary>
+
+@{
+    
+    Layout = null;
+}
+
+<html>
+    <head>
+        <style>
+            .number {text-align: right}
+            .headerrow {border-bottom: 2px solid black}
+            .row {border-right: 2px solid black}
+        </style>
+    </head>
+    <body>
+        <h2>@ViewBag.title</h2>
+        <table style="padding: 5px;border-collapse: collapse">
+            <tr style="font-weight: bold">
+                <td rowspan="2" style="width: 50px;border-right: 2px solid black" class="headerrow">customer</td>
+                <td rowspan="2" class="headerrow" style="border-right: 2px solid black;width: 80px">custpo</td>
+                <td rowspan="2" class="headerrow" style="width: 130px">order date</td>
+                <td rowspan="2" class="headerrow" style="width: 130px">ETD</td>
+                <td rowspan="2" class="headerrow" style="width: 130px;border-right: 2px solid black">difference</td>
+                @{
+                    var sabc = Model.Select(o => o.sabc).Distinct().OrderBy(s => s == "S" ? "0" : s).ToList();
+                }
+                @for (int i = 0; i < sabc.Count;i++ )
+                {
+                    <td rowspan="2"  class="headerrow" style="width: 30px;text-align:right;border-right: @(i == sabc.Count - 1 ? "2px solid black" : "none")">@sabc[i]</td>
+                }
+                @{
+                    int maxBrands = Model.Count > 0 ? Model.Max(o => o.brandcount) : 0, maxFactories = Model.Count > 0 ? Model.Max(o => o.factorycount) : 0 ;
+                    var maxLocations = Model.Count > 0 ? Model.Max(o => o.locations.Max()) : 0;
+                }
+                <td colspan="@maxBrands" style="text-align: center;border-right: 2px solid black">number of brands</td>
+                <td colspan="@maxFactories" style="text-align: center;border-right: 2px solid black">number of factories</td>
+                <td colspan="@maxLocations" style="text-align: center;border-right: 2px solid black">location</td>
+                <td class="headerrow" rowspan="2">Original ETA</td>
+                <td class="headerrow" rowspan="2">Current ETA</td>
+            </tr>
+            <tr>
+                @for (int i = 0; i < maxBrands; i++)
+                {
+                    <td class="number" style="width:30px;border-bottom: 2px solid black;border-right: @(i==maxBrands-1 ? "2px solid black": "none")">@(i+1)</td>
+                }
+                @for (int i = 0; i < maxFactories; i++)
+                {
+                    <td class="number" style="width:20px;border-bottom: 2px solid black;border-right: @(i==maxFactories-1 ? "2px solid black": "none")">@(i+1)</td>
+                }
+                @for (int i = 0; i < maxLocations; i++)
+                {
+                    <td class="number" style="width:20px;border-bottom: 2px solid black;border-right: @(i==maxLocations-1 ? "2px solid black": "none")">@(i+1)</td>
+                }
+            </tr>
+            @foreach (var o in Model)
+            {
+                <tr>
+                    <td style="border-right: 2px solid black">@o.customer_code</td>
+                    <td style="border-right: 2px solid black">@o.custpo</td>
+                    <td>@o.orderdate.ToString("d")</td>
+                    <td>@o.po_req_etd.ToString("d")</td>
+                    <td style="border-right: 2px solid black">@(o.po_req_etd != null && o.orderdate != null ? (o.po_req_etd.Value-o.orderdate.Value).TotalDays.ToString("N0") : "")</td>
+                    @for (int i = 0; i < sabc.Count;i++ )
+                    {
+                        <td class="number" style="border-right: @(i == sabc.Count - 1 ? "2px solid black" : "none")">@(o.sabc == sabc[i] ? "1" : "")</td>
+                    }
+                    @for (int i = 0; i < maxBrands; i++)
+                    {
+                        <td class="number" style="border-right: @(i==maxBrands-1 ? "2px solid black": "none")">@(o.brandcount == i+1 ? "1" : "")</td>
+                    }
+                    @for (int i = 0; i < maxFactories; i++)
+                    {
+                        <td class="number" style="border-right: @(i==maxFactories-1 ? "2px solid black": "none")">@(o.factorycount == i+1 ? "1" : "")</td>
+                    }
+                    @for (int i = 0; i < maxLocations; i++)
+                    {
+                        <td class="number" style="border-right: @(i==maxLocations-1 ? "2px solid black": "none")">@(o.locations.Contains(i+1) ? "1" : "")</td>
+                    }
+                    <td>@o.original_eta.ToString("d")</td>
+                    <td>@o.req_eta.ToString("d")</td>
+                </tr>
+            }
+        </table>
+    </body>
+</html>

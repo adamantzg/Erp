@@ -1,0 +1,248 @@
+﻿@* http://localhost:1535/report/reportproductssales *@
+@using Utilities = company.Common.Utilities
+@model ReportSalesModel
+@{
+    ViewBag.Title = "ReportProductsSales";
+    Layout = null;
+
+    
+}
+
+@{
+    int br = 0;
+    var numMonth = Model.Month21.Select(c => c.First()).Count();
+    var numMonthForecast = Model.FMonth21.Select(c => c.First()).Count();
+}
+<!DOCTYPE html>
+
+<html>
+    <head>
+
+        <style>
+            body {
+    
+	font-family:  Arial;
+    font-size: 10px;
+	color: #4f6b72;
+	background: #E6EAE9;
+}
+
+a {
+	color: #c75f3e;
+}
+
+#mytable {
+	/*width: 700px;*/
+	padding: 0;
+	margin: 0;
+}
+
+caption {
+	padding: 0 0 8px 0;
+	/*width: 700px;*/	 
+	
+	font-family:  Arial, Helvetica, sans-serif;
+	font-size: 8px;
+    text-align: right;
+}
+
+th {
+	
+	font-family:  Arial, Helvetica, sans-serif;
+    font-size: 8px;
+	color: #4f6b72;
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: left;
+	padding: 1px 1px 1px 2px;
+	/*background: #CAE8EA url(~/Content/images/bg_header.jpg) no-repeat;*/
+}
+
+th.nobg {
+	border-top: 0;
+	border-left: 0;
+	border-right: 1px solid #C1DAD7;
+	background: none;
+}
+tr.alt {
+    background: #E5FAFA;
+	color: #797268;
+}
+
+
+tr {
+	
+	background: #fff;
+	padding: 1px 1px 1px 2px;
+	color: #4f6b72;
+}
+td {
+    border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+    /*width:50px*/
+}
+
+
+td.alt {
+	background: #F5FAFA;
+	color: #797268;
+}
+
+
+th.spec {
+	border-left: 1px solid #C1DAD7;
+	border-top: 0;
+	/*background: #fff url(images/bullet1.gif) no-repeat;*/
+	font-size: 8px;
+	font-family:  Arial, Helvetica, sans-serif;
+}
+
+th.specalt {
+	border-left: 1px solid #C1DAD7;
+	border-top: 0;
+	/*background: #f5fafa url(images/bullet2.gif) no-repeat;*/
+	
+	font-family:  Arial, Helvetica, sans-serif;
+    font-size: 8px;
+	color: #797268;
+}
+            th.caption {
+                background: #CAE8EA;
+            }
+                
+            
+        </style>
+@* ReSharper restore InvalidValue *@
+    </head>
+    
+    <body >
+        <h1>Report Product Sales</h1>
+        @{ var rowIndex = 0;}
+        <table id="mytable" style="width: 3550px">
+            <tr>
+                <td style="width: 150px"></td>
+                <td ></td>
+                <td colspan="@(ViewBag.MonthFromNowForSale)" style="font-size: 12px"> <h3>&nbsp; History (units)</h3></td>
+                <td colspan="12" style="font-size: 12px"><h3>&nbsp;Sales Forecast (units)</h3></td>
+                <td style="width: 60px;font-size: 12px "><h3>&nbsp;Uk stock</h3></td>
+                <td style="width:60px;font-size: 12px" ><h3>Order frequency</h3></td>
+            </tr>
+            <tr style="height: 35px">
+
+                <th class="caption" style="width: 150px;font-size: 14px;background-color: #CAE8EA;text-align: left;padding-left: 8px"> Code</th>
+                <th class="caption" style="font-size: 14px;background-color: #CAE8EA;text-align:left;padding-left: 9px">Product name</th>
+                @foreach (var allDat in Model.Month21)
+                {
+                    br++;
+                
+                    @*<th class="main_header_title">@allDat.First().SalesProducts.month21</th>*@
+                    <th class="caption" style="width:70px; font-size:12px;background-color:#CAE8EA;text-align: center">
+                        <span>@Utilities.GetDateFromMonth21((int)allDat.First().SalesProducts.month21).ToLongDateString().Substring(3,3) </span>
+                        <span> - @Utilities.GetDateFromMonth21((int)allDat.First().SalesProducts.month21).Year.ToString().Substring(2,2)</span>
+
+                    </th>
+                
+          
+                }
+                   @if (numMonth < ViewBag.MonthFromNowForSale)
+                    {
+                        var num = ViewBag.MonthFromNowForSale - numMonth;
+                        for (int i = num; i < num+1; i++)
+                        {
+                                        <td style="width: 40px;text-align: center;font-size: 12px; background-color: #CAE8EA" class="caption" >-</td>
+                        }
+
+                    }
+           
+                @foreach (var f in Model.FMonth21.OrderBy(c=>c.First().month21))
+                {
+                
+                    @*<th>@f.First().month21</th>*@
+                    <th scope="col" class="caption" style="width: 70px;font-size: 12px;text-align: center;background-color: #CAE8EA">
+                        <span>@Utilities.GetDateFromMonth21((int) f.First().month21).ToLongDateString().Substring(3,3)</span>
+                        <span>- @Utilities.GetDateFromMonth21((int)f.First().month21).Year.ToString().Substring(2,2)</span>
+                    </th>
+                }
+                @if (numMonthForecast < ViewBag.MonthFromNowForSaleForecast)
+                {
+                    var num = ViewBag.MonthFromNowForSaleForecast - numMonthForecast;
+                    for (int i = 0; i < num; i++)
+                    {
+                        <th scope="col" class="caption" style="width: 60px; font-size: 14px;text-align: center;background-color: #CAE8EA"> - </th>
+                    }
+                }
+                    <th scope="col" class="caption" style="font-size: 12px;background-color:#CAE8EA">Balance</th>
+                <th class="caption"style="font-size: 12px;background-color: #CAE8EA">Order Freq</th>
+           
+                @foreach (var allStat in Model.ProductAllStatistics)
+                {
+                    int count = 0;
+               
+                 
+                    <tr @Html.Raw(rowIndex++%2==0 ? "style=\"\"":"style=\"background: #E5FAFA;  \" ")>
+                        @*<td>@(br++);</td>*@
+                        <th scope="col" style="width: 50px;font-size:12px; text-align: left;padding-left: 8px"  @Html.Raw(rowIndex == 0 ? "class=\"alt": "")> <b>@allStat.CprodCode</b></th>
+                        <th scope="col" class="spec" style="text-align: left; width: 450px;font-size: 12px;padding-left: 8px" >@allStat.Name</th>
+
+                        @if (allStat.SaleQty != null)
+                        {
+                        
+                        
+                            foreach (var saleStat in allStat.SaleQty)
+                            {
+                                count++;
+                                <td style="width: 60px;text-align: center;font-size: 12px">@(saleStat ?? 0)</td>
+                            }
+                            if (count < allStat.SetSalesDate21)
+                            {
+                                for (int i = count; i < allStat.SetSalesDate21; i++)
+                                {
+                                    <td style="width: 60px;text-align: center;font-size: 12px" >-</td>
+                                }
+                                count = 0;
+                            }
+                            count = 0;
+                        }
+                    
+                    
+                        @* SALES FORECAST *@
+
+                        @if (allStat.ForecastQty != null)
+                        {
+                            foreach (var forecastStat in allStat.ForecastQty)
+                            {
+                                count++; 
+                                <td style="width: 60px;text-align: center;font-size: 12px">@(forecastStat != 0 ? forecastStat : 0)</td>                             
+                        
+                            }
+                            if (count < allStat.SetForecastDate21)
+                            {
+                                for (int i = count ; i < allStat.SetForecastDate21; i++)
+                                {
+                                    <td style="width: 60px;text-align: center;font-size: 12px">&nbsp; - </td>
+                                }
+                                count = 0;
+                            }
+                            count = 0;
+                        }
+                        @if (allStat.ForecastQty == null)
+                        {
+                            for (int i = 0; i < allStat.SetForecastDate21; i++)
+                            {
+                                <td style="width: 60px;text-align: center;font-size: 12px">&nbsp; - </td>
+                            }
+                        }
+                    
+                        <td style="width: 60px; text-align: center;font-size: 12px">@allStat.CprodStock</td>
+
+                        <td style="text-align: center;font-size: 12px">@allStat.OrderFrequency</td>
+                </tr>
+            }
+        
+        </table>
+    </body>
+</html> 
+    

@@ -1,0 +1,17 @@
+﻿<div class="row">
+    <div class="col-md-12 text-center"><h4>{{form.title}}</h4></div>
+    
+</div>
+<div style="margin-bottom: 5px">
+    <button class="btn btn-primary" ui-sref="home">Back to form list</button>
+</div>
+<div class="panel panel-primary" ng-repeat="s in form.sections">
+    <div class="panel-heading">{{s.title}}</div>
+    <div class="panel-body">
+        <div class="form form-horizontal">
+            <form-section-element source="e" types="types" renderMethods="renderMethods" ng-repeat="e in s.elements" last="$index == s.elements.length - 1"></form-section-element>
+        </div>
+        
+    </div>
+</div>
+<button class="btn btn-primary" ng-click="submitForm()">Submit form</button>

@@ -1,0 +1,148 @@
+﻿<div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-xs-12">
+        <section class="panel">
+            <header class="panel-heading">{{heading}}
+            </header>
+            <div class="panel-body">
+                <section class="panel general">
+                    <form>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Factory:</label>
+                                    <select class="form-control" ng-model="insp.factory_id" ng-options="f.user_id as f.factory_code for f in factories" ng-if="role == 'fc'">
+                                    </select>
+                                    <div class="form-control-static" ng-if="role=='qc'">{{insp.factory}}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Client:</label>
+                                    <select class="form-control" ng-model="insp.client_id" ng-options="c.user_id as c.customer_code for c in clients" ng-if="role == 'fc'">
+                                    </select>
+                                    <div class="form-control-static" ng-if="role=='qc'">{{insp.client}}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Create date:</label>
+                                    <div class="form-control-static">{{FormatDate(insp.dateCreated)}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Subject:</label>
+                                    <select class="form-control" ng-model="insp.si_subject_id" ng-options="s.id as s.name for s in subjects" ng-if="role == 'fc'">
+                                    </select>
+                                    <div class="form-control-static" ng-if="role=='qc'">{{insp.subject}}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Inspection date:</label>
+                                    <p class="input-group" ng-if="role == 'fc'">
+                                        <input type="text" class="form-control" uib-datepicker-popup="{{format}}" ng-model="insp.startdate" datepicker-options="dateOptions"
+                                               is-open="datepickers.startdate" />
+                                        <span class="input-group-btn">
+                                            <button type="button"
+                                                    class="btn btn-default"
+                                                    ng-click="openpicker('startdate')">
+                                                <i class="glyphicon glyphicon-calendar"></i>
+                                            </button>
+                                        </span>
+                                    </p>
+                                    <div class="form-control-static" ng-if="role=='qc'">{{FormatDate(insp.startdate)}}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Status:</label>
+                                    <div class="form-control-static">{{getStatusText()}}</div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group" >
+                                    <label>Qc (inspectors):</label>
+                                    <div class="list-group">
+                                        <div style="margin-left:3px;margin-bottom:3px" class="list-group-item"
+                                             ng-repeat="c in insp.controllers">
+                                            <span>{{c.controller.userwelcome}}</span>
+                                            <span class="pull-right" ng-if="role == 'fc'">
+                                                <span class="glyphicon glyphicon-remove"
+                                                      ng-click="removeController(c)" title="Remove from list"></span>
+                                            </span>
+
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" ng-model="qcSearchText"
+                                           uib-typeahead="u as u.userwelcome for u in getControllers($viewValue)"
+                                           typeahead-on-select="qcSelected($item, $model, $label, $event)" ng-if="role == 'fc'"/>
+                                </div>
+
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label>Comment</label>
+                                    <textarea class="form-control" ng-model="insp.comments" ng-if="role == 'fc'"></textarea>
+                                    <div class="form-control-static" ng-if="role=='qc'">{{insp.comments}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <button class="btn" ng-click="addLine()" ng-if="role == 'fc'">Add product line</button>
+                                <button class="btn" plupload="productListUpload.url"
+                                            plupload-options="productListUpload.options"
+                                            plupload-callbacks="productListUpload.callbacks" ng-if="role == 'fc'">Upload product list</button>
+                                <button class="btn btn-default" ng-click="Update()">Update</button> <button class="btn" ng-click="changeStatus()" ng-show="showChangeStatusButton()">{{ChangeStatusText()}}</button>
+                            </div>
+                        </div>
+                        <div class="row" ng-show="productListProgress">
+                            <div class="col-md-4">
+                                <uib-progressbar value="productListProgress"></uib-progressbar>
+                            </div>                            
+                        </div>
+
+                        <table datatable="ng" class="table-condensed" data-page-length='50' dt-options="tableOptions" dt-instance="dtInstance">
+                            <thead>
+                                <tr>
+                                    <th>
+                                    </th>
+                                    <th>Factory product code</th>
+                                    <th>Client product code</th>
+                                    <th>Client description</th>
+                                    <th style="text-align:right">Qty</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody >
+                                <tr ng-repeat="l in insp.lines">
+                                    <td><a style="cursor:pointer;" ng-click="expand(l,$index)" ng-show="showExpand(l)">{{$index+1}}</a></td>
+                                    <td><input type="text" ng-model="l.insp_mastproduct_code" ng-disabled="role=='qc'"/></td>
+                                    <td>
+                                        <input type="text" ng-model="l.insp_custproduct_code" ng-disabled="role=='qc'"
+                                               typeahead-min-length="3" uib-typeahead="prod as prod.combined_code for prod in getProducts(l,$viewValue)"
+                                               typeahead-on-select="productSelected(l,$item, $model, $label, $event)" />
+                                    </td>
+                                    <td><input type="text" ng-model="l.insp_custproduct_name" ng-disabled="role=='qc'"/></td>
+                                    <td class="text-right"><input type="text" style="text-align: right" ng-model="l.qty" ng-disabled="role=='qc'" /></td>
+                                    <td>
+                                        <span class="glyphicon glyphicon-remove" ng-show="showRemoveLine(l)" ng-if="role == 'fc'"
+                                              ng-click="removeLine(l)" title="Remove from list"></span>
+                                    </td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </form>                    
+                </section>
+            </div>
+        </section>
+    </div>
+</div>

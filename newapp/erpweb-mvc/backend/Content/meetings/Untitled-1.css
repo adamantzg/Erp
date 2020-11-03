@@ -1,0 +1,407 @@
+﻿@charset "utf-8";
+/* Simple fluid media
+   Note: Fluid media requires that you remove the media's height and width attributes from the HTML
+   http://www.alistapart.com/articles/fluid-images/ 
+*/
+img, object, embed, video {
+	max-width: 100%;
+	float: left;
+}
+/* IE 6 does not support max-width so default to width 100% */
+.ie6 img {
+	width:100%;
+}
+
+
+
+
+
+
+/*
+	Dreamweaver Fluid Grid Properties
+	----------------------------------
+	dw-num-cols-mobile:		5;
+	dw-num-cols-tablet:		8;
+	dw-num-cols-desktop:	10;
+	dw-gutter-percentage:	25;
+	
+	Inspiration from "Responsive Web Design" by Ethan Marcotte 
+	http://www.alistapart.com/articles/responsive-web-design
+	
+	and Golden Grid System by Joni Korpi
+	http://goldengridsystem.com/
+*/
+
+/* Mobile Layout: 480px and below. */
+
+.gridContainer {
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 3%;
+	width: 87.36%;
+	padding-top: 0.82%;
+	padding-bottom: 0.82%;
+	padding-left: 1.82%;
+	padding-right: 1.82%;
+	box-sizing: border-box;
+	border: 2px solid #000;
+	/*background-image:url(../img/trsp_back.png);
+	background-position: left top;
+	background-repeat:repeat;*/
+}
+
+#LayoutDiv1 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+}
+
+#expanderContent {
+		float:left;
+		width: 100%;
+		border: 2px solid #CCC;
+		box-sizing: border-box;
+		padding: 3px;
+}
+
+a {
+	font-size: 1em;
+	color: #666;
+}
+
+.logo {
+		width: 50% !important;
+}
+
+.title {
+		color: #09C;
+}
+
+.containerContent {
+		width: 100%;
+		float: left;
+		margin-top: 0.5%;
+		padding: 2px;
+		box-sizing: border-box;
+		
+}
+
+.new_point {
+		float: left;
+		width: 40%;
+		margin-top: 1%;
+		color: #09C;
+}
+
+.new_point2 {
+		float: left;
+		width: 15%;
+		margin-bottom: 1%;
+}
+
+.idNum_holder {
+		float: left;
+		border-bottom: 1px solid #666;
+		width: 100%;
+		padding: 2px;
+		box-sizing: border-box;
+		
+}
+
+.idNum_holder2 {
+		float: left;
+		border-bottom: 1px solid #666;
+		width: 100%;
+		padding-top: 5px;
+		padding-bottom: 5px;
+		box-sizing: border-box;
+		
+		
+}
+
+.grey {
+		background: #e5e5e5;
+}
+
+.grey2 {
+		background: #f2f2f2;
+}
+
+.grey3 {
+		background:#999;
+}
+
+.blue {
+		color: #09C;
+}
+
+.idNum {
+		float: left;
+		width: 22%;
+		margin-right: 1%;
+		margin-top: 0.9%;
+		margin-bottom: 0.9%;
+		font-size: 0.9em;
+}
+
+.idNumSmall {
+		float: left;
+		width: 2%;
+		margin-right: 1%;
+		margin-top: 0.9%;
+		font-size: 0.9em;
+}
+
+.clear {
+		clear: both;
+}
+
+.delete {
+		
+		float: right;
+		color: #F00;
+		margin-top: 1.5%;
+		font-size: 0.7em;
+		margin-right: 1%;
+}
+
+
+.dismiss {
+		
+		float: right;
+		color: #093;
+		margin-top: 1.5%;
+		font-size: 0.7em;
+		margin-right: 1%;
+}
+
+.holder_small {
+		width: 30%;
+		height: 15%;
+		border: 1px solid #999;
+		padding: 3px;
+		box-sizing: border-box;
+		font-size: 1em;
+		float: left;
+		margin-bottom: 1.1625%;
+}
+
+.add_button {
+		width: 20px;
+		margin-right: 5px;
+		margin-top: -2px;
+}
+
+.noborder {
+		border: none !important;
+}
+
+.view_meet {
+		float: right;
+		width: 20%;
+		margin-top: 1%;
+		margin-right: 1%;
+		color: #09C;
+}
+		
+
+/*.pointContent {
+	  float: left;
+	  width: 100%;
+	  border: 2px solid #CCC;
+	  box-sizing: border-box;
+	  padding: 3px;
+}
+*/
+
+/* Tablet Layout: 481px to 768px. Inherits styles from: Mobile Layout. */
+
+@media only screen and (min-width: 380px) {
+.gridContainer {
+	width: 90.675%;
+	padding-left: 1.1625%;
+	padding-right: 1.1625%;
+	margin-top: 3%;
+}
+#LayoutDiv1 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+}
+
+
+
+.holder {
+		width: 100%;
+		height: 15%;
+		border: 1px solid #999;
+		padding: 3px;
+		box-sizing: border-box;
+		font-size: 1em;
+		float: left;
+		margin-bottom: 1.1625%;
+}
+
+.holder img {
+		max-width: 24%;
+		margin-right: 1%;
+		
+}
+
+.holder2 {
+		width: 30%;
+		height: 15%;
+		border: 1px solid #999;
+		padding: 3px;
+		box-sizing: border-box;
+		font-size: 1em;
+		float: left;
+		margin-bottom: 1.1625%;
+}
+
+.title {
+		width: 90%;
+		float: left;
+		font-size: 1.3em;
+		margin-bottom: 1.1625%;
+		color: #09C;
+}
+
+.title_center {
+		width: 100%;
+		float: left;
+		font-size: 1.5em;
+		margin-bottom: 1.1625%;
+		color: #09C;
+		
+}
+
+.idNum_title {
+		width: 16%;
+		float: left;
+		font-size: 1em;
+		margin-bottom: 0.5%;
+		margin-right: 1%;
+		padding: 3px;
+		
+		
+}
+
+.idNum_title_first {
+		width: 40%;
+		float: left;
+		font-size: 1em;
+		margin-bottom: 0.5%;
+		margin-right: 1%;
+		padding: 3px;
+		
+		
+}
+
+.sub_title {
+		width: 90%;
+		float: left;
+		font-size: 1em;
+		margin-bottom: 1.1625%;
+		text-decoration: underline;
+}
+
+.noUnderline {
+		text-decoration: none !important;
+		
+}
+
+.backgroundwhite {
+		background: #fff !important;
+}
+
+.holder .textarea1 {
+		width: 100%;
+		border: none;
+		box-sizing: border-box;
+}
+
+.holder2 .textarea2 {
+		width: 100%;
+		border: none;
+		box-sizing: border-box;
+}
+
+.details {
+		float: left;
+		width: 100%;
+		margin: 1% 0 1% 0;
+}
+
+.containerContent textarea {
+		width: 99%;
+		min-height: 10%;
+}
+
+.follow_up {
+		width: 50%;
+		float: left;
+
+}
+
+.delete {
+		
+		float: right;
+		color: #F00;
+		margin-top: 1.5%;
+		font-size: 1em;
+		
+}
+
+
+.dismiss {
+		
+		float: right;
+		color: #093;
+		margin-top: 1.5%;
+		font-size: 1em;
+		
+}
+
+}
+
+
+
+/* Desktop Layout: 769px to a max of 1232px.  Inherits styles from: Mobile Layout and Tablet Layout. */
+
+@media only screen and (min-width: 769px) {
+.gridContainer {
+	width: 88.2%;
+	max-width: 1050px;
+	padding-left: 0.9%;
+	padding-right: 0.9%;
+	margin: 1% auto;
+}
+#LayoutDiv1 {
+	clear: both;
+	float: left;
+	margin-left: 0;
+	width: 100%;
+	display: block;
+}
+
+.idNum {
+		float: left;
+		width: 16%;
+		margin-right: 1%;
+		font-size: 1em;
+}
+
+.idNum_first {
+		float: left;
+		width: 41%;
+		margin-right: 1%;
+		font-size: 1em;
+}
+
+
+}

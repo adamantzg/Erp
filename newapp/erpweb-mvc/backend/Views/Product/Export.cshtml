@@ -1,0 +1,97 @@
+﻿@model ProductExportModel
+
+<h3>Product export</h3>
+
+@using (Html.BeginForm("Export", "Product", new { target = "_blank" }))
+{
+    <table style="width: 100%">
+        <tr style="border-bottom: 1px solid gray;margin-bottom: 10px">
+            <td style="width: 150px">Clients:</td>
+            <td >
+                @Html.EditorFor(m=>m.Clients)
+            </td>
+        </tr>
+        
+        <tr>
+            <td >Factories:</td>
+            <td >
+                @Html.EditorFor(m=>m.Factories)
+            </td>
+        </tr>
+        <tr>
+            <td >Include spares:</td>
+            <td >
+                @Html.RadioButtonFor(m=>m.IncludeSpares,true) Yes @Html.RadioButtonFor(m=>m.IncludeSpares,false) No
+            </td>
+        </tr>
+        <tr>
+            <td >Include discontinued:</td>
+            <td >
+                @Html.RadioButtonFor(m=>m.IncludeDiscontinued,true) Yes @Html.RadioButtonFor(m=>m.IncludeDiscontinued,false) No
+            </td>
+        </tr>
+        <tr>
+            <td >Show factory pricing:</td>
+            <td >
+                @Html.RadioButtonFor(m=>m.ShowFactoryPricing,true) Yes @Html.RadioButtonFor(m=>m.ShowFactoryPricing,false) No
+            </td>
+        </tr>
+        <tr>
+            <td >Show sales history:</td>
+            <td >
+                @Html.RadioButtonFor(m=>m.ShowSalesHistory,true) Yes @Html.RadioButtonFor(m=>m.ShowSalesHistory,false) No
+            </td>
+        </tr>
+        <tr>
+            <td >Show logistics information:</td>
+            <td >
+                @Html.RadioButtonFor(m=>m.ShowLogistics,true) Yes @Html.RadioButtonFor(m=>m.ShowLogistics,false) No
+            </td>
+        </tr>
+        <tr>
+            <td>Group by factory product</td>
+            <td>@Html.RadioButtonFor(m=>m.GroupByMastProduct,true) Yes @Html.RadioButtonFor(m=>m.GroupByMastProduct, false) No</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><input type="submit" value="Export"/></td>
+        </tr>
+    </table>
+}
+
+@section scripts
+{
+    <script type="text/javascript">
+        var brandClientIds = [@string.Join(",",Model.Brands.Select(b=>b.user_id))];
+        $(function() {
+            $('#Factories_0__IsChecked').click(function() {
+                if ($(this).attr('checked') == 'checked') {
+                    $('[id^="Factories_"]').attr('checked', 'checked');
+                } else {
+                    $('[id^="Factories_"]').removeAttr('checked');
+                }
+            });
+            $('#Clients_0__IsChecked').click(function() {
+                if ($(this).attr('checked') == 'checked') {
+                    $('[id^="Clients_"]').attr('checked', 'checked');
+                } else {
+                    $('[id^="Clients_"]').removeAttr('checked');
+                }
+            });
+            for (var i = 0; i < brandClientIds.length; i++) {
+                var code = $('[id$="__Code"][value="' + brandClientIds[i] + '"]');
+                $('#' + code.attr('id').replace('Code', 'IsChecked')).attr('brand', '1');
+            }
+            $('#Clients_1__IsChecked').click(function () {
+                if ($(this).attr('checked') == 'checked') {
+                    $('[brand="1"]').attr('checked', 'checked');
+                } else {
+                    $('[brand="1"]').removeAttr('checked');
+                }
+            });
+
+            $('[id="ShowFactoryPricing"]').prop('disabled', true);
+        });
+    </script>
+    
+}

@@ -1,0 +1,33 @@
+﻿@model ConvertToPdfModel
+
+@{
+    ViewBag.Title = "title";
+    
+}
+
+<h2>Convert web page to pdf</h2>
+
+<div class="container-fluid">
+    @using (Html.BeginForm())
+    {
+        <div class="form-group">
+            <label class="form-control">Url:</label>
+            @Html.TextAreaFor(m => m.Url, new {@class = "form-control"})
+        </div>
+        <div class="form-group">
+            <label class="form-control">Options:</label>
+            @Html.TextAreaFor(m => m.Options, new {@class = "form-control"})
+        </div>
+        <button class="form-control">Generate</button>
+    }
+</div>
+
+@section head
+{
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+}
+
+@section scripts2
+{
+    @Scripts.Render("~/bundles/bootstrap")
+}

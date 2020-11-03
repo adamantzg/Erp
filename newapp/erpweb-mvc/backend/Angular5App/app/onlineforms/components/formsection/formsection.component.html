@@ -1,0 +1,34 @@
+<label *ngIf="getDescription(source) || source.questionGroup?.name">{{getLabel(source)}}</label>
+<div *ngIf="getDescription(source)" >{{getDescription(source)}}</div>
+<div class="form-group">
+    <div *ngIf="source.question">
+        <label class="control-label col-sm-2" *ngIf="!getDescription(source)">{{getLabel(source)}}</label>
+        <div class="col-sm-6">
+            <app-question-input [Question]="source.question" [Answer]="source.answer" [types]="types" [renderMethods]="renderMethods" 
+            *ngIf="!showResult"></app-question-input>
+            <app-question-result [Question]="source.question" [Answer]="source.answer.questionAnswers[0]" [types]="types" 
+             *ngIf="showResult"></app-question-result>
+        </div>
+    </div>    
+    <div *ngIf="source.questionGroup" class="col-sm-12">
+        <div *ngFor="let q of source.questionGroup.questions, let index = index" style="margin-bottom: 5px">
+            <div class="row" *ngIf="q.question?.description">
+                <div class="col-sm-12">
+                        {{q.question?.description}}
+                </div>
+            </div>
+            <div class="row">
+                <label *ngIf="!q.question?.label_editable" class="col-sm-4">{{q.question?.question_text}}</label>
+                <div class="col-sm-4" *ngIf="q.question?.label_editable">
+                    <input type="text" class="form-control" ng-model="q.answer.textValue" *ngIf="!showResult"/>
+                    <label *ngIf="showResult">{{source.answer?.questionAnswers[index]?.textValue}}</label>
+                </div>
+                <div class="col-sm-8">
+                    <app-question-input [Question]="q.question" [Answer]="source.answer" [types]="types" [renderMethods]="renderMethods" *ngIf="!showResult"></app-question-input>
+                    <app-question-result [Question]="q.question" [Answer]="source.answer.questionAnswers[index]" [types]="types" *ngIf="showResult"></app-question-result>
+                </div>
+            </div>            
+        </div>
+    </div>    
+</div>
+<hr *ngIf="!last"/>

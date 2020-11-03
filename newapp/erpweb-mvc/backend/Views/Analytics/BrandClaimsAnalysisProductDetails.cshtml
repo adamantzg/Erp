@@ -1,0 +1,146 @@
+﻿@using backend.Controllers
+@model BrandClaimsAnalysisProductModel
+
+@{
+    ViewBag.Title = "title";
+    Layout = null;
+}
+
+
+
+<html>
+<head>
+    <title>Brand claims analysis</title>
+    <style>
+        body {
+            font-family: Arial,Helvetica, sans-serif;
+            font-size: 12px;
+        }
+
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .monthheader {
+            border: 1px solid black;
+            background-color: #D0d0d0;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .header2 {
+            border: 1px solid black;
+            text-align: center;
+        }
+
+        .header1 {
+            font-weight: bold;
+        }
+
+        .number {
+            text-align: right;
+        }
+
+        .table {
+            border-collapse: collapse;
+            border: 1px solid black;
+            font-size: 12px;
+        }
+
+        td {
+            border: 1px solid black;
+            padding: 3px;
+        }
+
+        .altrow {
+            background-color: #C0C0C0;
+        }
+    </style>
+</head>
+<body>
+    <h2>Detailed product analysis</h2>
+    
+    <h3>@Model.Product.cprod_code1</h3>
+    <h3>@Model.Product.cprod_name</h3>
+    
+    <h4 style="margin-bottom: 0">Last 6 months by ETA</h4>
+    
+    <table class="table" style="float:left;margin-top: 25px">
+        <tr style="font-weight: bold">
+            <td>customer</td>
+            <td class="number">units shipped</td>
+            <td class="number">units claimed</td>
+        </tr>
+        @{
+            var customers = Model.ProductSalesLast.Select(s => s.customer_code).Union(Model.Returns.Select(r => r.Client.customer_code)).Distinct().OrderBy(s=>s);
+        }
+        @foreach (var c in customers)
+        {
+            <tr>
+                <td>@c</td>
+                <td class="number">@Model.ProductSalesLast.Where(s => s.customer_code == c).Sum(s => s.numOfUnits)</td>
+                <td class="number">@Model.Returns.Where(r => r.Client.customer_code == c).Sum(r => r.return_qty)</td>
+            </tr>
+        }
+        <tr style="font-weight: bold">
+            <td>TOTAL</td>
+            <td class="number">@Model.ProductSalesLast.Sum(s => s.numOfUnits)</td>
+            <td class="number">@Model.Returns.Sum(r => r.return_qty)</td>
+        </tr>
+        @*<tr style="font-weight: bold">
+            <td>GBP</td>
+            <td class="number">@Model.ProductSalesLast.Sum(s => s.Amount)</td>
+            <td></td>
+        </tr>*@
+
+    </table>
+    <div style="float:left">
+        <img src="@Url.Action("BrandClaimsAnalysisChart",
+                              new {Settings.Default.StatsKey,chartType=4,Model.Product.cprod_id,from = Model.Periods.LastPeriodEnd,Model.ChartWidth,ChartHeight = 200, Model.CountryFilter })" />
+    </div>
+    <br/>
+    <table style="width: 900px;clear: both">
+        <tr>
+            <td style="width: 50%">
+                <img src="@Url.Action("BrandClaimsAnalysisChart",
+                              new {Settings.Default.StatsKey,chartType=3,Model.Product.cprod_id,from = Model.Periods.LastPeriodEnd,Model.ChartWidth,Model.ChartHeight, Model.CountryFilter })" />
+            </td>
+            <td style="width: 50%">
+                <img src="@Url.Action("BrandClaimsAnalysisChart",
+                              new {Settings.Default.StatsKey,chartType=1,Model.Product.cprod_id,from = Model.Periods.LastPeriodEnd,Model.ChartWidth,Model.ChartHeight, Model.CountryFilter })" />
+            </td>
+        </tr>
+    </table>
+    
+    <h4>Claimed units by reason</h4>
+    
+    <table class="table">
+        @{
+            var total = Model.Returns.Sum(r => r.return_qty);
+        }
+        @foreach (var g in Model.Returns.GroupBy(r => r.reason))
+        {
+            var reasonSum = g.Sum(r => r.return_qty);
+            <tr>
+                <td>@CommonController.GetReturnReasonFullName(g.Key)</td>
+                <td class="number">@reasonSum</td>
+                <td class="number">@((reasonSum *1.0 / total).ToString("P0"))</td>
+            </tr>
+        }
+        <tr style="font-weight: bold">
+            <td>TOTAL</td>
+            <td class="number">@total</td>
+            <td></td>
+        </tr>
+    </table>
+    <br/>
+    <table style="width: 500px">
+        <tr>
+            <td >
+                <img src="@Url.Action("BrandClaimsAnalysisChart",
+                              new {Settings.Default.StatsKey,chartType=2,Model.Product.cprod_id,from = Model.Periods.LastPeriodEnd,Model.ChartWidth,Model.ChartHeight, Model.CountryFilter })" />
+            </td>
+        </tr>
+    </table>
+</body>

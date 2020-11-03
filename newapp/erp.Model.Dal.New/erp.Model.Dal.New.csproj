@@ -1,0 +1,336 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{1ED0F18A-6A6B-4E5A-9573-736243AEC6E3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>erp.Model.Dal.New</RootNamespace>
+    <AssemblyName>erp.Model.Dal.New</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Web.Release.UK.configh|AnyCPU'">
+    <OutputPath>bin\Web.Release.UK.configh\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release.UK|AnyCPU'">
+    <OutputPath>bin\Release.UK\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.3.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
+      <HintPath>..\..\packages\BouncyCastle.1.8.3.1\lib\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="Dapper, Version=1.60.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Dapper.1.60.6\lib\net451\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="Dapper.FluentMap, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Dapper.FluentMap.1.6.0\lib\net45\Dapper.FluentMap.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Protobuf, Version=3.6.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Google.Protobuf.3.6.1\lib\net45\Google.Protobuf.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data, Version=8.0.18.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\MySql.Data.8.0.18\lib\net452\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Renci.SshNet, Version=2016.1.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\SSH.NET.2016.1.0\lib\net40\Renci.SshNet.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Design" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DAL\Analytics\AnalyticsCategoryDal.cs" />
+    <Compile Include="DAL\Analytics\AnalyticsDAL.cs" />
+    <Compile Include="DAL\Analytics\AnalyticsOptionDal.cs" />
+    <Compile Include="DAL\Analytics\AnalyticsSubcategoryDal.cs" />
+    <Compile Include="DAL\Analytics\BrandSalesAnalysis2DAL.cs" />
+    <Compile Include="DAL\Analytics\IAnalyticsCategoryDal.cs" />
+    <Compile Include="DAL\Analytics\IAnalyticsDAL.cs" />
+    <Compile Include="DAL\Analytics\IAnalyticsOptionDal.cs" />
+    <Compile Include="DAL\Analytics\IAnalyticsSubcategoryDal.cs" />
+    <Compile Include="DAL\Analytics\IBrandSalesAnalysis2DAL.cs" />
+    <Compile Include="DAL\Analytics\ISabcSortDal.cs" />
+    <Compile Include="DAL\Analytics\SabcSortDal.cs" />
+    <Compile Include="DAL\Dealers\Dealer_imagesDAL.cs" />
+    <Compile Include="DAL\Dealers\IDealerImagesDal.cs" />
+    <Compile Include="DAL\Inspections\AqlDal.cs" />
+    <Compile Include="DAL\Inspections\IAqlDal.cs" />
+    <Compile Include="DAL\Inspections\IInspectionControllerDal.cs" />
+    <Compile Include="DAL\Inspections\IInspectionCriteriaDal.cs" />
+    <Compile Include="DAL\Inspections\IInspectionImagesDAL.cs" />
+    <Compile Include="DAL\Inspections\IInspectionLinesAcceptedDal.cs" />
+    <Compile Include="DAL\Inspections\IInspectionLinesNotifiedDal.cs" />
+    <Compile Include="DAL\Inspections\IInspectionLinesRejectedDal.cs" />
+    <Compile Include="DAL\Inspections\IInspectionLinesTestedDal.cs" />
+    <Compile Include="DAL\Inspections\IInspectionsDAL.cs" />
+    <Compile Include="DAL\Inspections\IInspectionsLoadingDal.cs" />
+    <Compile Include="DAL\Inspections\IInspectionsV2DAL.cs" />
+    <Compile Include="DAL\Inspections\InspectionCriteriaDal.cs" />
+    <Compile Include="DAL\Inspections\InspectionImagesDal.cs" />
+    <Compile Include="DAL\Inspections\InspectionLinesNotifiedDal.cs" />
+    <Compile Include="DAL\Inspections\InspectionsDAL.cs" />
+    <Compile Include="DAL\Inspections\InspectionsV2DAL.cs" />
+    <Compile Include="DAL\Inspections\Inspections_loadingDAL.cs" />
+    <Compile Include="DAL\Inspections\Inspection_controllerDAL.cs" />
+    <Compile Include="DAL\Inspections\InspectionLinesAcceptedDal.cs" />
+    <Compile Include="DAL\Inspections\InspectionLinesTestedDal.cs" />
+    <Compile Include="DAL\Inspections\InspectionLinesRejectedDal.cs" />
+    <Compile Include="DAL\Invoices\Creditnote_lineDAL.cs" />
+    <Compile Include="DAL\Invoices\Delivery_locationsDAL.cs" />
+    <Compile Include="DAL\Invoices\ICreditNoteLineDAL.cs" />
+    <Compile Include="DAL\Invoices\IDeliveryLocationsDAL.cs" />
+    <Compile Include="DAL\Invoices\IInvoiceLinesDAL.cs" />
+    <Compile Include="DAL\Invoices\IInvoicesDAL.cs" />
+    <Compile Include="DAL\Invoices\IInvoiceTypeDAL.cs" />
+    <Compile Include="DAL\Invoices\InvoicesDAL.cs" />
+    <Compile Include="DAL\Invoices\Invoice_linesDAL.cs" />
+    <Compile Include="DAL\Invoices\Invoice_typeDAL.cs" />
+    <Compile Include="DAL\Invoices\IPaymentDetailsDAL.cs" />
+    <Compile Include="DAL\Invoices\Payment_detailsDAL.cs" />
+    <Compile Include="DAL\LoginHistory\ILoginhistoryDAL.cs" />
+    <Compile Include="DAL\LoginHistory\ILoginHistoryDetailDAL.cs" />
+    <Compile Include="DAL\LoginHistory\ILoginHistoryPageDal.cs" />
+    <Compile Include="DAL\LoginHistory\LoginhistoryDAL.cs" />
+    <Compile Include="DAL\LoginHistory\LoginHistoryPageDal.cs" />
+    <Compile Include="DAL\LoginHistory\Login_history_detailDAL.cs" />
+    <Compile Include="DAL\Misc\AmendmentsDAL.cs" />
+    <Compile Include="DAL\Misc\BrandsDAL.cs" />
+    <Compile Include="DAL\Misc\Client_pagesDAL.cs" />
+    <Compile Include="DAL\Misc\Client_pages_allocatedDAL.cs" />
+    <Compile Include="DAL\Misc\ContainerDal.cs" />
+    <Compile Include="DAL\Misc\ContainerTypesDal.cs" />
+    <Compile Include="DAL\Misc\ContinentsDAL.cs" />
+    <Compile Include="DAL\Misc\CountriesDAL.cs" />
+    <Compile Include="DAL\Misc\FileTypeDal.cs" />
+    <Compile Include="DAL\Misc\IAmendmentsDAL.cs" />
+    <Compile Include="DAL\Misc\IBrandsDAL.cs" />
+    <Compile Include="DAL\Misc\IClientPagesAllocatedDAL.cs" />
+    <Compile Include="DAL\Misc\IContainerDal.cs" />
+    <Compile Include="DAL\Misc\IContainerTypesDal.cs" />
+    <Compile Include="DAL\Misc\IContinentsDAL.cs" />
+    <Compile Include="DAL\Misc\ICountriesDAL.cs" />
+    <Compile Include="DAL\Misc\IFileTypeDal.cs" />
+    <Compile Include="DAL\Misc\IInstructionsDal.cs" />
+    <Compile Include="DAL\Misc\ILanguageDal.cs" />
+    <Compile Include="DAL\Misc\InstructionsDal.cs" />
+    <Compile Include="DAL\Misc\IProductGroupClassDal.cs" />
+    <Compile Include="DAL\Misc\IRangeDAL.cs" />
+    <Compile Include="DAL\Misc\ITariffsDal.cs" />
+    <Compile Include="DAL\Misc\LanguageDal.cs" />
+    <Compile Include="DAL\Misc\ProductGroupClassDAL.cs" />
+    <Compile Include="DAL\Misc\RangeDAL.cs" />
+    <Compile Include="DAL\Misc\TariffsDal.cs" />
+    <Compile Include="DAL\Orders\IOrderHeaderDAL.cs" />
+    <Compile Include="DAL\Orders\IOrderLineExportDal.cs" />
+    <Compile Include="DAL\Orders\IOrderLinesDAL.cs" />
+    <Compile Include="DAL\Orders\IOrderLinesManualDAL.cs" />
+    <Compile Include="DAL\Orders\IOrderMgmtDetailDAL.cs" />
+    <Compile Include="DAL\Orders\IPorderLinesDal.cs" />
+    <Compile Include="DAL\Orders\IShipmentsDal.cs" />
+    <Compile Include="DAL\Orders\IStockMovementsDal.cs" />
+    <Compile Include="DAL\Orders\IStockOorderAllocationDAL.cs" />
+    <Compile Include="DAL\Orders\OrderLineExportDal.cs" />
+    <Compile Include="DAL\Orders\OrderMgmtDetailDAL.cs" />
+    <Compile Include="DAL\Orders\OrderheaderDAL.cs" />
+    <Compile Include="DAL\Orders\OrderLinesDAL.cs" />
+    <Compile Include="DAL\Orders\Order_lines_manualDAL.cs" />
+    <Compile Include="DAL\Orders\PorderLinesDal.cs" />
+    <Compile Include="DAL\Orders\ShipmentsDal.cs" />
+    <Compile Include="DAL\Orders\StockMovementsDal.cs" />
+    <Compile Include="DAL\Orders\StockOrderAllocationDAL.cs" />
+    <Compile Include="DAL\products\BrandSubCategoriesDal.cs" />
+    <Compile Include="DAL\products\Category1DAL.cs" />
+    <Compile Include="DAL\products\Category1SubDal.cs" />
+    <Compile Include="DAL\products\CustProductDocTypeDal.cs" />
+    <Compile Include="DAL\products\CustproductsDAL.cs" />
+    <Compile Include="DAL\products\DistProductsDal.cs" />
+    <Compile Include="DAL\products\BrandCategoriesDal.cs" />
+    <Compile Include="DAL\products\IBrandCategoriesDal.cs" />
+    <Compile Include="DAL\products\IBrandSubCategoriesDal.cs" />
+    <Compile Include="DAL\products\ICategory1DAL.cs" />
+    <Compile Include="DAL\products\ICategory1SubDal.cs" />
+    <Compile Include="DAL\products\ICustProductDocTypeDal.cs" />
+    <Compile Include="DAL\products\ICustproductsDAL.cs" />
+    <Compile Include="DAL\products\IDistProductsDal.cs" />
+    <Compile Include="DAL\products\IMastProductsDal.cs" />
+    <Compile Include="DAL\products\IProductfaultReasonDescriptionDAL.cs" />
+    <Compile Include="DAL\products\IProductTrackNumberFcDal.cs" />
+    <Compile Include="DAL\products\IProduct_faultsDAL.cs" />
+    <Compile Include="DAL\products\IStockCodeDal.cs" />
+    <Compile Include="DAL\products\IStockCodeFactoryDal.cs" />
+    <Compile Include="DAL\products\Mast_productsDAL.cs" />
+    <Compile Include="DAL\Misc\CurrenciesDAL.cs" />
+    <Compile Include="DAL\Misc\ICurrenciesDAL.cs" />
+    <Compile Include="DAL\Misc\ILocationDal.cs" />
+    <Compile Include="DAL\Misc\LocationDal.cs" />
+    <Compile Include="DAL\products\Productfault_reason_descriptionDAL.cs" />
+    <Compile Include="DAL\products\ProductTrackNumberFcDal.cs" />
+    <Compile Include="DAL\products\Product_faultsDAL.cs" />
+    <Compile Include="DAL\products\StockCodeDal.cs" />
+    <Compile Include="DAL\products\StockCodeFactoryDal.cs" />
+    <Compile Include="DAL\Reporting\Claims_investigation_reportsDAL.cs" />
+    <Compile Include="DAL\Reporting\Claims_investigation_reports_actionDAL.cs" />
+    <Compile Include="DAL\Reporting\Claims_investigation_report_action_imageDAL.cs" />
+    <Compile Include="DAL\Reporting\IClaimsInvestigationReportActionImageDAL.cs" />
+    <Compile Include="DAL\Reporting\IClaimsInvestigationReportsActionDAL.cs" />
+    <Compile Include="DAL\Reporting\IClaimsInvestigationReportsDAL.cs" />
+    <Compile Include="DAL\Reporting\IReportingDal.cs" />
+    <Compile Include="DAL\Reporting\ReportingDal.cs" />
+    <Compile Include="DAL\Returns\Email_recipientsDAL.cs" />
+    <Compile Include="DAL\Returns\Feedback_categoryDAL.cs" />
+    <Compile Include="DAL\Returns\Feedback_subscriptionsDAL.cs" />
+    <Compile Include="DAL\Returns\Feedback_typeDAL.cs" />
+    <Compile Include="DAL\Returns\IEmail_recipientsDAL.cs" />
+    <Compile Include="DAL\Returns\IFeedbackSubscriptionsDAL.cs" />
+    <Compile Include="DAL\Returns\IFeedback_categoryDAL.cs" />
+    <Compile Include="DAL\Returns\IFeedback_typeDAL.cs" />
+    <Compile Include="DAL\Returns\IProductInvestigationImagesDAL.cs" />
+    <Compile Include="DAL\Returns\IProductInvestigationsDAL.cs" />
+    <Compile Include="DAL\Returns\IProductInvestigationStatusDAL.cs" />
+    <Compile Include="DAL\Returns\IReturnsCommentsDAL.cs" />
+    <Compile Include="DAL\Returns\IReturnsCommentsFilesDAL.cs" />
+    <Compile Include="DAL\Returns\IReturnsDAL.cs" />
+    <Compile Include="DAL\Returns\IReturnsImagesDAL.cs" />
+    <Compile Include="DAL\Returns\IReturns_importanceDAL.cs" />
+    <Compile Include="DAL\Returns\IReturn_categoryDAL.cs" />
+    <Compile Include="DAL\Returns\IReturn_resolutionDAL.cs" />
+    <Compile Include="DAL\Returns\IStandard_responseDAL.cs" />
+    <Compile Include="DAL\Returns\Product_investigationsDAL.cs" />
+    <Compile Include="DAL\Returns\Product_investigation_imagesDAL.cs" />
+    <Compile Include="DAL\Returns\Product_investigation_statusDAL.cs" />
+    <Compile Include="DAL\Returns\ReturnsDAL.cs" />
+    <Compile Include="DAL\Returns\Returns_commentsDAL.cs" />
+    <Compile Include="DAL\Returns\Returns_comments_filesDAL.cs" />
+    <Compile Include="DAL\Returns\Returns_imagesDAL.cs" />
+    <Compile Include="DAL\Returns\Returns_importanceDAL.cs" />
+    <Compile Include="DAL\Returns\Return_categoryDAL.cs" />
+    <Compile Include="DAL\Returns\Return_resolutionDAL.cs" />
+    <Compile Include="DAL\Returns\Standard_responseDAL.cs" />
+    <Compile Include="DAL\Sales\ContractSalesForecastLineDal.cs" />
+    <Compile Include="DAL\Sales\IContractSalesForecastLinesDal.cs" />
+    <Compile Include="DAL\Sales\ISalesDataDal.cs" />
+    <Compile Include="DAL\Sales\ISalesForecastDal.cs" />
+    <Compile Include="DAL\Sales\SalesDataDal.cs" />
+    <Compile Include="DAL\Sales\SalesForecastDal.cs" />
+    <Compile Include="DAL\SchemaInfo\DbColumnInfo.cs" />
+    <Compile Include="DAL\SchemaInfo\ISchemaInfoDal.cs" />
+    <Compile Include="DAL\SchemaInfo\SchemaInfoDal.cs" />
+    <Compile Include="DAL\Security\AdminPermissionsDal.cs" />
+    <Compile Include="DAL\Security\Admin_pagesDAL.cs" />
+    <Compile Include="DAL\Security\Admin_pages_newDAL.cs" />
+    <Compile Include="DAL\Security\IAdminPagesDAL.cs" />
+    <Compile Include="DAL\Security\IAdminPagesNewDAL.cs" />
+    <Compile Include="DAL\Security\IAdminPermissionsDal.cs" />
+    <Compile Include="DAL\Security\IPermissionDAL.cs" />
+    <Compile Include="DAL\Security\IRoleDAL.cs" />
+    <Compile Include="DAL\Security\PermissionDAL.cs" />
+    <Compile Include="DAL\Security\RoleDAL.cs" />
+    <Compile Include="DAL\Technical\ITechnicalDataTypeDal.cs" />
+    <Compile Include="DAL\Technical\ITechnicalProductDataDal.cs" />
+    <Compile Include="DAL\Technical\TechnicalDataTypeDal.cs" />
+    <Compile Include="DAL\Technical\TechnicalProductDataDal.cs" />
+    <Compile Include="DAL\User\CompanyDAL.cs" />
+    <Compile Include="DAL\User\ICompanyDAL.cs" />
+    <Compile Include="DAL\User\IUserDAL.cs" />
+    <Compile Include="DAL\User\UserDAL.cs" />
+    <Compile Include="DAL\webproduct\IWebCategoryDal.cs" />
+    <Compile Include="DAL\webproduct\IWebProductComponentDal.cs" />
+    <Compile Include="DAL\webproduct\IWebProductFileDal.cs" />
+    <Compile Include="DAL\webproduct\IWebProductFileTypeDAL.cs" />
+    <Compile Include="DAL\webproduct\IWebProductFlowDal.cs" />
+    <Compile Include="DAL\webproduct\IWebProductInfoDal.cs" />
+    <Compile Include="DAL\webproduct\IWebProductNewDal.cs" />
+    <Compile Include="DAL\webproduct\IWebProductPartDal.cs" />
+    <Compile Include="DAL\webproduct\IWebProductPressureDal.cs" />
+    <Compile Include="DAL\webproduct\IWebSiteDal.cs" />
+    <Compile Include="DAL\webproduct\WebProductPartDal.cs" />
+    <Compile Include="DAL\webproduct\WebProductPressureDal.cs" />
+    <Compile Include="DAL\webproduct\Web_categoryDAL.cs" />
+    <Compile Include="DAL\webproduct\Web_product_componentDAL.cs" />
+    <Compile Include="DAL\webproduct\Web_product_fileDAL.cs" />
+    <Compile Include="DAL\webproduct\Web_product_file_typeDAL.cs" />
+    <Compile Include="DAL\webproduct\Web_product_flowDAL.cs" />
+    <Compile Include="DAL\webproduct\Web_product_infoDAL.cs" />
+    <Compile Include="DAL\webproduct\Web_product_newDAL.cs" />
+    <Compile Include="DAL\webproduct\Web_siteDAL.cs" />
+    <Compile Include="DAL\Whitebook\IWhitebookCategoryDal.cs" />
+    <Compile Include="DAL\Whitebook\WhitebookCategoryDal.cs" />
+    <Compile Include="GenericDal.cs" />
+    <Compile Include="IGenericDal.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Utils.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\company.Common\company.Common.csproj">
+      <Project>{5d6281ae-2a42-4e1c-af64-684907f43ba8}</Project>
+      <Name>company.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\erp.Model\erp.Model.csproj">
+      <Project>{32737149-900c-4b37-af6e-52ea8b16f1fe}</Project>
+      <Name>erp.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,14 @@
+<h4>Inspection criteria</h4>
+<app-errormessage [errorMessage]="errorMessage"></app-errormessage>
+<div class="form-inline">
+    <button [ngClass] = "(isQurrentUserQC == true) ? 'btn btn-primary disabled' : 'btn btn-primary'" (click)="createNew()">Create new</button>
+    <div class="pull-right">
+        <label>Filter</label>
+        <input #filterText type="text" class="form-control ml-2" (input)="filterChange(filterText.value)"> 
+    </div>
+</div>
+<div class="mt-2">
+    <app-grid [data]="gridData" [definition]="gridDefinition" [style]="gridStyle" (ButtonClicked)="onButtonClicked($event)"></app-grid>
+</div>
+
+

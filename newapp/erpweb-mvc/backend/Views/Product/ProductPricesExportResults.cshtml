@@ -1,0 +1,52 @@
+﻿@model ProductPricesExportModel
+
+@{
+
+    Layout = null;
+}
+
+<html>
+    <head>
+        <title>Client product prices</title>
+        <style type="text/css">
+            .tableheader { font-weight: bold;}
+            body, table { font-family: arial;font-size: 12px}
+        </style>
+    </head>
+    <body>
+        @{
+            var factory = Model.Factories.FirstOrDefault(f => f.user_id == Model.factory_id);
+        }
+        Factory: @(factory != null ? factory.factory_code : "All")
+        <table>
+            <thead>
+                <tr class="tableheader">
+                    <td>Factory</td>
+                    <td>Factory ref</td>
+                    <td>Product code</td>
+                    <td>Product name</td>
+                    <td>Client</td>
+                    <td >Price dollar</td>
+                    <td>Price euro</td>
+                    <td>Price pound</td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model.Products.OrderBy(prod=>prod.MastProduct.Factory.factory_code).ThenBy(prod=>prod.mast_id))
+                {
+                    <tr>
+                        <td>@p.MastProduct.Factory.factory_code</td>
+                        <td>@p.MastProduct.factory_ref</td>
+                        <td>@(p.CustProduct != null ? p.CustProduct.cprod_code1 : "")</td>
+                        <td>@(p.CustProduct != null ? p.CustProduct.cprod_name :  p.MastProduct.asaq_name)</td>
+                        <td>@p.Client.customer_code</td>
+                        <td>@p.price_dollar</td>
+                        <td>@p.price_euro</td>
+                        <td>@p.price_pound</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </body>
+</html>
+

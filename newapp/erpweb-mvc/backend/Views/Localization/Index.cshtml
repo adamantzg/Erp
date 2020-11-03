@@ -1,0 +1,216 @@
+﻿@model LocalizationListModel
+
+@using (Html.BeginForm("Index", "Localization", FormMethod.Post))
+{
+    <span>Brand/site:
+    @Html.DropDownListFor(m => m.brand_id, new SelectList(Model.SiteEdits.Select(se => se.Brand).Distinct(), "brand_id", "brandname"), "Select brand")</span>
+
+    <span id="spLang" @if (Model.brand_id == null)
+                      {
+                          @Html.Raw("style = \"display: none\"");
+                      }>@Html.DropDownListFor(m=>m.lang, new SelectList(Model.brand_id != null ? Model.SiteEdits.Where(se=>se.Brand.brand_id == Model.brand_id).Select(se=>se.Lang) : new [] {new Language{code = "en",name="English"}}.ToList(),"code","name"), "Select language") <input type="submit" value="Show"/>
+
+    </span>
+    
+    if (Model.Categories != null)
+    {
+        <div id="tabs">
+            <ul>
+                <li><a href="#tabCategories">Categories</a></li>
+                <li id="thsubs"><a href="#tabSubcats">Subcategories</a></li>
+                <li id="thsubsubs"><a href="#tabSubsubcats">Subsubcategories</a></li>
+                <li id="thgroups"><a href="#tabBrandGroups">Brand groups</a></li>
+                <li id="thproducts"><a href="#tabProducts">Products</a></li>
+            </ul>
+        
+            <div id="tabCategories">
+                <h4>Categories</h4>
+                
+                <table class="table">
+                    <tr class="table_headerrow">
+                        <td></td>
+                        <td>id</td>
+                        <td>name</td>
+                        <td>name (engl.)</td>
+                        <td>image</td>
+                    </tr>
+                    @{ var i = 0;
+                        Brand b = BrandsDAL.GetById(Model.brand_id.Value);
+                    }
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <tr class="tablerow@(i++ % 2 == 1 ? "_alt" : "")">
+                            <td><a href='@Url.Action("Edit", new {what = "cat", id = cat.brand_cat_id, language = Model.lang, Model.brand_id })'><img src="/images/menus/EditItem.gif" /></a></td>
+                            <td>@cat.brand_cat_id</td>
+                            <td>@cat.web_description</td>
+                            <td>@Model.Categories_Original.FirstOrDefault(c=>c.brand_cat_id == cat.brand_cat_id).web_description</td>
+                            <td><img style="height:50px" src="@string.Format("{0}web/{1}/category/{2}",Settings.Default.imagesRootFolder,b.code,System.IO.Path.GetFileName(cat.brand_cat_image))"/></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+            <div id="tabSubcats">
+                <h4>Subcategories</h4>
+                <table class="table">
+                    <tr class="table_headerrow">
+                        <td></td>
+                        <td>id</td>
+                        <td>name</td>
+                        <td>name (engl.)</td>
+                        <td>image</td>
+                    </tr>
+                    @{ i = 0;
+                    }
+                    @foreach (var subcat in Model.SubCategories)
+                    {
+                        <tr class="tablerow@(i++ % 2 == 1 ? "_alt" : "")">
+                            <td><a href='@Url.Action("Edit", new {what = "subcat", id = subcat.brand_sub_id, language = Model.lang, Model.brand_id })'><img src="/images/menus/EditItem.gif" /></a></td>
+                            <td>@subcat.brand_sub_id</td>
+                            <td>@subcat.brand_sub_desc</td>
+                            <td>@Model.SubCategories_Original.FirstOrDefault(s=>s.brand_sub_id == subcat.brand_sub_id).brand_sub_desc</td>
+                            <td><img style="height:50px" src="@string.Format("{0}web/{1}/{2}",Settings.Default.imagesRootFolder,b.code,System.IO.Path.GetFileName(subcat.sub_image1))"/></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+            <div id="tabSubsubcats">
+                <h4>Subsubcategories</h4>
+                <table class="table">
+                    <tr class="table_headerrow">
+                        <td></td>
+                        <td>id</td>
+                        <td>name</td>
+                        <td>name (engl.)</td>
+                        <td>image</td>
+                    </tr>
+                    @{ i = 0;
+                    }
+                    @foreach (var subcat in Model.SubsubCategories)
+                    {
+                        <tr class="tablerow@(i++ % 2 == 1 ? "_alt" : "")">
+                            <td><a href='@Url.Action("Edit", new {what = "subsubcat", id = subcat.brand_sub_sub_id, language = Model.lang, Model.brand_id })'><img src="/images/menus/EditItem.gif" /></a></td>
+                            <td>@subcat.brand_sub_sub_id</td>
+                            <td>@subcat.brand_sub_sub_desc</td>
+                            <td>@Model.SubsubCategories_Original.FirstOrDefault(s=>s.brand_sub_sub_id == subcat.brand_sub_sub_id).brand_sub_sub_desc</td>
+                            <td><img style="height:50px" src="@string.Format("{0}web/{1}/{2}",Settings.Default.imagesRootFolder,b.code,System.IO.Path.GetFileName(subcat.image1))"/></td>
+                        </tr>
+                    }
+                </table>
+            </div>
+            <div id="tabBrandGroups">
+                <h4>Brand groups</h4>
+                <table class="table">
+                    <tr class="table_headerrow">
+                        <td></td>
+                        <td>id</td>
+                        <td>name</td>
+                        <td>name (engl.)</td>
+                        
+                    </tr>
+                    @{ i = 0;
+                    }
+                    @foreach (var group in Model.BrandGroups)
+                    {
+                        <tr class="tablerow@(i++ % 2 == 1 ? "_alt" : "")">
+                            <td><a href='@Url.Action("Edit", new {what = "group", id = group.brand_group, language = Model.lang, Model.brand_id })'><img src="/images/menus/EditItem.gif" /></a></td>
+                            <td>@group.brand_group</td>
+                            <td>@group.group_desc</td>
+                            <td>@Model.BrandGroups_Original.FirstOrDefault(g=>g.brand_group == group.brand_group).group_desc</td>
+                            
+                        </tr>
+                    }
+                </table>
+            </div>
+            <div id="tabProducts">
+                <h4>Products</h4>
+                <div id="@ViewBag.What">
+                    <table class="table">
+                        <tr class="table_headerrow">
+                            <td></td>
+                            <td>id</td>
+                            <td>name</td>
+                            <td>name (engl.)</td>
+                            <td>image</td>
+                        </tr>
+                        @{ i = 0;
+                        }
+                        @foreach (var prod in Model.WebProducts.OrderBy(p=>p.web_name))
+                        {
+                            <tr class="tablerow@(i++ % 2 == 1 ? "_alt" : "")" id="@prod.web_unique">
+                                <td><a href='@Url.Action("Edit", new {what = "prod", id = prod.web_unique, language = Model.lang, Model.brand_id })'><img src="/images/menus/EditItem.gif" /></a></td>
+                                <td>@prod.web_unique</td>
+                                <td>@prod.web_name</td>
+                                <td>@prod.NonLocalized.web_name</td>
+                                <td><img style="height:50px" src="@string.Format("{0}web/{1}/{2}",Settings.Default.imagesRootFolder,b.code,WebUtilities.AppendToFileName(System.IO.Path.GetFileName(prod.web_image1),"_small"))"/></td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+}
+@section title
+{
+    Data localization
+}
+
+@section scripts
+{
+    @{
+        int tabIndex = 0;
+        string what = ViewBag.What;
+        switch (what)
+        {
+            case "subcat":
+                tabIndex = 1;
+                break;
+            case "subsubcat":
+                tabIndex = 2;
+                break;
+            case "group":
+                tabIndex = 3;
+                break;
+            case "prod":
+                tabIndex = 4;
+                break;
+            default:
+                tabIndex = 0;
+                break;
+        }
+    }
+    <script type="text/javascript">
+        var siteEditData = @Html.Raw(Json.Encode(Model.SiteEdits));
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#brand_id').change(function() {
+                $('#lang').empty();
+                if ($(this).val() != '') {
+                    var brand_id = $(this).val();
+                    var langs = $.grep(siteEditData, function(e) { return e.Brand.brand_id == brand_id; });
+                    if (langs.length > 0) {
+                        $("#lang").append('<option value="">Select language</option>');
+                        for (var i = 0; i < langs.length; i++) {
+                            $("#lang").append('<option value="' + langs[i].Lang.code + '">' + langs[i].Lang.name + '</option>');
+                        }
+                    }
+                    $('#spLang').show();
+                }
+            });
+            $("#tabs").tabs({selected:@tabIndex});
+            
+            @if (ViewBag.id != null)
+            {
+                <text>
+                location.href = location.href + '#' + @ViewBag.id;
+            @*var container = $('#@ViewBag.What');
+            var scrollTo = $('tr[id="@ViewBag.id"]');
+            container.scrollTop(scrollTo.offset().top - container.offset().top + container.scrollTop());
+            container.scrollTop(container.scrollTop() + scrollTo.offset().top - container.offset().top);*@
+                
+                </text>
+            }
+        });
+    </script>
+}

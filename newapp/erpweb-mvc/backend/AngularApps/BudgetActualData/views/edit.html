@@ -1,0 +1,209 @@
+﻿<h3>{{title}}</h3>
+
+<div style="margin-bottom: 5px">
+    <button class="btn btn-default" ui-sref="home">Back to list</button> <button class="btn btn-primary" ng-click="update()">{{saveButtonText}}</button>
+</div>
+
+<uib-tabset>
+    <uib-tab heading="Actuals">
+        <div class="row">
+            <div><label>UK</label></div>
+            
+            <div class="col-md-6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Brand
+                            </th>
+                            <th class="text-right">
+                                &pound;
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="b in model.brands | orderBy: 'brandname'">
+                            <td>{{b.brandname}}</td>
+                            <td class="text-right">
+                                <input type="text" class="form-control text-right" ng-model="b.ukActual" ng-paste="paste($event,model.brands,$index,'ukActual')" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Distributors
+                            </th>
+                            <th class="text-right">
+                                &pound;
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="d in ukDistributors | orderBy: 'user_name'">
+                            <td>{{d.user_name}}</td>
+                            <td class="text-right">
+                                <input type="text" class="form-control text-right" ng-model="d.actual" ng-paste="paste($event,ukDistributors,$index,'actual')" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div>
+                <label>Non-UK</label>
+            </div>
+            
+            <div class="col-md-6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Brand
+                            </th>
+                            <th class="text-right">
+                                &pound;
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="b in model.brands | orderBy: 'brandname'">
+                            <td>{{b.brandname}}</td>
+                            <td class="text-right">
+                                <input type="text" class="form-control text-right" ng-model="b.nonUkActual" ng-paste="paste($event,model.brands,$index,'nonUkActual')"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Distributors
+                            </th>
+                            <th class="text-right">
+                                &pound;
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="d in nonUkDistributors | orderBy: 'user_name'">
+                            <td>{{d.user_name}}</td>
+                            <td class="text-right">
+                                <input type="text" class="form-control text-right" ng-model="d.actual" ng-paste="paste($event,nonUkDistributors,$index,'actual')"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </uib-tab>
+
+    <uib-tab heading="Budget">
+        <div class="row">
+            <div><label>UK</label></div>
+
+            <div class="col-md-6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Brand
+                            </th>
+                            <th class="text-right">
+                                &pound;
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="b in model.brands | orderBy: 'brandname'">
+                            <td>{{b.brandname}}</td>
+                            <td class="text-right">
+                                <input type="text" class="form-control text-right" ng-model="b.ukBudget" ng-paste="paste($event,model.brands,$index,'ukBudget')" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Distributors
+                            </th>
+                            <th class="text-right">
+                                &pound;
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="d in ukDistributors | orderBy: 'user_name'">
+                            <td>{{d.user_name}}</td>
+                            <td class="text-right">
+                                <input type="text" class="form-control text-right" ng-model="d.budget" ng-paste="paste($event,ukDistributors,$index,'budget')" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div>
+                <label>Non-UK</label>
+            </div>
+
+            <div class="col-md-6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Brand
+                            </th>
+                            <th class="text-right">
+                                &pound;
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="b in model.brands | orderBy: 'brandname'">
+                            <td>{{b.brandname}}</td>
+                            <td class="text-right">
+                                <input type="text" class="form-control text-right" ng-model="b.nonUkBudget" ng-paste="paste($event,model.brands,$index,'nonUkBudget')" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>
+                                Distributors
+                            </th>
+                            <th class="text-right">
+                                &pound;
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="d in nonUkDistributors | orderBy: 'user_name'">
+                            <td>{{d.user_name}}</td>
+                            <td class="text-right">
+                                <input type="text" class="form-control text-right" ng-model="d.budget" ng-paste="paste($event,nonUkDistributors,$index,'budget')" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </uib-tab>
+</uib-tabset>

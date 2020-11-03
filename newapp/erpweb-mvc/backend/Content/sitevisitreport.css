@@ -1,0 +1,232 @@
+ body {
+    background: #666;
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	font-family: Arial; 
+ 
+}
+
+img {
+	border: 0px;
+	}
+
+.container {
+	
+	width: 980px;
+	/*height: 700px;*/
+	/*border: 1px solid red;*/
+	margin: auto;
+	background: #fff;
+	border: 1px solid black;
+	overflow: hidden;
+	}
+	
+.logo {
+    width: 960px;
+    background-image: url('../images/crosswater.png');
+    float: left;
+    height: 90px;
+    background-repeat: no-repeat;
+    background-position: 10px;
+    
+    
+}
+
+
+
+.menu {
+    width: 980px;
+    margin-top: 5px;
+    float: left;
+}
+
+.menu ul {
+    
+   list-style-type: none;
+   margin: 0px !important;
+    
+}
+
+.menu ul li {
+    margin-left: 10px;
+    width: 120px;
+    height: 20px;
+    border: 1px solid #000;
+    background: #e0e5e9;
+    text-decoration: none;
+    float: left;
+}
+
+.menu ul li a{
+    text-decoration: none;
+    font-size: 10px;
+    color: #000;
+    display:block;
+    width: 120px;
+    text-align: center;
+    line-height: 20px;
+    
+}
+
+.menu ul li a:hover{
+    background: #ffcf4f;
+}
+
+
+
+
+.main {
+    width: 940px;
+   
+    float: left;
+    margin-left: 20px;
+    border: 1px solid #ccc;
+    
+}
+
+
+		
+
+.footer {
+    height: 15px;
+    width: 980px;
+   
+    background: #999;
+    float: left;
+    
+}
+
+.footer_text {
+     color: #fff;
+    font-size: 12px;
+    line-height: 12px;
+    margin-top: 2px;
+    display: block;
+    width: 980px;
+    text-align: center;
+}
+
+.first_row {
+    background: #666;
+    color: #fff;
+    font-size: 16px;
+}
+
+.table_main a{
+    text-decoration: underline;
+    color: #000;
+}
+
+.sv_logo {
+    width: 920px;
+   
+    float: left;
+    height: 50px;
+   padding: 20px;
+    margin-bottom: 15px;
+    
+}
+
+.sv_head {
+	width: 950px;
+	height: 70px;
+	float: left;
+	background:#666;
+	-webkit-border-top-left-radius: 10px;
+-webkit-border-top-right-radius: 10px;
+-moz-border-radius-topleft: 10px;
+-moz-border-radius-topright: 10px;
+border-top-left-radius: 10px;
+border-top-right-radius: 10px;
+	
+}	
+
+.sv_main {
+	 width: 950px;
+   	height: 1250px;
+    float: left;
+    margin-left: 15px;
+   margin-bottom: 10px;
+	/*background:#E5E5E5;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	*/
+	background-image: url(file:///C|/Users/a1/Documents/after%20sales/images/background_site_visit.jpg); 
+	
+    
+}
+
+.sv_head_text {
+		display: block;
+		width: 950px;
+		font-size: 40px;
+		text-align: center;
+		color: #fff;
+		margin-top: 15px;
+}
+
+.sv_data {
+		width: 700px;
+		float: left;
+		margin: 20px 0 0 20px;
+		
+}
+
+.sv_data table{
+	font-size: 20px;
+}
+
+.sv_picture {
+	width: 900px;
+	height: 750px; 
+	float: left;
+	border: 1px solid #000;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	margin: 20px 0 0 20px;
+}
+
+.sv_picture_text {
+	display: block;
+		width: 300px;
+		font-size: 25px;
+		
+		color: #000;
+		margin: 15px 0 0 15px;
+}
+
+.sv_image {
+		margin: 10px 0 0 12px;
+		width: 280px;
+}
+
+.sv_comment {
+	width: 870px;
+	height: 220px; 
+	float: left;
+	border: 1px solid #000;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	margin: 20px 0 0 20px;	
+	color: #000;
+	font-size: 16px;
+	padding: 15px;
+	
+}
+
+.sv_comment_text{ 
+		display: block;
+		width: 900px;
+		font-size: 25px;
+		color: #000;
+		margin-bottom: 15px;
+		
+}
+
+
+	

@@ -1,0 +1,46 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>TrackingNumberTemplate</title>
+    <style>
+        thead tr {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div> 
+        <table>
+            <thead>
+                <tr>
+                    <td>
+                        mast_id
+                    </td>
+                    <td>MFG_code</td>
+                    <td>tracking_number</td>
+                </tr>
+            </thead>
+            <tbody>
+                @{ 
+                    var data = (ViewBag.Data as List<Mast_products>);
+
+                }
+                @foreach(var p in data) {
+                    <tr>
+                        <td>@p.mast_id</td>
+                        <td>@p.factory_ref</td>
+                        <td></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

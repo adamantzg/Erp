@@ -1,0 +1,91 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Bundle report</title>
+    <style>
+        table {
+            padding: 2px;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 2px;
+            font-weight: bold;
+            border: 1px solid black;
+        }
+
+        td {
+            padding: 2px;
+            border: 1px solid black;
+        }
+
+        .number {
+            text-align: right;
+        }
+
+        .bundle {
+            background-color: #E0E0E0;
+        }
+
+        .components_num {
+            color: red;
+        }
+    </style>
+</head>
+@{
+    var bundles = ViewBag.Bundles as List<cust_products_bundle>;
+    var sales = ViewBag.BundleSales as Dictionary<int?,int?>;
+    var maxComponents = bundles.SelectMany(b => b.Components).Max(c => c.sequence);
+    var bundlesWithSale = bundles.Select(b => new { Bundle = b, sales = sales.ContainsKey(b.id) ? sales[b.id] : 0 }).ToList();
+}
+<body>
+    <div>
+        <h2>Bundle availability report</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Bundle</th>
+                    @for (int i = 0; i < maxComponents; i++) {
+                    <th>
+                        @(i + 1)
+                    </th>
+                    }
+                    <th>Max. ready</th>
+                    <th>Sales last6m</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var b in bundlesWithSale.OrderByDescending(bs => bs.sales)) {
+                    <tr>
+                        <td>@b.Bundle.code</td>
+                        @for (int i = 0; i < maxComponents; i++) {
+                            <td style="text-align: center">
+                                @{
+                                    var component = b.Bundle.Components.FirstOrDefault(c => c.sequence == i + 1);
+                                    if (component != null) {
+                                        <span style="font-weight: bold">@component.Component.cprod_stock2</span><br />
+                                        <span style="font-size: 0.8em">@component.Component.cprod_code1</span>
+                                    }
+                                }
+
+                            </td>
+                        }
+                        <td>
+                            @b.Bundle.Components.Min(c=>c.Component.cprod_stock2)
+                        </td>
+                        <td>@b.sales</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</body>
+</html>

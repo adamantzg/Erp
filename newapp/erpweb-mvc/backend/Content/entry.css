@@ -1,0 +1,83 @@
+﻿body {
+    /*min-height: 100%; 
+    min-height: 100vh;
+    display: flex;
+    align-items: center;*/
+    background: #eee;
+}
+#form-container {
+    position: relative;
+    z-index: 2;
+    background-color: #eee;
+}
+/* CUSTOM BOOTSTRAP STYLES*/
+#banner-fix {
+    margin-left:-3%;
+}
+.navbar {
+    padding: 20px !important;
+}
+.navbar-default{
+    background-color:white!important;
+}
+.well{
+    background-color:white!important;
+}
+/* END CUSTOM BOOTSRAP */
+.field-validation-error {
+    color: #a94442;
+}
+.validation-summary-errors {
+    color: #a94442;
+}
+.input-validation-error{
+    border-color: #a94442;
+}
+#footer {
+    position: absolute;
+    bottom: 0px;
+    width: 100%;
+    background-color: #999;
+    height: auto;
+    text-align:center;
+    font-size:12px;
+    padding:8px 10px;
+    
+    line-height:95%;
+    font-weight:100;
+    letter-spacing:normal;
+    z-index:0;
+}
+/*768px*/
+@media screen and (max-width: 768px) and (orientation: portrait) {
+    #form-container {
+        margin-top: 25%;
+        
+    }
+    .navbar {
+        padding: 20px !important;
+    }
+    #footer {
+        color: #333;
+    }
+}
+@media screen and (max-width: 768px) and (orientation: landscape) {
+    #form-container {
+        margin-top: -2%;
+        background-color: #eee;
+    }
+    .navbar {
+        padding: 5px !important;
+    }
+}
+@media screen and (min-width: 769px)  {
+    #form-container {
+        margin-top: 10% !important;
+    }
+    .navbar {
+        padding: 20px !important;
+    }
+    #footer {
+        color: white;
+    }
+}

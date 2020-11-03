@@ -1,0 +1,317 @@
+﻿@model ProductDownloadModel
+
+@{
+	
+	Layout = null;
+}
+
+<html>
+	<head>
+		<title>download</title>
+		<style type="text/css">
+			.small_body {
+				font-family: Verdana, Geneva, sans-serif;
+				font-size: 10px;
+				font-style: normal;
+				color: #000;
+			}
+			.data_block_rows_header {
+				font-family: 'Arial, Helvetica, sans-serif';
+				font-size:11px;
+				height: 500px;
+				width: 760px;
+				/*margin-left:10px;*/
+			    overflow: auto;
+				margin-bottom: 0px;
+				margin-top: 10px;
+				text-align: left;
+				border:0px;
+				border-style:dashed;
+				border-color:#999;
+				padding:2px;
+				position: relative;
+			}
+			.small_body_faint {
+				font-family: Verdana, Geneva, sans-serif;
+				font-size: 10px;
+				font-style: normal;
+				color: #666;
+			}
+			.small_body_wonb {
+				font-family: Verdana, Geneva, sans-serif;
+				font-size: 10px;
+				font-style: normal;
+				color: #FFF;
+			}
+            .odd {
+                background-color: #FFFFFF;
+            }
+            .even {
+                background-color: #F4F4F4;
+            }
+            
+		</style>
+	</head>
+<body>
+@if (!Model.ShowProducts  )
+{
+    <span>No factory selected</span>
+}
+else {
+    <div ng-app="app" id="app">
+        <div ng-controller="controller" id="controller">
+            <div id="wait">
+                <img src="/Images/Spinning_wheel_throbber.gif"/>
+            </div>
+            <div id="container" style="display: none">
+                <form action="@Url.Action("Download")" target="hiddenFrame" method="POST">
+                    <div class="small_body">
+                        Type of document to download: <br />
+                        <input type="checkbox" id="chkDocTypeAll" ng-model="allTypes" ng-click="CheckAllTypes()" /><span>All</span>
+                        <span ng-repeat="t in CheckDocTypes">
+                            <input type="checkbox" name="chkDocType" ng-model="t.selected" ng-value="t.id" /> <span>{{t.value}}</span>
+                        </span><br />
+                        <input type="button" value="Download" id="btnDownload" ng-click="Download()"/>
+
+                        <div class="data_block_rows_header">
+                            <table style="width: 100%" border="0" align="center" cellpadding="2" cellspacing="0">
+                                <tr bgcolor="#EFEFEF" class="normal_body">
+                                    <td width="20" align="left" valign="top" bgcolor="#666666" class="small_body_wonb">
+                                        <input type="checkbox" id="chkProductsAll" ng-model="allProducts" ng-click="CheckAllProducts()" />
+                                    </td>
+                                    <td width="90" align="left" valign="top" bgcolor="#666666" class="small_body_wonb">Code</td>
+                                    <td width="210" align="left" valign="top" bgcolor="#666666" class="small_body_wonb">Description</td>
+
+                                    <td width="60" align="center" valign="top" bgcolor="#666666" class="small_body_wonb">
+                                        basic<br />
+                                        drawing
+                                    </td>
+                                    <td width="60" align="center" valign="top" bgcolor="#666666" class="small_body_wonb">
+                                        detailed<br />
+                                        drawing
+                                    </td>
+                                    <td width="45" align="center" valign="top" bgcolor="#666666" class="small_body_wonb">Hi-res</td>
+                                    <td width="45" align="center" valign="top" bgcolor="#666666" class="small_body_wonb">CAD</td>
+                                    <td width="50" align="center" valign="top" bgcolor="#666666" class="small_body_wonb">instr.</td>
+                                    <td width="50" align="center" valign="top" bgcolor="#666666" class="small_body_wonb">label</td>
+                                    <td width="50" align="center" valign="top" bgcolor="#666666" class="small_body_wonb">pkg.</td>
+                                    <td width="50" align="right" bgcolor="#666666" class="small_body_wonb">
+                                        data<br />
+                                        sheet
+                                    </td>@*
+                            <td width="65" align="right" bgcolor="#666666" class="small_body_wonb">approval<br />
+                                status</td>
+                            <td width="20" align="right" bgcolor="#666666" class="small_body_wonb"></td>*@
+                                </tr>
+                                <tbody>
+                                    <tr ng-repeat="p in Products" ng-class-odd="'odd'" ng-class-even="'even'">
+                                        <td> <input type="checkbox" ng-model="p.selected" name="chkProduct" ng-value="p.cprod_id" /></td>
+                                        <td ng-class="GetProductTdClass(p)">
+                                            <a target="_parent" ng-href="{{GetProductUrl(p)}}" ng-style="GetProductLinkStyle(p)">
+                                                <span>{{p.cprod_code1.substring(0, 13)}}</span>
+                                            </a>
+                                        </td>
+                                        <td width="210" height="16" align="left" ng-class="GetProductTdClass(p)">
+                                            <span>{{p.cprod_name.substring(0, 55)}}</span>
+                                        </td>
+                                        <td width="60" height="16" align="center" ng-class="GetProductTdClass(p)">
+                                            <a ng-href="{{GetTechPdfLink(p, '')}}" target="_blank"><img src="/images/small/pdf_icon.gif" width="19" height="18" border="0" ng-show="GetTechPdfLink(p, '')" /></a>
+                                        </td>
+                                        <td width="60" height="16" align="center" ng-class="GetProductTdClass(p)">
+                                            <a ng-href="{{GetTechPdfLink(p, '_det')}}" target="_blank"><img src="/images/small/pdf_icon.gif" width="19" height="18" border="0" ng-show="GetTechPdfLink(p, '')" /></a>
+                                        </td>
+                                        @*<td width="60" height="16" align="center" data-bind="attr: { class: $root.GetProductTdClass($data) }">
+                                    <a data-bind="attr: { href: $root.GetTechPdfLink($data, '_det') }"><img src="/images/small/pdf_icon.gif" width="19" height="18" border="0" data-bind="    visible: $root.GetTechPdfLink($data, '_det') " /></a>
+                                </td>*@
+                                        <td width="60" height="16" align="center" ng-class="GetProductTdClass(p)">
+                                            <a ng-href="{{GetDataPdfLink(p.hi_res)}}" target="_blank">
+                                                <img src="~/images/small/pdf_icon.gif" width="19" height="18" border="0" ng-show="p.hi_res != ''" ng-attr-title="{{p.hi_res}}"/>
+                                            </a>
+                                        </td>
+                                        <td width="60" height="16" align="center" ng-class="GetProductTdClass(p)">
+                                            <a ng-href="{{GetDataPdfLink(p.cprod_dwg, p.mastProduct_prod_image3)}}"  >
+                                                <img src="/images/small/technical.jpg" width="19" height="18" border="0" ng-show="GetDataPdfLink(p.cprod_dwg, p.mastProduct_prod_image3)" />
+                                            </a>
+                                        </td>
+                                        <td width="60" height="16" align="center" ng-class="GetProductTdClass(p)">
+                                            <a ng-href="{{GetDataPdfLink(p.cprod_instructions, p.mastProduct_prod_instructions)}}" target="_blank">
+                                                <img src="/images/small/pdf_icon.gif" width="19" height="18" border="0" ng-show="GetDataPdfLink(p.cprod_instructions, p.mastProduct_prod_instructions)" />
+                                            </a>
+                                        </td>
+                                        <td width="60" height="16" align="center" ng-class="GetProductTdClass(p)">
+                                            <a ng-href="{{GetDataPdfLink(p.cprod_label, p.mastProduct_prod_image4)}}" target="_blank">
+                                                <img src="/images/small/pdf_icon.gif" width="19" height="18" border="0" ng-show="GetDataPdfLink(p.cprod_label, p.mastProduct_prod_image4)" />
+                                            </a>
+                                        </td>
+                                        <td width="60" height="16" align="center" ng-class="GetProductTdClass(p)">
+                                            <a ng-href="{{GetDataPdfLink(p.cprod_packaging, p.mastProduct_prod_image5)}}" target="_blank">
+                                                <img src="/images/small/pdf_icon.gif" width="19" height="18" border="0" ng-show="GetDataPdfLink(p.cprod_packaging, p.mastProduct_prod_image5)" />
+                                            </a>
+                                        </td>
+
+                                        <td width="60" height="16" align="center" ng-class="GetProductTdClass(p)">
+                                            <a ng-href="{{GetDataSheetLink(p)}}" target="_blank"><img src="/images/small/pdf_icon.gif" width="19" height="18" border="0" ng-show="GetDataSheetLink(p)" /></a>
+                                            <span ng-show="GetDataSheetLink(p).length == 0">TBC</span>
+                                        </td>
+
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/utils")
+
+    @Html.GlobalizationScript()
+    <script type="text/javascript">
+    var asproot = '@Settings.Default.aspsite_root';
+    var model = @Html.Raw(WebUtilities.JsonSerialize(Model));
+
+    model.Products.forEach(function(item) {
+        item.selected = false;
+    });
+
+    model.CheckDocTypes = [];
+    model.DocTypes.forEach(function(item) {
+        model.CheckDocTypes.push(new CheckItem(item.id, item.name, true));
+    });
+
+    var app = angular.module('app', ['ngSanitize']);
+
+    app.controller('controller', [
+        '$scope', '$http', '$timeout',
+        function($scope, $http) {
+
+            $scope.Products = model.Products;
+            $scope.CheckDocTypes = model.CheckDocTypes;
+            $scope.DocTypes = model.DocTypes;
+            $scope.allTypes = true;
+            $scope.allProducts = false;
+            $scope.show = false;
+
+            $scope.CheckAllTypes = function() {
+                $scope.CheckDocTypes.forEach(function(item) {
+                    item.selected = $scope.allTypes;
+                });
+            }
+
+            $scope.CheckAllProducts = function() {
+                $scope.Products.forEach(function(item) {
+                    item.selected = $scope.allProducts;
+                });
+            }
+
+            $scope.Download = function() {
+                var prodids = $scope.CollectProdIds();
+                var docTypesId = $scope.CollectDocTypesIds();
+                if (prodids.length > 0 && docTypesId.length > 0) {
+                    //$http.post('@Url.Action("Download")', { prodIds: prodids, docTypeIds: docTypesId });
+                    downloadURL($.validator.format('@Url.Action("Download")/?prodIds={0}&docTypeIds={1}', prodids, docTypesId));
+                } else {
+                    alert("no product or document type selected");
+                }
+            };
+
+            $scope.CollectProdIds = function() {
+                return _.map(_.filter($scope.Products, { selected: true }), 'cprod_id').join(',');
+
+                /*return $.map(ko.utils.arrayFilter(self.Products(), function (item) { return item.selected(); }), function (elem) {
+                    return elem.cprod_id();
+                }).join(',');*/
+            };
+            $scope.CollectDocTypesIds = function() {
+                return _.map(_.filter($scope.CheckDocTypes, { selected: true }), 'id').join(',');
+                /*return $.map(ko.utils.arrayFilter(self.CheckDocTypes, function (item) { return item.selected(); }), function (elem) {
+                    return elem.id();
+                }).join(',');*/
+            };
+            $scope.GetProductLinkStyle = function(prod) {
+                if (prod.cprod_status == 'D')
+                    return 'color:#999';
+                return '';
+            };
+            $scope.GetProductUrl = function(p) {
+                return $.validator.format('{0}/_client_application/client_product_detail.asp?cprod_id={1}', asproot, p.cprod_id);
+            }
+            $scope.GetProductTdClass = function(prod) {
+                if (prod.cprod_status == 'D')
+                    return 'small_body_faint';
+                return 'small_body';
+            };
+            $scope.GetTechPdfLink = function(prod, suffix) {
+                var showLink = (prod.cprod_dwg != null && prod.cprod_dwg.length > 0) || (prod.mastProduct_prod_image3 != null && prod.mastProduct_prod_image3.length > 0);
+                if (showLink)
+                    return $.validator.format('{0}/_client_application/client_PR_4_tech_pdf{4}.asp?prod_id={1}&cprod_code={2}&loc1={3}', asproot, prod.cprod_id, prod.cprod_code1, prod.cprod_user, suffix);
+                return '';
+            };
+            $scope.GetDataPdfLink = function(field1, field2) {
+                var field = '';
+                if (field1 != null) {
+                    if (field1.length > 0)
+                        field = field1;
+                    else {
+                        if (field2 != null) {
+                            if (field2.length > 0)
+                                field = field2;
+                        }
+                    }
+                }
+                return field;
+            };
+
+            $scope.GetDataSheetLink = function(prod) {
+                //if (prod.mastProduct_prod_SpecCount() > 0)
+                return $.validator.format('{0}/_client_application/client_PR_technical.asp?prod_id={1}&cusid={2}', asproot, prod.cprod_id, prod.cprod_user);
+                //return '';
+            };
+
+            angular.element(document).ready(function () {
+                $('#wait').hide();
+                $('#container').show();
+            });
+
+            
+        }
+    ]);
+
+
+    $(function() {
+
+    });
+
+
+    function CheckItem(id, value, selected) {
+        this.id = id;
+        this.value = value;
+        this.selected = selected;
+    }
+
+    var downloadURL = function downloadURL(url) {
+        var hiddenIFrameID = 'hiddenDownloader',
+            iframe = document.getElementById(hiddenIFrameID);
+        if (iframe === null) {
+            iframe = document.createElement('iframe');
+            iframe.id = hiddenIFrameID;
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+        }
+        iframe.src = url;
+    };
+    </script>
+}
+
+
+@*<iframe id="hiddenFrame" style="display: none" src="/"></iframe>*@
+</body>
+</html>

@@ -1,0 +1,1 @@
+﻿var adminApp = angular.module('UserAdministrationApp', ['ui.bootstrap', 'treeGrid']);

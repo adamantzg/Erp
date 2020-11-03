@@ -1,0 +1,68 @@
+﻿@model BBLRequests
+@{
+    Layout = null;
+    ViewBag.Title = "BBLFinancialDetailRequest";
+}
+
+<span style="color:#00ade6;font-size:18px" >BBL Financial Detail Request</span>
+<br />
+<br/>
+
+<span>
+Below are the details of people who have requested BBL financial details in the last month.
+    </span>
+<br />
+<br />
+<table cellpadding="3" cellspacing="0">
+    <tr>
+        <th style="border-bottom:1px  solid #00ade6"></th>
+        <th style="font-weight:bold;font-size:13px; border-bottom:1px  solid #00ade6">Email</th>
+        <th style="font-weight:bold;font-size:13px;border-bottom:1px  solid #00ade6">Logtime </th>
+        @*<th style="font-weight:bold;font-size:13px;border-bottom:1px  solid #00ade6">Type </th>*@
+        @*<th style="font-weight:bold;font-size:13px;border-bottom:1px  solid #00ade6">Name</th>
+        <th style="font-weight:bold;font-size:13px;border-bottom:1px  solid #00ade6">Company</th>*@
+    </tr>
+
+
+    @{var i = 1;
+      var end = Model.EmailLogs.Count();
+      var border = "border-bottom:1px  solid #00ade6";
+    }
+    @foreach (var m in Model.EmailLogs.OrderBy(o=>o.logtime))
+    {
+        i++;
+        <tr>
+
+            <td style="font-size:14px;background:@(i % 2 == 0 ? " #f4f4f4" : "");@(end==i-1?border:"")">&nbsp;@(i - 1).</td>
+            <td style="font-size:14px; background:@(i % 2 == 0 ? " #f4f4f4" : "");@(end==i-1?border:"")">&nbsp;@m.email</td>
+            <td style="font-size:14px;background:@(i % 2 == 0 ? " #f4f4f4" : "");@(end==i-1?border:"")">&nbsp;@m.logtime.ToString("dd-MMM-yy")&nbsp;&nbsp;</td>
+            @*@if (m.type != null)
+            {
+                <td style="font-size:14px;background:@(i % 2 == 0 ? " #f4f4f4" : "");@(end==i-1?border:"")">&nbsp;&nbsp;@m.type&nbsp;&nbsp;</td>
+            }
+            else
+            {
+                <td style="font-size:14px;background:@(i % 2 == 0 ? " #f4f4f4" : "");@(end==i-1?border:"")">&nbsp;&nbsp;-&nbsp;&nbsp;</td>
+            }*@
+            @*@if (!string.IsNullOrEmpty(m.name))
+            {
+                <td style="font-size:14px;background:@(i % 2 == 0 ? " #f4f4f4" : "");@(end==i-1?border:"")">&nbsp;&nbsp;@m.name&nbsp;&nbsp;</td>
+            }
+            else
+            {
+                <td style="font-size:14px;background:@(i % 2 == 0 ? " #f4f4f4" : "");@(end==i-1?border:"")">&nbsp;&nbsp;-&nbsp;&nbsp;</td>
+            }
+            @if (!string.IsNullOrEmpty(m.company))
+            {
+                <td style="text-align:center;font-size:14px;background:@(i % 2 == 0 ? " #f4f4f4" : "");@(end==i-1?border:"")">&nbsp;&nbsp;@m.company&nbsp;&nbsp;</td>
+            }
+            else
+            {
+                <td style="text-align:center;font-size:14px;background:@(i % 2 == 0 ? " #f4f4f4" : "");@(end==i-1?border:"")">&nbsp;&nbsp;-&nbsp;&nbsp;</td>
+            }*@
+        </tr>
+    }
+</table>
+
+
+      

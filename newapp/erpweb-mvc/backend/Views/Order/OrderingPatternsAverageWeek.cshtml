@@ -1,0 +1,489 @@
+﻿@{
+    ViewBag.Title = "OrderingPatternsAverageWeek";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+@model OrderingPatternsAverage
+@section head{
+    <link href="~/Content/bootsrapfix.css" rel="stylesheet" />
+
+
+    <style>
+       thead th{
+           text-align:center;
+       }
+       tbody td{
+           text-align:center;
+       }
+       .header-first-col{
+           text-align:left;
+           padding-left:10px;
+       }
+       .body-first-col{
+           text-align:left;
+           width:100px;
+           
+       }
+
+    </style>
+}
+@{
+    //var temp = (from order in Model.OrderingPatterns
+    //         group order by order.customer_code into groupOrder
+    //         select new Order_line_detail2_v6()
+    //         {
+    //             customer_code = groupOrder.First().customer_code,
+    //             counted_orders = (int)groupOrder.Average(c=>c.counted_orders)
+    //         }).ToList();
+
+    var fromOneMonth=DateTime.Today.AddMonths(-1);
+    var fromThreeMonth = DateTime.Today.AddMonths(-3);
+    var customer = Model.OrderingPatterns.GroupBy(c => c.customer_code).ToList();
+    var customerOneMonth = Model.OrderingPatterns.Where(c => c.linedate > fromOneMonth).OrderBy(c=>c.customer_code).GroupBy(c=>c.customer_code).ToList(); //.GroupBy(c => c.customer_code).ToList();
+    var customerThreeMonth = Model.OrderingPatterns.Where(c => c.linedate > fromThreeMonth).OrderBy(c=>c.customer_code).GroupBy(c => c.customer_code).ToList(); 
+
+}
+<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<br />
+<span class="h3">Ordering Patterns</span>
+<br />
+<br />
+<div class="content-framework" ng-app="ordering">
+    <div>
+    @* prva verzija -  nisam zakomentiro nego se neprikazuje *@
+    @*<table ng-controller="oCtrl" class="table table-striped" style="width:100%" ng-show="false">
+        <thead>
+
+        <th ng-click="isCollapsed = !isCollapsed" style="cursor:pointer">Client</th>
+        <th>MON</th>
+        <th>TUE</th>
+        <th>WED</th>
+        <th>THU </th>
+        <th>FRI</th>
+        <th>SAT</th>
+        <th>SUN</th>
+        </thead>
+        <tbody>
+
+            @foreach (var m in customer)
+            {
+            <tr>
+
+                <td style="width:100px">
+                    <strong>@m.First().customer_code&nbsp;</strong>
+                    <div class='fx-bounce-normal'
+                         ng-show="isCollapsed"
+                         style="float:right;margin-right:20px"><a href="#">&nbsp;@m.Count()</a></div>
+                    </td>
+                    <td style="width:100px">
+                        @foreach (var n in m.GroupBy(c => c.week_day).Where(n => n.First().week_day == "Monday").ToList())
+                            {
+
+                        <span>
+                            @(((double)n.Count() / 52).ToString("N2"))
+                        </span>
+                            }
+                        <span>&nbsp;&nbsp; @(m.Count(c => c.week_day == "Monday") < 1 ? "-" : "")</span>
+                    </td>
+                    <td style="width:100px">
+
+                        @foreach (var n in m.GroupBy(c => c.week_day).Where(n => n.First().week_day == "Tuesday").ToList())
+                            {
+                        <span>
+                            @(((double)n.Count() / 52).ToString("N2"))
+                        </span>
+                            }
+                        <span>&nbsp;&nbsp; @(m.Count(c => c.week_day == "Tuesday") < 1 ? "-" : "")</span>
+                    </td>
+                    <td style="width:100px">
+
+                        @foreach (var n in m.GroupBy(c => c.week_day).Where(n => n.First().week_day == "Wednesday").ToList())
+                            {
+                        <span>
+                            @(((double)n.Count() / 52).ToString("N2"))
+
+                        </span>
+                            }
+                        <span>&nbsp;&nbsp; @(m.Count(c => c.week_day == "Wednesday") < 1 ? "-" : "")</span>
+                    </td>
+                    <td style="width:100px">
+
+                        @foreach (var n in m.GroupBy(n => n.week_day).Where(n => n.First().week_day == "Thursday").ToList())
+                            {
+                        <span>@(((double)n.Count() / 52).ToString("N2"))</span>
+                            }
+                        <span>&nbsp;&nbsp; @(m.Count(c => c.week_day == "Thursday") < 1 ? "-" : "")</span>
+                    </td>
+                    <td style="width:100px">
+
+                        @foreach (var n in m.GroupBy(c => c.week_day).Where(n => n.First().week_day == "Friday").ToList())
+                        {
+
+                        <span>
+                            @(((double)n.Count() / 52).ToString("N2"))
+                        </span>
+
+                        }
+                        <span>&nbsp;&nbsp; @(m.Count(c => c.week_day == "Friday") < 1 ? "-" : "")</span>
+                    </td>
+                    <td style="width:100px">
+                        @foreach (var n in m.Where(n => n.week_day == "Saturday").GroupBy(n=>n.week_day).ToList())
+                        {
+
+
+                        <span>
+                            @(((double)n.Count() / 52).ToString("N2"))
+                        </span>
+                        }
+                        <span>&nbsp;&nbsp; @(m.Count(c=>c.week_day == "Saturday")<1?"-":"")</span>
+                    </td>
+                    <td style="width:100px">
+                        @foreach (var n in m.Where(n => n.week_day == "Sunday").GroupBy(c => c.week_day).ToList())
+                            {
+                        @(((double)n.Count() / 52).ToString("N2"))
+                            }
+                        <span>&nbsp;&nbsp; @(m.Count(c => c.week_day == "Sunday") < 1 ? "-" : "")</span>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>*@
+        </div>
+    @* druga verzija za jedan mjesec *@
+    @* u modelu je pospremljena zadnja godina koja teče od jučer *@
+    <div>
+        <div class="h4">Last 30 days</div>
+        <table ng-controller="oCtrl" class="table table-striped" style="width:100%">
+        <thead>
+            <th class="header-first-col" >&nbsp;Client</th>
+            <th>MON</th>
+            <th>TUE</th>
+            <th>WED</th>
+            <th>THU </th>
+            <th>FRI</th>
+            <th>SAT</th>
+            <th>SUN</th>
+        <th>Total</th>
+        </thead>
+            <tbody>
+                @{
+                    int colMon = 0, colTue = 0, colWed = 0, colThu = 0, colFri = 0, colSat = 0, colSun = 0, colSUM = 0;
+
+                }
+                @foreach (var m in customerOneMonth)
+                {
+                    <tr>
+
+                        <td class="body-first-col">
+                            &nbsp;
+                            <strong>@m.First().customer_code&nbsp;</strong>
+                            @*<div class='fx-bounce-normal'
+                        ng-show="isCollapsed"
+                        style="float:right;margin-right:20px"><a href="#">&nbsp;@m.Count()</a></div>*@
+                        </td>
+                        <td style="width:100px;text-align:center">
+
+                            @foreach (var n in m.Where(n => n.week_day == "Monday").GroupBy(c => c.week_day).ToList())
+                            {
+                            <span>
+                                @n.Count()
+                                @*@(((double)n.Count() / 52).ToString("N2"))*@
+                            </span>
+                                colMon += n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Monday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+
+                            @foreach (var n in m.Where(n => n.week_day == "Tuesday").GroupBy(c => c.week_day).ToList())
+                            {
+                            <span>
+                                @n.Count()
+                                @*@(((double)n.Count() / 52).ToString("N2"))*@
+                            </span>
+                                colTue += n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Tuesday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+
+                            @foreach (var n in m.Where(n => n.week_day == "Wednesday").GroupBy(c => c.week_day).ToList())
+                            {
+                            <span>
+                                @n.Count()
+                                @*@(((double)n.Count() / 52).ToString("N2"))*@
+                            </span>
+                                colWed += n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Wednesday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+
+                            @foreach (var n in m.Where(n => n.week_day == "Thursday").GroupBy(n => n.week_day).ToList())
+                            {
+                            <span>@n.Count()</span>
+                            @*<span>@(((double)n.Count() / 52).ToString("N2"))</span>*@
+                                colThu += n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Thursday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+
+                            @foreach (var n in m.Where(n => n.week_day == "Friday").GroupBy(c => c.week_day).ToList())
+                            {
+
+                            <span>
+                                @n.Count()
+                                @* @(((double)n.Count() / 52).ToString("N2"))*@
+                            </span>
+                                colFri += n.Count();
+
+                            }
+                            <span>@(m.Count(c => c.week_day == "Friday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+                            @foreach (var n in m.Where(n => n.week_day == "Saturday").GroupBy(n => n.week_day).ToList())
+                            {
+
+
+                            <span>
+                                @n.Count()
+                                @*@(((double)n.Count() / 52).ToString("N2"))*@
+                            </span>
+                                colSat += n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Saturday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+                            @foreach (var n in m.Where(n => n.week_day == "Sunday").GroupBy(c => c.week_day).ToList())
+                            {
+                            @n.Count()
+                            @*@(((double)n.Count() / 52).ToString("N2"))*@
+                                colSun = n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Sunday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td>
+                            @m.Count()
+                            @{colSUM += m.Count();}
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td class="body-first-col">&nbsp;&nbsp;<strong>Total</strong> </td>
+                    <td>@colMon</td>
+                    <td>@colTue</td>
+                    <td>@colWed</td>
+                    <td>@colThu</td>
+                    <td>@colFri</td>
+                    <td>@colSat</td>
+                    <td>@colSun</td>
+                    <td>@colSUM</td>
+                </tr>
+                <tr>
+                    <td class="body-first-col" style="cursor:pointer" ng-click="isCollapsed = !isCollapsed">&nbsp;<strong> % </strong></td>
+                    <td> @((((double)colMon / colSUM) * 100).ToString("N2"))</td>
+                    <td> @((((double)colTue / colSUM) * 100).ToString("N2"))</td>
+                    <td> @((((double)colWed / colSUM) * 100).ToString("N2"))</td>
+                    <td> @((((double)colThu / colSUM) * 100).ToString("N2"))</td>
+                    <td> @((((double)colFri / colSUM) * 100).ToString("N2"))</td>
+                    <td> @((((double)colSat / colSUM) * 100).ToString("N2"))</td>
+                    <td> @((((double)colSun / colSUM) * 100).ToString("N2"))</td>
+                    <td>
+                        <div ng-show="isCollapsed" class='fx-bounce-normal'>
+                            @((((double)colMon / colSUM) * 100) +
+                                    (((double)colTue / colSUM) * 100) +
+                                    (((double)colWed / colSUM) * 100) +
+                                    (((double)colThu / colSUM) * 100) +
+                                    (((double)colFri / colSUM) * 100) +
+                                    (((double)colSat / colSUM) * 100) +
+                                    (((double)colSun / colSUM) * 100)
+                            )%
+                        </div>
+                    </td>
+                </tr>
+           
+        </tbody>
+
+    </table>
+    </div>
+    <div>
+        <br />
+        <div class="h4">Last 3 months </div>
+        <table ng-controller="oCtrl" class="table table-striped" style="width:100%">
+            <thead>
+            <th class="header-first-col">&nbsp;Client</th>
+            <th>MON</th>
+            <th>TUE</th>
+            <th>WED</th>
+            <th>THU </th>
+            <th>FRI</th>
+            <th>SAT</th>
+            <th>SUN</th>
+            <th>Total</th>
+            </thead>
+            <tbody>
+                @{
+                    colMon = colTue = colWed = colThu = colFri = colSat = colSun = colSUM = 0;
+
+                }
+                @foreach (var m in customerThreeMonth)
+                {
+                    <tr>
+
+                        <td class="body-first-col">
+                            &nbsp;
+                            <strong>@m.First().customer_code&nbsp;</strong>
+                            @*<div class='fx-bounce-normal'
+                                ng-show="isCollapsed"
+                                style="float:right;margin-right:20px"><a href="#">&nbsp;@m.Count()</a></div>*@
+                        </td>
+                        <td style="width:100px;text-align:center">
+
+                            @foreach (var n in m.Where(n => n.week_day == "Monday").GroupBy(c => c.week_day).ToList())
+                            {
+                                <span>
+                                    @n.Count()
+                                    @*@(((double)n.Count() / 52).ToString("N2"))*@
+                                </span>
+                                colMon += n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Monday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+
+                            @foreach (var n in m.Where(n => n.week_day == "Tuesday").GroupBy(c => c.week_day).ToList())
+                            {
+                                <span>
+                                    @n.Count()
+                                    @*@(((double)n.Count() / 52).ToString("N2"))*@
+                                </span>
+                                colTue += n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Tuesday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+
+                            @foreach (var n in m.Where(n => n.week_day == "Wednesday").GroupBy(c => c.week_day).ToList())
+                            {
+                                <span>
+                                    @n.Count()
+                                    @*@(((double)n.Count() / 52).ToString("N2"))*@
+                                </span>
+                                colWed += n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Wednesday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+
+                            @foreach (var n in m.Where(n => n.week_day == "Thursday").GroupBy(n => n.week_day).ToList())
+                            {
+                                <span>@n.Count()</span>
+                                @*<span>@(((double)n.Count() / 52).ToString("N2"))</span>*@
+                                colThu += n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Thursday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+
+                            @foreach (var n in m.Where(n => n.week_day == "Friday").GroupBy(c => c.week_day).ToList())
+                            {
+
+                                <span>
+                                    @n.Count()
+                                    @* @(((double)n.Count() / 52).ToString("N2"))*@
+                                </span>
+                                colFri += n.Count();
+
+                            }
+                            <span>@(m.Count(c => c.week_day == "Friday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+                            @foreach (var n in m.Where(n => n.week_day == "Saturday").GroupBy(n => n.week_day).ToList())
+                            {
+
+
+                                <span>
+                                    @n.Count()
+                                    @*@(((double)n.Count() / 52).ToString("N2"))*@
+                                </span>
+                                colSat += n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Saturday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td style="width:100px">
+                            @foreach (var n in m.Where(n => n.week_day == "Sunday").GroupBy(c => c.week_day).ToList())
+                            {
+                                @n.Count()
+                                @*@(((double)n.Count() / 52).ToString("N2"))*@
+                                colSun = n.Count();
+                            }
+                            <span>@(m.Count(c => c.week_day == "Sunday") < 1 ? "-" : "")</span>
+                        </td>
+                        <td>
+                            @m.Count()
+                            @{colSUM += m.Count();}
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td class="body-first-col">&nbsp;&nbsp;<strong>Total</strong> </td>
+                    <td>@colMon</td>
+                    <td>@colTue</td>
+                    <td>@colWed</td>
+                    <td>@colThu</td>
+                    <td>@colFri</td>
+                    <td>@colSat</td>
+                    <td>@colSun</td>
+                    <td>@colSUM</td>
+                </tr>
+                <tr>
+                    <td class="body-first-col" style="cursor:pointer" ng-click="isCollapsed = !isCollapsed">&nbsp;<strong> % </strong></td>
+                    <td> @((((double)colMon/colSUM)*100).ToString("N2"))</td>
+                    <td> @((((double)colTue / colSUM) * 100).ToString("N2"))</td>
+                    <td> @((((double)colWed / colSUM) * 100).ToString("N2"))</td>
+                    <td> @((((double)colThu / colSUM) * 100).ToString("N2"))</td>
+                    <td> @((((double)colFri / colSUM) * 100).ToString("N2"))</td>
+                    <td> @((((double)colSat / colSUM) * 100).ToString("N2"))</td>
+                    <td> @((((double)colSun / colSUM) * 100).ToString("N2"))</td>
+                    <td>
+                        <div ng-show="isCollapsed" class='fx-bounce-normal'>
+                            @((((double)colMon / colSUM) * 100) +
+                                    (((double)colTue / colSUM) * 100) +
+                                    (((double)colWed / colSUM) * 100) +
+                                    (((double)colThu / colSUM) * 100) +
+                                    (((double)colFri / colSUM) * 100) +
+                                    (((double)colSat / colSUM) * 100) +
+                                    (((double)colSun / colSUM) * 100)
+                            )%
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/angular.js"></script>
+    @* angular library -  animation *@
+    <script src="~/Scripts/angular-aria.js"></script>
+    <script src="~/Scripts/angular-animate.js"></script>
+    <script src="~/Scripts/GreenSock-JS-master/src/minified/TweenMax.min.js"></script>
+    <script src="~/Scripts/ngFx-master/dist/ngFx.js"></script>
+    <script type="text/javascript">
+        /*fix for footer*/
+        $(document).ready(function () {
+            $("#footer").attr("style", "width:940px");
+        });
+
+        var ordering = angular.module('ordering', ['ngFx', 'ngAnimate']).
+        controller("oCtrl", function ($scope) { });
+
+
+    </script>
+
+
+}

@@ -1,0 +1,336 @@
+﻿@using backend.Controllers
+@model ReportHomeModel
+
+@section head {
+<style type="text/css">
+		body {
+	background: #f5f5f5;
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	font-family: Tahoma, Geneva, sans-serif;
+	background-image: url(/images/diagonales_decalees.png);
+	/*background-repeat: no-repeat;*/
+	background-attachment: fixed;
+	background-position: left top;
+	
+	/**background-position: center;**/
+		}
+		
+img {
+	border: 0px;
+	}
+	
+.container {
+	/*height: 600px;*/
+	
+	width: 1000px;
+	min-height: 500px;
+	background: #fff;
+	overflow: hidden;
+	border: 5px solid #ccc;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	margin: 10px auto;
+	position: relative;
+	}
+	
+.top_menu {
+		background:#666;
+		height: 130px;
+		width: 100%;
+		border-bottom: 10px solid #000;
+}
+
+.logo {
+		height: 80px;
+		width: 100%;
+		float: left;
+		/*background:#999;*/
+}
+
+.logo img {
+		
+		width: 500px;
+		margin: 10px 0 0 250px;
+}
+
+.title {
+		font-size: 22px;
+		margin: 20px 0 0 20px;
+		float: left;
+		border-bottom: 2px solid #3B6F94;
+}
+
+.table1 {
+		float: left;
+		margin: 15px 0 0 20px;
+		font-size: 13px;
+}
+
+.table1_title {
+		font-size: 14px;
+		font-weight: bolder;
+}
+
+.table1_title2 {
+		background: #3B6F94;
+		color: #fff;
+}
+
+.menu {
+		height: 50px;
+		width: 100%;
+		/*background:#555;*/
+		
+		margin: 20px 0 0 310px;
+}
+
+
+.main {
+	width: 980px;
+		
+	margin-left: 10px;
+	float: left;
+	margin-bottom: 20px;
+	font-size:11px;
+	
+	
+	
+}
+
+.simple_input {
+	width: 200px;
+	height: 10px;
+  display: block;
+  padding: 5px;
+  border: 2px solid #3B6F94;
+  border-radius: 3px;
+  color: #333;
+  transition: all 0.3s ease-out;
+}
+
+.simple_input:hover { border-radius: 8px; }
+.simple_input:focus { 
+  outline: none;
+  border-radius: 8px; 
+  border-color: #ccc;
+}
+
+.button {
+		width: 110px;
+		height: 25px;
+		-webkit-border-radius: 2px;
+		-moz-border-radius: 2px;
+		border-radius: 2px;
+		font-size: 12px;
+		text-align: center;
+		color: #fff;
+		background: #3B6F94;
+		float: right;
+		
+}
+
+.button:hover {
+		background: #ccc
+}
+#jumpMenu {
+		min-width: 210px;
+		border: 2px solid #3B6F94;
+		border-radius: 3px;
+}
+
+.logo_rep {
+		width: 100%;
+		float: left; 
+		text-align: center;
+		padding-top: 10px;
+		margin-bottom: 15px;
+}   
+
+.left {
+		float: left;
+		width: 300px;
+		min-height: 350px;
+		border: 2px solid #e4e4e4;
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		margin: 20px 0 10px 15px;
+		
+}
+
+.center {
+		float: left;
+		width: 300px;
+		min-height: 350px;
+		border: 2px solid #e4e4e4;
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		margin: 20px 0 0 15px;
+		
+}
+
+.right {
+		float: left;
+		width: 300px;
+		min-height: 350px;
+		border: 2px solid #e4e4e4;
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		margin: 20px 0 0 15px;
+		
+}
+
+.title_rep {
+		width: 70%;
+		float: left;
+		text-align: center;
+		font-size: 16px;
+		color: #044275;
+		border-bottom: 1px solid #044275;
+		margin: 5px 0 0 50px;
+}
+
+.table_rep {
+		margin: 10px;
+		float: left;
+}
+
+.table_rep_img {
+		width: 100px;
+}
+
+.button_rep {
+		float: left;
+		width: 70px;
+		/*height: 22px;*/
+		text-align: center;
+		text-decoration: none;
+		/*border-bottom: 2px solid #044275;*/
+		/*background:#39F;*/
+		color: #39F;
+		line-height: 22px;
+		-webkit-border-radius: 5px;
+		-moz-border-radius: 5px;
+		border-radius: 5px;
+		font-size: 12px;
+		
+}
+
+.button_rep:hover {
+		color: #666;
+		
+}
+
+.non_brands_link {
+	width: auto;
+	
+	text-decoration: none;
+	color: #39F;
+	font-size: 14px;
+	
+}
+
+.non_brands_link:hover {
+		color: #666;
+}
+		.old_analytics_link {
+			text-decoration:none;
+			font-size:11px;
+			color:#39F;
+		}
+
+.table_rep_1 {
+		margin: 10px;
+		float: left;
+		}
+
+	</style>
+}	
+
+	<div class="container">
+		<div class="logo_rep"><a href="/"><img src="/images/Logo.jpg"/></a></div>
+		
+		<div class="left">
+			<span class="title_rep">BRANDS</span>
+			<table class="table_rep" width="90%" border="0" cellspacing="1" cellpadding="1" style="font-size: 12px">
+				<tr>
+				    
+				    <td >
+				        <table>
+				            <tr>
+				                <td>Weekly e-mail report </td>
+				                <td style="width: 70px"><a target="_blank" class="button_rep" href="@Url.Action("IndexV2", new { from = DateTime.Today.AddDays(0), statsKey = Settings.Default.StatsKey, excludedClients = "184,321", excludedSections = "stock summary,uk claims analysis 6,uk claims analysis 6 brands",brandDeliveriesDateMode = DateMode.FromYearStart, brandShipmentsDateMode = DateMode.All})">UK</a></td>
+				                <td><a target="_blank" class="button_rep" href="@Url.Action("IndexV2", new { from = DateTime.Today.AddDays(-1), statsKey = Settings.Default.StatsKey, countryFilter = CountryFilter.NonUKExcludingAsia, excludedClients = "184,321", excludedSections = "stock summary,uk claims analysis 6,uk claims analysis 6 brands,brochurerequests", useCompanyPriceTypeForSales = true })">NON UK</a></td>
+				            </tr>
+                            <tr>
+                                <td>
+
+                                </td>
+                            </tr>
+				            
+				        </table>
+				    </td>
+					
+				</tr>
+
+                @{ var brandsWithAnalyticsOptions = company.Common.Utilities.GetIdsFromString(Settings.Default.BrandsWithAnalyticsOption); }
+			    @foreach (var brand in Model.Brands)
+				{
+					<tr>
+					   
+						<td style="width:140px" height="60">
+                        <a target="_blank" href="@Url.Action("ForBrand", new {
+                                brand.brand_id,
+                                from = DateTime.Today.AddDays(-1),
+                                statsKey = Settings.Default.StatsKey,
+                                brand_cat = brand.brand_id == 1 ? "92,93,94" : "",
+                                showOptions = brandsWithAnalyticsOptions.Contains(brand.brand_id),
+                                excludedSections = brand.brand_id == Brand.Brandigton ? "brand shipments,sales by category,sales by distributor,stock summary" : "brand shipments,sales by category,stock summary",
+                                includedSections = brand.brand_id == Brand.AutomateBrand ? "option graph" : ""
+                            })">
+							@brand.brandname
+                            @*<img class="table_rep_img" src="@WebUtilities.GetSiteUrl()/Images/@(Path.GetFileNameWithoutExtension(brand.image) + "_narrow.jpg")" />*@
+                        </a></td>
+						@*<td width="70"><a class="button_rep" href="@Url.Action("ForBrand",new {brand.brand_id, from = DateTime.Today.AddDays(-1),statsKey = Settings.Default.StatsKey,brand_cat = brand.brand_id == 1 ? "92,93,94" : "",showOptions = brand.brand_id == Brand.AquaCabinets })">SALES</a></td>
+						<td><a class="button_rep" href="@Url.Action("ProductAnalysis", brand.brand_id == 1 ? (object) new {brand.brand_id, showOptions = false, brand_cat="92,93,94"} : new { brand.brand_id, showOptions = brand.brand_id == 3 })">PRODUCTS</a></td>*@
+					</tr>
+                    
+				}
+                
+			   
+			</table>
+
+			
+		</div> 
+	   
+	   
+	   
+	   <div class="center">
+			<span class="title_rep">MANUFACTURERS</span>
+			
+		   <table class="table_rep_1" width="90%" border="0" cellspacing="1" cellpadding="1">
+			  
+			   @foreach (var line in Model.FactoriesLines.OrderByDescending(a=>a.Suma))
+			   {
+				   <tr>
+					   <td height="25"><a target="_blank" class="non_brands_link" href="@Url.Action("ForFactory",new {factoryIdstring=line.IdFactory,statsKey=Settings.Default.StatsKey.ToString()})">
+										   @line.Name
+									   </a>
+						   
+					   </td>
+				   </tr>
+			   }
+			   
+			   
+		   </table>
+			
+			
+	   </div>
+	
+	</div><!--container-->

@@ -1,0 +1,234 @@
+﻿@model backend.Models.DistributorBrandSalesModel
+@using company.Common
+
+
+@{ 
+    var sortedBrands = Model.Brands.OrderBy(b => b.brandname).ToList();
+    var sortedDistributors = Model.Distributors.OrderBy(d => d.reporting_name).ToList();
+    var prevYear = Model.Sales.Count > 0 ? new Month21(Model.Sales.Select(s => s.month21).Min()).Date.Year : DateTime.Now.Year - 1;
+    var lastYear = Model.Sales.Count > 0 ? new Month21(Model.Sales.Select(s=> s.month21).Max()).Date.Year : DateTime.Now.Year;
+    var prevYMonth21 = Model.ForMonth - 12;
+    var prevYStartMonth21 = Month21.FromDate(new DateTime(prevYear, 1, 1));
+    var thisYStartMonth21 = Month21.FromDate(new DateTime(lastYear, 1, 1));
+    var sales = Model.Sales.Where(s => s.value_type == DistributorSalesValueType.Sales).ToList();
+    var stock = Model.Sales.Where(s => s.value_type == DistributorSalesValueType.Stock).ToList();
+    double? salesPrev, salesCurr, sumSalesPrev , sumSalesCurr ;
+
+}
+@functions {
+    public string FormatValue(double? value, bool? inThousands = null)
+    {
+        if (inThousands == null)
+            inThousands = Model.SalesInThousands;
+        return (value/(inThousands == true ? 1000 : 1)).ToString("N0");
+    }
+
+    public string DisplayPercent(double? prevValue, double? currValue)
+    {
+        if (prevValue == 0)
+            return string.Empty;
+        return ((currValue - prevValue)/prevValue*100).ToString("N0");
+    }
+
+}
+<!-- Previous month table-->
+<table class="salestable">
+    <thead>
+        <tr>
+            <td rowspan="3">Previous month</td>
+            @foreach (var d in sortedDistributors) {
+                <td  colspan="3">@d.reporting_name</td>
+            }
+            <td  colspan="3">Overall</td>
+        </tr>
+        <tr>
+            @foreach(var d in sortedDistributors) {
+                <td >@prevYear</td>
+                <td >@lastYear</td>
+                <td >% =/-</td>
+            }
+            <td >@prevYear</td>
+            <td >@lastYear</td>
+            <td >% =/-</td>
+        </tr>
+        <tr>
+            @foreach(var d in sortedDistributors) {
+                <td>000s GBP</td>
+                <td>000s GBP</td>                
+                <td></td>
+            }
+            <td>000s GBP</td>
+            <td>000s GBP</td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var b in sortedBrands) {
+            sumSalesPrev = sumSalesCurr = 0;
+            <tr>
+                <td>
+                    @b.brandname
+                </td>
+                @foreach (var d in sortedDistributors) {
+                    salesPrev = sales.Where(s => s.distributor_id == d.user_id && s.brand_id == b.brand_id && s.month21 == prevYMonth21).Sum(s => s.value);
+                    salesCurr = sales.Where(s => s.distributor_id == d.user_id && s.brand_id == b.brand_id && s.month21 == Model.ForMonth).Sum(s => s.value);
+                    sumSalesPrev += salesPrev;
+                    sumSalesCurr += salesCurr;
+                    <td class="number">@FormatValue(salesPrev)</td>
+                    <td class="number">@FormatValue(salesCurr)</td>
+                    <td class="number">@DisplayPercent(salesPrev, salesCurr)</td>
+                }                
+                <td class="number">@FormatValue(sumSalesPrev)</td>
+                <td class="number">@FormatValue(sumSalesCurr)</td>
+                <td class="number">@DisplayPercent(sumSalesPrev, sumSalesCurr)</td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            @{ 
+                sumSalesPrev = sumSalesCurr = 0;
+            }
+            <td >TOTAL</td>
+            @foreach (var d in sortedDistributors) {
+                salesPrev = sales.Where(s => s.distributor_id == d.user_id && s.month21 == prevYMonth21).Sum(s => s.value);
+                salesCurr = sales.Where(s => s.distributor_id == d.user_id && s.month21 == Model.ForMonth).Sum(s => s.value);
+                sumSalesPrev += salesPrev;
+                sumSalesCurr += salesCurr;
+                <td class="number">@FormatValue(salesPrev)</td>
+                <td class="number">@FormatValue(salesCurr)</td>
+                <td class="number">@DisplayPercent(salesPrev, salesCurr)</td>
+            }
+            <td class="number">@FormatValue(sumSalesPrev)</td>
+            <td class="number">@FormatValue(sumSalesCurr)</td>
+            <td class="number">@DisplayPercent(sumSalesPrev, sumSalesCurr)</td>
+        </tr>
+    </tfoot>
+</table>
+<br />
+<!-- YTD month table-->
+<table class="salestable">
+    <thead>
+        <tr>
+            <td rowspan="3">YTD</td>
+            @foreach (var d in sortedDistributors) {
+                <td  colspan="3">@d.reporting_name</td>
+            }
+            <td  colspan="3">Overall</td>
+        </tr>
+        <tr>
+            @foreach(var d in sortedDistributors) {
+                <td >@prevYear</td>
+                <td >@lastYear</td>
+                <td >% =/-</td>
+            }
+            <td >@prevYear</td>
+            <td >@lastYear</td>
+            <td >% =/-</td>
+        </tr>
+        <tr>
+            @foreach(var d in sortedDistributors) {
+                <td>000s GBP</td>
+                <td>000s GBP</td>                
+                <td></td>
+            }
+            <td>000s GBP</td>
+            <td>000s GBP</td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var b in sortedBrands) {
+            sumSalesPrev = sumSalesCurr = 0;
+            <tr>
+                <td>
+                    @b.brandname
+                </td>
+                @foreach (var d in sortedDistributors) {
+                    salesPrev = sales.Where(s => s.distributor_id == d.user_id && s.brand_id == b.brand_id && s.month21.Between(prevYStartMonth21.Value,prevYMonth21.Value)).Sum(s => s.value);
+                    salesCurr = sales.Where(s => s.distributor_id == d.user_id && s.brand_id == b.brand_id && s.month21.Between(thisYStartMonth21.Value, Model.ForMonth.Value)).Sum(s => s.value);
+                    sumSalesPrev += salesPrev;
+                    sumSalesCurr += salesCurr;
+                    <td class="number">@FormatValue(salesPrev)</td>
+                    <td class="number">@FormatValue(salesCurr)</td>
+                    <td class="number">@DisplayPercent(salesPrev, salesCurr)</td>
+                }                
+                <td class="number">@FormatValue(sumSalesPrev)</td>
+                <td class="number">@FormatValue(sumSalesCurr)</td>
+                <td class="number">@DisplayPercent(sumSalesPrev, sumSalesCurr)</td>
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            @{ 
+                sumSalesPrev = sumSalesCurr = 0;
+            }
+            <td >TOTAL</td>
+            @foreach (var d in sortedDistributors) {
+                salesPrev = sales.Where(s => s.distributor_id == d.user_id && s.month21.Between(prevYStartMonth21.Value, prevYMonth21.Value)).Sum(s => s.value);
+                salesCurr = sales.Where(s => s.distributor_id == d.user_id && s.month21.Between(thisYStartMonth21.Value, Model.ForMonth.Value)).Sum(s => s.value);
+                sumSalesPrev += salesPrev;
+                sumSalesCurr += salesCurr;
+                <td class="number">@FormatValue(salesPrev)</td>
+                <td class="number">@FormatValue(salesCurr)</td>
+                <td class="number">@DisplayPercent(salesPrev, salesCurr)</td>
+            }
+            <td class="number">@FormatValue(sumSalesPrev)</td>
+            <td class="number">@FormatValue(sumSalesCurr)</td>
+            <td class="number">@DisplayPercent(sumSalesPrev, sumSalesCurr)</td>
+        </tr>
+    </tfoot>
+</table>
+
+<br />
+<!-- stock table-->
+<table class="salestable">
+    <thead>
+        <tr>
+            <td>Stock</td>
+            @foreach (var d in sortedDistributors) {
+                <td>@d.reporting_name</td>
+            }
+            <td  colspan="3">Overall</td>
+        </tr>
+        
+    </thead>
+    <tbody>
+        @{ 
+            double? lastStockBrand = 0;
+            var distStockTotals = sortedDistributors.ToDictionary(d => d.user_id, d=> (double?) 0.0);
+        }
+        @foreach (var b in sortedBrands) {
+            lastStockBrand = 0;
+            <tr>
+                <td>
+                    @b.brandname
+                </td>
+                @foreach (var d in sortedDistributors) {
+                    var stockBrand = stock.Where(s => s.distributor_id == d.user_id && s.brand_id == b.brand_id).OrderByDescending(s=>s.month21).FirstOrDefault()?.value;
+                    distStockTotals[d.user_id] += stockBrand;
+                    lastStockBrand += stockBrand;
+                    <td class="number">@FormatValue(stockBrand,false)</td>                    
+                }                
+                <td class="number">@FormatValue(lastStockBrand,false)</td>
+                
+            </tr>
+        }
+    </tbody>
+    <tfoot>
+        <tr>
+            @{ 
+                lastStockBrand = 0;
+            }
+            <td >TOTAL</td>
+            @foreach (var d in sortedDistributors) {
+                var stockBrand = distStockTotals[d.user_id];
+
+                lastStockBrand += stockBrand;
+                <td class="number">@FormatValue(stockBrand,false)</td>
+            }
+            <td class="number">@FormatValue(lastStockBrand,false)</td>
+        </tr>
+    </tfoot>
+</table>

@@ -1,0 +1,2 @@
+﻿@model LinkButtonModel
+<input type="button" class="@Model.CssClass" value="@Model.Text" onclick="location.href='@Model.NavigateUrl'" @(Model.TabIndex >=0 ? Html.Raw(string.Format("tabindex=\"{0}\"", Model.TabIndex)) : Html.Raw("")) />

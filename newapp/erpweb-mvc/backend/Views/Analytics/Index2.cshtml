@@ -1,0 +1,256 @@
+﻿@{
+    Layout = null;
+}
+@model AnalyticsModel
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index2</title>
+            <style type="text/css">
+
+
+body {
+	font-family:Arial, Helvetica, sans-serif;
+	margin: 0; /* it's good practice to zero the margin and padding of the body element to account for differing browser defaults */
+	padding: 0;
+	text-align: left; /* this centers the container in IE 5* browsers. The text is then set to the left aligned default in the #container selector */
+    position: relative;
+    
+}
+
+.oneColFixCtrHdr #container {
+	width: 980px;  /* using 20px less than a full 800px width allows for browser chrome and avoids a horizontal scroll bar */
+	background: #FFFFFF;
+	margin: 0 auto; /* the auto margins (in conjunction with a width) center the page */
+	border: 1px solid #000000;
+	text-align: left; /* this overrides the text-align: center on the body element. */
+	padding-bottom:18px;
+}
+
+.oneColFixCtrHdr #mainContent {
+	padding: 0 20px; /* remember that padding is the space inside the div box and margin is the space outside the div box */
+	background: #FFFFFF;
+	text-align: left;
+	height: 1400px;
+	overflow: visible;
+	position:relative;
+}
+
+ul {
+	font-family: Arial, Helvetica, sans-serif;
+	margin:4px;
+	padding:0px;
+	padding-left:12px;
+}
+
+li { list-style:circle; 
+list-style-type: circle;
+}
+
+.main_header_section {
+	width:896px; 
+/*	background-color:#EAF5FD; */
+	/*height:35px;*/ 
+	padding-left:2px; 
+	font-family:Arial, Helvetica, sans-serif; 
+	color:#000; 
+	font-size:30px;
+	border-top:none ;
+    border-right: none;
+    border-left:none;
+    border-bottom:3px #999 solid;
+	
+	margin-bottom:10px;
+	/*float:left;*/
+}
+
+.main_header_number {
+	width:60px; 
+	height:35px; 
+	float:left; 
+	font-size:24px; 
+	color:#999;
+}
+
+.main_header_text {
+	width:836px; 
+	/*height:35px;*/ 
+	float:left; 
+	font-size:30px; 
+	
+}
+
+
+
+.header_section {
+	width:896px; 
+
+	height:auto; 
+	padding-left:2px; 
+	font-family:Arial, Helvetica, sans-serif; 
+	color:#000; 
+	font-size:24px;
+}
+
+.header_number {
+	width:60px;
+	/*height:45px;*/
+	float:left;
+	font-size:24px;
+	color:#999;
+}
+
+.header_title {
+	/*width:836px;
+	height:auto;
+	float:left;*/
+	font-size:18px;
+}
+
+.sub_title {
+	/*width:384px;
+	height:auto;
+	float:left;*/
+	text-align:center;
+	font-size:12px;
+	font-weight:bold;
+}
+
+.sub_title2 {
+	/*width:444px;
+	height:auto;
+	float:left;*/
+	text-align:center;
+	font-size:12px;
+	font-weight:bold;
+}
+
+.big_sub_title {
+	width:900px;
+	height:auto;
+	/*float:left;*/
+	text-align:left;
+	font-size:12px;
+	font-weight:bold;
+}
+
+
+.graph_footer {
+	width:900px;
+	/*	background-color:#EAF5FD; */
+	height:40px;
+	padding-left:0px;
+	margin-bottom:10px;
+	font-family:Arial, Helvetica, sans-serif;
+	color:#000;
+	font-size:12px;
+	float:left;/*	border-top:1px; border-right:1px; border-left:1px; border-bottom:0px;
+	border-color:#CCC;
+	border-style:solid;*/
+}
+
+.footer {
+	width:900px;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:11px;
+	color:#999;
+	/*position:absolute;
+	bottom:0;*/
+	height:18px;
+	left:20px;
+	border-top:1px; border-top-color:#333; border-top-style:solid;
+}
+
+.header_notes {
+	/*width:836px;
+	height:auto;
+	float:left;*/
+	font-size:12px;
+	color:#666;
+}
+
+.normal_body {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:12px;
+	color:#333;
+}
+.summary {
+    background-color: #CCCCCC;
+    width:900px;
+    border-width: 0;
+    font-size:14px; 
+    font-weight:bold; 
+    border:1px; 
+    border-style:solid;
+     border-color:#333;
+}
+
+.image {
+    width: 900px
+}
+.clienttable_header {
+    background-color: #B9C9FE; 
+    color:#4033AC
+}
+.clienttable_footer {
+    background-color: #CCC; 
+    color:#4033AC
+}
+
+.clienttable {
+    width: 900px;
+    border: 0;
+    padding: 3px;
+    border-spacing: 0;
+    font-family:Arial, Helvetica, sans-serif;
+    font-size:11px;
+}
+.producttable {
+    width: 440px;
+    border: 0;
+    padding: 3px;
+    border-spacing: 0;
+    font-family:Arial, Helvetica, sans-serif;
+    font-size:11px;
+}
+.number { text-align: right;}
+.percent { font-size: 14px;font-weight: bold}
+.rightborder {border-right: 1px solid blue}
+.rightbordernumber { border-right: 1px solid blue;text-align: right}
+.bheader {width:42px}
+.fheader {width: 30px}
+.alternaterow {background-color: #DDD}
+
+.top10box { width: 450px; float: left}
+.top10table {
+    width: 430px;
+    border: 0;
+    padding: 3px;
+    border-spacing: 0;
+    font-family:Arial, Helvetica, sans-serif;
+    font-size:11px;
+}
+.table_header
+{
+    text-align: center;
+    font-weight: bold;
+}
+</style>
+
+</head>
+<body>
+    <div>
+        <table class="header_section">
+            <tr>
+                <td class="header_title">Top 10 Selling Products by brand (units) - last 6 months ETD</td>
+            </tr>
+        </table>
+
+        @Html.Partial("_Top10Partial",Model)
+                    
+        <div style="clear:both"></div>
+    </div>
+</body>
+</html>

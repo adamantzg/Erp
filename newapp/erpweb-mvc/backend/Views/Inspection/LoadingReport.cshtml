@@ -1,0 +1,481 @@
+﻿@model InspectionReportModel
+
+@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width" />
+		<title>LoadingReport</title>
+	
+		<style type="text/css">
+			body {
+				background: #fff;
+				height: 100%;
+				width: 100%;
+				margin: 0;
+				padding: 0;
+				font-family: arial;
+				/*background-image: url(images/background1_gpc_malta.jpg);
+		/*background-repeat: no-repeat;
+		background-attachment: fixed;
+		background-position: center top;
+	
+		/**background-position: center;**/
+			}
+
+		
+			img {
+				border: 0px;
+			}
+	
+			.container {
+				/*height: 600px;*/
+	
+				width: 1000px;
+				background: #FFF;
+				overflow: hidden;
+				border: 2px solid #f4f4f4;
+				-webkit-border-radius: 10px;
+				-moz-border-radius: 10px;
+				border-radius: 10px;
+				margin: 10px auto;
+				/*margin-bottom: -100px;*/
+	
+		
+			}
+	
+
+
+			.logo {
+				height: 90px;
+				width: 900px;
+				/*background:#999;*/
+				/*float: left;*/
+			}
+
+			.logo img {
+		
+				margin: 10px 0 0 20px;
+			}
+
+
+
+			.main {
+				width: 980px;
+		
+				margin-left: 10px;
+	
+				margin-bottom: 20px;
+				font-size:12px;
+	
+	
+	
+			}
+
+
+
+			.inspection_title {
+				font-size: 28px;
+				width: 100%;
+				text-align: center;
+				color: #4E9BEF;
+				margin: 10px 0 0 10px;
+				letter-spacing: 3px;
+				float: left;
+			}
+
+			.gpc_title {
+				width: 99%;
+				height: 18px;
+				background: #4E9BEF;
+				color: #fff;
+				text-align: center;
+				font-size: 16px;
+				/*float: left;*/
+				line-height: 18px;
+				padding: 5px;
+				margin-top: 10px;
+			}
+
+			.table_general {
+				margin: 15px 0 0 0;
+			    width: 100%;
+				border: 3px solid #e4e4e4;
+		
+			}
+
+            .imageframe{
+                
+            }
+
+			.table_general img {
+				width: 430px;
+				height: 322px;
+			}
+
+			.first_row {
+				background: #f4f4f4;
+			}
+
+			.dotted_row {
+				border-bottom: 1px dotted #e4e4e4;
+			}
+
+			.text_area {
+				width: 950px;
+				margin: 3px;
+				border:3px solid #e4e4e4;
+				padding: 2px;
+			}
+
+			.unpacked {
+				background: #E5E5E5;
+			}
+
+			.packed {
+				background: #CFCFCF;
+			}
+
+			.sub_title {
+				font-size: 14px;
+				font-weight: bolder;
+			}
+
+			.title_bold {
+				font-size: 14px;
+				font-weight: bolder;
+			}
+
+			.title_div {
+				margin-top: 20px;
+				/*float: left;*/
+			    width: 980px;
+			    clear: both;
+			}
+			.containerbox {
+				width: 50%;
+				float: left;
+			}		
+
+		</style>
+	</head>
+	<body>
+		<div id="top" class="logo">
+			<img src="/images/asaq_ext2.jpg"  alt="logo" />
+		</div><!--logo-->
+		<div class="main">
+	   
+			<span class="inspection_title">LOADING INSPECTION</span>
+					
+            <table class="table_general" width="100%" border="0" cellspacing="1" cellpadding="1">
+
+                <tr>
+                    <td width="150" height="18" class="first_row">Factory</td>
+
+                    <td class="dotted_row">
+                        @if (Model.Inspection != null)
+                        {
+                            <span>
+                                @Model.Inspection.factory_code
+                            </span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Report</td>
+                    <td class="dotted_row">
+                        @if (Model.Inspection != null)
+                        {
+                            <span>
+                                @Model.Inspection.insp_id
+                            </span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Date of inspection</td>
+                    <td class="dotted_row">
+                        @if (Model.Inspection != null)
+                        {
+                            <span>
+                                @Model.Inspection.insp_start.ToString("d")
+                            </span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Client code</td>
+                    <td class="dotted_row">
+                        @if (Model.Inspection != null)
+                        {
+                            <span>
+                                @Model.Inspection.customer_code
+                            </span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">PO Numbers</td>
+                    <td class="dotted_row">
+                        @if (Model.Inspection != null)
+                        {
+                            <span>
+                                @Model.Inspection.custpo
+                            </span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">QC Inspectors</td>
+                    <td class="dotted_row">
+                        @if (Model.Inspection != null)
+                        {
+                            <span>
+                                @string.Join(" / ", Model.Inspection.Controllers.Select(c => !string.IsNullOrEmpty(c.Controller.user_initials) ? c.Controller.user_initials : c.Controller.userwelcome).ToArray())
+                            </span>
+                        }
+                    </td>
+                </tr>
+                
+
+                <tr>
+                    <td colspan="2">Loading Summary: @Model.Containers.Count Containers were loaded</td>
+                </tr>
+            </table><!--gpc_title--> 
+		</div>
+
+		@foreach (var cont in Model.Containers)
+		{
+			var counter = 0;           
+			<div class="main"> 
+   
+				<div class="title_div"><span class="title_bold">Container No.@cont.container_no Seal No. @cont.seal_no (@cont.container_size)</span></div>
+
+				<div class="table_general">
+					@foreach (var img in Model.ContainerImages.Where(im=>im.container_id == cont.container_id))
+					{
+					    <div style="width: 450px;margin-right: 20px;margin-top: 10px; float: left@(counter++%2 == 0 ? ";clear:left" : "")">
+					        <div style="display: table-cell"><img src="@WebUtilities.HandleInspectionFolderUrl(img.insp_image,string.Empty)" style="text-align: center" /></div>
+					    </div>
+					}
+				</div>
+
+			</div><!--main-->
+			
+			<div class="main"> 
+				<table class="table_general" width="100%" border="0" cellspacing="1" cellpadding="1">
+					<tr class="first_row">
+						<td width="250">Item</td>
+						<td>PO#</td>
+						<td width="120">Full Pallets</td>
+						<td width="120">QTY per Pallet</td>
+						<td width="120">QTY on Pallets</td>
+						<td>Loose Load QTY</td>
+						<td>Total QTY</td>
+					</tr>
+					@foreach (var cl in Model.InspectionLoadings.Where(il => il.container == cont.container_id && (il.full_pallets + il.loose_load_qty + il.mixed_pallet_qty + il.mixed_pallet_qty2 + il.mixed_pallet_qty3) > 0))
+					{
+						var qty_on_pallet = ((cl.full_pallets*cl.qty_per_pallet) + cl.mixed_pallet_qty + cl.mixed_pallet_qty2 + cl.mixed_pallet_qty3);
+						<tr>
+							<td class="dotted_row">@cl.insp_client_ref</td>
+							<td class="dotted_row">@cl.insp_custpo</td>
+							<td class="dotted_row">@cl.full_pallets</td>
+							<td class="dotted_row">@cl.qty_per_pallet</td>
+							<td class="dotted_row">@qty_on_pallet</td>
+							<td class="dotted_row">@cl.loose_load_qty</td>
+							<td class="dotted_row">@(qty_on_pallet + cl.loose_load_qty)</td>
+						</tr>
+					}
+					@{ var mix1 = string.Join(", ", Model.InspectionLoadings.Where(il => il.mixed_pallet_qty > 0).Select(il => string.Format("{0} ({1} pcs)", il.insp_client_ref, il.mixed_pallet_qty)));
+						var mix2 = string.Join(", ", Model.InspectionLoadings.Where(il => il.mixed_pallet_qty2 > 0).Select(il => string.Format("{0} ({1} pcs)", il.insp_client_ref, il.mixed_pallet_qty2)));
+						var mix3 = string.Join(", ", Model.InspectionLoadings.Where(il => il.mixed_pallet_qty3 > 0).Select(il => string.Format("{0} ({1} pcs)", il.insp_client_ref, il.mixed_pallet_qty3)));
+						var mixes = new List<string>();
+						if (!string.IsNullOrEmpty(mix1))
+						{
+							mixes.Add(mix1);
+						}
+						if (!string.IsNullOrEmpty(mix2))
+						{
+							mixes.Add(mix2);
+						}
+						if (!string.IsNullOrEmpty(mix3))
+						{
+							mixes.Add(mix3);
+						}
+					}
+					<tr>
+						<td rowspan="@(mixes.Count > 0 ? mixes.Count : 1)">Mixed Loading</td>
+						<td colspan="6">@(mixes.Count > 0 ? mixes[0] : "No different products mixed in one pallet")</td>
+					</tr>
+					@if (mixes.Count > 1)
+					{
+						<tr><td colspan="6">@mixes[1]</td></tr>
+					}
+					@if (mixes.Count > 2)
+					{
+						<tr><td colspan="6">@mixes[2]</td></tr>
+					}
+                    @if (cont.container_space > 0)
+                    {
+                        <tr>
+                            <td style="background-color: #CECFCE">Space on Container</td>
+                            <td style="background-color: #f4f4f4">Approx @cont.container_space CBM</td>
+                            <td style="background-color: #cecfce">Comments</td>
+                            <td colspan="4" style="background-color: #f4f4f4">@cont.container_comments</td>
+                        </tr>
+                    }
+
+				</table>
+				
+			</div>
+			
+			
+		}
+        @if (Model.InspectionLinesRejected != null)
+        {
+            <div class="main">
+                <table class="gpc_title"><tr><td>CORRECTIVE ACTION</td></tr></table><!--gpc_title-->
+                <div class="table_general">
+                    @if (Model.InspectionLinesRejected.Count(r => r.insp_ca > 0) == 0)
+                    {
+                        <span>No Corrective actions required</span>
+                    }
+                    @{ var ca = false; }
+                    @foreach (var l in Model.InspectionLinesRejected.Where(r => r.insp_ca > 0))
+                    {
+                        ca = true;
+                        var lineTested = l.LineTested;
+                        string client_ref, factory_ref, client_desc;
+                        client_ref = lineTested != null ? lineTested.insp_client_ref : "";
+                        factory_ref = lineTested != null ? lineTested.insp_factory_ref : "";
+                        client_desc = lineTested != null ? lineTested.insp_client_desc : "";
+                        var counter = 0;
+
+                        <div style="clear: both">
+                            <div class="text_area">@client_ref @factory_ref @client_desc @l.insp_comments @l.insp_document</div>
+                            @if (!string.IsNullOrEmpty(l.insp_line_rejection))
+                            {
+                                <div class="sub_title">Rejection</div>
+                                <div>@l.insp_line_rejection</div>
+                            }
+                            @if (!string.IsNullOrEmpty(l.insp_reason))
+                            {
+                                <div class="sub_title">Reason</div>
+                                <div>@l.insp_reason</div>
+                            }
+                            @if (!string.IsNullOrEmpty(l.insp_line_action))
+                            {
+                                <div class="sub_title">Action</div>
+                                <div>@l.insp_line_action</div>
+                            }
+                            @if (!string.IsNullOrEmpty(l.insp_permanent_action))
+                            {
+                                <div class="sub_title">Permanent Action</div>
+                                <div>@l.insp_permanent_action</div>
+                            }
+                        </div>
+
+                        if (lineTested != null)
+                        {
+                            foreach (var image in Model.InspectionImages.Where(i => i.insp_line_unique == lineTested.insp_line_unique && i.insp_type == "C"))
+                            {
+                                <div style="width: 450px; margin-right: 20px; margin-top: 5px; float: left@(counter++%2 == 0 ? ";clear:left" : "")">
+
+                                    <div style="display: table-cell; width: 100%">
+                                        <img src="@WebUtilities.HandleInspectionFolderUrl(image.insp_image, Model.ImagesFolder)" style="text-align: center" />
+                                    </div>
+                                </div>
+                            }
+                        }
+                        
+                        var acceptedCALines = Model.InspectionLinesAccepted.Where(la => la.insp_line_id == l.insp_line_id && la.insp_line_type == "CA");
+                        var counter2 = 0;
+                        foreach (var al in acceptedCALines)
+                        {
+                            var images = Model.InspectionImages.Where(i => i.insp_line_unique == al.insp_line_id && i.insp_type == "PAL").ToList();
+                            if (!string.IsNullOrEmpty(al.insp_line_comments) || images.Count > 0)
+                            {
+                                <div style="clear: both">
+                                    <div class="sub_title">Update</div>
+                                    <div>@al.insp_line_comments</div>
+                                </div>
+                            }
+                            foreach (var image in images)
+                            {
+                                <div style="width: 450px; margin-right: 20px; margin-top: 5px; float: left@(counter2++%2 == 0 ? ";clear:left" : "")">
+
+                                    <div style="display: table-cell; width: 100%">
+                                        <img src="@WebUtilities.HandleInspectionFolderUrl(image.insp_image,Model.ImagesFolder)" style="text-align: center" />
+                                    </div>
+                                </div>
+                            }
+                        }
+                        
+                    }
+                </div>
+            </div>
+        }
+	    <div class="main">
+	        
+            @foreach (var line in Model.InspectionLinesAccepted.OrderBy(i=>i.insp_line_type))
+            {
+                var qctype = string.Empty;
+                switch (line.insp_line_type)
+                {
+                    case "A" :
+                        qctype = "Appearance";
+                        break;
+                    case "M":
+                        qctype = "Material";
+                        break;
+                    case "P":
+                        qctype = "Packaging";
+                        break;
+                    case "D":
+                        qctype = "Dimension";
+                        break;
+                    case "F":
+                        qctype = "Function";
+                        break;
+                    case "CON":
+                        qctype = "Containers Inspection";
+                        break;
+                    case "PAK":
+                        qctype = "Packing, MFG Date, PO# and products code / quantity confirmation";
+                        break;
+                    case "PAL":
+                        qctype = "Pallets Inspection";
+                        break;
+                }
+
+
+                
+	            var counter = 0;
+                var images = Model.InspectionImages.Where(im => im.insp_line_unique == line.insp_line_id && im.insp_type == line.insp_line_type).ToList();
+	            if (images.Count > 0)
+	            {
+                    <div class="title_div"><span class="title_bold">@qctype</span></div>
+	                <div style="margin-top: 15px;clear: both">@line.insp_line_comments</div>
+	                <div class="table_general">
+	                    @foreach (var img in images)
+	                    {
+	                        <div style="width: 450px;margin-right: 20px;margin-top: 10px; float: left@(counter++%2 == 0 ? ";clear:left" : "")">
+					        <div style="display: table-cell"><img src="@WebUtilities.HandleInspectionFolderUrl(img.insp_image,Model.ImagesFolder)" style="text-align: center" /></div>
+					    </div>
+	                    }
+	                </div>
+	            }
+
+	        }
+            
+	        
+	    </div>
+
+	</body>
+
+</html>
+

@@ -1,0 +1,32 @@
+﻿<label ng-if="$ctrl.source.question.description || $ctrl.source.questionGroup.description || $ctrl.source.questionGroup.name">{{$ctrl.getLabel()}}</label>
+<div ng-if="$ctrl.source.question.description || $ctrl.source.questionGroup.description" >{{$ctrl.source.question.description}}{{$ctrl.source.questionGroup.description}}</div>
+<div class="form-group">
+    <div ng-if="$ctrl.source.question">
+        <label class="control-label col-sm-2" ng-if="!$ctrl.source.question.description && !$ctrl.source.questionGroup.description">{{$ctrl.getLabel()}}</label>
+        <div class="col-sm-6">
+            <question-input question="$ctrl.source.question" types="$ctrl.types" renderMethods="$ctrl.renderMethods" ng-if="!$ctrl.showResult"></question-input>
+            <question-result question="$ctrl.source.question" answer="$ctrl.source.answer.questionAnswers[0]" types="$ctrl.types"  ng-if="$ctrl.showResult"></question-result>
+        </div>
+    </div>    
+    <div ng-if="$ctrl.source.questionGroup" class="col-sm-12">
+        <div ng-repeat="q in $ctrl.source.questionGroup.questions" style="margin-bottom: 5px">
+            <div class="row" ng-if="q.description">
+                <div class="col-sm-12">
+                        {{q.description}}
+                </div>
+            </div>
+            <div class="row">
+                <label ng-if="!q.label_editable" class="col-sm-4">{{q.question_text}}</label>
+                <div class="col-sm-4" ng-if="q.label_editable">
+                    <input type="text" class="form-control" ng-model="q.answer.textValue" ng-if="!$ctrl.showResult"/>
+                    <label ng-if="$ctrl.showResult">{{$ctrl.source.answer.questionAnswers[$index].textValue}}</label>
+                </div>
+                <div class="col-sm-8">
+                    <question-input question="q" types="$ctrl.types" renderMethods="$ctrl.renderMethods" ng-if="!$ctrl.showResult"></question-input>
+                    <question-result question="q" answer="$ctrl.source.answer.questionAnswers[$index]" types="$ctrl.types" ng-if="$ctrl.showResult"></question-result>
+                </div>
+            </div>            
+        </div>
+    </div>    
+</div>
+<hr ng-if="!$ctrl.last"/>

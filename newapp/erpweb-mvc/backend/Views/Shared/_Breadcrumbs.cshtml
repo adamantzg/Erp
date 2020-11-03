@@ -1,0 +1,31 @@
+﻿
+@{
+    string actionName = this.ViewContext.RouteData.Values["action"].ToString();
+    string controllerName = this.ViewContext.RouteData.Values["controller"].ToString();
+}
+
+<!--breadcrumbs start -->
+<ol class="breadcrumb">
+	<li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Home</a></li>
+	@if(ViewBag.breadcrumbs == null)
+	{
+		<li class="breadcrumb-item @(controllerName != "Home" && !actionName.ToLower().Contains("index") ? "" : "hide")"><a href="@Url.Action("Index",controllerName)">@controllerName.SplitCamelCase()</a></li>
+		<li class="breadcrumb-item @(controllerName != "Home" || !actionName.ToLower().Contains("index") ? "" : "hide")">@(ViewBag.Title != null ? ViewBag.Title : actionName)</li>
+	} else
+	{
+		foreach(BreadCrumb b in ViewBag.breadcrumbs)
+		{
+			if(!string.IsNullOrEmpty(b.Url))
+			{
+				<li class="breadcrumb-item"><a href="@b.Url">@b.Text</a></li>
+			}
+			else
+			{
+				<li class="breadcrumb-item">@b.Text</li>
+			}
+
+		}
+	}
+
+</ol>
+<!--breadcrumbs end -->

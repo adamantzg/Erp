@@ -1,0 +1,84 @@
+﻿@model backend.Models.ArrivalsReportModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Arrivals Report</title>
+    <style>
+        body {
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida  Sans', Arial, sans-serif;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        table th, table td
+        {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <div> 
+        <h3>Arrivals report</h3>
+        <h4>Clients: @Model.Clients</h4>
+        @if (!string.IsNullOrEmpty(Model.Factories)) {
+            <h4>Factories: @Model.Factories</h4>
+        }
+        @{ 
+            var maxDate = Model.Lines.Max(l => l.Header.req_eta);
+            var endDate = maxDate != null ? (DateTime?) Utilities.GetFirstDayInWeek(maxDate.Value).AddDays(6) : null;
+            var numOfWeeks = ((endDate - Model.StartDate) ?? TimeSpan.Zero).TotalDays / 7 + 1;
+            var products = Model.Lines.Where(l=>l.Cust_Product != null).Select(l => l.Cust_Product).Distinct(new CustProductDistinctComparer()).OrderBy(p=>p.cprod_code1).ToList();
+        }
+        @if (Model.StartDate != null) {
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="3"></th>
+                        <th colspan="@(numOfWeeks)" style="text-align: center;font-weight: bold">Arrival week</th>
+                    </tr>
+                    <tr>
+                        <th rowspan="2">Part number</th>
+                        <th rowspan="2">Description</th>
+                        <th rowspan="2">Arrived</th>
+                        @for (DateTime? date = Model.StartDate; date < endDate; date = date.Value.AddDays(7) ) {
+                            <th>@date.ToString("dd-MMM")</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach(var p in products) {
+                        <tr>
+                            <td>@p.cprod_code1</td>
+                            <td>@p.cprod_name</td>
+                            <td>@{
+                                if(Model.ProductTotalsBeforeStartDate.ContainsKey(p.cprod_id)) {
+                                    @Model.ProductTotalsBeforeStartDate[p.cprod_id]
+                                }
+                            }</td>
+                            @for (DateTime? date = Model.StartDate; date < endDate; date = date.Value.AddDays(7) ) {
+                               <td>@{
+                                   var weekQty = Model.Lines.Where(l => l.cprod_id == p.cprod_id && l.Header.req_eta >= date && l.Header.req_eta < date.Value.AddDays(7)).Sum(l => l.orderqty);
+                                   if (weekQty > 0) {
+                                       @weekQty
+                                   }
+                               }</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else {
+            <div>No data</div>
+        }
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+﻿@model FinalInspectionV2ReportModel
+
+
+@if(Model.Inspection != null){
+    if ((bool) ViewData["isRejection"] == false)
+    {
+        <div class="table_general" >
+            @{ var counter = 0; }
+            @foreach(var image in Model.Inspection.AllImages.Where(i => i.type_id == (int) ViewData["type"] && (i.Line.Rejections == null || i.Line.Rejections.Count == 0)))
+            {
+                var l = image.Line;
+                <div style="width: 450px; margin-right: 20px; float: left@(counter++%2 == 0 ? ";clear:left" : "")">
+                    <div class="text_area">@l.insp_custproduct_code @l.insp_mastproduct_code @l.insp_custproduct_name </div>
+                    <div style="display: table-cell; width: 100%">
+                        <img src="@WebUtilities.HandleInspectionFolderUrl(image.insp_image,Model.ImagesFolder)" style="text-align: center"/>
+                    </div>
+                    <div style="width: 100%" >@image.comments</div>
+                </div>
+            }
+             
+            
+        </div>
+    }
+    else
+    {
+        <div class="table_general" >
+            @{ var counter = 0; }
+            @if(Model.Inspection.Lines.All(l=>l.Rejections == null || l.Rejections.Count(r => r.ca == false) == 0))
+            {
+                <span>No rejected units</span>
+            }
+            @foreach (var r in Model.Inspection.AllRejections.Where(r => r.ca==false))
+            {
+                var l = r.Line;
+                foreach (var image in l.Images)
+                {
+                    <div style="width: 450px; margin-right: 20px; float: left@(counter++%2 == 0 ? ";clear:left" : "")">
+                        <div class="text_area">@l.insp_custproduct_code  @l.insp_custproduct_name </div>
+                        <div style="display: table-cell; width: 100%">
+                            <img src="@WebUtilities.HandleInspectionFolderUrl(image.insp_image,Model.ImagesFolder)" style="text-align: center"/>
+                        </div>
+                        <div style="width: 100%" >@r.rejection. @r.action</div>
+                    </div>
+                }
+            }
+            
+        </div>
+    }
+}

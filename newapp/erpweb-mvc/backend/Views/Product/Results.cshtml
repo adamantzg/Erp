@@ -1,0 +1,234 @@
+﻿@model ProductExportModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Exported products</title>
+        <style>
+            body { font-family: arial;font-size: 11px}
+            table { font-family: arial;font-size:11px}
+            .tableheader {font-weight: bold}
+        </style>
+    </head>
+    <body>
+        <h3>Exported products</h3>
+        <div>
+            <table>
+                <tr class="tableheader">
+                    <td>Product id</td>
+                    <td>Factory code</td>
+                    <td>Client code</td>
+                    @if (!Model.GroupByMastProduct)
+                    {
+                        <td>Cust. product code</td>
+                    }
+                    <td>Product name</td>
+                    <td>Factory ref</td>
+                    <td>asaq ref</td>
+                    <td>Category1 name</td>
+                    @{ var hasBrandCats = Model.Products.Count(p => p.Product.cprod_brand_cat > 0) > 0; }
+                    @if (hasBrandCats)
+                    {
+                        <td>Brand category</td>
+                    }
+                    @if (Model.ShowFactoryPricing)
+                    {
+                        <td>price pound</td>
+                        <td>price dollar</td>
+                        <td>price euro</td>
+                    }
+                    @if (Model.ShowSalesHistory)
+                    {
+                        <td>units sold last 6 months</td>
+                        <td>last 6 months sales</td>
+                        <td>units sold previous 6 months</td>
+                        <td>previous 6 months sales</td>
+                    }
+                    @if (Model.ShowLogistics)
+                    {
+                        <td>prod length</td>
+                        <td>prod width</td>
+                        <td>prod height</td>
+                        <td>pack length</td>
+                        <td>pack width</td>
+                        <td>pack height</td>
+                       /**/
+                        <td>pack GW</td>
+                        <td>carton length</td>
+                        <td>carton width</td>
+                        <td>carton height</td>
+                        <td>units per carton</td>
+                        <td>pallet length</td>
+                        <td>pallet width</td>
+                        <td>pallet height</td>
+                        <td>units per pallet single</td>
+                    }
+
+                </tr>
+                @if (Model.GroupByMastProduct)
+                {
+                    foreach (var mp in Model.Products.GroupBy(p=>p.Product.cprod_mast))
+                    {
+                        var mast = mp.First().Product.MastProduct;
+                        <tr>
+                            <td>@mast.mast_id</td>
+                            <td>@{
+                                    var factory = Model.Factories.FirstOrDefault(f => f.Code == mast.factory_id);
+                                    if (factory != null)
+                                    {
+                                        @factory.Label
+                                    }
+                                }</td>
+                            <td>@{
+                                    var clients = new List<string>();
+                                    foreach (var productRow in mp)
+                                    {
+                                        var client = Model.Clients.FirstOrDefault(c => c.Code == productRow.Product.brand_userid);
+                                        if (client != null && !clients.Contains(client.Label))
+                                        {
+                                            clients.Add(client.Label);
+                                        }
+                                    }
+                                    @(string.Join(" ", clients))
+                                }</td>
+                            <td>@mast.asaq_name</td>
+                            <td>@mast.factory_ref</td>
+                            <td>@mast.asaq_ref</td>
+                            <td>@(mp.First().Category1 != null ? mp.First().Category1.cat1_name : "")</td>
+                            @if (hasBrandCats)
+                            {
+                                <td>
+                                @{
+                                    var bc = new List<string>();
+                                    foreach (var productRow in mp)
+                                    {
+                                        var cat = Model.BrandCategories.FirstOrDefault(c => c.brand_cat_id == productRow.Product.cprod_brand_cat);
+                                        if (cat != null && !bc.Contains(cat.brand_cat_desc))
+                                        {
+                                            bc.Add(cat.brand_cat_desc);
+                                        }
+                                    }
+                                }
+                                @(string.Join(" ", bc))
+                                </td>
+                            }
+                            @if (Model.ShowFactoryPricing)
+                            {
+                                <td>@mast.price_pound</td>
+                                <td>@mast.price_dollar   </td>
+                                <td>@mast.price_euro</td>
+                            }
+                            @if (Model.ShowSalesHistory)
+                            {
+                                <td>@mp.Sum(m=>m.Last6MonthQty)</td>
+                                <td>@mp.Sum(m=>m.Last6MonthAmount).ToString("N2")</td>
+                                <td>@mp.Sum(m=>m.Previous6MonthQty)</td>
+                                <td>@mp.Sum(m=>m.Previous6MonthAmount).ToString("N2")</td>
+                            }
+                            @if (Model.ShowLogistics)
+                            {
+
+                                <td>@mast.prod_length</td>
+                                <td>@mast.prod_width</td>
+                                <td>@mast.prod_height</td>
+                                <td>@mast.pack_length</td>
+                                <td>@mast.pack_width</td>
+                                <td>@mast.pack_height</td>
+                                <td>@(mast.pack_GW + mast.pack2_gw + mast.pack3_gw + mast.pack4_gw).To.String("G")</td>
+                                <td>@mast.carton_length</td>
+                                <td>@mast.carton_width</td>
+                                <td>@mast.carton_height</td>
+                                <td>@mast.units_per_carton</td>
+                                <td>@mast.pallet_length</td>
+                                <td>@mast.pallet_width</td>
+                                <td>@mast.pallet_height</td>
+                                <td>@mast.units_per_pallet_single</td>
+                            }
+                        </tr>
+                    }
+                }
+                else
+                {
+                    foreach (var prod in Model.Products)
+                    {
+                        var mast = prod.Product.MastProduct;
+                        <tr>
+                            <td>@mast.mast_id</td>
+                            <td>@{
+                                    var factory = Model.Factories.FirstOrDefault(f => f.Code == prod.Product.MastProduct.factory_id);
+                                    if (factory != null)
+                                    {
+                                        @factory.Label
+                                    }
+                                }</td>
+                            
+                            <td>@{
+                                    var client = Model.Clients.FirstOrDefault(c => c.Code == prod.Product.brand_userid);
+                                    if (client != null)
+                                    {
+                                        @client.Label
+                                    }
+                                }</td>
+                            <td>@prod.Product.cprod_code1</td>
+
+                            <td>@prod.Product.cprod_name</td>
+                            
+                            <td>@prod.Product.MastProduct.factory_ref</td>
+                            <td>@prod.Product.MastProduct.asaq_ref</td>
+                            <td>@(prod.Category1 != null ? prod.Category1.cat1_name : "")</td>
+                            @if (hasBrandCats)
+                            {
+                                <td>
+                                    @{
+                                        var cat = Model.BrandCategories.FirstOrDefault(c => c.brand_cat_id == prod.Product.cprod_brand_cat);
+                                        if (cat != null )
+                                        {
+                                            @cat.brand_cat_desc
+                                        }
+                                    }
+                                </td>
+                            }
+                            @if (Model.ShowFactoryPricing)
+                            {
+                                <td>@prod.Product.MastProduct.price_pound</td>
+                                <td>@prod.Product.MastProduct.price_dollar   </td>
+                                <td>@prod.Product.MastProduct.price_euro</td>
+                            }
+                            @if (Model.ShowSalesHistory)
+                            {
+                                <td>@prod.Last6MonthQty</td>
+                                <td>@prod.Last6MonthAmount.ToString("N2")</td>
+                                <td>@prod.Previous6MonthQty</td>
+                                <td>@prod.Previous6MonthAmount.ToString("N2")</td>
+                            }
+                            @if (Model.ShowLogistics)
+                            {
+
+                                <td>@mast.prod_length</td>
+                                <td>@mast.prod_width</td>
+                                <td>@mast.prod_height</td>
+                                <td>@mast.pack_length</td>
+                                <td>@mast.pack_width</td>
+                                <td>@mast.pack_height</td>
+                                <td>@(mast.pack_GW + mast.pack2_gw + mast.pack3_gw + mast.pack4_gw)</td>
+                                <td>@mast.carton_length</td>
+                                <td>@mast.carton_width</td>
+                                <td>@mast.carton_height</td>
+                                <td>@mast.units_per_carton</td>
+                                <td>@mast.pallet_length</td>
+                                <td>@mast.pallet_width</td>
+                                <td>@mast.pallet_height</td>
+                                <td>@mast.units_per_pallet_single</td>
+                            }
+                        </tr>
+                    }
+                }
+            </table>
+        </div>
+    </body>
+</html>

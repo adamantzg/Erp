@@ -1,0 +1,212 @@
+﻿@model UsSummaryReportModel
+@{
+    Layout = null;
+}
+
+@functions {
+    private string GetImageUrl(string chartname)
+    {
+        return $"{WebUtilities.GetSiteUrl()}{Url.Action("Image","Analytics", new {param = string.Format("{0}_{1}", ViewBag.ChartKey, chartname) + "#" + Settings.Default.StatsKey})}";
+    }
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>US Summary Report</title>
+    <style>
+        body {
+            font-family: arial;
+            font-size: 11px;
+        }
+        .salesorderstable thead tr {
+            font-weight: bold;
+            background-color: #B9C9FE; 
+            color:#4033AC
+        }
+        .salesorderstable td {
+            /*border: 1px solid black;*/
+            padding: 5px;
+        }
+        .salesorderstable {
+            border-collapse: collapse;
+        }
+        .salesdetailstable {
+            border-collapse: collapse;
+        }
+        .salesdetailstable th {
+            border-bottom: 1px solid black;
+        }
+        .number { text-align: right; }
+        .clienttable_header {
+            background-color: #B9C9FE; 
+            color:#4033AC
+        }
+        .clienttable_header_darker {
+            background-color: #99A9DE; 
+            color:#4033AC
+        }
+        .clienttable_footer {
+            background-color: #CCC; 
+            color:#4033AC
+        }
+
+        .clienttable {
+            width: 900px;
+            border: 0;
+            padding: 3px;
+            border-spacing: 0;
+            font-family:Arial, Helvetica, sans-serif;
+            font-size:11px;
+        }
+        .altrow
+        {
+            background-color: #EEF6FF;
+        }
+        .bestweekmonthtable thead tr {
+            font-weight: bold;
+            background-color: #A9D08E; 
+            color:blue
+        }
+        
+        .bestweekmonthtable td, .bestweekmonthtable th{
+           
+            padding: 5px;
+        }
+        .bestweekmonthtable {
+            border-collapse: collapse;
+        }
+        .bestweektablealtrow
+        {
+            background-color: #E2EFD6;
+        }
+        .bestweektablerow
+        {
+            background-color: #C6E0B4;
+        }
+        .details_total_row
+        {
+            border-top: 1px solid black;
+        }
+        .details_total_row td
+        {
+            background-color: #E0E0E0;
+        }
+    </style>
+</head>
+<body>
+    <div> 
+        @{ 
+            var from = Model.From ?? DateTime.Today;
+        }
+        <h2>US summary report - Week @System.Globalization.CultureInfo.CurrentCulture.Calendar.GetWeekOfYear((from),System.Globalization.CalendarWeekRule.FirstFourDayWeek,DayOfWeek.Monday) - @Model.DetailsTo.ToString("dd MMMM yyyy")</h2>
+
+        <h4>SALES CHART</h4>
+        <img src="@GetImageUrl("SalesOrdersMonthlyWarehouseReport")" />
+        
+        <h4>SALES TO RETAILERS</h4>
+
+        @Html.Partial("_SalesOrdersReportPartial", new SalesOrdersReportModel
+           {
+               Rows = Model.SalesOrdersSummaryData.ToList(),
+               From = Model.From,
+               YearData = Model.SalesOrdersYTDData,
+               Last12mData = Model.SalesOrdersLast12mData,
+               ShowNotes = false,
+               To = Model.DetailsTo,
+               ShowLast12m = true
+           })
+
+        <h4>RECORD SALES</h4>
+        @Html.Partial("_SalesOrdersBestWeekMonthPartial", Model)
+        
+        @if (Model.ShowNotDespatchedByMonthReport)
+        {
+            <h4>ORDERS NOT YET DESPATCHED</h4>
+            @Html.Partial("_SalesOrdersReportPartial", new SalesOrdersReportModel
+            {
+                Rows = Model.NotDespatchedByMonthData,
+                From = DateTime.MinValue,
+                ShowWTD = false,
+                ShowMTD = false,
+                ShowYTD = false,
+                ShowTotal = true,
+                ShowNotes = false,
+                To = Model.DetailsTo,
+                ShowLast12m = false,
+                DayFormat = "MMM yyyy",
+                DescendingOrder = true,
+                MinDateText = Model.MinDateText
+            })
+        }
+        
+
+
+        <h4>DISPLAY ORDERS</h4>
+        <ul>
+            <li>Display orders are determined as the orders on Sage where the “delivery_reason” code is set to “display”.</li>
+            <li>The cost of displays is determined by the cost value on the Sage system.</li>
+        </ul>
+        
+
+        @Html.Partial("_SalesOrdersReportPartial", new SalesOrdersReportModel
+           {
+               Rows = Model.DisplayRows,
+               From = Model.From,
+               YearData = Model.DisplayYTDData,
+               Last12mData = Model.DisplayLast12mData,
+               Headers = new[] { "Cost", "Order Count" },
+               To = Model.DetailsTo,
+               ShowLast12m = true
+           })
+
+        <h4>DETAILED REPORT - SALES TO RETAILERS</h4>
+
+        @Html.Partial("_SalesOrdersDetailPartial", new SalesOrdersDetailModel
+           {
+               SalesOrderData = Model.SalesOrderData.Where(s => s.date_entered >= Model.DetailsFrom && s.date_entered <= Model.DetailsTo).ToList(),
+               DealerYearData = Model.DealerYearData,
+               Dealers = Model.Dealers,
+               ProductAvailabilityDates = Model.ProductAvailabilityDates,
+               BundleAvailabilityDates = Model.BundleAvailabilityDates
+           })
+
+        <h4>DETAILED REPORT - DISPLAYS</h4>
+
+        @Html.Partial("_DisplayOrdersDetailPartial", new DisplayOrdersDetailModel {
+            DisplayOrderData = Model.DisplayOrderData.Where(s => s.date_entered >= Model.DetailsFrom && s.date_entered <= Model.DetailsTo).ToList(),
+            ProductAvailabilityDates = Model.ProductAvailabilityDates,
+            BundleAvailabilityDates = Model.BundleAvailabilityDates
+        } )
+
+        @if (Model.ShowNotDespatchedReport) {
+            <h4>SALES ORDERS NOT YET DESPATCHED</h4>
+
+            @Html.Partial("_SalesOrdersPendingDespatchPartial", new SalesOrdersDetailModel
+           {
+               SalesOrderData = Model.SalesOrdersNotDespatched,
+               DealerYearData = Model.DealerYearData,
+               ProductAvailabilityDates = Model.ProductAvailabilityDates
+           })
+        }
+        
+        @if (Model.ShowInternalTransactions)
+        {
+            <h4>INTERNAL TRANSACTIONS</h4>
+            @Html.Partial("_SalesOrdersDetailPartial", new SalesOrdersDetailModel
+            {
+                SalesOrderData = Model.InternalTransactions,
+                DealerYearData = Model.DealerYearData,
+                Dealers = Model.Dealers,
+                ProductAvailabilityDates = Model.ProductAvailabilityDates,
+                BundleAvailabilityDates = Model.BundleAvailabilityDates,
+                ShowNote = false,
+                HiddenColumns = new List<SalesOrderDetailColumns> { SalesOrderDetailColumns.OrdersYTD, SalesOrderDetailColumns.StockStatus}
+            })
+        }
+
+    </div>
+</body>
+</html>

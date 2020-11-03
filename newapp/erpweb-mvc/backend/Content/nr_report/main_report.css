@@ -1,0 +1,128 @@
+﻿
+
+body
+{
+	
+	width: 100%;
+	
+	
+	margin: 0 auto;
+	padding: 0;
+	background: #fff;
+	/*background-image:url(/images/wild_oliva.png);*/
+	/*-background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-position: center top;*/
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+
+img
+{
+	border: 0px;
+}
+
+
+
+
+.container
+{
+	width: 1000px;
+	height: 1333px;
+	/*min-height: 450px;*/
+	margin: 10px auto;
+	/*font-family: Tahoma, Geneva, sans-serif;*/
+	/*background: #fff;*/
+   /* overflow: hidden;*/
+	/*border: 1px solid #333;*/
+	background: #fff;
+	position: relative;
+	overflow:auto;
+	font-size: 12px;
+	/*border: 1px solid #000;*/
+	
+}
+
+.title {
+		font-size: 14px;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+.doc_name {
+		font-size: 40px;
+		padding: 10px 0 10px 0;
+		}
+		
+.row_name {
+		font-size: 22px;
+		padding: 5px;
+		background: #000;
+		
+		}
+		
+.row_name_gray {
+		font-size: 20px;
+		padding: 5px;
+		background: #999;
+		
+		}
+
+.backgr1 {
+		background: #e5e5e5;
+}
+
+.backgr2 {
+		background:#f4f4f4;
+}
+
+.backgr3 {
+		background:#E2E2E2;
+}
+
+
+.prod_img img {
+		max-width: 310px;
+		max-height: 250px;
+		
+}
+
+.white {
+		color: #fff;
+}
+
+.font28 {
+		font-size: 28px;
+}
+
+.footer {
+		font-size: 12px;
+		padding: 5px;
+		background: #000;
+		
+		
+		}
+		
+.data_holder {
+		border: 1px solid #999;
+		
+		float: left;
+		height: 740px;
+		margin-top: 15px;
+		
+}
+
+.data_holder2 {
+		border: 1px solid #999;
+		float: left;
+		
+		height: 740px;
+		margin-left: 25px;
+		margin-top: 15px;
+		margin-bottom: 20px;
+		
+		
+}
+

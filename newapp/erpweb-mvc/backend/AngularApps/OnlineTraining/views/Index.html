@@ -1,0 +1,53 @@
+﻿
+
+
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-xs-12">
+                    <section class="panel">
+                        <header class="panel-heading">
+                            Existing documents
+                        </header>
+                        <div class="panel-body">
+                            <section class="panel general">
+                            
+                                <button class="btn btn-info pull-right" ng-click="openUpload()">UPLOAD NEW DOCUMENT</button>
+
+                                <table id="maintable"  datatable="ng" class="table-condensed table-hover m-t-15" dt-options="tableOptions" dt-instance="dtInstance">
+                                    <thead>
+                                        <tr> 
+                                            <th>Name</th>
+                                            <th>Version</th>
+                                            <th>Subject</th>
+                                            <th>Creator</th>
+                                            <th>Created</th>
+                                            <th>Last Modified by</th>
+                                            <th>Modified</th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="clickable" ng-repeat="d in documents">
+                                            <td><a title="Download" ng-href="{{getDocUrl(d.current)}}"><i class="fa fa-download" aria-hidden="true"></i> {{d.current.filename}}</a></td>
+                                            <td>{{d.current.version}}</td>
+                                            <td>{{d.current.subject}}</td>
+                                            <td>{{getUserDescription(d.current.creator)}}</td>
+                                            <td>{{displayDate(d.current.dateCreated)}}</td>
+                                            <td>{{getUserDescription(d.current.editor)}}</td>
+                                            <td>{{displayDate(d.current.dateLastModified)}}</td>
+                                            <td><a title="Expand"><i ng-class="getExpandIcon(d)" ng-click="expand(d,$index)" aria-hidden="true"></i></a></td>
+                                            <td><a title="Edit"><i ng-click="edit(d.current.id)" class="fa fa-pencil-square-o fa-2x" aria-hidden="true"></i></a></td>
+                                            <td><a title="Delete"><i ng-click="delete(d);expand(d,$index)" class="fa fa-times fa-2x" aria-hidden="true"></i></a></td>
+                                            <td><button class="btn btn-default online_button pull-right" ng-click="publish(d.current.id)" title="Publish new version">New version</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </section> <!-- panel general -->
+                        </div>
+                    </section>
+                </div>
+            </div> <!-- row -->
+
+

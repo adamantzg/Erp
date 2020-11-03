@@ -1,0 +1,261 @@
+﻿<style>
+    .panel-body {
+        /*padding: 0;*/
+    }
+
+    .m-t-15 {
+
+    }
+
+    .type-call {
+        text-align: center;
+    }
+
+    .icon-color {
+        opacity: .8;
+    }
+    .active > a {
+        /*background-color:#39435C !important;*/
+        color: #27c24c!important;
+    }
+    /*.active2 > a{
+        background-color:white!important;
+    }*/
+    .expanded{
+        background:#f3f4f5;
+    }
+    .ended{
+        opacity:.5!important;
+        text-decoration:underline;
+    }
+    .nav-link {
+        color: #898989!important;
+    }
+
+</style>
+
+<h2 ng-if="types.showTest"> {{ctrlName}} - dealerDetailView.html</h2>
+<div class="row col-lg-12">
+    <button class="btn btn-default create_new pull-left"
+            type="submit"
+            ui-sref="list">
+        <i class="ion ion-chevron-left" title="Back to"></i>&nbsp;
+        Dealers List 
+    </button>
+    <span class="h4" style="margin-top:10px; margin-left:182px;float:left;font-family: 'Lato', sans-serif;">
+        &nbsp;&nbsp;{{dealer.name}}
+        <!--{{logs[0].usDealer.name != null ?logs[0].usDealer.name : logs[0].dealer}}--> 
+    </span>
+    <div class="pull-left" style="margin-left:20px" ng-show="!!dealerListAlpha">
+        <select name="category"
+                class="form-control"
+                ng-model="filterDealer"
+                ng-options="cat.customer as cat.customer for cat in dealerListAlpha"
+                style="padding-left:5px;"
+                ng-change="filterOrderLogs()"
+                >            
+            <option value="">all accounts </option> <!-- for {{dealer.alpha}} -->
+        </select>
+       
+    </div>
+    <div class="pull-left h4">&nbsp;&nbsp;<span style="opacity:.7">{{dealer.alpha}}</span></div>
+    <div class="pull-right">
+        <button 
+                class="btn btn-default create_new pull-right"
+                ng-if="!isMiscellaneus"
+                ng-click="open(null,true)">
+            <i class="fa fa-plus-square"></i>&nbsp;
+            Create Call Log
+        </button>
+        <button class="btn btn-default create_new pull-right" style="margin:0px 15px" ng-click="openNewClaim(null,customer)">
+            <!--ui-sref="create({dealerId:customer})">-->
+            <i class="fa fa-plus-square"></i>
+            &nbsp;Create Claim
+        </button>
+    </div>
+</div>
+
+<div loading class="loading-dialog"></div>
+
+<div class="row">
+    <!--  ***  COMMUNICATION LOG *** -->
+    <div class="col-lg-8  col-xs-12" ng-class="{'col-lg-push-4':!isMiscellaneus}">
+        <section class="panel" >
+            <header class="panel-heading" style="height:50px">
+                <div class="btn-group">
+                    <!--<button class="btn  btn-default create_new" ng-model="checkBtn" uib-btn-radio="'log'" ng-change="changeTab()"> Communication Log </button>
+                    <button class="btn  btn-default create_new" ng-model="checkBtn" uib-btn-radio="'radio'" ng-change="changeTab()"> Dealer's Claim List </button>-->
+                </div>
+               
+            </header>
+
+            <div class="panel-body" style="padding-left:0; padding-right:0;">
+
+                <div class="col-lg-12 m-t-15">
+                   
+
+                    <div ng-hide="showLog">
+                        <div>
+                            <uib-tabset active="active" style="margin-top:-71px">
+                                <uib-tab index="0" heading="COMMUNICATION  LOGS">
+                                    <div ng-show="true" ng-include="'AngularApps/DealerUSA/dealers/dealerDetailLogList8.html'"></div>
+                                </uib-tab>
+                                <uib-tab index="1" heading="CLAIMS & FEEDBACKS" disable="tab.disabled" >
+                                    <div  ng-controller="listFeedbacks" ng-include="'AngularApps/DealerUSA/claims/listFeedbacksView.html'"></div>      
+                                </uib-tab>
+                            </uib-tabset>
+                                           
+                           
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="panel-footer alert alert-danger" role="alert" ng-hide="!!!Error">
+                <h4 class="alert-heading">
+                    <i class="ion ion-alert"></i>&nbsp;
+                    Error {{Error.status}} - {{Error.statusText}}
+
+                </h4>
+                <p><strong>{{Error.data.exceptionMessage}}</strong></p>
+                <p>{{Error.data.exceptionType}}</p>
+                <p>{{Error.data.stackTrace}}</p>
+            </div>
+        </section>
+    </div> <!--  *** END COMMUNICATION LOG *** -->
+
+    <!--*** ORDER DETAILS ***-->
+    <div class="col-lg-4 col-lg-pull-8 col-xs-12" ng-if="!isMiscellaneus">
+        <section class="panel" style="min-height:467px">
+            <header class="panel-heading">
+                <div class="row">
+                    <span class="col-sm-4">
+                        ORDER DETAILS
+                    </span>
+                    <span class="form-group col-sm-push-4 col-sm-4" style="margin-bottom:0px;">
+                        <span class="input-group">
+
+                            <input type="text" name="name"
+                                   id="inputsm" ng-model="search.text" ng-change="showChanges()" class="form-control input-sm" />
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+                        </span>
+                    </span>
+
+                </div>
+
+
+            </header>
+            <content class="panel-body">
+                <section class="panel general" style="min-height:417px!important;margin-top:-17px">
+                    <table class="table table-condensed table-hover">
+                        <thead> 
+                            <tr>
+                                <th style="width:20px"></th>
+                                <th>Order number</th>
+                                <th>Date</th>
+                                <th>Items</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody ng-repeat="order in items">
+                            <tr data-toggle="collapse"
+                                data-target="#accordion{{$index}}"
+                                class="clickable"
+                                ng-click="expand = !expand"
+                                ng-class="{expanded:expand}">
+                                <td>
+                                    <a>
+                                        <i ng-hide="!!expand" class="icon ion-plus-round"></i>
+                                        <i ng-show="expand" class="icon ion-minus-round"></i>
+                                    </a>
+                                </td>
+                                <td><a>{{order[0].order_no}}</a></td>
+                                <td>{{order[0].date_entered|date}}</td>
+                                <td>{{orderItems(order)}}</td>
+                                <td>{{orderValue(order)|currency}}</td>
+                                <td ng-if="order[0].header.shippingsLength > 0">
+                                    <span class="fa fa-truck"></span>
+                                </td>
+                               
+                            </tr>
+                            <tr>
+                                <td colspan="6">
+                                    <div id="accordion{{$index}}" class="collapse">
+                                        <table class="table table-striped">
+                                            <tr>
+                                                <th>Product code</th>
+                                                <th>Description</th>
+                                                <th>Order quantity</th>
+                                                <th>Value</th>
+                                            </tr>
+                                            <tr ng-repeat="item in order">
+                                                <td><i class="fa fa-file-archive-o" ng-click="openNewClaim(null,customer,item.cprod_id)" style="cursor:pointer" title="Create claim"></i>&nbsp; {{item.cprod_code1}}</td>
+                                                <td>{{item.cprod_name}}</td>
+                                                <td>{{item.order_qty}}</td>
+                                                <td>{{item.value}}</td>
+                                            </tr>
+                                            <!--<tr ng-if="order[0].header.shippings.length > 0">-->
+                                            <tr ng-if="order[0].header.shippingsNumber">
+                                                <td style="font-weight:bold; background-color: #dff0d8 !important;">REF NUMBERS: </td>
+                                                <td style="background-color: #dff0d8 !important;"colspan="4">
+                                                    <div>
+                                                        {{order[0].header.shippingsNumber}}
+                                                        <!--{{orderShippingRefNumbers(order[0])}}-->
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+            </content>
+            <footer class="panel-footer">
+                <ul ng-show="!newPaging" class="pagination pull-right">
+                    <li ng-class="{'disabled ended':pager.currentPage === 1}"
+                        ng-if="pager.totalPages>10">
+                        <a ng-click="setPage(1)" href="">First</a>
+                    </li>
+                    <li ng-class="{'disabled ended':pager.currentPage === 1}">
+                        <a ng-click="setPage(pager.currentPage - 1)" href="">
+                            <i class="ion ion-ios7-arrow-back"></i>
+                        </a>
+                        <!-- Previous -->
+                    </li>
+
+                    <li ng-repeat="page in pager.pages" ng-class="{'active':pager.currentPage===page }" >
+                        <a ng-click="setPage(page)" href="">{{page}}</a>
+                    </li>
+
+                    <li ng-class="{'disabled ended':pager.currentPage === pager.totalPages}">
+                        <a ng-click="setPage(pager.currentPage + 1)" href="">
+                            <i class="ion ion-ios7-arrow-forward"></i>
+                        </a>
+                        <!-- Next -->
+                    </li>
+                    <li ng-class="{'disabled ended':pager.currentPage === pager.totalPages}" ng-if="pager.totalPages>10">
+                        <a ng-click="setPage(pager.totalPages)" href="">Last <small>({{pager.totalPages}})</small></a>
+                    </li>
+                </ul>
+
+                <ul ng-show="newPaging"
+                    uib-pagination 
+                    class="pagination-sm pull-right"
+                    total-items="totalItems"
+                    rotate="false"
+                    boundary-link-numbers="true"
+                    rotate="true"
+                    max-size="5"
+                    ng-model="currentPage"
+                    ng-change="pageChanged(currentPage)">
+                </ul>
+            </footer>
+        </section>
+    </div> <!--*** END ORDER DETAILS ***-->
+</div>
+
+<!--row-->

@@ -1,0 +1,24 @@
+<div >
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th style="width: 10%">Brand Code</th>
+                    <th>Brand description</th>
+                    <th style="width: 5%">Removed from brochure</th>                    
+                    <th style="width: 5%">Removed from commercial site</th>                    
+                    <th style="width: 5%">Removed from UK distributor site</th>                    
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let p of products, let ix = index">
+                    <td>{{p.cprod_code1}}</td>
+                    <td>{{p.cprod_name}}</td>
+                    <td><input type="checkbox" [(ngModel)]="p.extraData.removed_brochure" (change)="checkUpdate(p)"></td>
+                    <td><input type="checkbox" [(ngModel)]="p.extraData.removed_website" (change)="checkUpdate(p)"></td>
+                    <td><input type="checkbox" [(ngModel)]="p.extraData.removed_distributor" (change)="checkUpdate(p)"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    

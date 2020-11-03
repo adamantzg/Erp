@@ -1,0 +1,268 @@
+﻿@using company.Common
+@model AnalysisProductInfoModel
+
+@{
+    ViewBag.Title = "title";
+    Layout = null;
+}
+
+<html>
+    <head>
+        <style>
+            body {
+                font-family: arial;
+                font-size: 11px;
+            }
+             .clienttable_header {
+                 background-color: #B9C9FE; 
+                 color:#4033AC
+
+             }
+            .center {
+                text-align: center;
+            }
+            .number {
+                text-align: right;
+            }
+            td {
+                font-family: arial;
+                font-size: 11px;
+                border: 1px solid black;
+            }
+            .subheading {
+                font-weight: bold;
+                font-size: 16px;
+            }
+        </style>
+    </head>
+    <body>
+    <p>
+        @string.Format("{0:P2} of products have affected the lead time of {1:P0} of the live (unshipped) orders",
+            Model.OrdersAnalysisProductReport.NumOfLateProducts*1.0/Model.OrdersAnalysisProductReport.NumOfProducts,
+            Model.OrdersAnalysisProductReport.NumOfOrdersWithLateProducts*1.0/Model.OrdersAnalysisProductReport.NumOfOrders)
+    </p>    
+    @{
+	    var products = Model.OrdersAnalysisProductReport.Products.Where(p => Model.ShowNewProducts || !Model.OrdersAnalysisProductReport.NewProductIds.Contains(p.Product?.cprod_id)).ToList();
+
+		var totalCount = products.Count;
+    }
+    <div>There are @totalCount products on this list.</div>
+        @for (int i = 0; i < Model.SummaryDataPoints.Count; i++)
+        {
+            <div>
+                @if (i == 0)
+                {
+                <span>Of these </span>
+                }
+                else
+                {
+                <span>A further </span>
+                }
+                @{
+                    var dataPoint = Model.SummaryDataPoints[i];
+                    var numOfProducts = i == 0 ? products.Count(p =>p.SalesPrev3m == 0 || (p.SalesLast3m/p.SalesPrev3m - 1) > dataPoint/100) :
+                        products.Count(p => (p.SalesLast3m/p.SalesPrev3m - 1) > dataPoint/100 && (p.SalesLast3m/p.SalesPrev3m - 1) <= Model.SummaryDataPoints[i - 1]/100);
+                }
+                <span>@numOfProducts (@((totalCount > 0 ? numOfProducts*1.0/totalCount : 0).ToString("P0"))) have had an increase in sales over the last 3 months greater than @dataPoint %</span>
+            </div>
+
+        }
+    @if (!Model.ShowNewProducts)
+    {
+	    <p>* We exclude products with less than six months of shipment history</p>
+    }
+    
+        
+        <h3>@(Model.Client != null ? Model.Client.customer_code : "") products on @(Model.Client == null ? "ALL" : "") live orders with lead time > @(Model.DaysLeadTime/7) weeks</h3>
+
+        <table style="width: 900px; border-collapse: collapse">
+            <tr>
+                <td colspan="10" class="subheading" style="border: 0">
+                    Products with sales increases
+                </td>
+            </tr>
+            <tr>
+                <td colspan="7" style="border: 0"></td>
+                <td colspan="3" style="border: 1px solid black">order history (units ordered)</td>
+                @if (Model.Factories != null)
+                {
+                    <td></td>
+                }
+
+
+            </tr>
+            <tr class="clienttable_header">
+                <td>Brand</td>
+                <td>Code</td>
+                <td>Description</td>
+                <td>Location</td>
+                <td>Quantity</td>
+                <td>how many orders</td>
+                <td>distributors</td>
+                <td>previous 3 months</td>
+                <td>last 3 months</td>
+                <td>increase/decrease</td>
+                @if (Model.Factories != null)
+                {
+                <td>Factory</td>
+                }
+
+            </tr>
+
+            @{
+                var rows = Model.OrdersAnalysisProductReport.Products.Where(r => (!Model.SeparateNewProducts && Model.ShowNewProducts) || r.SalesBeforeLastnMonths > 0).
+                    Select(r => new
+                    {
+                        brand = Model.Brands.FirstOrDefault(b => b.user_id == r.Product.brand_userid).IfNotNull(b => b.brandname),
+                        r.Product.cprod_code1,
+                        r.Product.cprod_name,
+                        r.Location,
+                        r.Qty,
+                        r.NumOfOrders,
+                        distributors = string.Join(",", r.Distributors),
+                        r.SalesPrev3m,
+                        r.SalesLast3m,
+                        ratio = r.SalesPrev3m > 0 ? (r.SalesLast3m / r.SalesPrev3m - 1) : double.PositiveInfinity,
+                        factory_code = Model.Factories != null ? Model.Factories.FirstOrDefault(f => f.user_id == r.Product.MastProduct.factory_id).IfNotNull(f => f.factory_code) : String.Empty
+                        ,r.Product.MastProduct.product_group
+                    }).ToList();
+            }
+            @{ double? currentRatio = double.MaxValue;}
+            @foreach (var r in rows.OrderByDescending(r => r.ratio))
+            {
+            //var brand = Model.Brands.FirstOrDefault(b => b.user_id == r.Product.brand_userid);
+            if (currentRatio >= 0 && r.ratio < 0 && Model.IncreaseDecreaseSplit)
+            {
+            <tr>
+                <td colspan="10" class="subheading" style="border: 0">
+                    Products with sales decreases
+                </td>
+            </tr>
+                <tr>
+                    <td colspan="7" style="border: 0"></td>
+                    <td colspan="3" style="border: 1px solid black">order history (units ordered)</td>
+                    @if (Model.Factories != null)
+                    {
+                    <td></td>
+                    }
+
+                </tr>
+                <tr class="clienttable_header">
+                    <td>Brand</td>
+                    <td>Code</td>
+                    <td>Description</td>
+                    <td>Location</td>
+                    <td>Quantity</td>
+                    <td>how many orders</td>
+                    <td>distributors</td>
+                    <td>previous 3 months</td>
+                    <td>last 3 months</td>
+                    <td>increase/decrease</td>
+                    @if (Model.Factories != null)
+                    {   
+                        <td>Factory</td>
+                    }
+
+                </tr>
+            }
+            currentRatio = r.ratio;
+            
+
+            <tr>
+                <td>@r.brand</td>
+                <td>@r.cprod_code1</td>
+                <td>@r.cprod_name</td>
+                <td>@r.Location</td>
+                <td class="number">@r.Qty</td>
+                <td class="number">@r.NumOfOrders</td>
+                <td>@r.distributors</td>
+                <td class="number">@r.SalesPrev3m</td>
+                <td class="number">@r.SalesLast3m</td>
+                <td class="number">@Html.Raw(r.ratio != double.PositiveInfinity && r.ratio < Convert.ToDouble(9.99) ? r.ratio.ToString("P0") : "> 999%")</td>
+                @if (Model.Factories != null)
+                {
+                    <td>@r.factory_code</td>
+                }
+            </tr>
+            }
+        </table>
+        
+        @if (Model.SeparateNewProducts && Model.ShowNewProducts)
+        {
+            <p class="subheading">New products</p>
+
+            <table style="width: 900px;border-collapse: collapse">  
+                <tr>
+                    <td colspan="7" style="border: 0"></td>
+                    <td colspan="3" style="border: 1px solid black">order history (units ordered)</td>
+                    @if (Model.Factories != null) {
+                    <td></td>
+                }
+
+                </tr>
+                <tr class="clienttable_header">
+                    <td>Brand</td>
+                    <td>Code</td>
+                    <td>Description</td>
+                    <td>Location</td>
+                    <td>Quantity</td>
+                    <td>how many orders</td>
+                    <td>distributors</td>
+                    <td>previous 3 months</td>
+                    <td>last 3 months</td>
+                    <td>increase/decrease</td>
+                    @if (Model.Factories != null)
+                    {
+                        <td>Factory</td>
+                    }
+
+                </tr>
+
+                @{
+              rows = Model.OrdersAnalysisProductReport.Products.Where(r => r.SalesBeforeLastnMonths <= 0).
+                Select(r => new
+                {
+                    brand = Model.Brands.FirstOrDefault(b => b.user_id == r.Product.brand_userid).IfNotNull(b => b.brandname),
+                    r.Product.cprod_code1,
+                    r.Product.cprod_name,
+                    r.Location,
+                    r.Qty,
+                    r.NumOfOrders,
+                    distributors = string.Join(",", r.Distributors),
+                    r.SalesPrev3m,
+                    r.SalesLast3m,
+                    ratio = r.SalesPrev3m > 0 ? (r.SalesLast3m / r.SalesPrev3m - 1) : double.PositiveInfinity,
+                    factory_code = Model.Factories != null ? Model.Factories.FirstOrDefault(f => f.user_id == r.Product.MastProduct.factory_id).IfNotNull(f => f.factory_code) : string.Empty,
+                    r.Product.MastProduct.product_group
+                }).ToList();
+                }
+
+                @foreach (var r in rows.OrderByDescending(r => r.ratio)) {
+                    //var brand = Model.Brands.FirstOrDefault(b => b.user_id == r.Product.brand_userid);
+
+                    <tr>
+                        <td>@r.brand</td>
+                        <td>@r.cprod_code1</td>
+                        <td>@r.cprod_name</td>
+                        <td>@r.Location</td>
+                        <td class="number">@r.Qty</td>
+                        <td class="number">@r.NumOfOrders</td>
+                        <td>@r.distributors</td>
+                        <td class="number">@r.SalesPrev3m</td>
+                        <td class="number">@r.SalesLast3m</td>
+                        <td class="number">@Html.Raw(r.ratio != double.PositiveInfinity && r.ratio < Convert.ToDouble(9.99)  ? r.ratio.ToString("P0") : "> 999%")</td>
+                        @if (Model.Factories != null) {
+                            <td>@r.factory_code</td>
+                        }
+
+                    </tr>
+                }
+            </table>
+        }
+
+        
+    </body>
+</html>
+
+
+

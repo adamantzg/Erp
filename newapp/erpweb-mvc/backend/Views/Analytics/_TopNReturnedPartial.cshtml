@@ -1,0 +1,154 @@
+﻿@using company.Common
+@model AnalyticsModel
+
+                
+<table>
+    <tr>
+        <td style="font-size:12px">P = PACKAGING, F = FUNCTION, D = DIMENSION, A = APPEARANCE, M = MATERIAL</td>
+    </tr>
+</table>
+@{
+    var brands = new List<string>();
+    if (Model.TopNReturnedProducts6m != null)
+    {
+        brands.AddRange(Model.TopNReturnedProducts6m.GroupBy(t => t.brand).Select(g => g.Key).ToList());    
+    }
+    if (Model.TopNReturnedProducts12m != null)
+    {
+        brands.AddRange(Model.TopNReturnedProducts12m.GroupBy(t => t.brand).Select(g => g.Key).ToList());    
+    }
+    
+    int row = 0;
+}
+
+@if (Model.TopNReturnedMode != TopNReturnedMode.Show12m)
+{
+    <table class="clienttable" >
+        <tr class="clienttable_header">
+            <td colspan="@(Model.SortTopNReturned == SortField.TotalAcceptedValue ? 12 : 11)" style="text-align: center; font-size: 12px; font-weight: bold">Last 6 months</td>
+        </tr>
+
+        <tr class="clienttable_header">
+            <td style="width: 100px">Code</td>
+            <td style="width: 300px">Name</td>
+            <td style="width: 70px" class="number">Units returned</td>
+            <td style="width: 30px" class="number">P</td>
+            <td style="width: 30px" class="number">F</td>
+            <td style="width: 30px" class="number">D</td>
+            <td style="width: 30px" class="number">A</td>
+            <td style="width: 30px" class="rightbordernumber">M</td>
+            <td style="width: 80px" class="number">Units delivered</td>
+            <td style="width: 60px" class="number">%</td>
+            @if (Model.SortTopNReturned == SortField.TotalAcceptedValue)
+            {
+                <td style="width:60px" class="number">Value (GBP)</td>
+            }
+            <td>Change notice</td>
+        </tr>
+
+    
+        @foreach (var r in Model.TopNReturnedProducts6m.GroupBy(t => t.cprod_code1).OrderByDescending(r => r.Sum(t => (Model.SortTopNReturned == SortField.ReturnToSalesRatio ? t.ReturnToSalesRatio : t.TotalAcceptedValue))).Take(AnalyticsModel.ReturnsTopRecords))
+        {
+
+            <tr @(row++%2 == 1 ? "class=alternaterow" : "")>
+                <td>@r.First().cprod_code1</td>
+                <td>@r.First().cprod_name</td>
+                @{ var totalShipped = r.Where(ret => ret.Reason.In("P", "F", "D", "A", "M")).Sum(ret => ret.TotalAccepted); }
+                <td class="number">@totalShipped</td>
+                <td class="number">@r.Where(ret => ret.Reason == "P").Sum(ret => ret.TotalAccepted)</td>
+                <td class="number">@r.Where(ret => ret.Reason == "F").Sum(ret => ret.TotalAccepted)</td>
+                <td class="number">@r.Where(ret => ret.Reason == "D").Sum(ret => ret.TotalAccepted)</td>
+                <td class="number">@r.Where(ret => ret.Reason == "A").Sum(ret => ret.TotalAccepted)</td>
+                <td class="rightbordernumber">@r.Where(ret => ret.Reason == "M").Sum(ret => ret.TotalAccepted)</td>
+                @{ var units = r.First().UnitsShipped; }
+                <td class="number">@units</td>
+                <td class="number">@((units != 0 ? totalShipped*1.0/units : 0.0).ToString("P2"))</td>
+                @if (Model.SortTopNReturned == SortField.TotalAcceptedValue)
+                {
+                    <td class="number">@r.Sum(ret => ret.TotalAcceptedValue).ToString("N0")</td>
+                }
+                <td>
+                        
+                </td>
+            </tr>
+        }
+    </table>
+}
+
+@if (Model.TopNReturnedMode != TopNReturnedMode.Show6m)
+{
+    <table class="clienttable">
+        <tr class="clienttable_header">
+            <td colspan="@(Model.SortTopNReturned == SortField.TotalAcceptedValue ? 12 : 11)" style="text-align: center; font-size: 12px; font-weight: bold">Last 12 months</td>
+        </tr>
+        <tr class="clienttable_header">
+            <td style="width: 100px">Code</td>
+            <td style="width: 300px">Name</td>
+            <td style="width: 70px" class="number">Units returned</td>
+            <td style="width: 30px" class="number">P</td>
+            <td style="width: 30px" class="number">F</td>
+            <td style="width: 30px" class="number">D</td>
+            <td style="width: 30px" class="number">A</td>
+            <td style="width: 30px" class="rightbordernumber">M</td>
+            <td style="width: 80px" class="number">Units delivered</td>
+            <td style="width: 60px" class="number">%</td>
+            @if (Model.SortTopNReturned == SortField.TotalAcceptedValue)
+            {
+                <td style="width:60px" class="number">Value (GBP)</td>
+            }
+            <td class="number">Change notice</td>
+        </tr>
+        @{ row = 0; }
+        @foreach (var r in Model.TopNReturnedProducts12m.Where(t => Model.TopNMinUnitsDelivered == null || t.UnitsShipped >= Model.TopNMinUnitsDelivered).GroupBy(t => t.cprod_code1).OrderByDescending(r => r.Sum(t => (Model.SortTopNReturned == SortField.ReturnToSalesRatio ? t.ReturnToSalesRatio : t.TotalAcceptedValue))).Take(AnalyticsModel.ReturnsTopRecords))
+        {
+            <tr @(row++ % 2 == 1 ? "class=alternaterow" : "")>
+                <td>@r.First().cprod_code1</td>
+                <td>@r.First().cprod_name</td>
+                @{ var totalShipped = r.Where(ret => ret.Reason.In("P", "F", "D", "A", "M")).Sum(ret => ret.TotalAccepted); }
+                <td class="number">@totalShipped</td>
+                <td class="number">@r.Where(ret => ret.Reason == "P").Sum(ret => ret.TotalAccepted)</td>
+                <td class="number">@r.Where(ret => ret.Reason == "F").Sum(ret => ret.TotalAccepted)</td>
+                <td class="number">@r.Where(ret => ret.Reason == "D").Sum(ret => ret.TotalAccepted)</td>
+                <td class="number">@r.Where(ret => ret.Reason == "A").Sum(ret => ret.TotalAccepted)</td>
+                <td class="rightbordernumber">@r.Where(ret => ret.Reason == "M").Sum(ret => ret.TotalAccepted)</td>
+                @{ var units = r.First().UnitsShipped; }
+                <td class="number">@units</td>
+                <td class="number">@((units != 0 ? totalShipped * 1.0 / units : 1.0).ToString("P2"))</td>
+                @*<td> @{
+                     var inv = Model.ProductInvestigations.Where(pi => pi.cprod_id == r.First().cprod_id).OrderByDescending(pi=>pi.date).Take(1).ToList();
+                     if (inv.Count > 0)
+                     {
+                         var status = Model.ProductInvestigationStatuses.FirstOrDefault(s=>s.id == inv[0].status);
+                         if (status != null)
+                         {
+                             @status.name    
+                         }
+                            
+                     }
+                 }</td>*@
+                @if (Model.SortTopNReturned == SortField.TotalAcceptedValue)
+                {
+                    <td class="number">@r.Sum(ret => ret.TotalAcceptedValue).ToString("N0")</td>
+                }
+                <td class="number">
+                    @{
+                        var cprod_id = r.First().cprod_id;
+                        if (Model.dictProductChangeNotices.ContainsKey(cprod_id))
+                        {
+                            foreach (var c in Model.dictProductChangeNotices[cprod_id])
+                            {
+                                if (!string.IsNullOrEmpty(c.filename))
+                                {
+                                    if (!string.IsNullOrEmpty(Path.GetExtension(c.filename)))
+                                    {
+                                        <a href="@Path.Combine(Settings.Default.ChangeNoticeRootFolder, c.filename)" target="_blank"><img src="@WebUtilities.GetSiteUrl()/images/doctypes/@(Path.GetExtension(c.filename).Substring(1)).gif"/></a>
+                                    }
+                                }
+                            }
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+}

@@ -1,0 +1,1323 @@
+﻿@model backend.Models.NpdModel
+
+@{
+    Layout = null;    
+}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>New Product Development Interface - NPD</title>
+    <link href="~/Content/npd/demo.css" rel="stylesheet" />
+    <link href="~/Content/npd/main.css" rel="stylesheet" />
+    @Styles.Render("~/Content/themes/base/css")
+    <link rel="stylesheet" type="text/css" href="~/Content/npd/style2.css" />
+        <link href='//fonts.googleapis.com/css?family=Terminal+Dosis' rel='stylesheet' type='text/css' />
+    <link href="~/Scripts/spellcheck/themes/classic/ieonly.css" rel="stylesheet" />
+    <link href="~/Scripts/spellcheck/themes/classic/context-menu.css" rel="stylesheet" />
+    @*<link href="/Scripts/lytebox/lytebox.css" rel="stylesheet"/>*@
+    <link href="/Scripts/lightbox/css/lightbox.css" rel="stylesheet"/>
+    @*<link href="/Scripts/lightbox/css/screen.css" rel="stylesheet"/>*@
+    <style type="text/css">
+        /*#catsTable tr:nth-child(even) {background-color: #F4f4f4}*/
+        .ui-tabs .ui-tabs-panel {
+            padding: 0;
+        }
+        .ui-widget-header {
+            border: 0;
+            background: inherit;
+        }
+        .ui-widget-content {
+            border: 0;
+        }
+        .ui-widget-header .ui-state-default {
+            background: #6499d3;
+            color: white;
+        }
+        .ui-state-default a, .ui-state-default a:link, .ui-state-default a:visited {
+            color: white;
+        }
+        .ui-corner-all, .ui-corner-top, .ui-corner-right, .ui-corner-tr 
+        { -moz-border-radius-topright: 10px/*{cornerRadius}*/; 
+          -webkit-border-top-right-radius: 10px/*{cornerRadius}*/; 
+          -khtml-border-top-right-radius: 10px/*{cornerRadius}*/; 
+          border-top-right-radius: 10px/*{cornerRadius}*/; 
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="@Url.Action("Index")"><img class="logo_img" src="/images/npd/LogoCol300px.jpg" alt="logo"/></a>
+        <span class="title">New Product Development Interface - NPD</span>
+        
+        <div id="page1" class="bottom_margin" data-bind="visible: page() == '1'">
+            <span class="sub_title">Please select from the following options</span>
+            <input class="menu_option" name="" type="button" value="Initiate NPD" id="btnNewNpd"/>
+            <input class="menu_option" name="" type="button" value="Update existing product" id="btnUpdateNpd"/>
+        </div>
+        
+        <div id="page2a" class="bottom_margin" data-bind="visible: page() == '2a'" style="display: none">
+            <span class="sub_title">Check which brands will include this product</span>
+         
+            <table width="60%" border="0" cellspacing="1" cellpadding="1" style="margin: 20px 0 0 20px; font-size:16px; float:left">
+                <tbody data-bind="foreach: Brands">
+                    <tr>
+                        <td data-bind="text: brandname"></td>
+                        <td>
+                            <input  type="checkbox" data-bind="attr: { value: brand_id },checked: $root.Npd.Brands" />
+                        </td>
+                    </tr>    
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><span class="grey">Note: at least one brand must be checked to proceed!</span></td>
+                        <td>
+                            <input class="button" type="button" value="next" id="btnPage2aNext" data-bind="enable: Npd.Brands() != null && Npd.Brands().length > 0" />
+                            <input class="button" type="button" value="previous" id="btnPage2aPrevious" />
+                        </td>
+                    </tr>
+                </tfoot>
+  
+            </table>
+        </div>
+        
+        <div id="page3a" class="bottom_margin" data-bind="visible: page() == '3a'" style="display: none">
+            <span class="sub_title">Select product type</span>
+            <table id="catsTable" width="60%" border="0" cellspacing="1" cellpadding="1" style="margin: 20px 0 0 20px; font-size:16px; float:left">
+                <tbody data-bind="foreach: Categories">
+                    <tr>
+                        @*<td data-bind="text: brand_cat_desc"></td>*@
+                        <td data-bind="text: cat1_name"></td>
+                        <td>
+                            @*<input type="checkbox" data-bind="attr: { value: brand_cat_id },checked: $root.Npd.Categories"/>*@
+                            <input type="checkbox" data-bind="attr: { value: category1_id },checked: $root.Npd.Categories"/>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><span class="grey">Note: at least one type must be checked to proceed!</span></td>
+                        <td>
+                            <input class="button" id="btnPage3aNext" type="button" value="next" data-bind="enable: Npd.Categories() != null && Npd.Categories().length > 0"/>
+                            <input class="button" type="button" value="previous" id="btnPage3aPrevious" />
+                        </td>
+                    </tr>    
+                </tfoot>
+            </table>
+        </div>
+        
+        <div id="page4a" class="bottom_margin" data-bind="visible: page() == '4a'" style="display: none">
+            
+            <span class="sub_title">Add any documents, drawings, pictures</span>
+            <table width="60%" border="0" cellspacing="1" cellpadding="1" style="margin: 20px 0 0 20px; font-size:16px; float:left">
+                <tbody data-bind="foreach: Npd.Files">
+                    <tr>
+                        <td data-bind="text: filename" ></td>
+                        <td data-bind="text: DisplayProgress"></td>
+                        <td>
+                            <select data-bind="options: $root.FileTypes, optionsValue: 'type_id', optionsText: 'name',value:filetype_id "></select>
+                        </td>
+                        <td>
+                            <a href="javascript:void(0)" data-bind="click: $root.DeleteFile"><img src="/Images/menus/Delete.gif"/></a>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4">
+                            @*<input class="button" id="uploadFiles" type="button" value="Upload files"/>*@<input class="button" id="pickfiles" type="button" value="Select files"/> 
+                        </td>
+                    </tr>
+                    <tr>
+                        
+                        <td colspan="4">
+                            <input class="button" id="btnPage4aNext" type="button" value="next" />
+                            <input class="button" type="button" value="previous" id="btnPage4aPrevious" />
+                        </td>
+                    </tr>    
+                </tfoot>
+            </table>
+        </div>
+        <div id="page5a" class="bottom_margin" data-bind="visible: page() == '5a'" style="display: none">
+    
+            <table width="50%" border="0" cellspacing="1" cellpadding="1" style="margin: 20px 0 0 20px; font-size:16px; float:left">
+                <tr>
+                    <td height="25" style="color:#033D6A; font-size: 20px">Add a description for the project</td>
+                </tr>
+                <tr> 
+                    <td height="25" style="color:#033D6A; font-size: 14px;">(limited to 50 characters)</td>
+                </tr>
+    	
+                <tr>
+                    <td><textarea class="simple-input"  name="" cols="" rows="3" data-bind="value: Npd.prod_name"></textarea></td>
+                </tr>
+                <tr>
+                    <td height="25" style="color:#033D6A; font-size: 20px">Notes</td>
+                </tr>
+                <tr> 
+                    <td height="25" style="color:#033D6A; font-size: 14px;">(limited to 500 characters)</td>
+                </tr>
+ 
+                <td><textarea class="simple-input" id="txtDescription" name="" cols="" rows="8" data-bind="value: Npd.description"></textarea></td>
+              
+                <tr>
+                    <td><input class="button" id="btnPage5aSpell" name="" type="button" value="spell check" /></td>
+                </tr>
+                <tr>
+                    <td>
+                        <input class="button" id="btnPage5aNext" name="" type="button" value="next" data-bind="enable: Npd.prod_name() != null && Npd.prod_name().length > 0"/>
+                        <input class="button" type="button" value="previous" id="btnPage5aPrevious" data-bind="enable: Npd.prod_name() != null && Npd.prod_name().length > 0"/>
+                    </td>
+                </tr>
+            </table>
+
+
+
+        </div>
+        <div id="page6a" class="bottom_margin" data-bind="visible: page() == '6a' || page() == '3b'" style="display: none">
+            <span class="sub_title">Review your NPD details</span>
+            <table width="70%" border="0" cellspacing="1" cellpadding="1" style="margin: 20px 0 0 20px; font-size:16px">
+                <tbody>
+                    <tr>
+                        <td width="150" height="20"><span class="dark_blue">User</span></td>
+                        <td >(<span data-bind="text: CollectUsers()"></span>)</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td width="150" height="20"><span class="dark_blue">Date</span></td>
+                        <td data-bind="text: formatDate(Npd.DateCreated())"></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td width="150" height="20"><span class="dark_blue">REF.</span></td>
+                        <td data-bind="text: Npd.tracking_num"></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td width="150" height="20"><span class="dark_blue">Description</span></td>
+                        <td >
+                            <span data-bind="text: Npd.prod_name,visible: !editMode()"></span>
+                            <textarea class="simple-input"  name="" cols="" rows="3" data-bind="value: Npd.prod_name,visible: editMode()"></textarea>
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td width="150" height="20"><span class="dark_blue">Notes</span></td>
+                        <td >
+                            <span data-bind="text: Npd.description, visible: !editMode()"></span>
+                            <textarea class="simple-input"  name="" cols="" rows="3" data-bind="value: Npd.description, visible: editMode()"></textarea>
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td width="150" height="20"><span class="dark_blue">BRAND/S</span></td>
+                        <td >
+                            <span data-bind="text: DisplaySelectedBrands(),visible: !editMode()"></span>
+                            <div data-bind="foreach: Brands,visible: editMode()">
+                                <input  type="checkbox" style="width: auto" data-bind="attr: { value: brand_id }, checked: $root.Npd.Brands" />&nbsp;<span data-bind="text: brandname"></span>
+                            </div>
+                            @*<span data-bind="text: brand_names, visible: page() == '3b'"></span>*@
+                        </td>
+                        <td><input class="button_small" name="" type="button" value="edit" data-bind="visible: page()=='3b' && !editMode(),click: $root.Edit" /></td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr data-bind="visible: editMode">
+                        <td colspan="4" style="height: 10px">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td width="150" height="20"><span class="dark_blue">Product types</span></td>
+                        <td >
+                            <span data-bind="text: DisplaySelectedCategories(),visible: !editMode()"></span>
+                            <div data-bind="foreach: Categories, visible: editMode()">
+                                @*<input  type="checkbox" style="width:auto" data-bind=" attr: { value: brand_cat_id }, checked: $root.Npd.Categories" />&nbsp;<span data-bind="text: brand_cat_desc"></span>*@
+                                <input  type="checkbox" style="width:auto" data-bind=" attr: { value: category1_id }, checked: $root.Npd.Categories" />&nbsp;<span data-bind="text: cat1_name"></span>
+                            </div>
+                            @*<span data-bind="text: category_names, visible: page() == '3b'"></span>*@
+                        </td>
+                        <td>@*<input class="button_small" name="" type="button" value="edit" />*@</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    
+                    
+                </tbody>
+                
+            </table>
+        </div>
+        
+        <div id="page8" class="bottom_margin" data-bind="visible: page() == '6a' || page() == '3b'" style="display: none">
+            
+            <div id="commentsTabs">
+                <ul data-bind="visible: CanViewExternalComments() && CanViewInternalComments()">
+                    <li><a href="#External">External Discussion</a>
+                    </li>
+                    <li><a href="#Internal">Internal Discussion</a></li>
+                </ul>
+                
+                <div id="External" data-bind="visible: CanViewExternalComments">
+                    <table id="comments" width="90%" border="0" cellspacing="0" cellpadding="5" style="font-size:12px; border-collapse:separate;">
+                        <tbody data-bind="visible: page() == '3b'">
+                            
+                            <tr data-bind="visible: CanEditExternalComments">
+                                <td style="padding: 5px" width="150" bgcolor="#f4f4f4"><span class="dark_blue">Add new comment</span></td>
+                                <td colspan="3" bgcolor="#f4f4f4" style="padding: 5px"><textarea class="simple-input" id="txtComment" name="" cols="" rows="4" data-bind="value: NewComment.comments"></textarea></td>
+                            </tr>
+                            <tr style="background-color: #f4f4f4" data-bind="visible: CanEditExternalComments">
+                                <td></td>
+                                <td colspan="3">
+                                    <div id="commentUploader" >
+                                        <table style="width:100%">
+                                            <tbody data-bind="foreach: NewComment.Files">
+                                                <tr>
+                                                    <td data-bind="text: filename" ></td>
+                                                    <td data-bind="text: DisplayProgress"></td>
+                                                    <td>
+                                                        <select data-bind="options: $root.FileTypes, optionsValue: 'type_id', optionsText: 'name', value: filetype_id "></select>
+                                                    </td>
+                                                    <td>
+                                                        <a href="javascript:void(0)" data-bind="click: $root.DeleteFile"><img src="/Images/menus/Delete.gif"/></a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="4" style="padding: 5px">
+                                                        <input class="button" name="" id="btnCreateComment" type="button" value="add" data-bind="visible: Npd.prod_id() > 0, click: $root.CreateCommentExt " />
+                                                        <input class="button" id="btnPage3bSpell" name="" type="button" value="spell check" />
+                                                        <input class="button" id="pickCommentfiles" type="button" value="Select files"/> 
+                                                
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        
+                                        </table>
+                                
+
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">
+                            
+
+                                    <table style="width: 100%" id="commentTable">
+                                        <tbody data-bind="foreach: ExternalComments">
+                                            <tr>
+                                                <td style="background-color: #f4f4f4;width:150px"><span data-bind="text: formatDateTime(comments_date())"></span>
+                                                    <br/><span class="dark_blue" data-bind="text: CheckDisplayException(FromUser.userwelcome())"></span>
+                                                </td>
+                                                <td colspan="3" style="background-color: #f4f4f4">
+                                                    <span class="dark_blue" data-bind="text: comments"></span>
+
+                                                    <div data-bind="foreach: Files">
+                                                        <div class="commentfile_box">
+                                                            <span data-bind=" 'if': $data.filetype_id() == 1">
+                                                                <a data-bind="attr: { href: $root.GetFileUrl($data), 'class': $root.GetFileClass($data) }">
+                                                                    <img data-bind="attr: { src: $root.GetFileImage($data) }" style="max-width: 150px;max-height: 150px"/>
+                                                                </a>
+                                                            </span>
+
+                                                            <span data-bind=" 'if': $data.filetype_id() != 1">
+                                                                <a data-bind="attr: { href: $root.GetFileUrl($data), 'class': $root.GetFileClass($data), 'if': $data.filetype_id() != 1, 'data-lightbox': $parent.comments_id() }">
+                                                                    <img data-bind="attr: { src: $root.GetFileImage($data) }" style="max-width: 150px;max-height: 150px"/>
+                                                                </a>
+                                                            </span>
+
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                       
+                                            </tr>
+                                    
+                                                    
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">&nbsp;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div id="Internal" data-bind="visible: CanViewInternalComments">
+                    <table id="comments" width="90%" border="0" cellspacing="0" cellpadding="5" style="font-size:12px; border-collapse:separate;">
+                        <tbody data-bind="visible: page() == '3b'">
+                            
+                            <tr data-bind="visible: CanEditInternalComments">
+                                <td style="padding: 5px" width="150" bgcolor="#f4f4f4"><span class="dark_blue">Add new comment</span></td>
+                                <td colspan="3" bgcolor="#f4f4f4" style="padding: 5px"><textarea class="simple-input" id="txtComment" name="" cols="" rows="4" data-bind="value: NewCommentInt.comments"></textarea></td>
+                            </tr>
+                            <tr style="background-color: #f4f4f4" data-bind="visible: CanEditInternalComments">
+                                <td></td>
+                                <td colspan="3">
+                                    <div id="commentUploaderInt" >
+                                        <table style="width:100%">
+                                            <tbody data-bind="foreach: NewCommentInt.Files">
+                                                <tr>
+                                                    <td data-bind="text: filename" ></td>
+                                                    <td data-bind="text: DisplayProgress"></td>
+                                                    <td>
+                                                        <select data-bind="options: $root.FileTypes, optionsValue: 'type_id', optionsText: 'name', value: filetype_id "></select>
+                                                    </td>
+                                                    <td>
+                                                        <a href="javascript:void(0)" data-bind="click: $root.DeleteFile"><img src="/Images/menus/Delete.gif"/></a>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    <td colspan="4" style="padding: 5px">
+                                                        <input class="button" name="" id="btnCreateComment" type="button" value="add" data-bind="visible: Npd.prod_id() > 0, click: $root.CreateCommentInt " />
+                                                        <input class="button" id="btnPage3bSpellInt" name="" type="button" value="spell check" />
+                                                        <input class="button" id="pickCommentfilesInt" type="button" value="Select files"/> 
+                                                
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        
+                                        </table>
+                                
+
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4">
+                            
+
+                                    <table style="width: 100%" id="commentTable">
+                                        <tbody data-bind="foreach: InternalComments">
+                                            <tr>
+                                                <td style="background-color: #f4f4f4;width:150px"><span data-bind="text: formatDateTime(comments_date())"></span>
+                                                    <br/><span class="dark_blue" data-bind="text: CheckDisplayException(FromUser.userwelcome())"></span>
+                                                </td>
+                                                <td colspan="3" style="background-color: #f4f4f4">
+                                                    <span class="dark_blue" data-bind="text: comments"></span>
+
+                                                    <div data-bind="foreach: Files">
+                                                        <div class="commentfile_box">
+                                                            <span data-bind=" 'if': $data.filetype_id() == 1">
+                                                                <a data-bind="attr: { href: $root.GetFileUrl($data), 'class': $root.GetFileClass($data) }">
+                                                                    <img data-bind="attr: { src: $root.GetFileImage($data) }" style="max-width: 150px;max-height: 150px"/>
+                                                                </a>
+                                                            </span>
+
+                                                            <span data-bind=" 'if': $data.filetype_id() != 1">
+                                                                <a data-bind="attr: { href: $root.GetFileUrl($data), 'class': $root.GetFileClass($data), 'if': $data.filetype_id() != 1, 'data-lightbox': $parent.comments_id() }">
+                                                                    <img data-bind="attr: { src: $root.GetFileImage($data) }" style="max-width: 150px;max-height: 150px"/>
+                                                                </a>
+                                                            </span>
+
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                       
+                                            </tr>
+                                    
+                                                    
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tr>
+                            <td colspan="4">&nbsp;</td>
+                        </tr>
+                    </table>
+
+                </div>
+
+             
+            </div>
+            
+            <table id="comments" width="90%" border="0" cellspacing="0" cellpadding="5" style="margin: 20px 0 0 20px; font-size:12px;  border-collapse:separate;">
+                        
+                <tbody data-bind="foreach: SelectedFileTypes">
+                    <tr>
+                        <td colspan="4">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td><span class="dark_blue" data-bind="text: name"></span></td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4">
+                            <div data-bind="foreach: $root.FilesForType($data).sort(function (l, r) { return l.DateCreated() > r.DateCreated() ? -1 : 1; })">
+                                <div style="float:left;margin-right: 5px">
+                                    <span data-bind=" 'if': $data.filetype_id() == 1">
+                                        <a data-bind="attr: { href: $root.GetFileUrl($data), 'class': $root.GetFileClass($data) }">
+                                            <img data-bind="attr: { src: $root.GetFileImage($data) }" style="max-width: 150px;max-height: 150px"/>
+                                        </a>
+                                    </span>
+                                    <span data-bind=" 'if': $data.filetype_id() != 1">
+                                        <a data-bind="attr: { href: $root.GetFileUrl($data), 'class': $root.GetFileClass($data), 'if': $data.filetype_id() != 1, 'data-lightbox': 'files' }">
+                                            <img data-bind="attr: { src: $root.GetFileImage($data) }" style="max-width: 150px;max-height: 150px"/>
+                                        </a>
+                                    </span>
+                                    <br/>
+                                    <span><span data-bind="text: Creator"></span> <span data-bind="    text: formatDate(DateCreated())"></span></span>
+                                </div>
+
+                                
+
+                            </div>
+
+                        </td>
+                    </tr>
+                </tbody>
+
+                <tfoot>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td><input class="button" name="" id="btnPage6aConfirm" type="button" value="confirm" data-bind="visible: page() == '6a'"/>
+                            <input class="button" name="" id="btnPage6aPrevious" type="button" value="previous" data-bind="visible: page() == '6a'"/>
+                            <input class="button" name="" id="btnPage3bSaveChanges" type="button" value="confirm" data-bind="visible: editMode(), click: $root.SaveChanges" />
+                        </td>
+
+                    </tr>
+                </tfoot>
+            </table>
+
+            
+            
+
+        </div>
+        
+        <div id="page2b" class="bottom_margin" data-bind="visible: page() == '2b'" style="display: none">
+            <span class="sub_title">Select an existing NPD</span>
+        
+            <table class="table_two" width="94%"  border="0" cellspacing="1" cellpadding="1" style="margin: 20px 0 0 20px; font-size:16px; float:left">
+                <thead>
+                    <tr>
+                        <td class="title_row2">Ref</td>
+                        <td class="title_row2">Description </td>
+                        <td class="title_row2">Brand</td>
+                        <td class="title_row2">Status</td>
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: Npds">
+                    <tr>
+                        <td><a class="table_link" href="javascript:void(0)" data-bind="click: $root.ShowNpd, text: tracking_num"></a></td>
+                        <td data-bind="text: prod_name"></td>
+                        <td data-bind="text: brand_names"></td>
+                        <td data-bind="text: status_name"></td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        
+                        <td colspan="4">
+                            
+                            <input class="button" name="" id="btnPage2bPrevious" type="button" value="previous" />
+                        </td>
+
+                    </tr>
+                </tfoot>
+
+            </table>
+
+        </div>
+                
+    </div>
+    
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script src="/Scripts/functions.js" type="text/javascript"></script>
+    <script src="~/Scripts/spellcheck/include.js"></script>
+    <script src="/Scripts/lightbox/js/lightbox-2.6.min.js" type="text/javascript"></script>
+    @*<script src="/Scripts/lytebox/lytebox.js"></script>*@
+    @Html.GlobalizationScript()   
+    
+    @Scripts.Render("~/bundles/knockout")
+    <script src="~/Scripts/plupload/plupload.full.js"></script>
+    <script type="text/javascript">
+        var model = ko.mapping.fromJS(@Html.Raw(Json.Encode(Model)));
+
+        $(function() {
+            model.page = ko.observable('1');
+            model.Npd.Brands = ko.observableArray();
+            model.Npd.Categories = ko.observableArray();
+            model.Npd.Files = ko.observableArray();
+            model.Npd.Comments = ko.observableArray();
+            model.Npd.status_id = 1;
+            model.editMode = ko.observable(false);
+
+            model.EmptyComment = ko.mapping.fromJSON('@Html.Raw(Json.Encode(new Npd_comments()))');
+            model.EmptyCommentInt = ko.mapping.fromJSON('@Html.Raw(Json.Encode(new Npd_comments{type = 2}))');
+            model.NewComment = ko.mapping.fromJSON('@Html.Raw(Json.Encode(new Npd_comments()))');
+            model.NewComment.Files = ko.observableArray();
+            model.NewCommentInt = ko.mapping.fromJSON('@Html.Raw(Json.Encode(new Npd_comments{type = 2}))');
+            model.NewCommentInt.Files = ko.observableArray();
+
+            //model.Categories = ko.observableArray();
+            model.DeleteFile = function(data) {
+                var file = FindFile(data.file_id());
+                if (file != null) {
+                    model.Npd.Files.remove(file);
+                    DeleteTempFile(file.filename());
+                }
+            };
+            model.GetFileImage = function(data) {
+                if (data != null) {
+                    var id = parseInt(data.file_id());
+                    var isdoc = data.filetype_id() == 1;
+
+                    if (isNaN(id))
+                        return isdoc ? model.GetDocIcon(data) : '@Url.Action("GetTempFile")/?file=' + data.filename();
+                    else {
+                        return isdoc ? model.GetDocIcon(data) : '@Url.Action("GetFile")/?filename=' + data.filename();
+                    }
+                }
+                return '';
+            };
+            model.GetFileUrl = function(data) {
+                if (data != null) {
+                    var id = parseInt(data.file_id());
+
+                    if (isNaN(id))
+                        return '@Url.Action("GetTempFile")/?file=' + escape(data.filename());
+                    else {
+                        return '@Url.Action("GetFile")/?filename=' + escape(data.filename());
+                    }
+                }
+                return '';
+            };
+            model.GetDocIcon = function(data) {
+                var ext = GetExtension(data.filename());
+                var image = 'document_50px.png';
+                if (ext == 'doc' || ext == 'docx')
+                    image = 'word_50px.png';
+                if (ext == 'xls' || ext == 'xlsx')
+                    image = 'excel_50px.png';
+                if (ext == 'pdf')
+                    image = 'pdf_50px.png';
+
+                return $.validator.format('/images/doctypes/{0}', image);
+            };
+            model.GetFileStyle = function(data) {
+                if (data != null) {
+                    var isdoc = data.filetype_id() == 1;
+                    if (isdoc)
+                        return '';
+                    else
+                        return 'width: 135px;height:135px;';
+                }
+                return null;
+            };
+            model.GetFileClass = function(data) {
+                if (data != null) {
+                    var isdoc = data.filetype_id() == 1;
+                    if (isdoc)
+                        return '';
+                    else
+                        return '';
+                }
+                return null;
+            };
+            model.DisplaySelectedBrands = ko.computed(function() {
+                var result = [];
+                if (model.Npd.Brands() != null) {
+                    for (var i = 0; i < model.Npd.Brands().length; i++) {
+                        var foundBrand = $.grep(model.Brands(), function(elem) {
+                            return elem.brand_id() == model.Npd.Brands()[i];
+                        });
+                        if (foundBrand != null && foundBrand.length > 0)
+                            result.push(foundBrand[0].brandname());
+
+                    }
+                }
+                return result.join(',');
+            });
+            model.DisplaySelectedCategories = ko.computed(function() {
+                var result = [];
+                if (model.Npd.Categories() != null) {
+                    for (var i = 0; i < model.Npd.Categories().length; i++) {
+                        var foundCat = $.grep(model.Categories(), function(elem) {
+                            //return elem.brand_cat_id() == model.Npd.Categories()[i];
+                            return elem.category1_id() == model.Npd.Categories()[i];
+                        });
+                        if (foundCat != null && foundCat.length > 0)
+                            //result.push(foundCat[0].brand_cat_desc());
+                            result.push(foundCat[0].cat1_name());
+                    }
+                }
+                return result.join(',');
+            });
+
+            model.AllFiles = ko.computed(function() {
+                var result = [];
+                if (model.Npd.Files() != null) {
+                    for (var i = 0; i < model.Npd.Files().length; i++) {
+                        var file = model.Npd.Files()[i];
+                        file.Creator = ko.observable(CheckDisplayException(model.Npd.Creator.userwelcome()));
+                        file.DateCreated = ko.observable(model.Npd.DateCreated());
+                        result.push(file);
+                    }
+                }
+                if (model.Npd.Comments() != null) {
+                    for (var i = 0; i < model.Npd.Comments().length; i++) {
+                        var comment = model.Npd.Comments()[i];
+                        if ((comment.type() == 1 && model.CanViewExternalComments()) || (comment.type() == 2 && model.CanViewInternalComments()) ) {
+                            if (comment.Files() != null && comment.Files().length > 0) {
+                                for (var j = 0; j < comment.Files().length; j++) {
+                                    var commentFile = comment.Files()[j];
+                                    commentFile.Creator = ko.observable(CheckDisplayException(comment.FromUser.userwelcome()));
+                                    commentFile.DateCreated = ko.observable(comment.comments_date());
+                                    result.push(commentFile);
+                                }
+                            }
+                        }
+                    }
+                }
+                return result;
+            });
+
+            model.SelectedFileTypes = ko.computed(function() {
+                var result = [];
+                if (model.AllFiles() != null) {
+                    for (var i = 0; i < model.FileTypes().length; i++) {
+                        var foundFiles = $.grep(model.AllFiles(), function(elem) {
+                            return elem.filetype_id() == model.FileTypes()[i].type_id();
+                        });
+                        if (foundFiles.length > 0)
+                            result.push(model.FileTypes()[i]);
+                    }
+                }
+                return result;
+            });
+
+            model.FilesForType = function(data) {
+                var result = [];
+                if (model.AllFiles() != null) {
+                    result = $.grep(model.AllFiles(), function(elem) {
+                        return elem.filetype_id() == data.type_id() && elem.Progress() == 100;
+                    });
+
+                }
+                return ko.observableArray(result);
+            };
+            
+
+            //model.GetStatusName = function(data) {
+            //    var foundStatus = $.grep(model.Statuses(), function(elem) {
+            //        return elem.npdstatus_id() == data.status_id();
+            //    });
+            //    if (foundStatus.length > 0)
+            //        return foundStatus[0].name();
+            //    return '';
+            //};
+            model.CollectUsers = ko.computed(function() {
+
+                var users = [CheckDisplayException(model.Npd.Creator.userwelcome())];
+                for (var i = 0; i < model.Npd.Comments().length; i++) {
+                    var c = model.Npd.Comments()[i];
+                    var cUser = CheckDisplayException(c.FromUser.userwelcome());
+                    var foundUsers = $.grep(users, function(elem) { return elem == cUser; });
+                    if (foundUsers == null || foundUsers.length == 0)
+                        users.push(cUser);
+                }
+                return users.join(',');
+            });
+            model.ShowNpd = function(data) {
+                ko.mapping.fromJS(LoadNpd(data.prod_id()), {}, model.Npd);
+
+                $('#commentTable tr:nth-child(even) td').attr('style', 'background-color:#CCCCCC');
+                //initLytebox();
+                //load categories for selected brands
+                //ko.mapping.fromJS(LoadCategories(model.Npd.Brands()), {}, model.Categories);
+                //model.Npd.Brands.subscribe(function () {
+                //    ko.mapping.fromJS(LoadCategories(model.Npd.Brands()), {}, model.Categories);
+                //});
+                model.page('3b');
+                if (model.CanViewExternalComments() && model.CanViewInternalComments) {
+                    $('#commentsTabs').tabs();
+                }
+            };
+
+            model.Edit = function() {
+                model.editMode(true);
+            };
+
+            model.CreateCommentInt = function() {
+                this.CreateComment(2);
+            };
+
+            model.CreateCommentExt = function() {
+                this.CreateComment(1);
+
+            };
+
+            model.CreateComment = function(type) {
+                if (type == 1)
+                    model.NewComment.npd_id(model.Npd.prod_id());
+                else
+                    model.NewCommentInt.npd_id(model.Npd.prod_id());
+
+                var result;
+                $.ajax({
+                    url: '@Url.Action("CreateComment")',
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    async: false,
+                    dataType: "json",
+                    data: "{'comment': " + ko.toJSON(type == 1 ? model.NewComment : model.NewCommentInt) + "}",
+                    success: function(data) {
+                        result = data;
+                    },
+                    error: function(a, b, c) {
+                        alert("Error in creating record");
+                    }
+                });
+                result.comments_date = fromJSONDate(result.comments_date);
+
+                if (result.Files != null && result.Files.length > 0) {
+                    for (var i = 0; i < result.Files.length; i++) {
+                        result.Files[i].Progress = 100;
+                        result.Files[i].DisplayProgress = '';
+                    }
+                }
+                model.Npd.Comments.push(ko.mapping.fromJS(result));
+                $('#commentTable tr:nth-child(even) td').attr('style', 'background-color:#CCCCCC');
+                if (result.type == 1) {
+                    ko.mapping.fromJS(ko.toJS(model.EmptyComment), {}, model.NewComment);
+                    //model.NewComment.Files() = ko.observableArray([]);
+                    model.NewComment.Files([]);
+                    commentuploader.refresh();
+                } else {
+                    ko.mapping.fromJS(ko.toJS(model.EmptyCommentInt), {}, model.NewCommentInt);
+                    //model.NewCommentInt.Files = ko.observableArray([]);
+                    model.NewCommentInt.Files([]);
+                    commentuploaderint.refresh();
+                }
+            };
+        
+
+            model.ExternalComments = ko.computed(function () {
+                var result = [];
+                for (var i = 0; i < model.Npd.Comments().length; i++) {
+                    var comment = model.Npd.Comments()[i];
+                    if (comment.type() == 1)
+                        result.push(comment);
+                }
+                return result;
+            });
+
+            model.InternalComments = ko.computed(function () {
+                var result = [];
+                for (var i = 0; i < model.Npd.Comments().length; i++) {
+                    var comment = model.Npd.Comments()[i];
+                    if (comment.type() == 2)
+                        result.push(comment);
+                }
+                return result;
+            });
+            
+            
+            //for (var i = 0; i < model.Brands().length; i++) {
+            //    model.Brands()[i].selected = ko.observable(false);
+            //}
+            $('#btnNewNpd').click(function () {
+                model.Npd.DateCreated(new Date());
+                model.Npd.tracking_num(GetNewTrackingNo());
+                model.page('2a');
+            });
+            $('#btnUpdateNpd').click(function () {
+                model.page('2b');
+            });
+            $('#btnPage2aNext').click(function () {
+                //ko.mapping.fromJS(LoadCategories(model.Npd.Brands()), {}, model.Categories);
+                //$('#catsTable tr:nth-child(even) td').attr('style','background-color:#F4f4f4');
+                model.page('3a');
+            });
+            $('#btnPage2aPrevious').click(function () {
+                model.page('1');
+            });
+            $('#btnPage2bPrevious').click(function () {
+                model.page('1');
+            });
+            $('#btnPage3aNext').click(function () {
+                model.page('4a');
+            });
+            $('#btnPage3aPrevious').click(function () {
+                model.page('2a');
+            });
+            $('#btnPage4aNext').click(function () {
+                model.page('5a');
+            });
+            $('#btnPage4aPrevious').click(function () {
+                model.page('3a');
+            });
+            $('#btnPage5aNext').click(function() {
+                model.page('6a');
+            });
+            $('#btnPage5aPrevious').click(function () {
+                model.page('4a');
+            });
+            $('#btnPage5aSpell').click(function () {
+                $('#txtDescription').spellAsYouType();
+                //fix css
+                $('#txtDescription___livespell_proxy').css({ border: '2px solid #6499D3',width: '98%','border-radius': '5px' });
+            });
+            $('#btnPage3bSpell').click(function () {
+                $('#txtComment').spellAsYouType();
+                //fix css
+                $('#txtComment___livespell_proxy').css({ border: '2px solid #6499D3', width: '98%', 'border-radius': '5px' });
+            });
+            $('#btnPage6aConfirm').click(function () {
+                if ($('#txtComment').val() != '') {
+                    model.Npd.Comments = [];
+                    model.Npd.Comments.push(ko.mapping.fromJS(ko.toJS(model.NewComment)));
+                }
+                
+                CreateNpd();
+                location.href = '@Url.Action("Index")';
+            });
+            $('#btnPage6aPrevious').click(function () {
+                model.page('5a');
+            });
+
+            model.SaveChanges = function () {
+                model.Npd.Comments = [];
+                if ($('#txtComment').val() != '') {
+                    model.Npd.Comments.push(ko.mapping.fromJS(ko.toJS(model.NewComment)));
+                }
+                var newCat = [];
+                for (var i = 0; i < model.Npd.Categories().length; i++) {
+                    //newCat.push({ brand_cat_id: model.Npd.Categories()[i] });
+                    newCat.push({ category1_id: model.Npd.Categories()[i] });
+                }
+                model.Npd.Categories = newCat;
+                var brands = [];
+                for (var i = 0; i < model.Npd.Brands().length; i++) {
+                    brands.push({ brand_id: model.Npd.Brands()[i] });
+                }
+                model.Npd.Brands = brands;
+                $.ajax({
+                    url: '@Url.Action("Update")',
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    async: false,
+                    dataType: "json",
+                    data: "{'npd': " + ko.toJSON(model.Npd) + "}",
+                    success: function (data) {
+
+                    },
+                    error: function (a, b, c) {
+                        alert("Error in creating record");
+                    }
+                });
+                
+                location.href = '@Url.Action("Index")';
+            };
+            
+            ko.applyBindings(model);
+            
+            $('#catsTable tr:nth-child(even) td').attr('style','background-color:#F4f4f4');
+            
+            var runtimes;
+            $.browser.safari = ($.browser.safari && /chrome/.test(navigator.userAgent.toLowerCase())) ? false : true;
+            if ($.browser.safari) {
+                runtimes = 'flash,silverlight,html5,html4';
+            } else {
+                runtimes = 'gears,html5,flash,silverlight, browserplus';
+            }
+            
+            var uploader = new plupload.Uploader({
+                runtimes: runtimes,
+                browse_button: 'pickfiles',
+                container: 'page4a',
+                max_file_size: '@Settings.Default.Enquiries_MaxFileSize mb',
+                url: '@Url.Action("Files")',
+                flash_swf_url: '/Scripts/plupload/plupload.flash.swf',
+                silverlight_xap_url: '/Scripts/plupload/plupload.silverlight.xap'
+            });
+
+            uploader.bind('Init', function (up, params) {
+                
+            });
+
+            $('#uploadFiles').click(function (e) {
+                uploader.start();
+                e.preventDefault();
+            });
+
+            uploader.init();
+
+            uploader.bind('FilesAdded', function (up, files) {
+                $.each(files, function (i, file) {
+                    model.Npd.Files.push(new File(file.id, file.name, DetectType(file.name)));
+                });
+                uploader.start();
+                up.refresh(); // Reposition Flash/Silverlight
+            });
+
+            uploader.bind('UploadProgress', function (up, file) {
+                var foundFile = FindFile(file.id);
+                if(foundFile != null)
+                    foundFile.Progress(file.percent);
+            });
+
+            uploader.bind('Error', function (up, err) {
+                $('#files').append("<div>Error: " + err.code +
+                    ", Message: " + err.message +
+                    (err.file ? ", File: " + err.file.name : "") +
+                    "</div>"
+                );
+
+                up.refresh(); // Reposition Flash/Silverlight
+            });
+
+            uploader.bind('FileUploaded', function (up, file) {
+                var foundFile = FindFile(file.id);
+                if (foundFile != null)
+                    foundFile.Progress(100);
+            });
+            
+            var commentuploader = new plupload.Uploader({
+                runtimes: runtimes,
+                browse_button: 'pickCommentfiles',
+                container: 'commentUploader',
+                max_file_size: '@Settings.Default.Enquiries_MaxFileSize mb',
+                url: '@Url.Action("CommentFiles")',
+                flash_swf_url: '/Scripts/plupload/plupload.flash.swf',
+                silverlight_xap_url: '/Scripts/plupload/plupload.silverlight.xap'
+            });
+
+            commentuploader.bind('Init', function (up, params) {
+
+            });
+
+          
+            commentuploader.init();
+
+            commentuploader.bind('FilesAdded', function (up, files) {
+                $.each(files, function (i, file) {
+                    model.NewComment.Files.push(new File(file.id, file.name, DetectType(file.name)));
+                });
+                commentuploader.start();
+                up.refresh(); // Reposition Flash/Silverlight
+            });
+
+            commentuploader.bind('UploadProgress', function (up, file) {
+                var foundFile = FindCommentFile(file.id);
+                if (foundFile != null)
+                    foundFile.Progress(file.percent);
+            });
+
+            commentuploader.bind('Error', function (up, err) {
+                $('#files').append("<div>Error: " + err.code +
+                    ", Message: " + err.message +
+                    (err.file ? ", File: " + err.file.name : "") +
+                    "</div>"
+                );
+
+                up.refresh(); // Reposition Flash/Silverlight
+            });
+
+            commentuploader.bind('FileUploaded', function (up, file) {
+                var foundFile = FindCommentFile(file.id);
+                if (foundFile != null)
+                    foundFile.Progress(100);
+                up.refresh();
+            });
+            
+            var commentuploaderint = new plupload.Uploader({
+                runtimes: runtimes,
+                browse_button: 'pickCommentfilesInt',
+                container: 'commentUploaderInt',
+                max_file_size: '@Settings.Default.Enquiries_MaxFileSize mb',
+                url: '@Url.Action("CommentFilesInternal")',
+                 flash_swf_url: '/Scripts/plupload/plupload.flash.swf',
+                 silverlight_xap_url: '/Scripts/plupload/plupload.silverlight.xap'
+             });
+
+            commentuploaderint.bind('Init', function (up, params) {
+
+            });
+
+
+            commentuploaderint.init();
+
+            commentuploaderint.bind('FilesAdded', function (up, files) {
+                $.each(files, function (i, file) {
+                    model.NewCommentInt.Files.push(new File(file.id, file.name, DetectType(file.name)));
+                });
+                commentuploaderint.start();
+                up.refresh(); // Reposition Flash/Silverlight
+            });
+
+            commentuploaderint.bind('UploadProgress', function (up, file) {
+                var foundFile = FindCommentFileInt(file.id);
+                if (foundFile != null)
+                    foundFile.Progress(file.percent);
+            });
+
+            commentuploaderint.bind('Error', function (up, err) {
+                $('#files').append("<div>Error: " + err.code +
+                    ", Message: " + err.message +
+                    (err.file ? ", File: " + err.file.name : "") +
+                    "</div>"
+                );
+
+                up.refresh(); // Reposition Flash/Silverlight
+            });
+
+            commentuploaderint.bind('FileUploaded', function (up, file) {
+                var foundFile = FindCommentFileInt(file.id);
+                if (foundFile != null)
+                    foundFile.Progress(100);
+                up.refresh();
+            });
+            
+
+        });
+        
+        function CheckDisplayException(user) {
+            if (user == 'asaq1' || user=='Admin Master')
+                return 'Tim'; //Exception for npd
+            return user;
+        }
+        
+        function CreateNpd() {
+            //tranform categories
+            var newCat = [];
+            for (var i = 0; i < model.Npd.Categories().length; i++) {
+                //newCat.push({ brand_cat_id: model.Npd.Categories()[i] });
+                newCat.push({ category1_id: model.Npd.Categories()[i] });
+            }
+            model.Npd.Categories = newCat;
+            var brands = [];
+            for (var i = 0; i < model.Npd.Brands().length; i++) {
+                brands.push({ brand_id: model.Npd.Brands()[i] });
+            }
+            model.Npd.Brands = brands;
+            $.ajax({
+                url: '@Url.Action("Create")',
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                dataType: "json",
+                data: "{'npd': " + ko.toJSON(model.Npd) + "}",
+                success: function (data) {
+                    
+                },
+                error: function (a, b, c) {
+                    alert("Error in creating record");
+                }
+            });
+        }
+        
+        function LoadNpd(id) {
+            var result = null;
+            $.ajax({
+                url: '@Url.Action("Get")',
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                dataType: "json",
+                data: "{'id': " + id + "}",
+                success: function (data) {
+                    result = data;
+                },
+                error: function (a, b, c) {
+                    alert("Error in creating record");
+                }
+            });
+
+            result.DateCreated = fromJSONDate(result.DateCreated);
+            if (result.Comments != null && result.Comments.length > 0) {
+                for (var i = 0; i < result.Comments.length; i++) {
+                    var comment = result.Comments[i];
+                    comment.comments_date = fromJSONDate(comment.comments_date);
+                    if (comment.Files != null) {
+                        for (var j = 0; j < comment.Files.length; j++) {
+                            comment.Files[j].DisplayProgress = '';
+                            comment.Files[j].Progress = 100;
+                        }
+                    }
+                }
+            } else
+                result.Comments = [];
+            //transform brands and categories arrays for checkbox selection
+            var selBrands = [];
+            for (var i = 0; i < result.Brands.length; i++) {
+                selBrands.push(result.Brands[i].brand_id.toString());
+            }
+            result.Brands = selBrands;
+            var selCats = [];
+            for (var i = 0; i < result.Categories.length; i++) {
+                //selCats.push(result.Categories[i].brand_cat_id.toString());
+                selCats.push(result.Categories[i].category1_id.toString());
+            }
+            result.Categories = selCats;
+            
+            if (result.Files != null) {
+                for (var i = 0; i < result.Files.length; i++) {
+                    result.Files[i].DisplayProgress = '';
+                    result.Files[i].Progress = 100;
+                }
+            }
+            
+            return result;
+        }
+        
+        
+        function formatDate(date) {
+            return $.global.format(date, 'd');
+        }
+        
+        function formatDateTime(date) {
+            return $.global.format(date, 'dd/MM/yyyy HH:mm');
+        }
+        
+        function DetectType(filename) {
+
+            var ext = GetExtension(filename);
+            if (ext.length > 0) {
+                for (var i = 0; i < model.FileTypes().length; i++) {
+                    var extensions = model.FileTypes()[i].extensions().split(',');
+                    for (var j = 0; j < extensions.length; j++) {
+                        if (extensions[j].toLowerCase() == ext.toLowerCase())
+                            return model.FileTypes()[i].type_id();
+                    }
+                }
+                
+            }
+            return 1;
+        }
+
+        function GetExtension(filename) {
+            var parts = filename.split('.');
+            if (parts.length > 1) {
+                return parts[parts.length - 1];
+
+            }
+            return '';
+        }
+
+        function FindFile(id) {
+            var files = $.grep(model.Npd.Files(), function (elem) {
+                return elem.file_id() == id;
+            });
+            if (files.length > 0)
+                return files[0];
+            else {
+                return null;
+            }
+        }
+        
+        function FindCommentFile(id) {
+            var files = $.grep(model.NewComment.Files(), function (elem) {
+                return elem.file_id() == id;
+            });
+            if (files.length > 0)
+                return files[0];
+            else {
+                return null;
+            }
+        }
+        
+        function FindCommentFileInt(id) {
+            var files = $.grep(model.NewCommentInt.Files(), function (elem) {
+                return elem.file_id() == id;
+            });
+            if (files.length > 0)
+                return files[0];
+            else {
+                return null;
+            }
+        }
+        
+
+        
+        function File(id,filename, filetype_id) {
+            this.file_id = ko.observable(id);
+            this.filename = ko.observable(filename);
+            this.filetype_id = ko.observable(filetype_id);
+            this.Progress = ko.observable(0);
+            this.Creator = { userwelcome: ko.observable(CheckDisplayException(model.User())) };
+            this.DateCreated = new Date();
+            var self = this;
+            this.DisplayProgress = ko.computed(function () {
+                return $.validator.format('{0} %', self.Progress());
+            });
+        }
+        
+        
+        
+        function GetNewTrackingNo() {
+            var result = '';
+            $.ajax({
+                url: '@Url.Action("GetNextTrackingNo")',
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                dataType: "json",
+                success: function (data) {
+                    result = data;
+                },
+                error: function (a, b, c) {
+                    alert("Error in getting tracking no");
+                }
+            });
+            return result;
+            
+        }
+        
+        function LoadCategories(brand_ids) {
+            var result = [];
+            $.ajax({
+                url: '@Url.Action("Categories")',
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: false,
+                dataType: "json",
+                data: "{'brand_ids': " + ko.toJSON(brand_ids) + "}",
+                    success: function (data) {
+                        result = data;
+                    },
+                    error: function (a, b, c) {
+                        alert("Error in getting categories");
+                    }
+            });
+            return result;
+        }
+        
+        function DeleteTempFile(filename) {
+            $.ajax({
+                url: '@Url.Action("DeleteTempFile")',
+                type: "POST",
+                contentType: "application/json; charset=utf-8",
+                async: true,
+                dataType: "json",
+                data: "{'name': '" + filename + "'}",
+                success: function (data) {
+                    result = data;
+                },
+                error: function (a, b, c) {
+                    alert("Error in deleting file");
+                }
+            });
+        }
+    </script>
+</body>
+    
+
+
+

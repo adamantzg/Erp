@@ -1,0 +1,88 @@
+﻿@model Stock_order_header
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>@Model.poname</title>
+        <style>
+            body, table { font-family: arial;font-size: 11px}
+            .header { background-color: lightgray;font-weight: bold}
+            .label {font-weight: bold}
+            .bigtitle {background-color: lightgray; font-size: 20px;font-weight: bold}
+            #tblLines td {border: 1px solid black}
+            #tblLines {border-collapse: collapse}
+            .tablecell { text-align: center;border: 1px solid black}
+        </style>
+    </head>
+    <body style="width: 800px">
+        <div>
+            <table style="width: 100%">
+                <tr>
+                    <td style="width: 70%">
+                        <span style="font-size: 12px;font-weight: bold">@Model.From.user_name</span><br/>
+                        @Html.Raw(WebUtilities.ArrayToString(new[]{Model.From.user_address1,Model.From.user_address2, Model.From.user_address3, Model.From.user_address4, Model.From.user_address5},"<br/>"))<p></p>
+                        
+                        <span style="font-size: 12px;font-weight: bold">To: @Model.Factory.user_name</span><br/>
+                        @Html.Raw(WebUtilities.ArrayToString(new[]{Model.Factory.user_address1,Model.Factory.user_address2, Model.Factory.user_address3, Model.Factory.user_address4, Model.Factory.user_address5},"<br/>"))</td>
+                    <td style="vertical-align: top">
+                        <table>
+                            <tr class="header">
+                                <td>P.O. number</td>
+                            </tr>
+                            <tr>
+                                <td>@Model.poname</td>
+                            </tr>
+                            <tr class="header">
+                                <td>Date</td>
+                            </tr>
+                            <tr>
+                                <td>@Model.orderdate.ToString("dd-MMM-yy")</td>
+                            </tr>
+                            <tr class="header">
+                                <td>ETD</td>
+                            </tr>
+                            <tr>
+                                <td>@Model.po_ready_date.ToString("dd-MMM-yy")</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+            <p></p>
+            <table id="tblLines">
+                <tr class="header">
+                    <td style="width: 80px">MFG CODE</td>
+                    <td style="width: 80px">B Code</td>
+                    <td style="width: 350px">Product Description</td>
+                    <td style="text-align: right">Qty.</td>
+                    <td style="text-align: right">Price/set</td>
+                    <td style="text-align: right">Total Price</td>
+                </tr>
+                @foreach (var line in Model.Lines)
+                {
+                    <tr>
+                    <td style="width: 80px">@line.Product.MastProduct.factory_ref</td>
+                    <td style="width: 80px">@line.Product.cprod_code1</td>
+                    <td style="width: 350px">@line.Product.cprod_name</td>
+                    <td style="text-align: right">@line.orderqty</td>
+                    <td style="text-align: right">@line.unitprice.ToString("N2")</td>
+                    <td style="text-align: right">@((line.unitprice * line.orderqty).ToString("N2"))</td>
+                    </tr>
+                }
+                <tr>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td>TOTAL</td>
+                    <td style="text-align: right">@Model.Lines.Sum(l=>l.orderqty)</td>
+                    <td>&nbsp;</td>
+                    <td style="text-align: right">@Model.Lines.Sum(l=>l.unitprice*l.orderqty).ToString("N2")</td>
+                </tr>
+            </table>
+        </div>
+    </body>
+</html>

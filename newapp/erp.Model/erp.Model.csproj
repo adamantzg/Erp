@@ -1,0 +1,606 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{32737149-900C-4B37-AF6E-52EA8B16F1FE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>erp.Model</RootNamespace>
+    <AssemblyName>erp.Model</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'server1|AnyCPU'">
+    <OutputPath>bin\server1\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'server1|x86'">
+    <OutputPath>bin\x86\server1\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'RelaseStaging|AnyCPU'">
+    <OutputPath>bin\RelaseStaging\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'RelaseStaging|x86'">
+    <OutputPath>bin\x86\RelaseStaging\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Classes\Analytics\reporting\ar_audience.cs" />
+    <Compile Include="Classes\Analytics\reporting\ar_report.cs" />
+    <Compile Include="Classes\Analytics\reporting\ar_report_section.cs" />
+    <Compile Include="Classes\Analytics\reporting\ar_section.cs" />
+    <Compile Include="Classes\Analytics\reporting\ar_user.cs" />
+    <Compile Include="Classes\Analytics\reporting\sage_sales_data.cs" />
+    <Compile Include="Classes\aql\aql_new_category1_returncategory_level.cs" />
+    <Compile Include="Classes\aql\aql_new_range.cs" />
+    <Compile Include="Classes\aql\aql_new_range_level_sample.cs" />
+    <Compile Include="Classes\aql\aql_new_sample_size.cs" />
+    <Compile Include="Classes\automated_task\AutomatedTaskIterator.cs" />
+    <Compile Include="Classes\automated_task\automatedtask_attachment.cs" />
+    <Compile Include="Classes\2012_products_track_number_fc.cs" />
+    <Compile Include="Classes\Advert_files_download.cs" />
+    <Compile Include="Classes\Analytics\brand_sales_analysis_product3.cs" />
+    <Compile Include="Classes\Analytics\OrderLineSimple.cs" />
+    <Compile Include="Classes\Analytics\brs_sales_analysis2.cs" />
+    <Compile Include="Classes\Analytics\budget.cs" />
+    <Compile Include="Classes\Analytics\BudgetActualData.cs" />
+    <Compile Include="Classes\Analytics\ReturnsSimple.cs" />
+    <Compile Include="Classes\Analytics\sabc_sort.cs" />
+    <Compile Include="Classes\Analytics\stock_summary_report.cs" />
+    <Compile Include="Classes\Analytics\stock_summary_report_calloff.cs" />
+    <Compile Include="Classes\automated_task\AutomatedTask.cs" />
+    <Compile Include="Classes\brochureDownloadLog.cs" />
+    <Compile Include="Classes\ChangeNotice\change_notice.cs" />
+    <Compile Include="Classes\ChangeNotice\change_notice_allocation.cs" />
+    <Compile Include="Classes\ChangeNotice\change_notice_document.cs" />
+    <Compile Include="Classes\ChangeNotice\change_notice_image.cs" />
+    <Compile Include="Classes\ChangeNotice\change_notice_image_type.cs" />
+    <Compile Include="Classes\ChangeNotice\change_notice_reasons.cs" />
+    <Compile Include="Classes\ChangeNotice_Old\2011_change_notice_product_table.cs" />
+    <Compile Include="Classes\ChangeNotice_Old\2011_change_notice_table.cs" />
+    <Compile Include="Classes\color.cs" />
+    <Compile Include="Classes\Configuration\app.cs" />
+    <Compile Include="Classes\Configuration\setting.cs" />
+    <Compile Include="Classes\continents.cs" />
+    <Compile Include="Classes\Cust_product_files.cs" />
+    <Compile Include="Classes\CwProducts\cw_component.cs" />
+    <Compile Include="Classes\CwProducts\cw_component_feature.cs" />
+    <Compile Include="Classes\CwProducts\cw_feature.cs" />
+    <Compile Include="Classes\CwProducts\cw_product.cs" />
+    <Compile Include="Classes\CwProducts\cw_product_file.cs" />
+    <Compile Include="Classes\CwProducts\cw_product_info.cs" />
+    <Compile Include="Classes\CwProducts\cw_site.cs" />
+    <Compile Include="Classes\DAM\dam_enquiry.cs" />
+    <Compile Include="Classes\Dealer\dealers_all_brands_new_export.cs" />
+    <Compile Include="Classes\Dealer\dealer_images_external.cs" />
+    <Compile Include="Classes\DefaultHost.cs" />
+    <Compile Include="Classes\exchange_rates.cs" />
+    <Compile Include="Classes\FactoryStock\factory_stock_order.cs" />
+    <Compile Include="Classes\FactoryStock\factory_stock_order_lines.cs" />
+    <Compile Include="Classes\FactoryStock\stock_movements.cs" />
+    <Compile Include="Classes\factory_client_settings.cs" />
+    <Compile Include="Classes\Form\form.cs" />
+    <Compile Include="Classes\Form\form_choice.cs" />
+    <Compile Include="Classes\Form\form_choice_group.cs" />
+    <Compile Include="Classes\Form\form_formsection.cs" />
+    <Compile Include="Classes\Form\form_question.cs" />
+    <Compile Include="Classes\Form\form_questiongroup_question.cs" />
+    <Compile Include="Classes\Form\form_question_answer.cs" />
+    <Compile Include="Classes\Form\form_question_group.cs" />
+    <Compile Include="Classes\Form\form_question_rendermethod.cs" />
+    <Compile Include="Classes\Form\form_question_type.cs" />
+    <Compile Include="Classes\Form\form_section.cs" />
+    <Compile Include="Classes\Form\form_section_question.cs" />
+    <Compile Include="Classes\Form\form_submission.cs" />
+    <Compile Include="Classes\Form\form_submission_answer.cs" />
+    <Compile Include="Classes\GuaranteeRegistration.cs" />
+    <Compile Include="Classes\Image\ImageViewType.cs" />
+    <Compile Include="Classes\Inspections\2012_inspection_sample_table.cs" />
+    <Compile Include="Classes\Inspections\2012_products_track_number_qc.cs" />
+    <Compile Include="Classes\Inspections\IInspectionController.cs" />
+    <Compile Include="Classes\Inspections\inspections_list2.cs" />
+    <Compile Include="Classes\Inspections\inspection_images_v2_table.cs" />
+    <Compile Include="Classes\Inspections\inspection_lines_notified.cs" />
+    <Compile Include="Classes\Inspections\inspection_notified_summary_images_table.cs" />
+    <Compile Include="Classes\Inspections\inspections_documents.cs" />
+    <Compile Include="Classes\Inspections\inspection_lines_notified_v2_table.cs" />
+    <Compile Include="Classes\Inspections\inspection_notified_summary_table.cs" />
+    <Compile Include="Classes\Inspections\qc_comments.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_2.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_area.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_container_2.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_container.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_container_images.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_controller.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_controller_2.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_image.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_image_type.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_line.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_line_2.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_line_rejection.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_line_si_details.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_loading_2.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_loading.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_loading_mixedpallet.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_mixedpallet.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_si_subject.cs" />
+    <Compile Include="Classes\Inspections\v2\inspection_v2_type.cs" />
+    <Compile Include="Classes\Instructions.cs" />
+    <Compile Include="Classes\Invoices\Invoice_export_settings.cs" />
+    <Compile Include="Classes\Invoices\order_invoice_sequence.cs" />
+    <Compile Include="Classes\Jobs.cs" />
+    <Compile Include="Classes\Legacy\brand_categories_group.cs" />
+    <Compile Include="Classes\LoginHistory\Ip2.cs" />
+    <Compile Include="Classes\LoginHistory\login_history_page.cs" />
+    <Compile Include="Classes\Log_functions.cs" />
+    <Compile Include="Classes\ManualV2\ManualV2.cs" />
+    <Compile Include="Classes\ManualV2\ManualV2Administration.cs" />
+    <Compile Include="Classes\ManualV2\ManualV2EditHistory.cs" />
+    <Compile Include="Classes\ManualV2\ManualV2Message.cs" />
+    <Compile Include="Classes\ManualV2\ManualV2MessageAudience.cs" />
+    <Compile Include="Classes\ManualV2\ManualV2MessageFile.cs" />
+    <Compile Include="Classes\ManualV2\ManualV2Node.cs" />
+    <Compile Include="Classes\Manual\Manual.cs" />
+    <Compile Include="Classes\Manual\User_manual_types.cs" />
+    <Compile Include="Classes\Meetings\meeting.cs" />
+    <Compile Include="Classes\Meetings\meeting_detail.cs" />
+    <Compile Include="Classes\Meetings\Meeting_detail_image.cs" />
+    <Compile Include="Classes\Meetings\meeting_detail_responsibility.cs" />
+    <Compile Include="Classes\navigation\navigation_item.cs" />
+    <Compile Include="Classes\navigation\navigation_item_permission.cs" />
+    <Compile Include="Classes\NR\NrReportInspectionRow.cs" />
+    <Compile Include="Classes\NR\nr_header.cs" />
+    <Compile Include="Classes\NR\nr_header_images.cs" />
+    <Compile Include="Classes\NR\nr_image_type.cs" />
+    <Compile Include="Classes\NR\nr_lines.cs" />
+    <Compile Include="Classes\NR\nr_line_images.cs" />
+    <Compile Include="Classes\NR\nr_line_legacy.cs" />
+    <Compile Include="Classes\NR\nr_line_type.cs" />
+    <Compile Include="Classes\NR\nr_type.cs" />
+    <Compile Include="Classes\OnlineTraining\tc_document.cs" />
+    <Compile Include="Classes\Order\containercalculation_order.cs" />
+    <Compile Include="Classes\Order\containercalculation_order_product.cs" />
+    <Compile Include="Classes\Order\order_line_detail2_v6.cs" />
+    <Compile Include="Classes\Order\order_summary.cs" />
+    <Compile Include="Classes\Order\ports.cs" />
+    <Compile Include="Classes\Order\process.cs" />
+    <Compile Include="Classes\Order\stockmovements.cs" />
+    <Compile Include="Classes\pricing_discounts.cs" />
+    <Compile Include="Classes\DAM\dam_functions.cs" />
+    <Compile Include="Classes\Dealer\Cw_customer.cs" />
+    <Compile Include="Classes\Dealer\dealer_displays.cs" />
+    <Compile Include="Classes\Dealer\dealer_displays_activity_bydateandbrand.cs" />
+    <Compile Include="Classes\Dealer\dealer_sales_data_lines.cs" />
+    <Compile Include="Classes\Dealer\dealer_sales_data_header.cs" />
+    <Compile Include="Classes\Dealer\dealer_display_rebate.cs" />
+    <Compile Include="Classes\Dealer_external\brand_external.cs" />
+    <Compile Include="Classes\Dealer_external\dealer_external.cs" />
+    <Compile Include="Classes\Dealer_external\dealer_external_comment.cs" />
+    <Compile Include="Classes\Dealer_external\dealer_external_display.cs" />
+    <Compile Include="Classes\Dealer_external\dealer_external_type.cs" />
+    <Compile Include="Classes\emaillog.cs" />
+    <Compile Include="Classes\Image\ImageFile.cs" />
+    <Compile Include="Classes\Image\ImageFileTest.cs" />
+    <Compile Include="Classes\brochure_history.cs" />
+    <Compile Include="Classes\Inspections\v2\inspv2point.cs" />
+    <Compile Include="Classes\Inspections\v2\inspv2_aql.cs" />
+    <Compile Include="Classes\Inspections\v2\inspv2_criteria.cs" />
+    <Compile Include="Classes\Inspections\v2\inspv2_criteriacategory.cs" />
+    <Compile Include="Classes\Inspections\v2\inspv2_customcriteria.cs" />
+    <Compile Include="Classes\Inspections\v2\inspv2_custproduct_template.cs" />
+    <Compile Include="Classes\Inspections\v2\inspv2_template.cs" />
+    <Compile Include="Classes\Order\order_lines_manual.cs" />
+    <Compile Include="Classes\Order\porder_lines.cs" />
+    <Compile Include="Classes\Order\porder_lines2.cs" />
+    <Compile Include="Classes\Order\shipments.cs" />
+    <Compile Include="Classes\ProductPricing\pp_freightcost.cs" />
+    <Compile Include="Classes\ProductPricing\pp_market.cs" />
+    <Compile Include="Classes\ProductPricing\pp_market_product.cs" />
+    <Compile Include="Classes\ProductPricing\pp_mastproduct.cs" />
+    <Compile Include="Classes\ProductPricing\pp_model.cs" />
+    <Compile Include="Classes\ProductPricing\pp_model_level.cs" />
+    <Compile Include="Classes\ProductPricing\pp_project.cs" />
+    <Compile Include="Classes\ProductPricing\pp_settings.cs" />
+    <Compile Include="Classes\Products\auto_add_products.cs" />
+    <Compile Include="Classes\Products\cust_products_bundle.cs" />
+    <Compile Include="Classes\Products\cust_products_bundle_component.cs" />
+    <Compile Include="Classes\Products\cust_products_extradata.cs" />
+    <Compile Include="Classes\Products\cust_product_details.cs" />
+    <Compile Include="Classes\Products\instructions_new.cs" />
+    <Compile Include="Classes\Products\MastProduct_Component.cs" />
+    <Compile Include="Classes\Products\mastproduct_price.cs" />
+    <Compile Include="Classes\Products\Packaging\Mast_products_packaging_material.cs" />
+    <Compile Include="Classes\Products\Packaging\Material.cs" />
+    <Compile Include="Classes\Products\Packaging\Packaging.cs" />
+    <Compile Include="Classes\Products\ProductComponent.cs" />
+    <Compile Include="Classes\Products\category1_sub.cs" />
+    <Compile Include="Classes\Products\customer_type.cs" />
+    <Compile Include="Classes\Products\CustProductFile.cs" />
+    <Compile Include="Classes\Products\cust_products_file_type.cs" />
+    <Compile Include="Classes\Products\cust_product_doctype.cs" />
+    <Compile Include="Classes\Products\cust_product_file_type.cs" />
+    <Compile Include="Classes\Products\cust_product_range.cs" />
+    <Compile Include="Classes\Products\dist_products.cs" />
+    <Compile Include="Classes\Products\download_logs.cs" />
+    <Compile Include="Classes\Products\MastProductFile.cs" />
+    <Compile Include="Classes\Products\mast_product_file_type.cs" />
+    <Compile Include="Classes\Products\ProductFit.cs" />
+    <Compile Include="Classes\Products\product_file.cs" />
+    <Compile Include="Classes\Products\product_file_type.cs" />
+    <Compile Include="Classes\Products\product_group_class.cs" />
+    <Compile Include="Classes\Products\product_specifications.cs" />
+    <Compile Include="Classes\Products\stock_code_factory.cs" />
+    <Compile Include="Classes\Products\Technical\technical_data_type.cs" />
+    <Compile Include="Classes\Products\Technical\technical_product_data.cs" />
+    <Compile Include="Classes\Products\Technical\technical_subcategory_template.cs" />
+    <Compile Include="Classes\Products\tickets.cs" />
+    <Compile Include="Classes\product_type.cs" />
+    <Compile Include="Classes\Reporting\claims_investigation_reports.cs" />
+    <Compile Include="Classes\Reporting\claims_monthly_summary.cs" />
+    <Compile Include="Classes\Reporting\login_history_page_count.cs" />
+    <Compile Include="Classes\Reporting\stocksummary_factoryvalue.cs" />
+    <Compile Include="Classes\Reporting\tp2_sales_export_all.cs" />
+    <Compile Include="Classes\Reporting\us_call_log2.cs" />
+    <Compile Include="Classes\Reporting\us_call_log_export.cs" />
+    <Compile Include="Classes\Returns\ca_reasons.cs" />
+    <Compile Include="Classes\Returns\claims_report.cs" />
+    <Compile Include="Classes\Returns\feedback_authorization.cs" />
+    <Compile Include="Classes\Returns\feedback_authorization_level.cs" />
+    <Compile Include="Classes\Returns\feedback_issue_type.cs" />
+    <Compile Include="Classes\Returns\product_investigations.cs" />
+    <Compile Include="Classes\Returns\product_investigation_images.cs" />
+    <Compile Include="Classes\Returns\product_investigation_status.cs" />
+    <Compile Include="Classes\Returns\returns_decision.cs" />
+    <Compile Include="Classes\Returns\returns_lastmail.cs" />
+    <Compile Include="Classes\Returns\returns_qcusers.cs" />
+    <Compile Include="Classes\Sales\client_sales_data.cs" />
+    <Compile Include="Classes\Sales\distributor_sales.cs" />
+    <Compile Include="Classes\Sales\forward_order_lines.cs" />
+    <Compile Include="Classes\Sales\ISalesForecast.cs" />
+    <Compile Include="Classes\Sales\sales_forecast_amendments.cs" />
+    <Compile Include="Classes\Sales\sales_forecast_contract.cs" />
+    <Compile Include="Classes\Sales\sales_orders.cs" />
+    <Compile Include="Classes\Sales\sales_orders_headers.cs" />
+    <Compile Include="Classes\Sales\sales_orders_headers_shipping.cs" />
+    <Compile Include="Classes\Sales\sales_orders_headers_summary.cs" />
+    <Compile Include="Classes\Sales\sales_orders_monthly_data.cs" />
+    <Compile Include="Classes\Sales\sales_order_brand.cs" />
+    <Compile Include="Classes\Sales\ussales_log.cs" />
+    <Compile Include="Classes\Sales\ussales_log_report.cs" />
+    <Compile Include="Classes\Sales\us_backorders.cs" />
+    <Compile Include="Classes\Sales\Us_call_log.cs" />
+    <Compile Include="Classes\Sales\us_call_log.images.cs" />
+    <Compile Include="Classes\Sales\us_call_log_category.cs" />
+    <Compile Include="Classes\Sales\us_dealers.cs" />
+    <Compile Include="Classes\Sales\us_display_orders.cs" />
+    <Compile Include="Classes\Security\admin_pages.cs" />
+    <Compile Include="Classes\amendments.cs" />
+    <Compile Include="Classes\Analytics\Analytics.cs" />
+    <Compile Include="Classes\Analytics\analytics_categories.cs" />
+    <Compile Include="Classes\Analytics\analytics_options.cs" />
+    <Compile Include="Classes\Analytics\analytics_subcategory.cs" />
+    <Compile Include="Classes\Analytics\brand_sales_analysis2.cs" />
+    <Compile Include="Classes\brand.cs" />
+    <Compile Include="Classes\Legacy\BrandCategory.cs" />
+    <Compile Include="Classes\BrandGroup.cs" />
+    <Compile Include="Classes\Legacy\BrandSubCategory.cs" />
+    <Compile Include="Classes\Legacy\brand_categories_sub_sub.cs" />
+    <Compile Include="Classes\BrochureRequest.cs" />
+    <Compile Include="Classes\category1.cs" />
+    <Compile Include="Classes\clasification.cs" />
+    <Compile Include="Classes\client_pages.cs" />
+    <Compile Include="Classes\client_pages_allocated.cs" />
+    <Compile Include="Classes\ContactRequest.cs" />
+    <Compile Include="Classes\container_types.cs" />
+    <Compile Include="Classes\contract_sales_forecast.cs" />
+    <Compile Include="Classes\contract_sales_forecast_lines.cs" />
+    <Compile Include="Classes\countries.cs" />
+    <Compile Include="Classes\currencies.cs" />
+    <Compile Include="Classes\Products\cust_products.cs" />
+    <Compile Include="Classes\Dealer\Dealer.cs" />
+    <Compile Include="Classes\Dealer\dealer_brandstatus.cs" />
+    <Compile Include="Classes\Dealer\dealer_displays_activity.cs" />
+    <Compile Include="Classes\Dealer\dealer_images.cs" />
+    <Compile Include="Classes\Dealer\dealer_image_displays.cs" />
+    <Compile Include="Classes\Dealer\ie_counties.cs" />
+    <Compile Include="Classes\Dop\catdop_characteristics.cs" />
+    <Compile Include="Classes\Dop\category_dop.cs" />
+    <Compile Include="Classes\Dop\mastproduct_characteristics.cs" />
+    <Compile Include="Classes\email_recipients.cs" />
+    <Compile Include="Classes\Enquiries\after_sales_enquiry_sitevisit.cs" />
+    <Compile Include="Classes\Enquiries\after_sales_enquiry_sitevisit_files.cs" />
+    <Compile Include="Classes\Enquiries\after_sales_enquiry.cs" />
+    <Compile Include="Classes\Enquiries\after_sales_enquiry_comment.cs" />
+    <Compile Include="Classes\Enquiries\after_sales_enquiry_comment_files.cs" />
+    <Compile Include="Classes\Enquiries\after_sales_enquiry_files.cs" />
+    <Compile Include="Classes\Enquiries\after_sales_enquiry_sitevisit_status.cs" />
+    <Compile Include="Classes\Enquiries\after_sales_enquiry_status.cs" />
+    <Compile Include="Classes\external_user.cs" />
+    <Compile Include="Classes\Inspections\containers.cs" />
+    <Compile Include="Classes\Inspections\container_images.cs" />
+    <Compile Include="Classes\Inspections\inspections.cs" />
+    <Compile Include="Classes\Inspections\inspections_loading.cs" />
+    <Compile Include="Classes\Inspections\inspection_controller.cs" />
+    <Compile Include="Classes\Inspections\inspection_criteria.cs" />
+    <Compile Include="Classes\Inspections\inspection_images.cs" />
+    <Compile Include="Classes\Inspections\inspection_lines_accepted.cs" />
+    <Compile Include="Classes\Inspections\inspection_lines_rejected.cs" />
+    <Compile Include="Classes\Inspections\inspection_lines_tested.cs" />
+    <Compile Include="Classes\Invoices\creditnote_line.cs" />
+    <Compile Include="Classes\Invoices\delivery_locations.cs" />
+    <Compile Include="Classes\Invoices\invoices.cs" />
+    <Compile Include="Classes\Invoices\invoice_lines.cs" />
+    <Compile Include="Classes\Invoices\invoice_type.cs" />
+    <Compile Include="Classes\Invoices\payment_details.cs" />
+    <Compile Include="Classes\Issues\issue.cs" />
+    <Compile Include="Classes\Issues\issuecomment_files.cs" />
+    <Compile Include="Classes\Issues\issue_area.cs" />
+    <Compile Include="Classes\Issues\issue_category.cs" />
+    <Compile Include="Classes\Issues\issue_comments.cs" />
+    <Compile Include="Classes\Issues\issue_files.cs" />
+    <Compile Include="Classes\Issues\issue_priority.cs" />
+    <Compile Include="Classes\Issues\issue_status.cs" />
+    <Compile Include="Classes\Issues\issue_subscription.cs" />
+    <Compile Include="Classes\Issues\issue_type.cs" />
+    <Compile Include="Classes\Language.cs" />
+    <Compile Include="Classes\LoginHistory\LoginHistory.cs" />
+    <Compile Include="Classes\LoginHistory\login_history_detail.cs" />
+    <Compile Include="Classes\Lookup.cs" />
+    <Compile Include="Classes\Products\mast_products.cs" />
+    <Compile Include="Classes\MyBathroomEntry.cs" />
+    <Compile Include="Classes\npd\npd.cs" />
+    <Compile Include="Classes\npd\npd_categories.cs" />
+    <Compile Include="Classes\npd\npd_comments.cs" />
+    <Compile Include="Classes\npd\npd_comments_files.cs" />
+    <Compile Include="Classes\npd\npd_file.cs" />
+    <Compile Include="Classes\npd\npd_filetype.cs" />
+    <Compile Include="Classes\npd\npd_status.cs" />
+    <Compile Include="Classes\Order\omdetail.cs" />
+    <Compile Include="Classes\Order\order_header.cs" />
+    <Compile Include="Classes\Order\order_lines.cs" />
+    <Compile Include="Classes\Order\order_line_summary.cs" />
+    <Compile Include="Classes\Order\porder_header.cs" />
+    <Compile Include="Classes\Order\ProductSaleSummary.cs" />
+    <Compile Include="Classes\Order\soalloc_overallocation.cs" />
+    <Compile Include="Classes\Order\stock_order_allocation.cs" />
+    <Compile Include="Classes\Order\stock_order_brand_allocation.cs" />
+    <Compile Include="Classes\Order\stock_order_header.cs" />
+    <Compile Include="Classes\Order\stock_order_lines.cs" />
+    <Compile Include="Classes\Products\productfault_reason_description.cs" />
+    <Compile Include="Classes\Products\product_faults.cs" />
+    <Compile Include="Classes\Products\stock_code.cs" />
+    <Compile Include="Classes\quotation_companies.cs" />
+    <Compile Include="Classes\quotation_header.cs" />
+    <Compile Include="Classes\quotation_lines.cs" />
+    <Compile Include="Classes\Range.cs" />
+    <Compile Include="Classes\Reporting\PageVisit.cs" />
+    <Compile Include="Classes\Company.cs" />
+    <Compile Include="Classes\Reporting\ProductVisit.cs" />
+    <Compile Include="Classes\Reporting\login_history_detail_report.cs" />
+    <Compile Include="Classes\Reporting\ReportingClasses.cs" />
+    <Compile Include="Classes\Returns\AnalyticsRow.cs" />
+    <Compile Include="Classes\Returns\feedback_category.cs" />
+    <Compile Include="Classes\Returns\feedback_subscriptions.cs" />
+    <Compile Include="Classes\Returns\feedback_type.cs" />
+    <Compile Include="Classes\Returns\returns.cs" />
+    <Compile Include="Classes\Returns\returns_comments.cs" />
+    <Compile Include="Classes\Returns\returns_comments_files.cs" />
+    <Compile Include="Classes\Returns\returns_images.cs" />
+    <Compile Include="Classes\Returns\returns_importance.cs" />
+    <Compile Include="Classes\Returns\return_category.cs" />
+    <Compile Include="Classes\Returns\return_resolution.cs" />
+    <Compile Include="Classes\Returns\standard_response.cs" />
+    <Compile Include="Classes\Sales\sales_data_contracts.cs" />
+    <Compile Include="Classes\sales_data.cs" />
+    <Compile Include="Classes\sales_forecast.cs" />
+    <Compile Include="Classes\Security\admin_pages_new.cs" />
+    <Compile Include="Classes\Security\admin_permissions.cs" />
+    <Compile Include="Classes\Security\IAdminpages.cs" />
+    <Compile Include="Classes\Security\permission.cs" />
+    <Compile Include="Classes\Security\permission2.cs" />
+    <Compile Include="Classes\Security\role.cs" />
+    <Compile Include="Classes\Security\role2.cs" />
+    <Compile Include="Classes\SiteEdit.cs" />
+    <Compile Include="Classes\Spares.cs" />
+    <Compile Include="Classes\survey\survey_definition.cs" />
+    <Compile Include="Classes\survey\survey_optionset.cs" />
+    <Compile Include="Classes\survey\survey_optionset_option.cs" />
+    <Compile Include="Classes\survey\survey_question.cs" />
+    <Compile Include="Classes\survey\survey_question_option.cs" />
+    <Compile Include="Classes\survey\survey_question_type.cs" />
+    <Compile Include="Classes\survey\survey_result.cs" />
+    <Compile Include="Classes\survey\survey_result_answer.cs" />
+    <Compile Include="Classes\survey\survey_result_answer_option.cs" />
+    <Compile Include="Classes\survey\survey_uitype.cs" />
+    <Compile Include="Classes\tariffs.cs" />
+    <Compile Include="Classes\Temp\product_specifications.cs" />
+    <Compile Include="Classes\Temp\product_specification_type.cs" />
+    <Compile Include="Classes\Translation\brand_categories_sub_sub_translate.cs" />
+    <Compile Include="Classes\Translation\brand_categories_sub_translate.cs" />
+    <Compile Include="Classes\Translation\brand_categories_translate.cs" />
+    <Compile Include="Classes\Translation\brand_grouping_translate.cs" />
+    <Compile Include="Classes\Translation\cust_products_translate.cs" />
+    <Compile Include="Classes\Translation\web_products_translate.cs" />
+    <Compile Include="Classes\User.cs" />
+    <Compile Include="Classes\ViewsModels.cs" />
+    <Compile Include="Classes\webproduct\ProductCountByCountry.cs" />
+    <Compile Include="Classes\webproduct\UserComments\comment_type.cs" />
+    <Compile Include="Classes\webproduct\UserComments\user_comment.cs" />
+    <Compile Include="Classes\WebComponent.cs" />
+    <Compile Include="Classes\webproduct\file_type.cs" />
+    <Compile Include="Classes\webproduct\image_assignment_log.cs" />
+    <Compile Include="Classes\webproduct\image_site.cs" />
+    <Compile Include="Classes\webproduct\image_type.cs" />
+    <Compile Include="Classes\webproduct\sale.cs" />
+    <Compile Include="Classes\webproduct\search_word.cs" />
+    <Compile Include="Classes\webproduct\uploaded_file.cs" />
+    <Compile Include="Classes\webproduct\website_imagetype.cs" />
+    <Compile Include="Classes\webproduct\web_category.cs" />
+    <Compile Include="Classes\webproduct\web_category2.cs" />
+    <Compile Include="Classes\webproduct\web_category_translate.cs" />
+    <Compile Include="Classes\webproduct\web_option_headers.cs" />
+    <Compile Include="Classes\webproduct\web_product_component.cs" />
+    <Compile Include="Classes\webproduct\web_product_component_details.cs" />
+    <Compile Include="Classes\webproduct\web_product_file_rename.cs" />
+    <Compile Include="Classes\webproduct\web_product_file.cs" />
+    <Compile Include="Classes\webproduct\Web_product_file2.cs" />
+    <Compile Include="Classes\webproduct\web_product_file_type.cs" />
+    <Compile Include="Classes\webproduct\web_product_flow.cs" />
+    <Compile Include="Classes\webproduct\web_product_info.cs" />
+    <Compile Include="Classes\webproduct\Web_product_info_box.cs" />
+    <Compile Include="Classes\webproduct\web_product_info_translate.cs" />
+    <Compile Include="Classes\webproduct\webproduct_search.cs" />
+    <Compile Include="Classes\webproduct\web_product_info_type.cs" />
+    <Compile Include="Classes\webproduct\web_product_new.cs" />
+    <Compile Include="Classes\webproduct\web_product_new2.cs" />
+    <Compile Include="Classes\webproduct\web_product_new_related.cs" />
+    <Compile Include="Classes\webproduct\web_product_new_translate.cs" />
+    <Compile Include="Classes\webproduct\web_product_part.cs" />
+    <Compile Include="Classes\webproduct\web_product_pressure.cs" />
+    <Compile Include="Classes\webproduct\Web_product_transfer.cs" />
+    <Compile Include="Classes\webproduct\web_shortcuts.cs" />
+    <Compile Include="Classes\webproduct\web_site.cs" />
+    <Compile Include="Classes\webproduct\Web_site_visits.cs" />
+    <Compile Include="Classes\webproduct\web_slide.cs" />
+    <Compile Include="Classes\webproduct\whitebook\whitebook_category.cs" />
+    <Compile Include="Classes\webproduct\whitebook\whitebook_option.cs" />
+    <Compile Include="Classes\webproduct\whitebook\whitebook_option_group.cs" />
+    <Compile Include="Classes\webproduct\whitebook\whitebook_template.cs" />
+    <Compile Include="Classes\webproduct\whitebook\Whitebook_template_category.cs" />
+    <Compile Include="Classes\webproduct\whitebook\whitebook_template_optiongroup.cs" />
+    <Compile Include="Classes\WebUser.cs" />
+    <Compile Include="Classes\Reporting\OrderSummary.cs" />
+    <Compile Include="Classes\File.cs" />
+    <Compile Include="GeoUtils.cs" />
+    <Compile Include="ITrackable.cs" />
+    <Compile Include="Models\PetaPoco.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="TrackableObject.cs" />
+    <Compile Include="UserGroup.cs" />
+    <Compile Include="Utilities.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <Compile Include="Classes\Order\order_line_export.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>PublicSettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\company.Common\company.Common.csproj">
+      <Project>{5d6281ae-2a42-4e1c-af64-684907f43ba8}</Project>
+      <Name>company.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

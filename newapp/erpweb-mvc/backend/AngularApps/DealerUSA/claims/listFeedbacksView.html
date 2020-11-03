@@ -1,0 +1,81 @@
+﻿<!--<div class="row" style="margin-top: -70px;">
+    <div class="col-sm-12">
+        ui-sref="create"
+        
+    </div>
+</div>-->
+
+<!--<table class="table table-striped" id="claimList">
+    <thead>
+        <tr>
+            <th>Reference</th>
+            <th>Type</th>
+            <th>Brand</th>
+            <th>Code</th>
+            <th>Description</th>
+            <th>Issue type</th>
+            <th>Dealer or Consumer</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td colspan="7" style="text-align:center" ng-if="busy">
+                <i class="fa fa-2x fa-refresh fa-spin" style="color:#fa8564;"></i>
+             
+            </td>
+        </tr>
+        <tr style="text-align:center" ng-if="Feedbacks.length<1 && !busy">
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td><i class="fa fa-minus"></i></td>
+            <td></td>
+          
+        </tr>
+        <tr ng-repeat="claim in Feedbacks | orderBy : '-request_date'" ng-class="{'selected-for-delete':claimSelectedForDelete.return_no === claim.return_no}">
+            <td><a ng-click="open(claim)" ng-class="{'link-style':claimSelectedForDelete.return_no !== claim.return_no,'link-delete-style' :claimSelectedForDelete.return_no === claim.return_no}"><strong>{{claim.return_no}}</strong></a></td>
+            <td>{{claimType[claim.claim_type]}}</td>
+            <td>{{claim.factory_id === 406 ? "Ammara":"Crosswater"}}</td>
+            <td class="table-row-two">{{claim.cprod_code1}}</td>
+            <td>{{claim.cprod_name}}</td>
+            <td class="table-row-one">{{claim.reason}}</td>
+            <td class="table-row-one">{{claim.dealer_id != null ? 'Dealer':'Consumer'}}</td>
+            <td>
+                <i class="fa fa-remove delete-row" ng-if="user.userid===claim.request_userid" ng-click="deleteConfirm(claim)"></i>
+            </td>
+        </tr>
+
+    </tbody>
+</table>-->
+<table datatable="ng" dt-options="tableOptions" class="table table-striped;margin-top:-20px" id="claimList" style="font-size:13px">
+    <thead>
+        <tr>
+            <th  style="padding:10px 5px;width:110px">Reference</th><!--1--> 
+            <th  style="padding:10px 5px">Type</th><!--2-->
+            <th  style="padding:10px 5px">Brand</th><!--3-->
+            <th  style="padding:10px 5px">Code</th><!--4-->
+            <th  style="padding:10px 5px">Description</th><!--5-->
+            <th  style="padding:10px 5px">Issue type</th><!--6-->
+            <th  style="padding:10px 5px; width:110px!important">Dealer or Consumer</th><!--7-->
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="claim in Feedbacks | orderBy : '-request_date'" ng-class="{'selected-for-delete':claimSelectedForDelete.return_no === claim.return_no}">
+            <!--1--><td  style="padding:10px 5px"><a ng-click="open(claim)" ng-class="{'link-style':claimSelectedForDelete.return_no !== claim.return_no,'link-delete-style' :claimSelectedForDelete.return_no === claim.return_no}"><strong>{{claim.return_no}}</strong></a></td>
+            <!--2--><td  style="padding:10px 5px">{{claimType[claim.claim_type]}}</td>
+            <!--3--><td  style="padding:10px 5px">{{claim.factory_id === 406 ? "Ammara":"Crosswater"}}</td>
+            <!--4--><td  style="padding:10px 5px" class="table-row-two">{{claim.cprod_code1}}</td>
+            <!--5--><td  style="padding:10px 5px">{{claim.cprod_name}}</td>
+            <!--6--><td  style="padding:10px 5px" class="table-row-one">{{claim.reason}}</td>
+            <!--7--><td style="padding:10px 5px" class="table-row-one">
+                {{claim.dealer_id != null ? 'Dealer':'Consumer'}} 
+                <span class="pull-right"><i class="fa fa-remove delete-row" ng-if="currentUser.userid===claim.request_userid" ng-click="deleteConfirm(claim)"></i></span>
+            </td>
+        </tr>
+
+    </tbody>
+</table>

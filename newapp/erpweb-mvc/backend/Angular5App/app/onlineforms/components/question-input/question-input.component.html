@@ -1,0 +1,31 @@
+<input type="text" class="form-control" [(ngModel)]="questionAnswer.textValue" *ngIf="Question?.question_type == questionTypes.shorttext" />
+<div *ngIf="Question?.question_type == questionTypes.singlechoice">
+    <select class="form-control" *ngIf="Question?.render_id == renderMethodTypes.dropdown" 
+     [(ngModel)]="questionAnswer.intValue">
+        <option *ngFor="let c of Question.choiceGroup.choices" [value]="c.id">{{c.name}}</option>
+    </select>
+    <div class="radio-inline" *ngIf="Question?.render_id == renderMethodTypes.radio">
+        <div *ngFor="let c of Question.choiceGroup.choices"><input type="radio" value="{{c.id}}" [(ngModel)]="questionAnswer.intValue" /> {{c.name}}</div>
+    </div>
+</div>
+<div *ngIf="Question?.question_type == questionTypes.yesno">
+    <div class="checkbox">
+        <input type="checkbox" [(ngModel)]="questionAnswer.intValue" ng-true-value="1" ng-false-value="0" style="margin-left: 0" />
+    </div>
+</div>
+<div *ngIf="Question?.question_type == questionTypes.date">
+    <span class="input-group">
+        <input class="form-control" type="text" [bsValue]="questionAnswer.dateValue" bsDatepicker/>
+        <!-- <span class="input-group-btn">
+            <button type="button" class="btn btn-default" ng-click="openPopup()"><i class="glyphicon glyphicon-calendar"></i></button>
+        </span> -->
+    </span>
+</div>
+<textarea class="form-control" [(ngModel)]="questionAnswer.textValue" rows="4" *ngIf="Question?.question_type == questionTypes.longtext"></textarea>
+<div *ngIf="Question?.question_type == questionTypes.multiplechoice">
+    <label class="checkbox-inline" *ngFor="let c of Question.choiceGroup.choices">
+        <input type="checkbox" [(ngModel)]="c.selected" /> {{c.name}}
+    </label>
+</div>
+
+

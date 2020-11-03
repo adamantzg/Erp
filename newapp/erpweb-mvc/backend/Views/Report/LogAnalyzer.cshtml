@@ -1,0 +1,217 @@
+﻿@model LogAnalyzerModel
+
+@{
+    ViewBag.Title = "User activity report";
+    Layout ="~/Views/Shared/_LayoutBootstrap.cshtml" ;
+}
+<div id="app" ng-app="app">
+    <div id="controller" ng-controller="controller">
+        <form role="form" class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-sm-2">Date from:</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" id="dateFrom" placeholder="Enter date from" ng-model="SearchObject.DateFrom">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Date to:</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" id="dateTo" placeholder="Enter date to" ng-model="SearchObject.DateTo">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">User(s):</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" id="dateTo" placeholder="Enter username(s)" ng-model="SearchObject.UserNames">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2">Company code(s):</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" id="dateTo" placeholder="Enter company code(s)" ng-model="SearchObject.CompanyNames">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-2">
+                    <button type="submit" class="btn btn-default" ng-click="Show()">Show</button>
+                </div>
+                <div class="col-sm-4">
+                    <div us-spinner spinner-key="spinner-1"></div>
+                </div>
+            </div>
+        </form>
+        
+        <div id="result" ng-show="showResults">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Page visits</th>
+                        
+                    </tr>
+                </thead>
+                <tbody >
+                    <tr ng-click="Toggle(r)" ng-repeat-start="r in Results" style="cursor:pointer">
+                        <td>{{r.UserName}}</td>
+                        <td>{{r.Count}}</td>
+                    </tr>
+                    <tr ng-show="expandedUser===r.UserName" ng-if="expandedUser===r.UserName" ng-repeat-end>
+                        <td colspan="2">                            
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Page</th>
+                                        <th>Visits</th>
+                                    </tr>
+                                </thead>
+                                <tbody >
+                                    <tr ng-repeat-start="p in r.Pages" ng-click="TogglePage(r,p)" style="cursor:pointer">
+                                        <td>{{p.Page}}</td>
+                                        <td>{{p.Count}}</td>
+                                    </tr>
+                                    <tr ng-show="expandedPage == p.Page" ng-repeat-end>
+                                        <td colspan="2">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Date</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr ng-repeat="l in p.Logs">
+                                                        <td>
+                                                            {{l.LogDateTime | date:'dd/MM/yyyy hh:mm'}}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>    
+
+    <div loading class="loading-dialog"></div>
+</div>
+
+@*<div class="row">
+    <div class="col-md-2 col-xs-2">Date from:</div>
+    <div class="col-md-6 col-xs-6">@Html.TextBoxFor(m=>m.DateFrom)</div>
+</div>
+<div class="row">
+    <div class="col-md-2 col-xs-2">Date to:</div>
+    <div class="col-md-6 col-xs-6">@Html.TextBoxFor(m => m.DateFrom)</div>
+</div>
+<div class="row">
+    <div class="col-md-2 col-xs-2">User name(s):</div>
+    <div class="col-md-6 col-xs-6">@Html.TextBoxFor(m => m.UserName)</div>
+</div>
+<div class="row">
+    <div class="col-md-2 col-xs-2">Company name(s):</div>
+    <div class="col-md-6 col-xs-6">@Html.TextBoxFor(m => m.CompanyName)</div>
+</div>
+<button class="btn-default" id="btnShow">Show</button>*@
+
+@section head
+{
+    <link href="~/Content/bootstrap/bootstrap-theme-flatly.css" rel="stylesheet" />
+    <link href="~/Content/loading.css" rel="stylesheet" />
+}
+
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/globalize")
+
+
+    <script type="text/javascript">
+        var app = angular.module('app',[]);
+        var model = @Html.Raw(WebUtilities.JsonSerialize(Model));
+        app.controller('controller', [
+            '$scope', '$http', function($scope, $http) {
+
+                $scope.Results = [];
+                $scope.SearchObject = model;
+                $scope.showResults = false;
+                $scope.expandedUser = "";
+                $scope.expandedPage = "";
+
+                $scope.Show = function() {
+                    
+
+                    $http.post('@Url.Action("SearchLog")', $scope.SearchObject).
+                        success(function(data, status, headers, config) {
+
+
+                            $scope.Results = data;
+                            
+                            //SetupMap(data);
+                            $scope.showResults = true;
+                        }).
+                        error(function(data, status, headers, config) {
+                            //alert(status);
+                        });
+                };
+
+                $scope.Toggle = function(r) {
+                    if ($scope.expandedUser == "")
+                        $scope.expandedUser = r.UserName;
+                    else {
+                        $scope.expandedUser = "";
+                    }
+                    if ($scope.expandedUser.length > 0 && r.Pages == null) {
+                        
+
+                        var obj = { userName: r.UserName, m: $scope.SearchObject };
+                        $http.post('@Url.Action("GetPageStats")', obj).
+                            success(function(data, status, headers, config) {
+                                r.Pages = data;
+                        
+                            }).
+                            error(function(data, status, headers, config) {
+                                //alert(status);
+                            });
+                    }
+                }
+
+                $scope.TogglePage = function (r,p) {
+                    if ($scope.expandedPage == "")
+                        $scope.expandedPage = p.Page;
+                    else {
+                        $scope.expandedPage = "";
+                    }
+                    if ($scope.expandedPage.length > 0 && p.Logs == null) {
+                        
+
+                        var obj = { userName: r.UserName, page: p.Page, m: $scope.SearchObject };
+                        $http.post('@Url.Action("GetPageDetails")', obj).
+                            success(function (data, status, headers, config) {
+                                data.forEach(function (d) {
+                                    d.LogDateTime = moment(d.LogDateTime).toDate();
+                                })
+                                p.Logs = data;                                
+                            }).
+                            error(function(data, status, headers, config) {
+                                //alert(status);
+                            });
+                    }
+                }
+            }
+        ]);
+
+    </script>
+<script src="~/Scripts/loading.js"></script>    
+}
+@section title
+{
+    <span>User activity report</span>
+}

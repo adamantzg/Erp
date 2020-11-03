@@ -1,0 +1,140 @@
+﻿@model OrderSummaryModel
+
+@{
+    var brandCount = Model.brandCount;
+    var maxFactories = Model.maxFactories;
+    var prod_groups = Model.prod_groups;
+    var osa_locations = Model.osa_locations;
+}
+    <tr>
+        <td colspan="@(2 + Model.brandCount+Model.maxFactories+Model.prod_groups.Length)">
+            <div style="height: 30px;vertical-align: bottom;display: table-cell"><strong>@Model.heading</strong></div>
+        </td>        
+    </tr>
+    <tr class="clienttable_header">
+                    
+        <td rowspan="2">Client</td>
+        <td class="rightbordernumber" rowspan="2">TOTAL</td>
+            @for(int i=0;i<prod_groups.Length;i++)
+            {
+            var g = prod_groups[i];
+            <td class="@(i==prod_groups.Length-1 ? "rightborder" : "")number" rowspan="2">@g</td>
+            }
+        <td colspan="@brandCount" style="text-align: center" class="rightborder" >number of brands</td>
+        @if (maxFactories > 0)
+        {
+            <td colspan="@maxFactories" style="text-align: center" class="rightborder" >number of factories</td>
+        }
+        @if (osa_locations.Count > 0)
+        {
+            <td colspan="@osa_locations.Count" style="text-align: center" class="rightborder">location</td>
+        }
+                    
+    </tr>
+    <tr class="clienttable_header">
+        @for (int i = 0; i < brandCount; i++)
+        {
+            <td class="@(i==brandCount-1 ? "rightborder" : "")number" style="width: 30px">@(i+1)</td>
+        }
+        @for (int i = 0; i < maxFactories; i++)
+        {
+            <td class="@(i==maxFactories-1 ? "rightborder" : "")number" style="width: 30px">@(i+1)</td>
+        }
+        @for (int i = 0; i < osa_locations.Count; i++)
+        {
+            <td class="@(i==osa_locations.Count-1 ? "rightborder" : "")number" style="width: 30px">@osa_locations[i]</td>
+        }
+    </tr>
+        @{ int row = 0;
+        }
+        @foreach (var dist in Model.OrderStats.Select(o => o.client_code).Distinct().OrderBy(s => s))
+        {
+            <tr @(row++%2 == 1 ? "class=alternaterow" : "")>
+                <td>@dist</td>
+                <td class="rightbordernumber">
+                    @Model.OrderStats.Where(o => o.client_code == dist).Sum(o => o.orders_count)
+                </td>
+                @for(int i=0;i<prod_groups.Length;i++)
+                {
+                    var g = prod_groups[i];
+                    var sum = Model.OrderStats.Where(o => o.client_code == dist && o.product_group == g).Sum(o => o.orders_count);
+                    //var oStat = Model.OrderStats.FirstOrDefault(o => o.client_code == dist && o.product_group == g);
+                    <td class="@(i==prod_groups.Length-1 ? "rightborder" : "")number">
+                        @if (sum > 0)
+                        {
+                            @sum
+                        }
+                        
+                    </td>
+                }
+                @for (int i = 0; i < brandCount; i++)
+                {
+                    var bStat = Model.OrderBrandStats.Where(o => o.client_code == dist && o.brandCount == i + 1).Sum(o=>o.orderCount);
+                    <td class="@(i==brandCount-1 ? "rightborder" : "")number">
+                        @if (bStat > 0)
+                        {
+                            @bStat
+                        }
+                    </td>
+                }
+                @for (int i = 0; i < maxFactories; i++)
+                {
+                    var fStat = Model.OrderFactoryStats.Where(o => o.client_code == dist && o.factoryCount == i + 1).Sum(o=>o.orderCount);
+                    <td class="@(i==maxFactories-1 ? "rightborder" : "")number">
+                        @if (fStat > 0)
+                        {
+                            @fStat
+                        }
+                    </td>
+                }
+                @for (int i = 0; i < osa_locations.Count; i++)
+                {
+                    var lStat = Model.OrderLocationStats.Where(o => o.client_code == dist && o.location == osa_locations[i]).Sum(o=>o.orderCount);
+                    <td class="@(i==osa_locations.Count-1 ? "rightborder" : "")number">
+                        @if (lStat > 0)
+                        {
+                            @lStat
+                        }
+                    </td>
+                }
+                        
+                        
+            </tr>
+        }
+    <tr class="clienttable_header">
+        <td>
+            TOTAL
+        </td>
+        <td class="rightbordernumber">
+            @Model.OrderStats.Sum(o=>o.orders_count)
+        </td>
+        @for(int i=0;i<prod_groups.Length;i++)
+        {
+            var g = prod_groups[i];
+            <td class="@(i==prod_groups.Length-1 ? "rightborder" : "")number">
+                @Model.OrderStats.Where(o => o.product_group == g).Sum(o=>o.orders_count)
+            </td>
+        }
+        @for (int i = 0; i < brandCount; i++)
+        {
+            <td class="@(i==brandCount-1 ? "rightborder" : "")number">
+                @Model.OrderBrandStats.Where(o => o.brandCount == i + 1).Sum(o=>o.orderCount)
+            </td>
+        }
+        @for (int i = 0; i < maxFactories; i++)
+        {
+                        
+            <td class="@(i==maxFactories-1 ? "rightborder" : "")number">
+                @Model.OrderFactoryStats.Where(o => o.factoryCount == i + 1).Sum(o=>o.orderCount)
+            </td>
+        }
+        @for (int i = 0; i < osa_locations.Count ; i++)
+        {
+                        
+            <td class="@(i==osa_locations.Count-1  ? "rightborder" : "")number">
+                @Model.OrderLocationStats.Where(o => o.location == osa_locations[i]).Sum(o=>o.orderCount)
+            </td>
+        }
+
+                    
+    </tr>

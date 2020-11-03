@@ -1,0 +1,57 @@
+﻿@model List<WeightDifferenceRow>
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Weight override for brands orders </title>
+        <style>
+            td {border:1px solid black}
+            table { border-collapse: collapse;font-family: arial;font-size: 14px}
+            body { font-family: arial;font-size: 14px}
+        </style>
+    </head>
+    <body>
+        <h2>Weight override for brands orders </h2>
+        From: @( ((DateTime)ViewBag.from).ToShortDateString()) To: @( ((DateTime)ViewBag.to).ToShortDateString())
+        <div>
+            <table style="">
+                <tr style="font-weight: bold">
+                    <td>
+                        Factory
+                    </td>
+                    <td>
+                        Customer code
+                    </td>
+                    <td>
+                        CustPO
+                    </td>
+                    <td>
+                        Product code
+                    </td>
+                    <td style="width: 160px;text-align: right">
+                        Updated PO weight
+                    </td>
+                    <td style="width: 160px;text-align: right">
+                        System weight
+                    </td>
+                </tr>
+                @foreach (var wd in Model)
+                {
+                    <tr>
+                        <td>@wd.factory_code</td>
+                        <td>@wd.customer_code</td>
+                        <td>@wd.custpo</td>
+                        <td>@wd.factory_ref</td>
+                        <td style="text-align: right">@wd.Updated_PO_weight</td>
+                        <td style="text-align: right">@wd.System_weight</td>
+                    </tr>
+                }
+            </table>      
+        </div>
+    </body>
+</html>

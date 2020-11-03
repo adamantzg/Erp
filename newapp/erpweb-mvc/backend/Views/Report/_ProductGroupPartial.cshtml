@@ -1,0 +1,22 @@
+﻿@model ProductGroupPartialModel
+
+<tr>
+    @{ var sum = 0;}
+    <td class="center">@Model.ProductGroup</td>
+    @*<td style="width:100%!important;">@Model.Description</td>*@
+    @{
+        sum = 0;
+    }
+    @*@foreach (var c in Model.Categories)
+    {
+        var count = Model.Products.Count(p => p.MastProduct != null && p.MastProduct.product_group == Model.ProductGroup && p.cprod_brand_cat == c.brand_cat_id);
+        sum += count;
+        <td class="number">@count</td>
+    }*@
+    @foreach (var cg in Model.CategoryGroups.OrderBy(cg=>cg.Name)) {
+        var count = Model.Products.Count(p => p.MastProduct != null && p.MastProduct.product_group == Model.ProductGroup && cg.Categories.Count(c=>c.brand_cat_id == p.cprod_brand_cat) > 0);
+        sum += count;
+        <td class="number">@count.ToString("N0")</td>
+    }
+    <td class="number success">@sum.ToString("N0")</td>
+</tr>

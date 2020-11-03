@@ -1,0 +1,386 @@
+﻿
+    <ng-form name="vm.CAform" class="flex-col" ng-submit="vm.saveNewCA()" ng-class="vm.getPanelType()" ng-switch="vm.view" on=0 novalidate ng-cloak>
+        <div class="loading-dialog" ng-show="vm.showLoadingDialog"></div>
+
+        <!--<div class="panel-heading" ng-if="vm.view < vm.max">
+            <span class="h4 title-panel">Create New Ca </span>-->
+            <!--@*<span class="pull-right" ><i class="fa fa-user"></i> {{vm.user.name}}</span>*@-->
+        <!--</div>-->
+        <div class="panel-heading" ng-if="vm.view === vm.max">
+
+            <span ng-if="vm.succes" class="h4 title-panel">New CA is Created</span>
+            <span ng-if="!vm.succes" class="h4 title-panel">ERROR</span>
+        </div>
+        <!--@* BODY *@-->
+        <!--@* 1st VIEW *@-->
+        <div class="panel-body" ng-switch-when=0>
+
+            <!--@* REFERENCE *@-->
+            <div class="form-group col-xs-7">
+                <label for="Ref">
+                    Reference
+
+                </label>
+                <input name="Ref"
+                       type="text" class="form-control" id="Ref" ng-model="vm.Feedback.return_no"
+                       disabled />
+            </div>
+
+
+            <div class="form-group col-xs-12">
+                <label for="clientOrder"
+                       ng-class="{'text-danger':!vm.CAform.clientOrder.$valid && vm.viewSubmited[vm.view]}">
+                    Select Client order
+                    <i class="fa fa-refresh fa-spin"
+                       style="color: #fa8564; position:absolute; margin-top:15px;right:30px;font-size:17px;opacity:.7" ng-show="vm.busyOrders"></i>
+                    <span ng-if="!vm.CAform.clientOrder.$valid && vm.viewSubmited[vm.view]" class="text-danger"> *Is requried</span>
+                </label>
+                <!--@*<input id="clientOrder"
+                           name="clientOrder"
+                           ng-hide="hideAutoInmput"
+                           type="text"
+                           ng-model="vm.Order"
+                           uib-typeahead="o as o.custpo for o in vm.orders |filter:{custpo:$viewValue}"
+                           typeahead-on-select="vm.getProducts($item)"
+                           placeholder="{{vm.busyOrders ? '' : 'Enter order id'}}"
+                           ng-class="{'invalid':!vm.CAform.clientOrder.$valid && vm.viewSubmited[vm.view]}"
+                    class="form-control m-b-10" required />*@-->
+                <select id="clientOrder"
+                        name="clientOrder"
+                        type="text"
+                        ng-model="vm.Order"
+                        ng-change="vm.getProducts()"
+                        ng-options="order as order.custpo for order in vm.orders |orderBy:'custpo'"
+                        class="form-control"
+                        @*ng-class="{'invalid':!vm.productValid && vm.viewSubmited[vm.view]}" *@
+                        required>
+                    <option style="display:none;" value="">Select order</option>
+                </select>
+              
+
+            </div>
+            <!--@* PRODUCT *@-->
+            <!--@*<div class="form-group col-xs-12">
+                <label for="product"
+                       ng-class="{'text-danger':!vm.productValid && vm.viewSubmited[vm.view]}">
+                    Select product
+                    <i class="fa fa-refresh fa-spin"
+                       style="color: #fa8564; position:absolute; margin-top:15px;right:30px;font-size:16px;opacity:.7" ng-show="vm.busyProducts"></i>
+                    <span ng-if="!vm.productValid && vm.viewSubmited[vm.view]" class="text-danger"> *Is requried</span>
+                </label>
+
+                <select id="product"
+                        name="product"
+                        type="text"
+                        ng-model="vm.product"
+                        ng-change="vm.productSelected()"
+                        ng-options="prod as prod.cprod_code for prod in vm.products"
+                        class="form-control"
+                        ng-class="{'invalid':!vm.productValid && vm.viewSubmited[vm.view]}"
+                        required
+                        ng-disabled="vm.products.length < 1">
+                    <option ng-if="vm.products.length > 0" style="display:none;" value="">Select product</option>
+                </select>
+            </div>*@-->
+            <div class="form-group col-xs-12">
+                <label for="product"
+                       ng-class="{'text-danger':!vm.productValid && vm.viewSubmited[vm.view]}">
+                    Select products
+                    <i class="fa fa-refresh fa-spin"
+                       style="color: #fa8564; position:absolute; margin-top:15px;right:30px;font-size:16px;opacity:.7" ng-show="vm.busyProducts"></i>
+                    <span ng-if="!vm.productValid && vm.viewSubmited[vm.view]" class="text-danger"> *Is required</span>
+                </label>
+                <!--@* CUSTOM DROPDOWN-LIST  *@-->
+                
+                <button class="btn btn-default btn-block"
+                        ng-hide="vm.Order !== null && !vm.products.length > 0 && !vm.busyProducts"
+                        ng-click="vm.openModal()"
+                        ng-disabled="!vm.products.length > 0 ">
+                    <span ng-hide="vm.Feedback.Products.length > 0" class="pull-left">Select product</span>
+                    <span ng-show="vm.Feedback.Products.length > 0" ng-repeat="prod in vm.Feedback.Products" class="pull-left">
+                        {{$index > 0 ? ',':''}}&nbsp;{{prod.cprod_code}}
+                    </span>
+                    <i class="glyphicon glyphicon-triangle-bottom pull-right" style="opacity:.9;font-size:10px;margin-top:5px;width:3px;"></i>
+                </button>
+
+                <button class="btn btn-warning btn-block" ng-if="vm.products.length===0  ">
+                    <span  class="pull-left">Has no products</span>
+                </button>
+                <!--@* END CUSTOM DROPDOWN-LIST *@-->
+            </div>
+
+
+            <!--@*<div class="form-group col-xs-12 ">
+                <form class="form-horizontal tasi-form">
+                    <div class="form-group col-xs-12 stab-pane" style="overflow-y: scroll; max-height:150px">
+                        <div class="col-xs-10">
+                            <div ng-repeat="v in vm.products">
+                                <input type="checkbox" ng-model="v.selected" ng-change="productSelected2()" />
+                                <span>{{v.cprod_code}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>*@-->
+            <!--@*!vm.CAform.clientOrder.$valid*@-->
+            <div class="form-group col-xs-12 one_scroll">
+                <label for="retCat"
+                       ng-class="{'text-danger':!vm.CAform.retCat.$valid && vm.viewSubmited[vm.view]}">
+                    Select Return Category
+                    <i class="fa fa-refresh fa-spin"
+                       style="color: #fa8564; position:absolute; margin-top:15px;right:30px;font-size:16px;opacity:.7" ng-show="vm.busyReturnCategory"></i>
+                    <span ng-if="!vm.CAform.retCat.$valid && vm.viewSubmited[vm.view]" class="text-danger"> *Is required</span>
+                </label>
+                <select id="retCat"
+                        name="retCat"
+                        type="text"
+                        ng-model="vm.returnCategory"
+                        ng-change="vm.returnCateogrySelected()"
+                        ng-options="returnCat as returnCat.category_name for returnCat in vm.returnsCategories"
+                        class="form-control"
+                        ng-class="{'invalid':!vm.CAform.retCat.$valid && vm.viewSubmited[vm.view]}"
+                        required>
+                    <option style="display:none;" value="">Select returns reason</option>
+                </select>
+            </div>
+            <!--@* ISSUE *@
+            @*<div class="col-xs-12">
+                    <label for="issue">
+                        <span>Select the category of the issue </span>
+                    </label>
+                    <select id="issue"
+                            name="issue"
+                            class="form-control"
+                            ng-model="vm.Feedback.feedback_category_id"
+                            ng-options="category.feedback_cat_id as category.name for category in vm.categories"></select>
+                </div>*@-->
+            <div class="form-group col-xs-12">
+                <label> What is the urgency of the issue?</label><br />
+                <select id="important"
+                        class="form-control"
+                        name="important"    
+                        ng-model="vm.Feedback.importance_id"
+                        ng-change="vm.importanceSelected()"
+                        ng-options=" imp.importance_id as imp.importance_text for imp in vm.importances">
+                    <option style="display:none;" value="">Select importance</option>
+                </select>
+                <!--<div class="radio-inline" ng-repeat="i in vm.importances | orderBy:'-days'">
+                    <label class="radio-inline">
+                        <input class="radio" type="radio" ng-model="$parent.Feedback.importance_id" name="importance" ng-value="i.importance_id" />
+                        <span>{{i.importance_text}}</span>
+                    </label>
+                </div>-->
+            </div>
+
+        </div>
+        <!--@* 2nd VIEW *@-->
+        <div class="panel-body" ng-switch-when="1" style="padding-bottom:0;margin-bottom:-25px">
+            <div class="form-group col-xs-12">
+                <label for="reason" class="control-label">
+                    Reason templates
+                </label>
+
+                <select id="product"
+                        name="product"
+                        type="text"
+                        ng-model="vm.Feedback.client_comments"
+                        ng-options="reason.reason_description as reason.reason_description for reason in vm.resonTemplates"
+                        class="form-control"
+                        required>
+                    <option style="display:none;" value="">Select returns reason</option>
+                </select>
+            </div>
+        </div>
+        <div class="panel-body flex-grow" ng-switch-when="1">
+            <div class="form-group col-xs-12">
+                <label for="reason" class="control-label" ng-class="{'text-danger':!vm.CAform.reason.$valid && vm.viewSubmited[vm.view]}">
+                    Reason
+                    <span ng-if="!vm.CAform.reason.$valid && vm.viewSubmited[vm.view]" class="text-danger"> *Is required</span>
+                </label>
+                <!--@*<span class="col-sm-10"></span>*@-->
+
+                <textarea id="reason"
+                          name="reason"
+                          class="form-control text-area"
+                          ng-class="{'invalid':!vm.CAform.reason.$valid && vm.viewSubmited[vm.view]}"
+                          ng-model="vm.Feedback.client_comments"
+                          style="width:100%;" required></textarea>
+            </div>
+
+        </div>
+        <div class="panel-body" ng-switch-when="1">
+            <div class="col-xs-6" style="padding-left:0">
+
+                <label class="control-label" for="InspQty">Inspection qty</label>
+                <input id="InspQty"
+                       ng-model="vm.Feedback.inspection_qty" class="form-control" type="number" value="" />
+            </div>
+            <div class="col-xs-6" style="padding-right:0">
+                <label class="control-label" for="SampleQty">Sample qty</label>
+
+                <input id="SampleQty"
+                       ng-model="vm.Feedback.sample_qty"
+                       class="form-control" type="number" value="" />
+            </div>
+            <div class="col-xs-6" style="padding-left:0">
+                <label class="control-label" for="InspQty">
+                    Rejection qty
+                </label>
+                <input id="InspQty"
+                       ng-model="vm.Feedback.rejection_qty"
+                       class="form-control" type="number" value="" />
+            </div>
+        </div>
+
+        <!--@* 3rd *@-->
+        <div class="panel-body flex-grow" ng-switch-when="2">
+            <div class="form-group col-xs-12">
+                <label for="prior" class="control-label">Resolution-Prior to shipment the product</label>
+                <!--@*<span class="col-sm-10"></span>*@-->
+
+                <textarea id="prior"
+                          class="form-control text-area"
+                          ng-model="vm.Feedback.client_comments2" style="width:100%;min-height:140px;"></textarea>
+            </div>
+
+        </div>
+        <div class="panel-body" ng-switch-when="2">
+            <div class="form-group col-xs-12">
+                <label>
+                    <span class="radio-title">Recheck required</span>
+                </label>
+                <!--@*<input ng-model="Feedback.recheck_required" type="checkbox">*@-->
+                <button type="button"
+                        style="border-radius:45%"
+                        class="btn btn-default pull-right" ng-model="vm.Feedback.recheck_required" uib-btn-checkbox btn-checkbox-true="true" btn-checkbox-false="false">
+                    <span ng-hide="vm.Feedback.recheck_required">&nbsp;&nbsp;</span>
+                    <i ng-show="vm.Feedback.recheck_required" class="glyphicon glyphicon-ok"></i>
+
+                </button>
+
+
+            </div>
+        </div>
+
+        <!--@* END 3rd *@-->
+        <!--@* image view *@-->
+        <div class="panel-body" ng-switch-when="3" style="overflow:scroll">
+            <div class="col-xs-12">
+                <label for="images" class="control-label">Images <span class="badge">{{vm.Feedback.Images.length}}</span></label>
+                <div ng-repeat="i in vm.Feedback.Images" style="float:left;margin-right:5px">
+                    <div style="float:left;">
+                        <!--@* DELETE *@-->
+                        <div class="delete-image-btn" ng-click="vm.DeleteFileNewCA(i.return_image,$index)">
+                            <a class="pointer">
+                                <i class="glyphicon glyphicon-remove"></i>
+                                <!--@*<img src="/Images/menus/Delete.gif" />*@-->
+                            </a>
+                        </div>
+                        <a ng-href="{{vm.GetFileUrl(i)}}" ng-class="data-lightbox" ng-attr-data-lightbox="{{IsPicture(i.return_image) ? 'files' : undefined}}">
+
+                            <img ng-src="{{vm.GetFileImage(i)}}" title="{{i.return_image}}" class="thumbnail" style="max-width:100%;max-height:100%" />
+                            
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <!--@* end image view *@-->
+        <!--@* 4rd  ERROR / SUCCESS*@-->
+        <div class="panel-body" ng-switch-when="4" ng-if="vm.succes">
+            <span class="text-success">
+                Thank you for submitting. Your reference number is <b>{{vm.Feedback.return_no}}</b>. We will come back to you shortly.
+            </span>
+        </div>
+        <div class="panel-body" ng-switch-when="4" ng-if="!vm.succes">
+            <div class="h3 text-danger">Status: {{vm.error.status}} - {{vm.error.statusText}}</div>
+            <br />
+            <div class="h3 text-danger">
+                Message:
+            </div>
+            <p class="text-danger">
+                {{vm.error.data.message}}
+            </p>
+        </div>
+        <!--@* EDN 4TH *@-->
+        <!--@* EXPAND ROW *@-->
+        <div class="panel-body flex-grow" ng-if="!vm.hideBottoFlex()"></div>
+        <!--@* END EXPAND *@-->
+        <!--@* END BODY *@-->
+        <!--@* FOOTER *@-->
+        <div class="panel-footer panel-footer-preview" style="z-index:1">
+            <!--<div class="col-xs-12" style="position:absolute;z-index:999999;margin-top:-150px">
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h4 class="h4">Error!</h4>
+                        <span>Return Category is not selected.</span><br />
+                        <span>Please select return category.</span>
+                    </div>
+                </div>
+            </div>-->
+            <div class="col-xs-12" id="view-prev">
+                <!--@* 1 *@-->
+                <div class="col-xs-3" ng-class="vm.getClass(0)" style="font-size:11px;">Step 1&nbsp;</div>
+                <!--@* 2 *@-->
+                <div class="col-xs-3" ng-class="vm.getClass(1)" style="font-size:11px;">Step 2&nbsp;</div>
+                <!--@* 3 *@-->
+                <div class="col-xs-3" ng-class="vm.getClass(2)" style="font-size:11px;">Step 3&nbsp;</div>
+                <!--@* 4 *@-->
+                <div class="col-xs-3" ng-class="vm.getClass(3)" style="font-size:11px;">Images &nbsp;</div>
+            </div>
+            <div ng-if="vm.view < vm.max">
+                <div class="col-xs-3">
+                    <div>
+                        <i ng-if="vm.view > 0" ng-click="vm.left()" class="glyphicon glyphicon-circle-arrow-left nav-arrow"></i>
+                    </div>
+                    <!--@*<span class="h4">{{vm.CAform.$valid}}</span>*@-->
+                    <div>
+
+                    </div>
+                </div>
+
+                <!--<div class-->
+
+                <div class="col-xs-3 btn-footer-holder" style="padding-right:2px!important">
+                    <div ng-if="vm.view === vm.max-1" class="btn btn-warning btn-block" ng-click="vm.reset()">Cancel</div>
+                </div>
+                <div class="col-xs-3 btn-footer-holder" style="padding-left:2px!important">
+
+                    <input type="submit" ng-if="vm.view === vm.max -1"
+                           class="btn  btn-block" ng-class="vm.getButtonStyle()" ng-click="vm.saveNewCA()" value="Create Ca" style="padding:6px!important" />
+
+                </div>
+                <div class="col-xs-3">
+                    <div class="pull-right" ng-if="vm.view === vm.max-1">
+                        <a id="upload"
+                           class="btn btn-xs btn-info btn-upload"
+                           style="font-size:19px;width:40px;height:40px;border-radius:50%;padding-top:4px "
+                           plupload="vm.fileUpload.url"
+                           plupload-options="vm.fileUpload.options"
+                           plupload-callbacks="vm.fileUpload.callbacks"
+                           title="Upload new image">
+                            <i class="fa fa-camera"></i>
+                        </a>
+                    </div>
+                    <i ng-click="vm.right()" ng-if="vm.view < vm.max - 1" class="glyphicon glyphicon-circle-arrow-right nav-arrow pull-right"></i>
+
+                    <i class="fa fa-refresh fa-spin"
+                       style="color: #fa8564; position:absolute; margin-top:3px;margin-left:10px;font-size:27px;" ng-show="vm.busyCreate"></i>
+                </div>
+
+
+            </div>
+            <div ng-show="vm.showCreateNewBtn">
+                <div class="col-sm-2">&nbsp;</div>
+                <div class="col-sm-8">
+
+                    <div class="btn btn-primary btn-block" ng-click="vm.reset()">Create new CA</div>
+                </div>
+                <div class="col-sm-2">&nbsp;</div>
+            </div>
+        </div>
+</ng-form>
+

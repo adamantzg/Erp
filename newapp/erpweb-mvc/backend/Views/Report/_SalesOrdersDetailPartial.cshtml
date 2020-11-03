@@ -1,0 +1,228 @@
+﻿@using System.Reflection
+@model SalesOrdersDetailModel
+@{
+    Layout = null;
+}
+
+@functions {
+    public string GetStockStatus(DateTime? date)
+    {
+        var text = "Unsure";
+        if (date == DateTime.Today) {
+            text = "In Stock";
+        }
+        else if (date != null) {
+            text = $"Due {date.ToString("dd MMM")}";
+        }
+        return text;
+    }
+
+    public string GetRowStatus(Sales_orders s)
+    {
+        var text = "Unsure";
+        if (s.cprod_id != null && Model.ProductAvailabilityDates.ContainsKey(s.cprod_id))
+        {
+            text = GetStockStatus(Model.ProductAvailabilityDates[s.cprod_id]);
+        }
+        else if (s.bundle_id != null && Model.BundleAvailabilityDates.ContainsKey(s.bundle_id.Value))
+        {
+            text = GetStockStatus(Model.BundleAvailabilityDates[s.bundle_id.Value]);
+        }
+        return text;
+    }
+}
+@if (Model.ShowNote)
+{
+    <ul>
+        <li>
+            ** Order where the value is > 1500 USD or weight is over 150 lbs are applied FOC domestic freight
+        </li>
+    </ul>
+}
+
+@{
+    var columns = new Dictionary<SalesOrderDetailColumns, string>()
+    {
+        {SalesOrderDetailColumns.OrdersYTD, "Orders YTD"},
+        {SalesOrderDetailColumns.Dealer, "Dealer"},
+        {SalesOrderDetailColumns.State, "State"},
+        {SalesOrderDetailColumns.Brand, "Brand"},
+        {SalesOrderDetailColumns.Code, "code"},
+        {SalesOrderDetailColumns.Description, "desc"},
+        {SalesOrderDetailColumns.Qty, "qty"},
+        {SalesOrderDetailColumns.ValueFormatted, "value"},
+        {SalesOrderDetailColumns.StockStatus, "stock status"}
+    };
+
+    var rightAlignments = new List<SalesOrderDetailColumns> {SalesOrderDetailColumns.Qty, SalesOrderDetailColumns.ValueFormatted, SalesOrderDetailColumns.StockStatus};
+
+    var columnWidths = new Dictionary<SalesOrderDetailColumns, string>()
+    {
+        {SalesOrderDetailColumns.OrdersYTD, "80"},
+        {SalesOrderDetailColumns.Dealer, "80"},
+        {SalesOrderDetailColumns.State, "40"},
+        {SalesOrderDetailColumns.Brand, "40"},
+        {SalesOrderDetailColumns.Code, "120"},
+        {SalesOrderDetailColumns.Description, null},
+        {SalesOrderDetailColumns.Qty, "40"},
+        {SalesOrderDetailColumns.ValueFormatted, "60"},
+        {SalesOrderDetailColumns.StockStatus, "100"}
+    };
+
+    Dictionary<SalesOrderDetailColumns, PropertyInfo> propertyInfos = null;
+}
+
+<table style="width: 900px" class="salesdetailstable">
+@foreach(var g in Model.SalesOrderData.Where(d=>!d.IsCN).GroupBy(s=>s.date_report).OrderBy(g=>g.Key)) {
+        <thead>
+            <tr>
+                <th colspan="9" style="border: 0;text-align: left">
+                    @(g.Key.ToString("ddd d MMM"))
+                </th>
+            </tr>
+        <tr style="font-weight: bold">
+            @foreach (var c in columns)
+            {
+                <th style="text-align:@(Html.Raw( (rightAlignments.Contains(c.Key) ? "right" : "left") + (columnWidths[c.Key] != null ? $";width:{columnWidths[c.Key]}px" : "") ))">
+                    <span @Html.Raw(Model.HiddenColumns != null && Model.HiddenColumns.Contains(c.Key) ? "style=color:white" : "")>@c.Value</span>
+                </th>
+            }
+            
+
+        </tr>
+        </thead>
+        <tbody>
+            @{ 
+                string order_no = null;
+                string previousOrderNo = null;
+                var counter = 0;
+                double? orderValue = 0.0;
+                double? orderWeight = 0.0;
+
+                var data = g.OrderBy(s => s.alpha).ThenBy(s => s.order_no).ThenBy(s => s.cprod_code1).
+                    Select(s => new
+                    {
+                        OrderNo = s.order_no,
+                        OrdersYTD = Model.DealerYearData.ContainsKey(s.customer) ? Model.DealerYearData[s.customer].NoOfOrders : 0,
+                        Dealer = s.alpha,
+                        State = Model.Dealers.ContainsKey(s.customer) ? Model.Dealers[s.customer].state_region : "",
+                        Brand = WebUtilities.MapStockOrdersBrand(s.brand, true),
+                        Code = s.cprod_code1,
+                        Description = s.cprod_name,
+                        Qty = s.order_qty,
+                        s.Product,
+                        Value = s.value,
+                        ValueFormatted = s.value.ToString("N2"),
+                        StockStatus = GetRowStatus(s)
+                    }).ToList();
+                bool firstRow = true;
+
+            }
+
+            @foreach (var s in data)
+            {
+                if (firstRow)
+                {
+                    propertyInfos = columns.ToDictionary(c => c.Key, c => s.GetType().GetProperty(c.Key.ToString()));
+                    firstRow = false;
+                }
+
+                var orderChanged = s.OrderNo != order_no;
+                previousOrderNo = order_no;
+                order_no = s.OrderNo;
+
+                if (orderChanged)
+                {
+                    counter++;
+                    if (previousOrderNo != null)
+                    {
+                        <tr class="details_total_row">
+                            <td colspan="5"></td>
+                            <td><span style="font-weight: bold">ORDER NO. </span>@previousOrderNo</td>
+                            <td style="text-align:right;font-weight: bold">Total</td>
+                            <td style="text-align: right">@orderValue.ToString("N2")</td>
+                            @*<td style="text-align: right">@orderWeight.ToString("N2")</td>*@
+                            <td style="text-align: left">@(orderValue > 1500 || orderWeight > 150 ? "**" : "")</td>
+                        </tr>
+                        orderWeight = 0;
+                        orderValue = 0;
+                    }
+
+                }
+                orderValue += s.Value;
+                var weight = s.Product?.MastProduct?.pack_GW * s.Qty * 2.2;
+                orderWeight += weight;
+                <tr @(Html.Raw(orderChanged ? "style=\"border-top: 1px solid black\"" : ""))>
+                    
+                    @foreach (var c in columns)
+                    {
+                        <td @Html.Raw(rightAlignments.Contains(c.Key) ? "style=text-align:right" : "")>
+                            @if (Model.HiddenColumns == null || !Model.HiddenColumns.Contains(c.Key))
+                            {
+                                @(propertyInfos[c.Key] != null ? propertyInfos[c.Key].GetValue(s) : string.Empty)
+                            }
+                        </td>
+                    }
+
+                </tr>
+                
+            }
+            @if (order_no != null)
+            {
+                <tr class="details_total_row">
+                    <td colspan="5"></td>
+                    <td><span style="font-weight: bold">ORDER NO. </span>@order_no</td>
+                    <td style="text-align:right;font-weight: bold">Total</td>
+                    <td style="text-align: right">@orderValue.ToString("N2")</td>
+                    @*<td style="text-align: right">@orderWeight.ToString("N2")</td>*@
+                    <td style="text-align: left">@(orderValue > 1500 || orderWeight > 150 ? "**" : "")</td>
+                </tr>
+                orderWeight = 0;
+                orderValue = 0;
+            }
+            <tr>
+                <td colspan="9" style="height: 10px">&nbsp;</td>
+            </tr>
+        </tbody>   
+    
+}
+@if(Model.SalesOrderData.Count(d=>d.IsCN) > 0 )
+{
+    <thead>
+        <tr>
+            <th colspan="9">CREDIT NOTES</th>
+        </tr>
+         <tr style="font-weight: bold">
+            @foreach (var c in columns)
+            {
+                <th style="text-align:@(Html.Raw( (rightAlignments.Contains(c.Key) ? "right" : "left") + (columnWidths[c.Key] != null ? $";width:{columnWidths[c.Key]}px" : "") ))">
+                    <span @Html.Raw(Model.HiddenColumns != null && Model.HiddenColumns.Contains(c.Key) ? "style=color:white" : "")>@c.Value</span>
+                </th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            @{  var cnData = Model.SalesOrderData.Where(d => d.IsCN).ToList();
+                int? cnOrdersYTD = 0;
+                foreach(var g in cnData.GroupBy(d=>d.customer))
+                {
+                    if(Model.DealerYearData.ContainsKey(g.Key))
+                    {
+                        cnOrdersYTD += Model.DealerYearData[g.Key].NoOfOrders;
+                    }
+                }
+            }
+            <td>@cnOrdersYTD</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td style="text-align: right">@cnData.Sum(d=>d.order_qty)</td>
+            <td style="text-align: right">@cnData.Sum(d=>d.value)</td>
+            <td></td>
+        </tr>
+    </tbody>
+}
+</table>

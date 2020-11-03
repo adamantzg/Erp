@@ -1,0 +1,124 @@
+﻿
+@section head
+{
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    @Styles.Render("~/Content/DataTables/style/css")
+}
+
+<h3>Order chart</h3>
+<form class="form form-horizontal" ng-app="app">
+    <div ng-controller="controller">
+        <div class="row">
+            <div class="col-md-6">
+                <label>Factory</label>
+                <select class="form-control" ng-options="f as f.factory_code for f in factories track by f.user_id " ng-model="factory" ng-change="factorySelected()"></select>
+            </div>
+            <div class="col-md-6">
+                <label>Client</label>
+                <div us-spinner spinner-key="spinner-1"></div>
+                <select class="form-control" ng-options="c as c.customer_code for c in clients track by c.user_id " ng-model="client" ng-show="!clientsLoading"></select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <label>Category</label>
+                <select class="form-control" ng-options="c as c.cat1_name for c in categories track by c.category1_id" ng-model="category1" ></select>
+            </div>
+            <div class="col-md-6">
+                <div><label>From - to</label></div>                
+                <div class="col-md-6">
+                    <select class="form-control col-md-6" ng-options="m as m for m in months" ng-model="from.month" style="width:50%"></select>
+                    <select class="form-control col-md-6" ng-options="y as y for y in years" ng-model="from.year" style="width:50%"></select>
+                </div>
+                <div class="col-md-6">
+                    <select class="form-control col-md-6" ng-options="m as m for m in months" ng-model="to.month" style="width:50%"></select>
+                    <select class="form-control col-md-6" ng-options="y as y for y in years" ng-model="to.year" style="width:50%"></select>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top:10px;margin-bottom:10px">
+            <div class="col-md-6">
+                <button class="btn btn-default" ng-click="showProducts()" ng-disabled="checkShowProducts()==false">Show products</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <table class="table table-striped" datatable="ng" dt-options="productTableOptions" >
+            <thead>
+            <tr class="table_headerrow">
+                <th style="width:20px"><input type="checkbox" name="checkall" id="checkall" ng-model="checkAll" ng-change="toggleCheckAll()"/></th>
+                <th style="width:20%">MFG Code</th>
+                <th style="width:20%">Client code</th>
+                <th>Description</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr ng-show="productsLoading">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>
+                        <div us-spinner spinner-key="spinner-2"></div>
+                    </td>
+                </tr>
+                
+                <tr ng-repeat="p in products">
+                    <td><input type="checkbox" ng-model="p.selected" /></td>
+                    <td>{{p.factory_ref}}</td>
+                    <td>{{p.cprod_code1}}</td>
+                    <td>{{p.cprod_name}}</td>
+                </tr>
+            </tbody>
+        
+            </table>
+
+        </div>
+        <div class="row">
+            <div class="col-md-9">
+                <div><label>Data</label></div>
+                <div class="col-md-4">
+                    <input type="checkbox" ng-model="byOrderDate" /><span> Order qty by month of order</span>
+                </div>
+                <div class="col-md-3">
+                    <input type="checkbox" ng-model="byETD" /><span> Qty by ETD month</span>
+                </div>
+                <div class="col-md-4">
+                    <input type="checkbox" ng-model="byETA" /><span> Qty by ETA month</span>
+                </div>
+            </div>
+        </div>
+        <div class="row" style="margin-top:10px">
+            <div class="col-md-6">
+                <button class="btn btn-default" ng-click="generateChart()" ng-disabled="!checkShowGenerateChart()">Generate chart</button>
+            </div>
+        </div>
+        <div class="row">
+            <div us-spinner spinner-key="spinner-3"></div>
+            <img ng-show="showChart" ng-src="{{chartSrc}}" ng-load="chartLoaded()"/>
+        </div>
+    </div>
+</form>
+
+@section scripts2
+{
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/utils")    
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/DataTable")
+    @Scripts.Render("~/bundles/AngularDataTable")
+    <script src="~/Scripts/logToServer.js"></script>
+    <script src="~/Scripts/spin.min.js"></script>
+    <script src="~/Scripts/angular-spinner.min.js"></script>
+    <script src="~/Scripts/ngLoad.js"></script>
+    <script src="~/Scripts/functions.js"></script>
+    <script src="~/AngularApps/Order/app.js"></script>
+    <script src="~/AngularApps/Order/factory.js"></script>
+    <script src="~/AngularApps/Order/controller.js"></script>
+
+    
+}

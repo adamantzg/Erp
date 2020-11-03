@@ -1,0 +1,102 @@
+﻿@model NREditModel
+
+<div class="row" ng-app="app">
+
+    <div class="col-xs-12" ng-controller="controller">
+
+        <section class="panel panel-primary">
+
+            <header class="panel-heading">
+                NT Report creation list
+            </header>
+
+            <div class="panel-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Cust PO</th>
+                            <th>Inspection date</th>
+                            <th>Factory</th>
+                            <th>Customer</th>
+                            <th>ETD</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="r in model.inspectionRows">
+                            <td>{{$index+1}}</td>
+                            <td>{{r.insp_custpo}}</td>
+                            <td>{{formatDate(r.startdate)}}</td>
+                            <td>{{r.factory_code}}</td>
+                            <td>{{r.customer_code}}</td>
+                            <td>{{formatDate(r.po_req_etd)}}</td>
+                            <td><button class="btn btn-primary" ng-click="create(r)">Create</button></td>
+                        </tr>
+                    </tbody>
+                </table>                
+
+            </div>
+
+        </section>
+    </div>
+    <div loading class="loading-dialog"></div>
+    
+</div>
+
+
+
+@section head
+{
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    
+    <style>
+        .loading-dialog {
+            display: none;
+            position: fixed;
+            z-index: 1100;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: rgba( 0, 0, 0, .3 ) url('/images/loading2.gif') 50% 50% no-repeat;
+        }
+
+        .main {
+            width: auto;
+        }
+
+        @@media (min-width: 768px) {
+            #footer {
+                width: 750px
+            }
+        }
+
+        @@media (min-width: 992px) {
+            #footer {
+                width: 970px
+            }
+        }
+
+        @@media (min-width: 1200px) {
+            #footer {
+                width: 1170px
+            }
+        }
+    </style>
+}
+
+@section scripts2
+{
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/globalize")
+    <script src="~/Scripts/angular-plupload/angular-plupload.js"></script>
+    <script src="~/AngularApps/NotificationReport/app.js"></script>
+    <script src="~/AngularApps/NotificationReport/factory.js"></script>
+    <script src="~/AngularApps/NotificationReport/controllernt.js"></script>
+
+    <script src="~/AngularApps/loading.js"></script>
+    
+}

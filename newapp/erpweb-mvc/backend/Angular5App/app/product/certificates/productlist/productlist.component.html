@@ -1,0 +1,9 @@
+<div style="display: flex">
+    <input type="text" class="form-control filterBox" [(ngModel)]="productFilter" (input)="getFilteredProducts()">
+    <div style="margin-left: 5px"> {{filteredProducts.length}} products, {{getSelectedCount()}} selected</div>
+</div>                        
+<div>
+    <app-grid [data]="filteredProducts" [definition]="gridDefinition" [style]="{height: '500px'}" [headerData]="headerData"
+    (HeaderCheckBoxClicked)="onHeaderCheckBoxClicked($event)" (ColumnClicked)="onColumnClicked($event)"></app-grid>
+</div>
+

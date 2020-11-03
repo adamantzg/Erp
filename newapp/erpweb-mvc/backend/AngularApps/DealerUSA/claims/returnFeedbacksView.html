@@ -1,0 +1,320 @@
+﻿<script type="text/ng-template" id="customTemplate.html">
+    <a title="Detail: {{match.model.name}}, {{match.model.address1}}, {{match.model.town_city}}, {{match.model.state_region}}">
+        <!--<img ng-src="http://upload.wikimedia.org/wikipedia/commons/thumb/{{match.model.state_region}}" width="16">-->
+        <span ng-bind-html="match.label | uibTypeaheadHighlight:query"></span>, <span ng-bind-html="match.model.town_city | uibTypeaheadHighlight:query"></span>
+        
+    </a>
+</script>
+<h2 ng-if="types.showTest"> {{ctrlName}} - returnFeedbackView.html</h2>
+<button class="btn btn-default create_new" ng-hide="hideBackToList" ui-sref="list" style="margin-bottom:0px!important;margin-left:35px"><i class="ion ion-chevron-left"></i>&nbsp;&nbsp;Dealer List.</button>
+<form name="returnForm" novalidate>
+    <div class="row create-new-frame" ng-cloak>
+        <div ng-class="hideBackToList ?'col-sm-12':'col-sm-6'">
+            <div class="panel panel-default">
+                <header class="panel-heading">
+                    <span class="h4">&nbsp;</span>
+                    <a ui-sref="claims" title="Claims list">
+                        <!--<i class="fa fa-2x fa-chevron-left" style="float:left;color:#777" ng-hide="hideBackToList"></i>-->
+                    </a>
+                    <span class="h4" style="float:left;margin-left:10px; margin-top:5px;">
+                        {{modalTitle}}  <label>
+                            <span class="label label-default" style="font-size:15px;margin-left:15px">
+                                <i class="fa fa-barcode"></i> &nbsp;&nbsp; {{model.return_no}}&nbsp;&nbsp;&nbsp;
+                            </span>
+                        </label>
+                        <!--Create claim-->
+                    </span>
+                    <a href="" class="pull-right close" aria-label="close" ng-click="cancel()" ng-hide="!hideBackToList"> &times</a>
+                </header>
+
+                <div class="panel-body">
+                    <div class="row row-my-margin">
+
+                    </div>
+
+                    <!-- ROW 1 -->
+                    <!-- RADIO enquiry or a return? -->
+                    <div class="row row-my-margin">
+                        <div class="form-group col-sm-12">
+                            <label>Is this technical enquiry or a return?</label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio"
+                                           ng-model="model.claim_type"
+                                           name="optEnqRet" ng-change="changeOptionType()" ng-value=5 required ng-disabled="disableInEditMode" />Technical
+                                </label>
+                                <label>
+                                    <input type="radio"
+                                           ng-model="model.claim_type"
+                                           name="optEnqRet" ng-change="changeOptionType()" ng-value=1 required ng-disabled="disableInEditMode" />Return
+                                </label>
+                            </div>
+                        </div>
+                    </div><!-- END ROW -RADIO - enquiry or a return?-->
+                    <!-- RADIO -->
+                    <div class="row row-my-margin">
+                        <div class="form-group col-sm-6">
+                            <label>Is this Ammara or Crosswater product? </label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio"
+                                           name="optradio"
+                                           ng-model="optAmaraOrCross" ng-change="change()" ng-value="true" />Ammara
+                                </label>
+                                <label>
+                                    <input type="radio"
+                                           name="optradio"
+                                           ng-model="optAmaraOrCross" ng-change="change()" ng-value="false" />Crosswater
+                                </label>
+                            </div>
+                        </div>
+
+                    </div><!-- END ROW RADIO-->
+                    <!-- ************ -->
+                    <!-- TYPEAHEAD GROUP find products -->
+                    <div class="row">
+                        <div class="form-group col-sm-12">
+                            <!-- not used -->
+                            <label for="product">
+                                <span>Select product</span>
+                                <!--<i class="fa fa-refresh fa-spin"
+                                   style="position: absolute;margin-top: 12px;color: #fa8564;margin-left: -20px;float: right!important;" ng-if="busy">
+
+                                </i>-->
+                                <!--<i class="fa fa-2x fa-bomb"></i>-->
+                            </label>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <span style="margin-left:3px;margin-bottom:3px;float:left"
+                                          class="label label-inverse"
+                                          ng-repeat="prod in Feedback.Products">
+                                        {{prod.cprod_code1}}&nbsp;
+                                        <span class="glyphicon glyphicon-remove-circle"
+                                              style="color:lightcoral; cursor:pointer"
+                                              ng-click="removeSelectedProduct(prod)" title="Remove from list">
+                                        </span>
+                                    </span>
+                                </div>
+
+                            </div>
+                            <span class=""></span>
+                            <!-- TYPEAHEAD -->
+                            <div class="col-sm-5" style="padding-left:0">
+                                <div class="input-group m-b-10" ng-class="{'has-error':ProductMissing}" style="width:100%">
+                                    <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                                    <input id="product"
+                                           name="nameProduct"
+                                           type="text"
+                                           ng-model="Product"
+                                           uib-typeahead="prod as prod.cprod_code1 for prod in Products | filter:$viewValue"
+                                           typeahead-min-length="2"
+                                           typeahead-on-select="ProductSelected($item, $model, $label, $event)"
+                                           typeahead-input-formatter="$model.cprod_code1"
+                                           typeahead-wait-ms="900"
+                                           placeholder="Enter product id"
+                                           class="form-control input-sm"
+                                           ng-class="{'input-novalid':!returnForm.nameProduct.$valid && returnForm.$submitted}"
+                                           required />
+                                </div>
+                                <!--typeahead-wait-ms="900"-->
+                                <sub class="error"
+                                     style="float:left"
+                                     ng-if="!returnForm.nameProduct.$valid && returnForm.$submitted">*Product is required</sub>
+
+
+                            </div>
+
+                            <div class="col-sm-6" style="padding-top:8px">
+                                {{Product.cprod_name}}
+                            </div>
+                        </div><!-- END INPUT LABEL -->
+                    </div><!--END ROW - TYPEAHEAD GROUP - find products -->
+                    <!-- ************ -->
+
+                    <div class="row row-my-margin">
+                        <!-- CHECKBOXS is deaer or consumer -->
+                        <div class="form-group col-sm-5"
+                             ng-class="{'error':model.dealer_id == null && (model.contact_name == null ||model.contact_name==='') && returnForm.$submitted}">
+                            <!--LEFT COLUMN-->
+                            <label style="color:#333;">Is this dealer or consumer?</label> <br />
+
+                            <sub style="float:left;margin-top:-5px" ng-if="model.dealer_id == null && (model.contact_name == null ||model.contact_name==='') && returnForm.$submitted">*Is required dealer or consumer!</sub>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="optDealerConsumer"
+                                           ng-model="optDealerConsumer"
+                                           ng-value="true"
+                                           ng-change="checkDealerConsumer()" />Dealer
+                                </label>
+                                <label>
+                                    <input type="radio" name="optDealerConsumer"
+                                           ng-model="optDealerConsumer"
+                                           ng-value="false"
+                                           ng-change="checkDealerConsumer()" />Consumer
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <!-- SHOW HIDE INPUT BLOCKS -->
+                        <div class="form-group col-sm-5">
+                            <!--RIGHT COLUMN-->
+                            <div ng-if="optDealerConsumer">
+                                <label>
+                                    <!--Select Dealer-->&nbsp;
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa  fa-user"></i></span>
+                                    <input id="product"
+                                           type="text"
+                                           ng-model="dealer"
+                                           uib-typeahead="prod as prod.name for prod in Dealers|filter:$viewValue"
+                                           typeahead-template-url="customTemplate.html"
+                                           typeahead-min-length="1"
+                                           typeahead-on-select="DealerSelected($item, $model, $label, $event)"
+                                           typeahead-append-to-body="true"
+                                           typeahead-show-hint="true"
+                                           typeahead-wait-ms="900"
+                                           placeholder="Enter dealer"
+                                           class="form-control iput-sm" />
+                                    <!--<input type="text" uib-typeahead="state as state.name for state in statesWithFlags | filter:{name:$viewValue}"
+                               typeahead-template-url="customTemplate.html" class="form-control" typeahead-show-hint="true" typeahead-min-length="0">-->
+                                    <!-- typeahead-on-select="ProductSelected($item, $model, $label, $event)" -->
+                                    <!--typeahead-input-formatter="$model.name +', '+ $model.state_region"-->
+                                </div>
+
+                            </div>
+
+                            <div ng-if="!optDealerConsumer">
+                                <label>
+                                    <!--Enter contact details-->
+                                </label>
+                                <div class="row">
+                                    <div class="col-sm-10 input-my-contact col-sm-push-1">
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa  fa-user pull-right"></i></span>
+                                            <input type="text" ng-model="model.contact_name" class="form-control input-sm" placeholder="Please enter name" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-10 input-my-contact col-sm-push-1">
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa  fa-envelope-o pull-right"></i></span>
+                                            <input type="email" name="nameEmail" ng-class="{'input-novalid':returnForm.$error.email}" ng-model="model.contact_email" class="form-control input-sm" placeholder="Please enter e-mail" />
+                                            <br />
+
+
+                                        </div>
+                                        <sub ng-if="returnForm.$error.email && returnForm.nameEmail.$touched" class="error">*Incorrect email format!</sub>
+                                    </div>
+
+                                    <div class="col-sm-10 input-my-contact col-sm-push-1">
+                                        <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa  fa-phone pull-right"></i></span>
+                                            <input type="text" ng-model="model.contact_phone" class="form-control input-sm" placeholder="Please enter phone number" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-1" style="padding-top:30px">
+                            <!--<span ng-if="model.dealer_id != null"
+                      uib-popover-html="'Id'"> <i class="fa fa-2x fa-info-circle"></i></span>-->
+                        </div>
+                    </div><!-- END ROW-->
+                    <!-- CHECKBOXS -->
+                    <div class="row row-my-margin">
+                        <div class="form-group col-sm-12">
+                            <label>How would you classify the issue?</label>
+                            <div class="radio" ng-class="{'error':!returnForm.optIssue.$valid && returnForm.$submitted}">
+                                <label><input type="radio" name="optIssue" value="A" ng-model="model.reason" required />Appearance</label>
+                                <label><input type="radio" name="optIssue" value="D" ng-model="model.reason" required />Dimension</label>
+                                <label><input type="radio" name="optIssue" value="F" ng-model="model.reason" required />Function</label>
+                                <label><input type="radio" name="optIssue" value="M" ng-model="model.reason" required />Material</label>
+                                <label><input type="radio" name="optIssue" value="P" ng-model="model.reason" required />Packaging</label>
+                            </div>
+                            <br />
+                            <sub ng-if="!returnForm.optIssue.$valid && returnForm.$submitted"
+                                 class="error"
+                                 style="float:left;margin-top:5px">*Classify the issue is required!</sub>
+                        </div>
+                    </div><!--END ROW-->
+                    <!-- TEXTAREA -->
+                    <div class="row row-my-margin" style="padding-bottom:15px;">
+                        <div class="col-sm-12">
+                            <label for="txtIsue">Please describe the issue</label>
+
+                            <textarea type=""
+                                      ng-model="model.client_comments"
+                                      class="form-control"
+                                      rows="5"
+                                      name="issueName" value=""
+                                      ng-class="{'input-novalid':!returnForm.issueName.$valid && returnForm.$submitted}"
+                                      required />
+                            <sub ng-if="!returnForm.issueName.$valid && returnForm.$submitted"
+                                 class="error">*Describe the issue is required!</sub>
+                        </div>
+                    </div> <!-- END ROW  -->
+
+
+                    <div class="row row-my-margin">
+                        <div class="col-sm-6" style="padding-bottom:15px">
+                            <label for="upload">Upload file(s)</label>
+                            <button id="upload"
+                                    plupload="fileUpload.url"
+                                    plupload-options="fileUpload.options"
+                                    plupload-callbacks="fileUpload.callbacks"
+                                    class="btn btn-default create_new"
+                                    style="margin-left:20px;">
+                                <i class="fa fa-upload"></i> Upload
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="row row-my-margin" style="padding-bottom:20px">
+                        <div class="col-sm-12">
+                            <div class="image-holder" ng-repeat="image in model.images">
+                                <i class="fa fa-2x fa-close delete-image" ng-click="deleteImage(image,$index)"></i>
+                                <img ng-src="{{image.return_image}}" class="img-thumbnail" style="max-height:150px!important" />
+                            </div>
+                            <div ng-repeat="image in model.Images" class="image-holder">
+                                <i class="fa fa-2x fa-close delete-image"
+                                   ng-click="deleteTempImage($index)"></i>
+                                <img ng-src="{{GetFileImage(image)}}" class="img-thumbnail" style="max-height:150px!important" />
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--<h2>{{returnForm.$valid && !( model.dealer_id == null && (model.name == null ||model.name===''))}}</h2>-->
+                <div class="panel-footer">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <!--busySave-->
+
+                            <input type="submit"
+                                   style="font-weight:100"
+                                   class="btn create_new btn-default pull-right"
+                                   ng-disabled="busySave"
+                                   ng-click="returnForm.$valid && saveForm()" value="Save" />
+                            <i class="fa fa-2x fa-refresh fa-spin pull-right"
+                               style="margin-top: 5px;margin-right:10px;color: #fa8564;float: right!important;" ng-show="busySave"></i>
+
+                            <input type="button"
+                                   style="font-weight:100"
+                                   class="btn   btn-warning pull-right"
+                                   ng-click="cancel()"
+                                   value="Cancel"
+                                   title="Cancel and back to list!" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+

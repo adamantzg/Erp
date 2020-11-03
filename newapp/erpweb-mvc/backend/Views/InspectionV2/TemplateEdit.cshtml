@@ -1,0 +1,326 @@
+﻿@model InspectionTemplateEditModel
+
+
+<h2>Edit template</h2>
+
+<div ng-app="cwApp">
+    
+    <div ng-controller="cwController">
+
+        <div style="display:table-cell">Name: </div>
+        <div style="display: table-cell"><input type="text" ng-model="Template.name"/></div>
+        <div ><input type="button" value="Save" ng-click="save()"/> <a href="@Url.Action("Templates")">Back to templates</a></div>
+
+        <div>
+            <div style="font-weight: bold;font-size: 14px">Criteria</div>
+            <div style="text-align: right"><a style="cursor: pointer" ng-click="addNewCriteria()">+ add new</a></div>
+            <div>
+                <table class="table" style="width:100%">
+                    <tr class="table_headerrow">
+                        <td>Category</td>
+                        <td>Number</td>
+                        <td>Point</td>
+                        <td>Requirement (en)</td>
+                        <td>Requirement (cn)</td>
+                        <td>Importance</td>
+                        <td style="width:60px"></td>
+                        <td style="width:60px"></td>
+                    </tr>
+                    
+                    <tbody ng-repeat="c in Template.Criteria | orderBy:['category_id','number']" ng-class-even="'tablerow_alt'" ng-class-odd="'tablerow'">
+                        <tr ng-if="editId != c.id">
+                            <td>{{GetCategory(c.category_id)}}</td>
+                            <td>{{c.number}}</td>
+                            <td>{{GetPoint(c.point_id)}}</td>
+                            <td>{{c.requirements}}</td>
+                            <td>{{c.requirements_cn}}</td>
+                            <td>{{GetImportance(c.importance)}}</td>
+                            <td><input type=button id="editRowBtn{{c.id}}" value="edit" ng-click="startEdit(c.id)"></td>
+                            <td><input type=button id="deleteRowBtn{{c.id}}" value="delete" ng-click="DeleteCriteria(c)"></td>
+                        </tr>
+                        <tr ng-show="editId===c.id" ng-if="editId===c.id">
+                            <td><select ng-model="editedRow.category_id" ng-options="c.id as c.name for c in Categories"></select></td>
+                            <td><input type="text" ng-model="editedRow.number" style="max-width: 50px" /></td>
+                            <td><select ng-model="editedRow.point_id" ng-options="p.id as p.name for p in Points"></select></td>
+                            <td><textarea ng-model="editedRow.requirements" rows="3"></textarea></td>
+                            <td><textarea ng-model="editedRow.requirements_cn" rows="3"></textarea></td>
+                            <td><select ng-model="editedRow.importance" ng-options="p.id as p.name for p in Importances"></select></td>
+                            <td><input type=button id="saveRowBtn{{c.id}}" value="save" ng-click="saveCriteria(c.id)"></td>
+                            <td><input type=button id="cancelRowBtn{{c.id}}" value="cancel" ng-click="cancel(c.id)"></td>
+                        </tr>
+                    </tbody>
+                    <tr ng-show="editId<0" ng-if="editId<0">
+                        <td><select ng-model="editedRow.category_id" ng-options="c.id as c.name for c in Categories"></select></td>
+                        <td><input type="text" ng-model="editedRow.number" style="max-width: 50px"/></td>
+                        <td><select ng-model="editedRow.point_id" ng-options="p.id as p.name for p in Points"></select></td>
+                        <td><textarea ng-model="editedRow.requirements" rows="3"></textarea></td>
+                        <td><textarea ng-model="editedRow.requirements_cn" rows="3"></textarea></td>
+                        <td><select ng-model="editedRow.importance" ng-options="p.id as p.name for p in Importances"></select></td>
+                        <td><input type=button id="saveRowBtn{{c.id}}" value="save" ng-click="saveCriteria(editId)"></td>
+                        <td><input type=button id="cancelRowBtn{{c.id}}" value="cancel" ng-click="cancel(editId)"></td>
+                    </tr>
+                </table>
+            </div>
+            <div style="font-weight: bold;font-size: 14px">Products</div>
+            <div style="width: 50%;float:left;border: 1px solid black;height:300px;position: relative">
+                <div style="font-weight:bold;font-size:12px">Add new product(s)</div>
+                <div style="display: table-row">
+                    <div style="display:table-cell">Client:</div>
+                    <div style="display:table-cell"><select ng-model="client_id" ng-options="c.id as c.value for c in Clients | orderBy:'value'" ng-change="loadProducts()"></select></div>
+                </div>
+                <div style="display: table-row">
+                    <div style="display:table-cell">Factory:</div>
+                    <div style="display:table-cell"><select ng-model="factory_id" ng-options="f.id as f.value for f in Factories | orderBy: 'value'" ng-change="loadProducts()">
+                                                        <option value="">(All)</option>
+                                                    </select></div>
+                </div>
+                <div style="display: table-row">
+                    <div style="display:table-cell">Name or code:</div>
+                    <div style="display:table-cell"><input type="text" ng-model="searchText" /></div>
+                </div>
+                @*<div style="display: table-row">
+                    <div style="display:table-cell"><input type="button" value="Find"/></div>
+                    
+                </div>*@
+                <div style="font-weight: bold;font-size:12px">Found products</div>
+                <div us-spinner spinner-key="spinner-1" ></div>
+                <div ng-show="!inSearch" style="height: 250px">
+                    <input type="button" value="add all" ng-click="addAllProducts()" ng-show="FoundProductsFiltered().length > 0" />
+                    <div style="height: 150px;overflow:auto;margin-bottom: 5px;position: absolute;bottom: 2px">
+                        <table style="width: 100%">
+                            <tbody ng-repeat="p in FoundProducts | filter:FoundProductFilter(searchText)" ng-class-even="'tablerow_alt'" ng-class-odd="'tablerow'">
+                                <tr>
+                                    <td>{{p.cprod_code1}}</td>
+                                    <td>{{p.cprod_name}}</td>
+                                    <td style="width: 30px"><img src="/Images/menus/add1.gif" ng-click="addProduct(p)" title="Add" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div style="width:48%;float:left;border: 1px solid black">
+                <div style="font-weight: bold;font-size:12px">Selected products</div>
+                <table style="width: 100%">
+                    <tr>
+                        <td>code</td>
+                        <td>name</td>
+                        <td></td>
+                    </tr>
+                    <tbody ng-repeat="p in Template.Products" ng-class-even="'tablerow_alt'" ng-class-odd="'tablerow'">
+                        <tr>
+                            <td>{{p.cprod_code1}}</td>
+                            <td>{{p.cprod_name}}</td>
+                            <td style="width: 30px"><img src="/Images/menus/Delete.gif" style="cursor: pointer" ng-click="removeProduct(p)" title="Add" /></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts2
+{
+    @Scripts.Render("~/bundles/angular")
+
+    <script src="~/Scripts/spin.min.js"></script>
+    <script src="~/Scripts/angular-spinner.min.js"></script>
+    <script src="~/Scripts/lodash.min.js"></script>
+    <script type="text/javascript">
+    var cwApp = angular.module('cwApp', ['angularSpinner']);
+    var model = @Html.Raw(WebUtilities.JsonSerialize(Model));
+
+    cwApp.controller('cwController', [
+        '$scope', '$http', 'usSpinnerService', function($scope, $http, usSpinnerService) {
+            $scope.Clients = model.Clients;
+            $scope.Factories = model.Factories;
+            $scope.Template = model.Template;
+            $scope.Points = model.Points;
+            $scope.Categories = model.Categories;
+            $scope.Importances = [{ id: 1, name: 'CIR' }, { id: 2, name: 'MAJ' }, { id: 3, name: 'MIJ' }];
+            $scope.factory_id = null;
+            $scope.client_id = null;
+            $scope.searchText = '';
+            $scope.editedRow = {};
+            $scope.inSearch = false;
+            $scope.FoundProducts = [];
+            $scope.DeletedCriteria = [];
+            $scope.DeletedProducts = [];
+
+            $scope.startEdit = function(pid) {
+
+                var c = $scope.Template.Criteria.filter(function(cr) { return cr.id == pid; });
+                if (c.length > 0) {
+                    var crit = c[0];
+                    $scope.editedRow.id = crit.id;
+                    $scope.editedRow.category_id = crit.category_id;
+                    $scope.editedRow.number = crit.number;
+                    $scope.editedRow.point_id = crit.point_id;
+                    $scope.editedRow.requirements = crit.requirements;
+                    $scope.editedRow.requirements_cn = crit.requirements_cn;
+                    $scope.editedRow.importance = crit.importance;
+                } else {
+                    $scope.editedRow.id = pid;
+                    $scope.editedRow.category_id = 1;
+                    $scope.editedRow.number = 0;
+                    $scope.editedRow.point_id = null;
+                    $scope.editedRow.requirements = '';
+                    $scope.editedRow.requirements_cn = '';
+                    $scope.editedRow.importance = 3;
+                }
+                $scope.editId = pid;
+
+            }
+
+            $scope.addNewCriteria = function() {
+                $scope.startEdit($scope.minId);
+            }
+
+            $scope.FoundProductFilter =  function(searchText) {
+                return function(p) {
+                    return $scope.CheckFoundProduct(searchText, p);
+                };
+            }
+
+            $scope.CheckFoundProduct = function(searchText, p) {
+                if(p != null)
+                    return (searchText.length == 0 || p.cprod_name.indexOf(searchText) >= 0 || p.cprod_code1.indexOf(searchText) >= 0);
+                return false;
+            }
+
+            $scope.FoundProductsFiltered = function() {
+                return $scope.FoundProducts.filter(function(p) {
+                    return $scope.CheckFoundProduct($scope.searchText,p);
+                });
+            }
+
+            $scope.saveCriteria = function(id) {
+                var crit = null;
+
+                var c = $scope.Template.Criteria.filter(function(cr) { return cr.id == id; });
+                if (c.length > 0) {
+                    crit = c[0];
+                }
+                if (crit == null) {
+                    crit = {};
+                    $scope.Template.Criteria.push(crit);
+                    $scope.minId--;
+                    crit.IsNew = true;
+                }
+
+                crit.id = $scope.editedRow.id;
+                crit.category_id = $scope.editedRow.category_id;
+                crit.Category = null;
+                crit.number = $scope.editedRow.number;
+                crit.point_id = $scope.editedRow.point_id;
+                crit.Point = null;
+                crit.requirements = $scope.editedRow.requirements;
+                crit.requirements_cn = $scope.editedRow.requirements_cn;
+                crit.importance = $scope.editedRow.importance;
+                crit.IsModified = true;
+
+                $scope.editId = 0;
+
+            }
+
+            $scope.DeleteCriteria = function(c) {
+
+                _.remove($scope.Template.Criteria, function(elem) { return elem.id == c.id; });
+                if(c.id > 0)
+                    $scope.DeletedCriteria.push(c.id);
+            }
+
+            $scope.cancel = function(id) {
+                $scope.editId = 0;
+            }
+
+            $scope.GetPoint = function(point_id) {
+                var f = $scope.Points.filter(function(po) { return po.id == point_id; });
+                if (f.length > 0)
+                    return f[0].name;
+                return null;
+            }
+
+            $scope.GetCategory = function(cat_id) {
+                var f = $scope.Categories.filter(function(po) { return po.id == cat_id; });
+                if (f.length > 0)
+                    return f[0].name;
+                return null;
+            }
+
+            $scope.GetImportance = function(importance_id) {
+                var f = $scope.Importances.filter(function(po) { return po.id == importance_id; });
+                if (f.length > 0)
+                    return f[0].name;
+                return null;
+            }
+
+            $scope.loadProducts = function() {
+                $scope.inSearch = true;
+                usSpinnerService.spin('spinner-1');
+                var obj = { factory_id:  $scope.factory_id, client_id: $scope.client_id };
+                $http.post('@Url.Action("SearchProducts")', obj).
+                    success(function(data, status, headers, config) {
+
+                        $scope.FoundProducts = data;
+                        usSpinnerService.stop('spinner-1');
+                        //SetupMap(data);
+                        $scope.inSearch = false;
+                    }).
+                    error(function(data, status, headers, config) {
+                        //alert(status);
+                    });
+            }
+
+            $scope.addProduct = function(p) {
+                var existing = _.find($scope.Template.Products, function(elem) { return elem.cprod_id == p.cprod_id; });
+                if (existing == null) {
+                    $scope.Template.Products.push(p);
+                    p.IsNew = true;
+                }
+                    
+                _.remove($scope.DeletedProducts, function(elem) { return elem == p.cprod_id; });
+            }
+
+            $scope.addAllProducts = function() {
+                _.forEach($scope.FoundProductsFiltered(), function(elem) {
+                    $scope.addProduct(elem);
+                });
+            }
+
+            $scope.removeProduct = function(p) {
+                $scope.DeletedProducts.push(p.cprod_id);
+                _.remove($scope.Template.Products, function(elem) { return elem.cprod_id == p.cprod_id; });
+            }
+
+            $scope.save = function() {
+                var obj = { template:  $scope.Template, deletedCriteria: $scope.DeletedCriteria, deletedProducts: $scope.DeletedProducts  };
+                $http.post('@Url.Action("Save")', obj).
+                    success(function(data, status, headers, config) {
+                        location.href = '@Url.Action("Templates")';
+                    }).
+                    error(function(data, status, headers, config) {
+                        //alert(status);
+                    });
+            }
+
+            $scope.minId = -1;
+
+            $scope.editId = 0;
+        }
+    ]);
+    </script>
+}
+
+@section head
+{
+    <style>
+        input[type=text] {
+            width: auto;
+        }
+        select {max-width: 150px;}
+        textarea {width: auto;}
+    </style>
+}

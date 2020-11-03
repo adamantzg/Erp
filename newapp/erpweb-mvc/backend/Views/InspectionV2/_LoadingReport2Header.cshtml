@@ -1,0 +1,55 @@
+﻿
+@using company.Common
+@model LoadingInspectionV2ReportModel
+
+@{
+    var insp = Model.Inspection;
+}
+
+<table width="@(ViewBag.ForPdf ? "95" : "100")%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td><img style="width: 250px;" src="/images/asaq_logo.jpg" /></td>
+        <td align="right"><div class="doc_name">Loading Inspection</div>
+        
+            @if (!ViewBag.ForPdf) {
+                <div>
+                    <a href="/Content/container.pdf" target="_blank">Container area map</a>
+                </div>
+            }
+                    
+        </td>
+    </tr>
+</table>
+@{
+    var ponumbers = insp.Lines.Where(l=>l.OrderLine != null).Select(il => il.OrderLine?.Header?.custpo).Distinct().ToList();
+    ponumbers.AddRange(Model.CombinedOrders.Select(o => o.custpo).Distinct());
+
+
+}
+<table style="margin-top:10px;" width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td width="150" class="row_name"><span class="white">PO Numbers:</span></td>
+        <td class="row_name"><span class="white font28">@(string.Join(",",ponumbers.Distinct()))</span></td>
+    </tr>
+</table>
+
+<table style="margin-top:10px;" width="100%" border="0" cellspacing="2" cellpadding="2">
+    <tr>
+        <td width="140" class="backgr1">Factory</td>
+        <td width="400">@insp.Factory.IfNotNull(f => f.factory_code)</td>
+        <td width="140" class="backgr1">Client code</td>
+        <td>@insp.Client.IfNotNull(c => c.customer_code)</td>
+    </tr>
+    <tr>
+        <td class="backgr1">Report</td>
+        <td>@insp.ComputedCode</td>
+        <td class="backgr1">PO Numbers</td>
+        <td>@(string.Join(",", ponumbers.Distinct()))</td>
+    </tr>
+    <tr>
+        <td class="backgr1">Date of inspection</td>
+        <td>@insp.startdate.ToString("d")</td>
+        <td class="backgr1">QC Inspectors</td>
+        <td>@string.Join(",", insp.Controllers.Select(c => c.Controller.IfNotNull(u => u.user_initials)))</td>
+    </tr>
+</table>

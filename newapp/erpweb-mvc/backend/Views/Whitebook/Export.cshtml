@@ -1,0 +1,38 @@
+﻿@model List<Whitebook_template>
+@{
+    ViewBag.Title = "Export";
+    Layout = null;
+}
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th colspan="4">
+              Whitebook  Templates
+            </th>
+        </tr>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Subtitle</th>
+            <th>Whitebook notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var book in Model)
+        {
+            <tr >
+                <td>@book.id</td>
+
+                <td>@book.name</td>
+                <td>@book.subtitle</td>
+                <td>@book.whitebook_notes</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section head{
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+
+    }
+

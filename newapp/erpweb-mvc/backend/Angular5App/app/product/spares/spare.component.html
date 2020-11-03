@@ -1,0 +1,49 @@
+<h3 class="text-info">Product / Spares</h3>
+<h4>Find product or spare code</h4>
+<div class="row">
+   <div class="col-xs-12 form-inline">
+        <input 
+            [(ngModel)]="code" 
+            [typeahead]="products" 
+            (typeaheadOnSelect)="onProductSelected($event)"
+            [typeaheadOptionsLimit]="20" 
+            [typeaheadMinLength]="2" 
+            placeholder="Type product or spare"
+            typeaheadOptionField="combined_name" 
+            class="form-control" style="width: 50%; margin-right:10px"/>
+            <button class="btn btn-primary" (click)="clickSearchProductSpares(code)" [disabled]="!code">Search </button> 
+            <h4 *ngIf="loadingProducts"  class="h4 loading-message" >
+                    <small>{{loadingMessage}}</small>
+            </h4>
+        <div *ngIf="product">
+            {{product?.cprod_code1}} {{product?.cprod_name}}
+        </div>
+   </div>   
+   
+</div>
+
+<div class="row" style="margin-top:20px">
+    <div class="col-xs-12">
+        <h4 *ngIf="product">Linked {{getDescription()}}</h4>
+    </div>
+    <div class="col-xs-12">
+        <table class="table table-striped">
+            <thead>
+
+                <tr>
+                    <th>Code</th>
+
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let prod of productsOrSpares">
+                    <td>{{prod.cprod_code1}}</td>
+                    <td>{{prod.cprod_name}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+    </div>
+</div>

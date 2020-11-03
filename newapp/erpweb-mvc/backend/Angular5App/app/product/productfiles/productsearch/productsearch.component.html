@@ -1,0 +1,12 @@
+<div class="form-group">
+    <label>{{label}}</label>
+    <input type="text" 
+    [(ngModel)]="code" 
+            [typeahead]="products" 
+            (typeaheadOnSelect)="onProductSelected($event)"
+            [typeaheadOptionsLimit]="20" 
+            [typeaheadMinLength]="3" 
+            typeaheadWaitMs="1000"
+            placeholder="Type factory or product code"
+            typeaheadOptionField="combined_code" class="form-control" style="width: 33%">
+</div>

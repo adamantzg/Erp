@@ -1,0 +1,56 @@
+﻿@using company.Common
+@model LoginHistoryModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Login history</title>
+        <style>
+            .number {text-align: right;}
+            table td {border: 1px solid black;}
+        </style>
+    </head>
+    <body style="font-size:12px;font-family: arial">
+        
+        <div style="font-weight: bold; font-size: 14px">
+            Summary
+        </div>
+        <table style="font-size:12px;font-family: arial;border: 1px solid black;border-collapse: collapse;padding: 5px">
+            <tr style="font-weight: bold">
+                <td style="width: 250px">@(Model.ShowUsers ? "User" : "Company")</td>
+                <td style="width: 100px; text-align: right">No. of logins</td>
+                <td style="width: 100px; text-align: right">Uploaded images</td>
+                <td style="width: 100px; text-align: right">Technical downloads</td>
+                <td style="width: 100px; text-align: right">Inspection list page visits</td>
+                <td style="width: 100px; text-align: right">Reports submitted FI</td>
+                <td style="width: 100px; text-align: right">Reports submitted LI</td>
+            </tr>
+            @{
+                var counter = 0;                
+            }
+            @foreach (var g in Model.HistorySimple.GroupBy(h => Model.ShowUsers ? h.login_username :  h.Company.user_id.ToString()).OrderByDescending(g=>g.Count()))
+            {
+                <tr style="border: 1px solid black@(counter++ % 2 == 0 ? ";background-color: #E0E0E0" : "")">
+                    <td>@(Model.ShowUsers ? g.Key : g.First().Company.user_name)</td>
+                    <td style="text-align: right">@g.Count()</td>
+                    <td style="text-align: right">@Model.HistoryPageCounts.FirstOrDefault(pg=>pg.Username == g.Key && pg.page_type == 1).IfNotNull(pg=>pg.Count)</td>
+                    <td style="text-align: right">@Model.DownloadLogTotals.FirstOrDefault(d => d.user_id == g.First().User.userid).IfNotNull(d => d.Count)</td>
+                    <td style="text-align: right">@Model.HistoryPageCounts.FirstOrDefault(pg => pg.Username == g.Key && pg.page_type == 2).IfNotNull(pg => pg.Count)</td>
+                    <td style="text-align: right">@Model.QcComments.Count(c=>c.insp_comments == "Report Submitted" && c.Creator.username == g.Key && c.Inspection?.insp_type == "FI")</td>
+                    <td style="text-align: right">@Model.QcComments.Count(c => c.insp_comments == "Report Submitted" && c.Creator.username == g.Key && c.InspectionV2?.type == Inspection_v2_type.Loading)</td>
+                    
+                </tr>
+            }
+        </table>
+        <br/>
+        
+        
+    </body>
+
+
+</html>

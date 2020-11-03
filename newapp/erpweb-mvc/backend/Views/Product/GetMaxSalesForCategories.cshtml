@@ -1,0 +1,78 @@
+﻿@model SalesPricesPercentgesModel
+
+@{
+    ViewBag.Title = "GetMaxSalesForCategories";
+    Layout = null;
+}
+@*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+<link href="~/Content/bootsrapfix.css" rel="stylesheet" />*@
+@*<h2>Get Max Sales For Categories</h2>*@
+<style type="text/css">
+    td{
+        width:100px
+    }
+</style>
+<div class="container">
+    @*<table class="table table-striped">*@
+    <table>
+       
+        <thead>
+            @*<td>subcat</td>*@
+        <th>Category id</th>
+        @*<th>Name</th>*@
+        <th> % </th>
+        <th>&nbsp;</th>
+        <th style="color:gray">web_unique</th>
+        <th style="color:gray">price</th>
+
+        <th style="color:gray">sale price</th>
+        </thead>
+
+        @* Dohvati sve krovne kategorije *@
+        @foreach (var item in Model.Categories.Where(c => c.Products.Count(p=>p.Price != p.SalePrice) > 0))
+        {
+            <tr style="color:darkblue">
+                <td>@item.category_id</td>
+                @foreach (var prod in item.Products.Where(s => s.SalePrice > 0).OrderByDescending(c => (100 - (c.SalePrice * 100 / c.Price))).Take(1))
+                {
+                    <td>
+                        @((100 - (prod.SalePrice * 100 / prod.Price)) / 100)
+                    </td>
+                    <td>&nbsp;</td>
+                    <td style="color:gray">
+                        @prod.web_unique
+                    </td>
+                    <td style="color:gray">
+                        @prod.Price
+                    </td>
+                    <td style="color:gray">@prod.SalePrice</td>
+
+
+
+                }
+            </tr>
+                //////sve podkategorije
+                foreach (var subcat in item.Children.Where(p => p.Products.Count(c => c.Price != c.SalePrice) > 0))
+                {
+                    <tr>
+                        <td>
+                            @subcat.category_id
+                        </td>
+                       
+                        @foreach (var subproduct in subcat.Products.Where(s => s.Price != s.SalePrice).OrderByDescending(c => (100-(c.SalePrice * 100 / c.Price))).Take(1))
+                        {
+                            
+                            <td> @((100 - (subproduct.SalePrice * 100 / subproduct.Price)) / 100) </td>
+                            <td>&nbsp;</td>
+                            <td style="color:gray"> @subproduct.web_unique</td>
+                            <td style="color:gray"> @subproduct.Price</td>
+                            <td style="color:gray"> @subproduct.SalePrice</td>
+
+                        }
+                    </tr>
+                }
+        }
+    </table>
+    <br />
+   
+</div>

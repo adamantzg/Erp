@@ -1,0 +1,36 @@
+
+<h3>Markets</h3>
+<div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
+<button class="btn btn-primary" (click)="update()">Update</button> <button class="btn btn-default" (click)="back()">Back</button>
+<div class="row" style="margin-top:5px"> 
+  <div class="col-sm-12">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Internal delivery cost (%)</th>
+          <th>VAT (%)</th>
+          <th>Currency</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of rows;let i = index">
+          <td><input type="text" class="form-control" [(ngModel)]="r.name"></td>
+          <td><app-percentageinput [(Data)]="r.internal_cost"></app-percentageinput></td>
+          <td><app-percentageinput [(Data)]="r.vat"></app-percentageinput></td>          
+          <td>
+            <select class="form-control" [(ngModel)]="r.currency_id">
+              <option *ngFor="let c of currencies" [value]="c.curr_code">{{c.curr_symbol}}</option>
+            </select>
+          </td>
+          <td><button class="btn glyphicon glyphicon-remove" (click)="removeRow(i)"></button></td>
+        </tr>
+        <tr >
+          <td><button class="btn glyphicon glyphicon-plus" (click)="addRow()"></button></td>
+          <td colspan="4"></td>
+        </tr>  
+      </tbody>
+    </table>
+  </div>
+</div>

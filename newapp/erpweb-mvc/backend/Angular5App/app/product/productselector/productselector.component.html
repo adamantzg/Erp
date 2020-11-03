@@ -1,0 +1,31 @@
+<div class="row" [ngStyle]="style">
+  <div class="col-md-12">
+    <div class="form-inline" style="padding-bottom:3px;">
+        <div class="form-group">
+            <label>Factory:</label>
+            <select class="form-control ml-2" [(ngModel)]="searchParams.factory_id">
+              <option value="">(Select)</option>
+              <option *ngFor="let f of factories | orderBy: 'factory_code'" [value]="f.user_id">{{f.factory_code}}</option>
+            </select>
+        </div>
+      <div class="form-group ml-2">
+          <label>Client:</label>
+          <select class="form-control ml-2" [(ngModel)]="searchParams.client_id">
+              <option value="">(Select)</option>
+              <option *ngFor="let c of clients | orderBy: 'customer_code'" [value]="c.user_id">{{c.customer_code}}</option>
+            </select>
+      </div>    
+      <button class="btn btn-default ml-2" (click)="searchProducts()">Search products</button> 
+      <button class="btn btn-default ml-2" *ngIf="multiSelect" [disabled]="checkedProducts().length == 0" (click)="addSelected()" >Add selected</button>
+      <div class="form-group ml-2">
+        <label>Filter</label>
+        <input #filterText type="text" class="form-control ml-2" (input)="filterChange(filterText.value)"> 
+      </div>
+  </div>
+
+  <div class="col-md-10" style="margin-top:5px;padding-left:0px">
+      
+      <app-grid [definition]="gridDefinition" [data]="gridData" (ButtonClicked)="onButtonClicked($event)" [style]="gridStyle"></app-grid>      
+    </div>
+  </div>
+</div>

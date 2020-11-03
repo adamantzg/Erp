@@ -1,0 +1,27 @@
+<div class="form-inline">
+  <div class="form-group">
+    <label >Use same value</label>
+    <input type="checkbox" [(ngModel)]="same"> <input type="text" [(ngModel)]="value" class="form-control" (input)="sameValueChanged()">    
+  </div>
+</div>
+
+<table class="table" style="margin-top:5px">
+    <thead>
+    <tr>
+      <th>Month/Year</th>
+      <th>Forecast</th>
+      <th *ngIf="allowRemove"></th>
+    </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let f of data | orderBy: 'month21'">
+        <td><app-month21input [Month21]="f.month21" [disabled]="!allowMonthChange" ></app-month21input></td>
+        <td><input type="text" class="form-control" [(ngModel)]="f.sales_qty"></td>
+        <td *ngIf="allowRemove"><button class="btn glyphicon glyphicon-remove"></button></td>
+      </tr>
+      <tr *ngIf="allowAdd">
+        <td><button class="btn glyphicon glyphicon-plus"></button></td>
+        <td [colSpan]="1 + (allowRemove ? 1: 0)"></td>
+      </tr>
+    </tbody>
+</table>

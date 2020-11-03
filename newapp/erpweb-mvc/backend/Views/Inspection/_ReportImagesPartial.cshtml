@@ -1,0 +1,103 @@
+﻿@model InspectionReportModel
+
+
+@if(Model.Inspection != null){
+    if (ViewData["type"].ToString() != "R")
+    {
+<div class="table_general">
+
+    @{ var counter = 0; }
+    @foreach (var l in Model.InspectionLinesAccepted.Where(line => line.insp_line_type == ViewData["type"].ToString()))
+    {
+        var lineTested = l.LineTested;
+        if (lineTested != null)
+        {
+            foreach (var image in Model.InspectionImages.Where(i => i.insp_line_unique == lineTested.insp_line_unique && i.insp_type == ViewData["type"].ToString()))
+            {
+                <div style="width: 450px; margin-right: 20px; float: left@(counter++%2 == 0 ? ";clear:left" : "")">
+                    <div class="text_area">@lineTested.insp_client_ref @lineTested.insp_factory_ref @lineTested.insp_client_desc </div>
+                    <div style="display: table-cell; width: 100%">
+                        <img src="@WebUtilities.HandleInspectionFolderUrl(image.insp_image,Model.ImagesFolder)" style="text-align: center" />
+                    </div>
+                    <div style="width: 100%">@l.insp_line_comments</div>
+                </div>
+
+                if (counter % 6 == 0)
+                {
+                    <div style="height:1px"></div>
+                    <div style="text-align:left;clear:both;margin-top:5px;">&copy; Big Company</div>
+                    <br style="page-break-after: always; height:1px"></br>
+                }
+            }
+        }
+    }
+
+    @if (counter > 0 && counter < 6)
+    {
+        <div style="height:1px"></div>
+        <div style="text-align:left;clear:both;">&copy; Big Company</div>
+        <br style="page-break-after: always; height:1px"></br>
+    }
+    else // uneven number of images
+    {
+        if (counter % 6 > 0)
+        {
+            <div style="height:1px"></div>
+            <div style="text-align:left;clear:both;">&copy; Big Company</div>
+            <br style="page-break-after: always; height:1px"></br>
+        }
+    }
+</div>
+    }
+    else
+    {
+        <div class="table_general" >
+            @{ var counter = 0; }
+            @if (Model.InspectionLinesRejected.Count(line => line.insp_ca == 0) == 0)
+            {
+                <span>No rejected units</span>
+            }
+            @foreach (var l in Model.InspectionLinesRejected.Where(line => line.insp_ca==0))
+            {
+                var lineTested = l.LineTested;
+                if (lineTested != null)
+                {
+                    foreach (var image in Model.InspectionImages.Where(i => i.insp_line_unique == lineTested.insp_line_unique && string.IsNullOrEmpty(i.insp_type)))
+                    {
+                        <div style="width: 450px; margin-right: 20px; float: left@(counter++%2 == 0 ? ";clear:left" : "")">
+                            <div class="text_area">@lineTested.insp_client_ref  @lineTested.insp_client_desc </div>
+                            <div style="display: table-cell; width: 100%">
+                                <img src="@WebUtilities.HandleInspectionFolderUrl(image.insp_image,Model.ImagesFolder)" style="text-align: center"/>
+                            </div>
+                            <div style="width: 100%" >@l.insp_line_rejection. @l.insp_line_action</div>
+                        </div>
+
+                        if(counter%6 == 0)
+                        {
+                            <div style="height:1px"></div> 
+                            <div style="text-align:left;clear:both;">&copy; Big Company</div>
+                            <br style="page-break-after: always; height:1px"></br>
+                        }
+
+
+                    }
+                }
+            }
+
+            @if(counter > 0 && counter < 6){
+                <div style="height:1px"></div> 
+                <div style="text-align:left;clear:both;">&copy; Big Company</div>
+                <br style="page-break-after: always; height:1px"></br>
+            }
+            else // uneven number of images
+            {
+                if(counter % 6 > 0)
+                {
+                    <div style="height:1px"></div> 
+                    <div style="text-align:left;clear:both;">&copy; Big Company</div>
+                    <br style="page-break-after: always; height:1px"></br>
+                }
+            }
+        </div>
+    }
+}

@@ -1,0 +1,220 @@
+﻿@model backend.Models.BackOrdersReportModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Back orders report</title>
+    <style>
+        /*table {
+            padding: 2px;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 2px;
+            font-weight: bold;
+            border: 1px solid black;
+        }
+
+        td {
+            padding: 2px;
+            border: 1px solid black;
+        }
+
+        .bundle {
+            background-color: #E0E0E0;
+        }
+
+        .components_num {
+            color: red;
+        }*/
+        .number {
+            text-align: right;
+        }
+    </style>
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    @Styles.Render("~/Content/DataTables/style/css")
+</head>
+@functions{
+    public DateTime? GetAvailabilityDate(Us_backorders l)
+    {
+        if (l.cprod_id != null)
+            return Model.ProductAvailabilityDates.ContainsKey(l.cprod_id) ? Model.ProductAvailabilityDates[l.cprod_id] : null;
+        if (l.bundle_id != null)
+            return Model.BundleAvailabilityDates.ContainsKey(l.bundle_id.Value) ? Model.BundleAvailabilityDates[l.bundle_id.Value] : null;
+        if (l.physical_qty >= l.order_qty)
+            return DateTime.Today;
+        return null;
+    }
+
+    public DateTime? GetProductAvailabilityDate(Cust_products p)
+    {
+        return Model.ProductAvailabilityDates.ContainsKey(p.cprod_id) ? Model.ProductAvailabilityDates[p.cprod_id] : null;
+    }
+
+    public string GetStatusText(Us_backorders l)
+    {
+        var date = GetAvailabilityDate(l);
+        return GetStatusText(date);
+    }
+
+    public string GetStatusText(DateTime? d)
+    {
+        return WebUtilities.GetStockStatusText(d, "ready");
+    }
+
+    public string GetStatusText(Cust_products p)
+    {
+        return GetStatusText(GetProductAvailabilityDate(p));
+    }
+
+    public DateTime? StatusSort(Us_backorders l)
+    {
+        var date = GetAvailabilityDate(l);
+        if (date == DateTime.Today)
+            return DateTime.MinValue;
+        if (date == null)
+            return DateTime.MaxValue;
+        return date;
+    }
+}
+<body>
+    <div>
+        <h2>Back orders report for @Model.Date.ToString("d")</h2>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width:20%">Customer</th>
+                    <th>Order no</th>
+                    <th>Order date</th>
+                    <th>Stock status</th>
+                    <th class="number">Cost value USD</th>
+                </tr>
+            </thead>
+            @{
+                //Used for debugging, can be removed once stable
+                var clientCounter = 1;
+            }
+            <tbody>
+                @foreach (var g in Model.Orders.GroupBy(o => new { o.customer }).OrderBy(g => g.First().Dealer.name)) {
+                    var counter = 1;
+                    if (clientCounter++ <= int.MaxValue) {
+                        var orderCount = g.Select(l => l.order_no).Distinct().Count();
+                        foreach (var g2 in g.GroupBy(o => o.order_no).OrderBy(g2 => g2.Key)) {
+                            var lineAvailabilityDates = g2.ToList().Select(l => GetAvailabilityDate(l)).ToList();
+                            string status = "Unsure";
+                            if (lineAvailabilityDates.All(d => d != null)) {
+                                var date = lineAvailabilityDates.Max();
+                                if (date == DateTime.Today) {
+                                    status = "ready";
+                                }
+                                else {
+                                    status = $"ETA {date.ToString("d")}";
+                                }
+                            }
+
+                            <tr customer="@g.Key.customer">
+                                @if (counter++ == 1) {
+                                    @*<td rowspan="@orderCount"><span class="glyphicon glyphicon-expand" id="@g.Key"></span></td>*@
+                                    <td rowspan="@orderCount" id="@g.Key.customer">@(g.First().Dealer.name) - @(g.Key.customer)</td>
+                                }
+
+                                <td><a id="@g2.Key" customer="@g.Key.customer" style="cursor:pointer">@(g2.First().order_no)</a></td>
+                                <td>@(g2.First().date_entered.ToString("dd MMM yyyy"))</td>
+                                <td>@status</td>
+                                <td class="number">@g2.ToList().Sum(l => l.standard_cost).ToString("N2")</td>
+                            </tr>
+                            <tr style="display:none" id="@g2.Key" customer="@g.Key.customer">
+                                <td colspan="3">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Product</th>
+                                                <th>Description</th>
+                                                <th>Physical stock</th>
+                                                <th>Order qty</th>
+                                                <th>Status</th>
+                                                <th class="number">Cost USD</th>
+                                            </tr>
+                                        </thead>
+                                        @foreach (var l in g2.OrderBy(l=>StatusSort(l)).ToList()) {
+                                            <tr>
+                                                <td>
+                                                    @if (l.Bundle != null) {
+                                                        <a bundle_id="@(l.bundle_id)" style="cursor:pointer">@l.product</a>
+                                                    }
+                                                    else {
+                                                        @l.product
+                                                    }
+                                                </td>
+                                                <td>@l.description</td>
+                                                <td>@l.physical_qty</td>
+                                                <td>@l.order_qty</td>
+                                                <td>@GetStatusText(l)</td>
+                                                <td class="number">@l.standard_cost.ToString("N2")</td>
+                                            </tr>
+                                            if (l.Bundle != null) {
+                                                <tr style="display:none" bundle_id="@(l.bundle_id)">
+                                                    <td></td>
+                                                    <td colspan="5">
+                                                        <table class="table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Product</th>
+                                                                    <th>Description</th>
+                                                                    <th>Physical stock</th>
+                                                                    <th>Order qty</th>
+                                                                    <th>Status</th>
+
+                                                                </tr>
+                                                            </thead>
+                                                            @foreach (var c in l.Bundle.Components) {
+                                                                <tr>
+                                                                    <td>@c.Component.cprod_code1</td>
+                                                                    <td>@c.Component.cprod_name</td>
+                                                                    <td>@c.Component.cprod_stock2</td>
+                                                                    <td>@l.order_qty</td>
+                                                                    <td>@GetStatusText(c.Component)</td>
+
+                                                                </tr>
+                                                            }
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                    </table>
+                                </td>
+                            </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/DataTable")
+
+    <script>
+        $(function () {
+            $('a[id]').click(function () {
+                $('tr[id="' + $(this).attr('id') + '"]').toggle();
+                var customer = $(this).attr('customer');
+                $('td[id="' + customer + '"]').attr('rowspan', $('tr[customer="' + customer + '"]:visible').length);
+
+            });
+
+            $('a[bundle_id').click(function () {
+                $('tr[bundle_id="' + $(this).attr('bundle_id') + '"]').toggle();
+            });
+        });
+    </script>
+</body>
+</html>

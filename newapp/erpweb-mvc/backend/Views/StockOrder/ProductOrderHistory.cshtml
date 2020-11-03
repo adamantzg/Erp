@@ -1,0 +1,64 @@
+﻿@using Utilities = company.Common.Utilities
+@model OrderHistoryModel
+
+@{
+    Layout = "~/Views/shared/_Layout.cshtml";
+    var custpo_count = 0;
+    var counter = 0;
+    var line_custpo = string.Empty;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title></title>
+</head>
+<body>
+    <div> 
+        <table class="table">
+            <thead> 
+                <tr>
+                    <th></th>
+                    <th>TOTAL</th>
+                    <th>CALL OFF TO</th>
+                    <th>QTY</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var line in Model.OrderLines)
+                {
+                    custpo_count = Model.OrderLines.Count(n => n.custpo == line.custpo);
+                    
+                    if(line.custpo != line_custpo)
+                    {
+                        line_custpo = line.custpo;
+                        counter = 0;
+                    }
+
+                    <tr>
+                        @if (counter == 0)
+                        {
+                            <td rowspan="@custpo_count">@line.custpo</td>
+                            <td rowspan="@custpo_count">@line.orderqty</td>
+                            counter = 1;
+                        }
+                                                
+                        <td>@line.calloff_custpo</td>
+                        <td>@line.alloc_qty</td>
+                    </tr>
+                }
+                
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+
+
+@section scripts{
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap/bootstrap-theme-spacelab.css" rel="stylesheet" />
+}

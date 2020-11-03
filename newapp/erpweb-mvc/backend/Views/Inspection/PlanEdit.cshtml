@@ -1,0 +1,287 @@
+﻿@model InspectionPlanEditModel
+<style>
+    input[type="text"], input[type="date"] {
+        width: 200px;
+    }
+    textarea {
+        width: 300px;
+    }
+</style>
+@{ Html.EnableClientValidation(); }
+@Html.ValidationSummary()
+<div class="inspectionplan_edit mb-2">
+	<div class="form-group row pt-2">
+		<label class="col-sm-2 col-form-label">Start Date/Days</label>
+        <div class="col-sm-10" style="display:flex">
+            @Html.TextBoxFor(m => m.Inspection.insp_start, "{0:d}", new { isDate=true, @class = "form-control" })
+		    @Html.HiddenFor(m => m.IsV2)@Html.HiddenFor(m => m.Inspection.qc_required)
+		    @Html.TextBoxFor(m => m.Inspection.insp_days, new { @class = "ml-2 daysDuration form-control" })
+            <div class="ml-2">
+                Factory: @Model.Inspection.factory_code Client: @Model.Inspection.customer_code PO No's:
+            </div>
+            @if (Model.Inspection.IsV2) {
+			    <a href="@Url.Action("InspectionList", "InspectionV2", new { id = Model.Inspection.insp_unique })" target="_blank">@Model.Inspection.custpo</a>
+            }
+        </div>  
+	</div>    
+	
+    @if(!string.IsNullOrEmpty(Model.Inspection.insp_comments))
+	{
+        <div class="form-group row">
+		    <label class="col-sm-2 col-form-label">FC comments: </label>
+            <div class="col-sm-6">
+                @Model.Inspection.insp_comments
+            </div>		
+	    </div>
+	}
+	
+	<div class="form-group row pb-2">
+		<label class="col-sm-2 col-form-label">Admin comments: </label>
+        <div class="col-sm-6">
+            @Html.TextAreaFor(m => m.Inspection.insp_comments_admin, 5, 60, new { @class = "form-control" })
+        </div>
+		
+	</div>
+    <table id="tblControllers" class="table mt-2" style="width:60%">
+		<thead>
+		<tr class="table_headerrow">
+			<th>QC controller</th>
+			<th style="width: 10%">Start date</th>
+			<th style="width: 10%">Days</th>
+			<th style="width:30px"></th>
+		</tr>
+		</thead>
+		
+		@foreach (var ic in Model.Inspection.Controllers)
+        {
+			<tr id="@ic.id">
+				<td>@Html.DropDownList(string.Format("ddlController_{0}", ic.id), new SelectList(Model.Inspectors, "userid", "userwelcome", ic.controller_id), new { @class = "form-control" })</td>
+				<td>@Html.TextBox(string.Format("startDate_{0}", ic.id), ic.startdate.ToShortDateString(), new { isDate = true, @class = "dateRequired form-control" })
+				</td>
+				<td>
+					@Html.Hidden(string.Format("insp_controller_id_{0}", ic.id), ic.id)
+					@Html.TextBox(string.Format("txtDays_{0}", ic.id), ic.duration, new { @class = "daysDuration form-control" })
+				</td>
+				<td>
+					<a href="javascript:void(0)" onclick="deleteRow(@ic.id)"><span class="fa fa-remove"></span></a>
+				</td>
+			</tr>
+        }
+		<tr id="@ViewBag.nextId">
+			@{ int newId = (int)ViewBag.nextId;}
+			<td>@Html.DropDownList(string.Format("ddlController_{0}", newId), new SelectList(Model.Inspectors, "userid", "userwelcome"), "Please select", new { @class = "form-control" })</td>
+			<td>@Html.TextBox(string.Format("startDate_{0}", newId), Model.Inspection.insp_start.Value.ToShortDateString(), new { isdate = true, @class = "form-control" })
+			</td>
+            <td>
+                @Html.Hidden(string.Format("insp_controller_id_{0}", newId), newId)
+                @Html.TextBox(string.Format("txtDays_{0}", newId), 1, new { @class = "daysDuration form-control" })
+                @Html.HiddenFor(m => m.location_id)
+                @Html.HiddenFor(m => m.returnTo)
+            </td>
+			<td>
+				<a href="javascript:void(0)" onclick="addRow(@ViewBag.nextId)"><span class="fa fa-plus"></span></a>
+			</td>
+		</tr>
+	</table>
+</div>
+
+
+<input type="button" value="Update" class="btn btn-success" onclick="update()"/>
+<input type="button" value="Cancel" class="btn btn-warning" onclick="$(this).parent().hide()"/>
+
+<script type="text/javascript">
+
+	var one_day = 1000 * 60 * 60 * 24;
+	var inspectorDates = [];
+
+    $(document).ready(function() {
+        $('[id^="txtDays_"]').change(function() {
+            //calculate new duration 
+            
+            checkMinInspectionDate();
+        });
+
+        
+        $('[id^="startDate_"]').change(function() {
+            //check if date < inspection date
+            // debugger;
+            if($('[id^="startDate_"]').last().attr('id') != $(this).attr('id'))
+            {
+                var inspdate = $('#Inspection_insp_start').val();
+                if (inspdate.length > 0) {
+                    var currDate = $(this).val();
+                    if (currDate.length > 0) {
+                        checkMinInspectionDate();
+                    }
+                }
+            }
+            
+        });
+
+        $('#Inspection_insp_start').change(function() {
+            //if start changes, adjust individual start dates
+            var inspdate = $('#Inspection_insp_start').val();
+            if (inspdate.length > 0) {
+                inspdate = moment(inspdate, "DD/MM/YYYY");
+                
+                //$('#Inspection_insp_start___Day').val(inspdate.getDate());
+                //$('#Inspection_insp_start___Month').val(inspdate.getMonth()+1);
+                //$('#Inspection_insp_start___Year').val(inspdate.getFullYear());
+
+                var outOfRangeInspectors = [];
+                
+                
+                $('[id^="startDate_"]').each(function() {
+                    var date = $(this).val();
+                    if (date.length > 0) {
+						date = moment(date, "DD/MM/YYYY");
+						if(inspectorDates != null)
+							inspectorDates.push(date);
+                        if (date.isBefore(inspdate)) {
+                            outOfRangeInspectors.push($(this)[0]);                 
+                        }
+                    }                    
+                });
+                
+                var adjust = false;
+                if (outOfRangeInspectors.length > 0) {
+                    adjust = confirm("one or more of the allocated QC inspectors are not within the inspection period. Do you want to automatically update these dates?");
+                    if (adjust) {
+                        for (var i = 0; i < outOfRangeInspectors.length; i++) {
+                            var date = moment(outOfRangeInspectors[i].value);                            
+                            outOfRangeInspectors[i].value = inspdate.format('DD/MM/YYYY');
+                        }
+                    }
+                }
+                else{
+                    inspdate = moment.min(inspectorDates);
+                    
+                }
+                    
+            }
+        });
+    });
+    
+    
+    
+    
+    function checkMinInspectionDate()
+    {
+	    inspectorDates = [];
+        var endDates = [];
+        //set inspection date as the min of controller dates
+        $('[id^="startDate_"]').each(function() {
+            if($('[id^="startDate_"]').last().attr('id') != $(this).attr('id'))
+            {
+                if ($(this).val().length > 0) {
+					var date = moment($(this).val(), 'DD/MM/YYYY');
+					inspectorDates.push(date);
+                    var duration = $('#' + $(this).attr('id').replace('startDate', 'txtDays')).val();
+
+                    if (duration != null && duration.length > 0) {
+                        duration = parseInt(duration);
+                        var endDate = moment(date);
+                        endDate.add(duration,'days');
+                        endDates.push(endDate);
+                    }
+                }
+            }                
+        });
+		//var newInspDate = moment($('#Inspection_insp_start').val(), 'DD/MM/YYYY');
+		
+		var newInspdate = moment.min(inspectorDates);
+        var lastEndDate = moment.max(endDates);
+        var diff = lastEndDate.diff(newInspdate, 'days');
+        
+        $('#Inspection_insp_days').val(diff);
+        $('#Inspection_insp_start').val(newInspdate.format('DD/MM/YYYY'));
+    }
+
+    function update() {
+        
+        //debugger;
+        $("#mainForm").removeData("validator");
+        $.validator.addMethod("dateRequired", $.validator.methods.required,"date is required");
+    
+        $.validator.addMethod("durationRequired", $.validator.methods.required,"number of days should be supplied");
+    
+        $.validator.addClassRules("dateRequired", { dateRequired: true, date: true});
+    
+        $.validator.addClassRules("daysDuration", { durationRequired: true, number: true});
+        $("#mainForm").validate();
+
+        //Check number of controllers
+        var isV2 = $('#IsV2').val().toLowerCase();
+        var qc_required = parseInt($('#Inspection_qc_required').val());
+        /*if (isV2 == 'true' && $('#tblControllers tr').length < (qc_required+2))    //qc_required +2 - one row for header and one for empty row used for adding new controllers
+            alert('Minimum number of controllers is ' + qc_required);
+        else*/ {
+            $("#mainForm").attr("action", "@Url.Action("Edit",new {id=Model.Inspection.insp_unique })");
+            $("#mainForm").attr("method", "post");
+            $('.loading-dialog').show();
+            $("#mainForm").submit();
+        }
+    }
+
+    var nextId = @ViewBag.nextId;
+
+    function addRow(id) {
+        var trSrc = $('tr[id="' + id + '"]');
+        var newTr = trSrc.clone();
+        //debugger;
+        
+        var txtStartDate = trSrc.find('input[id^="startDate"]');
+        var txtDays = trSrc.find('input[id^="startDate"]');
+        var controller = trSrc.find('select');
+
+        if (txtStartDate.val().length > 0 && txtDays.val().length > 0 && controller.val().length > 0) {
+            
+            var img = trSrc.find('span[class*="fa"]');
+            img.parent().attr('onclick', 'deleteRow(' + nextId + ')');
+            img.attr('class', 'fa fa-remove');
+            
+            nextId--;
+
+            var hidId = $.validator.format('<input type="hidden" id="insp_controller_id_{0}" name="insp_controller_id_{0}" value="{0}">', nextId);
+            img.after(hidId);
+
+            newTr.attr('id', nextId);
+
+            var ddlController = newTr.find('select');
+
+            ddlController.attr('id', nextId);
+            ddlController.attr('name', 'ddlController_' + nextId);
+            ddlController.val('');
+
+            txtStartDate = newTr.find('input[id^="startDate"]');
+            txtStartDate.val('@Model.Inspection.insp_start.Value.ToShortDateString()');
+            txtStartDate.attr('name', 'startDate_' + nextId);
+            txtStartDate.attr('id', 'startDate_' + nextId);
+            txtStartDate.removeClass('hasDatepicker');
+
+            newTr.find('img[src*="calendar"]').remove();
+
+            txtDays = newTr.find('input[id^="txtDays"]');
+            txtDays.val('1');
+            txtDays.attr('name', 'txtDays_' + nextId);
+
+            img = newTr.find('span[class*="fa"]'); //newTr.find('span[src*="glyphicon"]');
+            img.parent().attr('onclick', 'addRow(' + nextId + ')');
+
+            //img.attr('src', '/Images/menus/add1.gif');
+
+
+            $('#tblControllers tr:last').after(newTr);
+			$('input[isdate]').datepicker({ format: "dd/mm/yyyy", autoclose: true });
+            checkMinInspectionDate();
+        }
+    }
+    
+    function deleteRow(id) {
+        $('tr[id="' + id + '"]').remove();
+    }
+    
+    $('input[isdate]').datepicker({ format: "dd/mm/yyyy", autoclose: true });
+    
+    @Html.Raw("//# sourceURL=dynamicScript.js")
+</script>

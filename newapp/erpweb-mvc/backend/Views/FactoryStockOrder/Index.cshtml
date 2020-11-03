@@ -1,0 +1,104 @@
+﻿@model FactoryStockOrderListModel
+
+<h3>Factory stock orders</h3>
+
+<div ng-app="app">
+    <div class="col-md-8" ng-controller="controller" ng-cloak>
+        <div class="form-group">
+            <label for="cboFactory">Factory</label>
+            <select class="form-control" id="cboFactory" ng-model="factory_id" ng-change="FactoryChanged()">
+                <option ng-repeat="f in Factories | orderBy: 'factory_code'" value="{{f.user_id}}" ng-selected="f.user_id == Order.factory_id">{{f.factory_code}}</option>
+            </select>
+        </div>
+        <button value="Create" ng-click="Create()">Create new order</button><p />
+        <div ng-show="busy"><img src="~/images/Spinning_wheel_throbber.gif" /></div>
+        <table class="table table-bordered" ng-show="!busy">
+            <thead>
+                <tr class="tableheader">
+                    <td>Order PO</td>
+                    <td>ETD</td>
+                    <td>Currency</td>
+                    <td class="number">Balance</td>
+                    <td class="number">Balance value</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="o in Orders">
+                    <td><a ng-href="@Url.Action("Edit")/{{o.id}}">{{o.po_ref}}</a></td>
+                    <td>{{o.etd}}</td>
+                    <td>{{o.currencytext}}</td>
+                    <td class="number">{{o.Balance}}</td>
+                    <td class="number">{{o.BalanceValue.toFixed(2)}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+
+@section head
+{
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    <style>
+        .number {
+            text-align: right;
+        }
+        input {
+            width: auto;
+        }
+        .container {
+            overflow: visible;            
+        }
+        .tableheader {
+            font-weight: bold;
+        }
+    </style>
+}
+
+@section scripts2
+{
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/globalize")
+<script src="~/Scripts/functions.js"></script>
+
+    <script>
+        var app = angular.module('app', ['ui.bootstrap']);
+        var model = @Html.Raw(WebUtilities.JsonSerialize(Model));
+        app.controller('controller', ['$scope', '$http',
+            function ($scope, $http) {
+                $scope.Factories = model.Factories;
+                $scope.Currencies = model.Currencies;
+                $scope.busy = false;
+                $scope.factory_id = null;
+                $scope.Orders = [];
+                $scope.FactoryChanged = function() {
+                    $scope.busy = true;
+                    $http.post('@Url.Action("GetOrdersForFactory")',{factory_id: $scope.factory_id}).
+                    success(function(data, status, headers, config) {
+                        $scope.busy = false;
+                        data.forEach(function(o) {
+                            o.etd = fromJSONDateFormatted(o.etd);
+                            currency = _.first($scope.Currencies, {curr_code: o.Currency});
+                            if(currency != null)
+                                o.currencytext = currency.curr_symbol;
+                        });
+                        $scope.Orders = data;
+                    } ).
+                        error(function(data, status, headers, config) {
+                        } );
+                };
+
+                $scope.Create = function() {
+                    location.href='@Url.Action("Create")';
+                };
+            }]);
+
+        $(function() {
+            $('.logo-layout').hide();
+        });
+    </script>
+}

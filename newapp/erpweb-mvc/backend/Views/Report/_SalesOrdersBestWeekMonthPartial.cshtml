@@ -1,0 +1,91 @@
+﻿@model UsSummaryReportModel
+
+@functions
+{
+
+    public string MapWarehouse(string w)
+    {
+        return WebUtilities.MapStockOrdersWarehouse(w);
+    }
+
+    public string MapBrand(string b)
+    {
+        return WebUtilities.MapStockOrdersBrand(b);
+    }
+
+    public string FormatWeek(int? yearweek)
+    {
+        if (yearweek == null)
+            return string.Empty;
+        return $"{yearweek.ToString().Right(2)} {yearweek.ToString().Left(4)}";
+    }
+
+    public string FormatMonth(int? month21)
+    {
+        if (month21 == null)
+            return string.Empty;
+        return Month21.GetDate(month21.Value).ToString("MMM yyyy");
+    }
+
+}
+
+@{
+    
+    var brands = Model.BestMonthData.Where(d=>!string.IsNullOrEmpty(d.Brand)).Select(r => r.Brand).Distinct().OrderBy(MapBrand).ToList();
+    
+    var counter = 0;
+    
+}
+
+
+
+<table  class="bestweekmonthtable">
+    <thead>
+        <tr>
+            <th rowspan="2" style="width: 90px"></th>
+            @foreach (var b in brands)
+            {
+                <th colspan="3" style="text-align: center">@MapBrand(b)</th>
+            }
+            <th colspan="2" style="text-align: center">Total</th>
+        </tr>
+        <tr>
+            @foreach (var b in brands)
+            {
+                <th class="number" style="width: 75px">Value</th>
+                <th class="number" style="width: 80px">Orders</th>
+                <th style="width: 5px"></th>
+            }
+            <th class="number" style="width: 90px">Value</th>
+            <th class="number" style="width: 80px">Orders</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="bestweektablerow">
+            <td>BEST WEEK</td>
+            @foreach(var b in brands) {
+                var data = Model.BestWeekData.FirstOrDefault(d => d.Brand == b);
+                <td class="number">$ @(data?.Value.ToString("N2"))</td>
+                <td class="number">@(data?.NoOfOrders)</td>
+                <td style="width: 5px"></td>
+            }
+            <td class="number">@(Model.BestWeekData.FirstOrDefault(d => d.Brand == null)?.Value.ToString("N2"))</td>
+            <td class="number">@(Model.BestWeekData.FirstOrDefault(d => d.Brand == null)?.NoOfOrders)</td>
+        </tr>
+        <tr class="bestweektablealtrow">
+            <td>BEST MONTH</td>
+            @foreach(var b in brands) {
+                var data = Model.BestMonthData.FirstOrDefault(d => d.Brand == b);
+                <td class="number">$ @(data?.Value.ToString("N2"))</td>
+                <td class="number">@(data?.NoOfOrders)</td>
+                <td style="width: 5px"></td>
+            }
+            <td class="number">@(Model.BestMonthData.FirstOrDefault(d => d.Brand == null)?.Value.ToString("N2"))</td>
+            <td class="number">@(Model.BestMonthData.FirstOrDefault(d => d.Brand == null)?.NoOfOrders)</td>
+        </tr>
+    </tbody>
+</table>
+<ul>
+    <li>The best week ever for total sales was week @FormatWeek(Model.BestWeekData.FirstOrDefault(d => d.Brand == null)?.Period).</li>
+    <li>The best month ever for total sales was @FormatMonth(Model.BestMonthData.FirstOrDefault(d => d.Brand == null)?.Period).</li>
+</ul>

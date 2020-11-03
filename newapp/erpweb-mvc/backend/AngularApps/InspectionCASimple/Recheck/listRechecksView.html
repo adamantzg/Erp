@@ -1,0 +1,34 @@
+﻿<div class="loading-dialog" ng-show="vm.showLoadingDialog" style="top:88px"></div>
+<div class="panel-body" style="padding:0!important; overflow:scroll">
+    <ul class="list-group">
+        <li class="list-group-item disabled">
+            <div class="list-group-text">
+                <strong style="width:45%;display:inline-block">CA Reference</strong>
+                <strong style="width:30%;display:inline-block">Date Created</strong>
+            </div>
+        </li>
+        <li class="list-group-item" ng-repeat="recheck in vm.rechecks">
+            <div class="list-group-item-text">
+                <span style="width:45%;display:inline-block">{{recheck.return_no}}</span>
+                <span style="width:30%;display:inline-block">{{recheck.request_date | date:format}}</span>
+
+                <span style="width:20%;display:inline-block"
+                      ng-click="vm.saveForEdit(recheck)"
+                      ui-sref="rechechekEdit({id:recheck.returnsid})"
+                      >
+                    <span class="btn btn-primary btn-outline" 
+                          style="position:absolute; right:5px!important; top:7px; border-radius:45%"
+                          >
+                    <i class="glyphicon glyphicon-chevron-right"></i>
+                    </span>
+
+                </span>
+                <!--<span style="width:20%;display:inline-block" class="radio">
+                    <input type="radio" name="name" value="" style="margin-top:0;right:0;" />
+                </span>-->
+            </div>
+
+        </li>
+    </ul>
+</div>
+

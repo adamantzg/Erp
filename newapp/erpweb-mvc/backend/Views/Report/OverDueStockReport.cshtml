@@ -1,0 +1,92 @@
+﻿@using company.Common
+@model OverdueLinesReportModel
+
+@{
+    ViewBag.Title = "title";
+    Layout = null;
+}
+<html>
+<head>
+    <style>
+        thead {
+            font-weight: bold;
+            
+        }
+        body {
+            font-size: 11px;
+            font-family: arial;
+        }
+        table {
+            border: 1px solid;
+            font-size: 12px;
+            border-collapse: collapse;
+            padding: 2px;
+        }
+        td {
+            border: 1px solid black;
+            padding: 4px;
+        }
+    </style>
+</head>
+</html>
+<h2>Overdue stock report</h2>
+<h3>Factories: @(string.Join(",", Model.Factories.Select(f => f.factory_code)))</h3>
+<h3>Overdue period: @Model.From.ToString("d") - @Model.To.ToString("d")</h3>
+
+<table>
+    <thead>
+    <tr>
+        <td>Factory</td>
+        <td>Product code</td>
+        <td>Product description</td>
+        <td style="text-align: right">Balance</td>
+        <td>Cust po</td>
+        <td>Order date</td>
+        <td>Overdue date</td>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (var l in Model.LinesInPeriod.Where(l=>l.Cust_Product != null && l.Header != null && l.Cust_Product.MastProduct != null).OrderBy(l=>l.Cust_Product.cprod_code1))
+        {
+            <tr>
+                <td>@Model.Factories.FirstOrDefault(f=>f.user_id == l.Cust_Product.MastProduct.factory_id).IfNotNull(f=>f.factory_code)</td>
+                <td>@l.Cust_Product.cprod_code1</td>
+                <td>@l.Cust_Product.cprod_name</td>
+                <td style="text-align: right">@(l.orderqty - l.Allocations.Sum(a => a.alloc_qty))</td>
+                <td>@l.Header.custpo</td>
+                <td>@l.Header.orderdate.ToString("d-MMM-yy")</td>
+                <td>@(l.Header.orderdate != null && Model.Rules.ContainsKey(l.Cust_Product.MastProduct.factory_id ?? 0) ? l.Header.orderdate.Value.AddMonths(Model.Rules[l.Cust_Product.MastProduct.factory_id ?? 0]).ToString("d-MMM-yy") : "")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Overdue before @Model.From.ToString("d")</h3>
+
+<table>
+    <thead>
+    <tr>
+        <td>Factory</td>
+        <td>Product code</td>
+        <td>Product description</td>
+        <td style="text-align: right">Balance</td>
+        <td>Cust po</td>
+        <td>Order date</td>
+        <td>Overdue date</td>
+    </tr>
+    </thead>
+    <tbody>
+        @foreach (var l in Model.LinesBeforePeriod.Where(l => l.Cust_Product != null && l.Header != null && l.Cust_Product.MastProduct != null).OrderBy(l => l.Cust_Product.cprod_code1)) {
+            <tr>
+                <td>@Model.Factories.FirstOrDefault(f => f.user_id == l.Cust_Product.MastProduct.factory_id).IfNotNull(f => f.factory_code)</td>
+                <td>@l.Cust_Product.cprod_code1</td>
+                <td>@l.Cust_Product.cprod_name</td>
+                <td style="text-align: right">@(l.orderqty - l.Allocations.Sum(a => a.alloc_qty))</td>
+                <td>@l.Header.custpo</td>
+                <td>@l.Header.orderdate.ToString("d-MMM-yy")</td>
+                <td>@(l.Header.orderdate != null && Model.Rules.ContainsKey(l.Cust_Product.MastProduct.factory_id ?? 0) ? l.Header.orderdate.Value.AddMonths(Model.Rules[l.Cust_Product.MastProduct.factory_id ?? 0]).ToString("d-MMM-yy") : "")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

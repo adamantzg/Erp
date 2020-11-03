@@ -1,0 +1,216 @@
+﻿@model WhitebookComponentExportModel
+@{
+    ViewBag.Title = "Components";
+    Layout = null;
+}
+@{
+    var list = new List<int> { 1, 2 };
+}
+<style>
+    .text-guarantee{
+        min-width:250px;
+    }
+    .text-cell{
+        min-width:550px;
+    }
+</style>
+<link href="~/Content/bootstrap.css" rel="stylesheet" />
+
+<h2>Components</h2>
+<div  style="overflow-x:scroll">
+<table class="table table-bordered table-responsive" style="border:1px solid black;margin:20px;vertical-align:text-top;">
+    <thead >
+        <tr style="padding-bottom:5px;padding-top:5px;">
+            <!--1 -->
+            <th>Template</th>
+            <!--1 a-->
+            <th> Cprod id</th>
+            <!--2-->
+            <th>Cprod code</th>
+            <!--3-->
+            <th class="text-cell">Whitebook cprod name</th>
+            <!--4-->
+            <th>Product type desc</th>
+            <!--5-->
+            <th>Material</th>
+            <!--6-->
+            <th>Size length</th>
+            <!--7-->
+            <th>Size width</th>
+            <!--8-->
+            <th>Size height</th>
+            <!--9-->
+            <th>Nett weight</th>
+            <!--10-->
+            <th>Gross Weight including packaging</th>
+            <!--11-->
+            <th>Packed dimensions length</th>
+            <!--12-->
+            <th>Packed dimensions width</th>
+            <!--13-->
+            <th>Packed dimensions height</th>
+            <!--14-->
+            <th>Colour</th>
+            <!---->
+            <th>Water Volume</th>
+            <!--15-->
+            <th class="text-cell">Tap hole options</th>
+            <!--16-->
+            <th class="text-cell">Product notes</th>
+            <!--17-->
+            <th class="text-guarantee">
+                Guarantee*
+            </th>
+            <!--18-->
+            <th class="text-cell">
+                Standards
+            </th>
+            <!--19-->
+            <th class="text-cell">
+                Additional Information
+            </th>
+            <!--20-->
+            <th class="">Compatible products</th>
+            <th>Flow rates</th>
+        </tr >
+    </thead>
+
+    <tbody>
+        @foreach (var cprod_code1 in Model.ComponentDetails.Keys)
+        {
+            var component = Model.ComponentDetails[cprod_code1].FirstOrDefault();
+            <tr>
+                <!--1-->
+                <td>
+                    @component.whitebook_template_id
+                </td>
+                <!-- 1 a -->
+                <td>
+                    @component.cprod_id
+                </td>
+                <!--2-->
+                <td>@component.cprod_code1</td>
+                <!--3-->
+                <td>@(component.whitebook_cprod_name ?? component.cprod_name)</td>
+                <!--4-->
+                <td>@component.product_type_desc</td>
+                <!--5-->
+                <td>@component.prod_material</td>
+                <!--6-->
+                <td>@component.prod_length</td>
+                <!--7-->
+                <td>@component.prod_width</td>
+                <!--8-->
+                <td>@component.prod_height</td>
+                <!--9-->
+                <td>@component.prod_nw</td>
+                <!--10-->
+                <td>@component.pack_GW</td>
+                <!--11-->
+                <td>@component.pack_length</td>
+                <!--12-->
+                <td>@component.pack_width</td>
+                <!--13-->
+                <td>@component.pack_height</td>
+                <!--14-->
+                <td>@component.prod_finish</td>
+                <!---->
+                <td>@component.bath_volume</td>
+                <!--15-->
+                <td>@component.tech_tap_holes</td>
+                <!--16-->
+                <td>@component.whitebook_notes</td>
+                <!--17-->
+                <td>
+                    @Settings.Default.Guarantee_10y,
+                    @Settings.Default.Guarantee_1y
+            </td>
+                <!--18-->
+                <td>
+
+                        @foreach (var prodInfo in component.Product.ProductInfo.Where(c=>c.type == 1))
+                        {
+                            @prodInfo.value
+                        }
+
+
+                </td>
+                <!--19-->
+                <td>
+
+                        @foreach (var prodInfo in component.Product.ProductInfo.Where(c => c.type == 2))
+                        {
+                            @prodInfo.value
+                        }
+
+
+                </td>
+                <!--20-->
+                <td>
+                    @if (component.Product.RelatedProducts != null)
+                    {
+                        @(string.Join(", ", component.Product.RelatedProducts.Select(s => s.web_name)))
+
+                    }
+                </td>
+                <td style="padding:0;">
+                    @if (component.Product.ProductFlows != null && component.Product.ProductFlows.Count > 0)
+                    {
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td height="20" bgcolor="#CCCCCC">System Pressure</td>
+                                @foreach (var pres in Model.Pressures)
+                                {
+                                    <td bgcolor="#CCCCCC">@string.Format("{0} bar", pres.value)</td>
+                                }
+
+                            </tr>
+                            @foreach (var prodFlowsGroup in component.Product.ProductFlows.GroupBy(pf => pf.part_id))
+                    {
+                                <tr>
+                                    <td>
+                                        @{ var part = Model.Parts.FirstOrDefault(p => p.id == prodFlowsGroup.Key);}@part.name
+                                    </td>
+                                    @foreach (var pres in Model.Pressures)
+                                    {
+                                        <td>
+                                            @{ var presVal = prodFlowsGroup.FirstOrDefault(pf => pf.pressure_id == pres.id);}
+                                            @(presVal != null && presVal.value > 0 ? presVal.value.ToString() : "n/a")&nbsp;
+                                        </td>
+                                                }
+                                </tr>
+                                                }
+
+                        </table>
+                                                }
+                </td>
+
+            </tr>
+        }
+    </tbody>
+
+
+    @*@foreach (var templates in Model.GroupBy(p => p.whitebook_template_id).Where(c => c.First().whitebook_template_id == 1).OrderBy(c => c.First().whitebook_template_id))
+    {
+            foreach (var comp in templates.First().Components)
+            {
+                <tr>
+                    <td>
+                        @templates.First().whitebook_template_id - @templates.First().web_unique
+                    </td>
+                    <td>
+                        @comp.CprodCode1
+                    </td>
+                    <td>
+                        @(!string.IsNullOrEmpty(comp.Component.whitebook_cprod_name)? comp.Component.whitebook_cprod_name : comp.CprodName)
+                    </td>
+                    <td>
+                        @comp.Component.MastProduct.prod_material
+                    </td>
+                </tr>
+            }
+
+    }*@
+</table>
+
+    </div>

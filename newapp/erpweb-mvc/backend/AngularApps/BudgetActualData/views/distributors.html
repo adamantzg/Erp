@@ -1,0 +1,17 @@
+﻿<h3>Distributors</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>id</th>
+            <th>name</th>
+            <th style="width:100px">Include for budget/actuals</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="d in distributors | orderBy: 'user_name'">
+            <td>{{d.user_id}}</td>
+            <td>{{d.user_name}}</td>
+            <td><input type="checkbox" ng-model="d.showForBudgetActual" ng-click="updateDistributor(d)" /></td>
+        </tr>
+    </tbody>
+</table>

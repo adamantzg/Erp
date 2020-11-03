@@ -1,0 +1,84 @@
+﻿
+@{
+    ViewBag.Title = "Contract sales forecast";
+    
+}
+@model ContractSalesForecastListModel
+<DIV class=aftersales_groupheader>Contract sales forecast</DIV>
+@Html.Partial("_LinkButtonPartial", new LinkButtonModel {Text="Add new contract", NavigateUrl=Url.Action("Create"), CssClass="linkbutton_gray" })
+<table class="table" style="margin-top: 5px">
+    <tr class="table_headerrow">
+        <td></td>
+        @if (Model.CanDelete) { 
+        <td></td>
+        }
+        <td >
+            Id</td>
+        <td >Start month</td>
+        <td>Duration</td>
+        <td>Reference</td>
+        <td >
+            Date created   </td>
+        <td >
+            Creator
+        </td>
+        <td >
+            Date modified
+        </td>
+        <td >
+            Modified by
+        </td>
+    </tr>
+    @for (int i = 0; i < Model.List.Count; i++)
+    {
+        Contract_sales_forecast csf = Model.List[i];
+        <tr class="@if (i%2 == 0)
+                   {
+                       @Html.Raw("tablerow")
+                   }
+                   else
+                   {
+                       @Html.Raw("tablerow_alt")
+                   } ">
+            <td><a href='@Url.Action("Edit", new {id = csf.forecast_id})'><img src="/images/menus/EditItem.gif" /></a></td>
+            @if (Model.CanDelete) { 
+              <td><a href='@Url.Action("Delete", new {id = csf.forecast_id})' onclick=" return ConfirmDelete() "><img src="/images/menus/Delete.gif" /></a></td>
+            }
+            
+            <td>
+                @csf.forecast_id
+            </td>
+            <td>@csf.startmonth.ToString("MM/yyyy")</td>
+            <td>@csf.monthduration</td>
+            <td>@csf.reference</td>
+            <td>@csf.datecreated.ToString("d")</td>
+            <td>@csf.creator</td>
+            <td>@csf.datemodified.ToString("d")</td>
+            <td>@csf.editor</td>
+        </tr>
+    }
+</table>
+
+@section head
+{
+    <style>
+        .table td {
+            padding: 3px;
+        }
+    </style>
+}
+
+@section scripts
+{
+<script>
+    $(document).ready(function () {
+        //Add row classes to td-s
+        $(".tablerow > td").addClass("tablerow");
+        $(".tablerow_alt > td").addClass("tablerow_alt");
+        $(".table_headerrow > td").addClass("table_headerrow");
+    });
+    function ConfirmDelete() {
+        return confirm("Delete record?");
+    }
+</script>
+}

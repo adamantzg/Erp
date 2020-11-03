@@ -1,0 +1,8 @@
+<div *ngIf="files().length > 0" style="display:flex">
+    <div *ngFor="let f of files()" class="fileicon">
+        <a [href]="f.url" [title]="getFilesDescription(f)">
+            <img src="/images/doctypes/pdf32.png">
+        </a>
+        <div class="deleteicon" (click)="onFileDelete(f)"><i class="fa fa-remove"></i></div>
+    </div>    
+</div>

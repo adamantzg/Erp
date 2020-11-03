@@ -1,0 +1,277 @@
+﻿@using System.Web.WebPages.Razor.Configuration
+@using company.Common
+@model BrandStockReportModel
+
+@functions
+{
+
+    public int GetMonthFromNow(int offset)
+    {
+        return company.Common.Utilities.GetMonthFromNow(offset);
+    }
+
+}
+
+@{
+    ViewBag.Title = "title";
+    Layout = null;
+}
+<html>
+<head>
+    <title>Weekly brand stock report</title>
+    @*@Styles.Render("~/Content/css")*@
+    <style>
+        body {
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 12px;
+        }
+         .table_headerrow {
+             background-color: #DCDCDC;
+             color: #000000;
+             border: 1px solid #999999;
+             font-weight: bold;
+         }
+        .table {
+            background-color: #FFFFFF;
+            border-collapse: collapse;
+            border-color: #999999;
+            border-style: solid;
+            border-width: 1px;
+            font-family: Verdana, Arial, Helvetica, sans-serif;
+            font-size: 12px;
+        }
+        .tablerow {
+            /*background-color:#DCDCDC;*/
+            background-color: White;
+            color: #000000;
+            border: 1px solid #999999;
+            /*border-bottom: 1px solid gray;*/
+        }
+        .tablerow_above {
+            background-color: #A8FFC0;
+            color: #000000;
+            border: 1px solid #999999;
+        }
+        .tablerow_below {
+            background-color: #FF6F6F;
+            color: #000000;
+            border: 1px solid #999999;
+        }
+
+        .firstrow_above {
+            background-color: #A8FFC0;
+            color: #000000;
+            border: 1px solid #999999;
+        }
+
+        .firstrow_below {
+            background-color: #FF6F6F;
+            color: #000000;
+            border: 1px solid #999999;
+        }
+
+        .firstrow td {
+            background-color: #A0A0A0;
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+        .bordermonth { border-right: 1px solid black;}
+        .borderfirst { border-left: 1px solid black;}
+
+        .tablerow td {
+            background-color: #C0C0C0;
+        }
+        .number {
+            text-align: right;
+        }
+
+        .datatable {
+            width: 920px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            border-style: solid;
+            border: 1px;
+            border-color: #000;
+            border-collapse: collapse;
+        }
+        .datatable td {
+            padding: 5px;
+        }
+
+        .datatable_header {
+            height: 25px;
+            text-align: left;
+            font-weight: bold;
+            background-color: #B9C9FE;
+        }
+
+        .altrow td {
+            background-color: #E0E0E0;
+        }
+    </style>
+</head>
+
+<body>
+    
+    <h2>Weekly brand stock report</h2>
+    @{
+        int firstPeriodStart = -4, secondPeriodEnd = 2;
+        int firstPeriodEnd = -1;
+        var productThreshold = Model.Brands.Count > 1 ? Model.ProductShowThreshold : Model.ProductShowThresholdBrand;
+    }
+    @foreach (var brand in Model.Brands.OrderBy(b => b.brandname).ToList())
+    {
+        var brandProducts = Model.ProductData.Where(d => d.brand_id == brand.brand_id && d.AnalyticsSubCategoryId != null).ToList();
+        var categories = brandProducts.GroupBy(p => Model.AnalyticsSubcategories.FirstOrDefault(c=>c.subcat_id == p.AnalyticsSubCategoryId).IfNotNull(c=>c.category_id))
+            .Select(g => new
+            {
+                cat_id = g.Key, 
+                category_name = Model.AnalyticsSubcategories.FirstOrDefault(c => c.category_id == g.Key).IfNotNull(c => c.Category.IfNotNull(cat=>cat.category_name)),
+                sequence = Model.AnalyticsSubcategories.FirstOrDefault(c => c.category_id == g.Key).IfNotNull(c => c.Category.IfNotNull(cat => cat.category_seq))
+            })
+            .ToList();
+        <h3>@brand.brandname @(!string.IsNullOrEmpty(Model.CustomerCode) ? " - " + Model.CustomerCode : "" )</h3>
+
+        var brandData = new List<CategoryData>();
+        int numWarningsAbove=0, numWarningsBelow = 0;
+        var excludedByQty = new List<Cust_products>();
+
+        foreach (var category in categories.OrderBy(c => c.sequence))
+        {
+            var subcatIds = Model.AnalyticsSubcategories.Where(s => s.category_id == category.cat_id).Select(s => s.subcat_id).ToList();
+            var catProducts = brandProducts.Where(p => subcatIds.Contains(p.AnalyticsSubCategoryId.Value)).GroupBy(p => new {cprod_code = p.cprod_code.Trim(), cprod_name= p.cprod_name.Trim()}).ToList();
+            var excluded = catProducts.Where(g => g.Where(p => p.Month21 >= GetMonthFromNow(-6) && p.Month21 <= GetMonthFromNow(-1)).Sum(p => p.Qty) < productThreshold)
+                .Select(g=>new Cust_products{cprod_code1= g.Key.cprod_code,cprod_name = g.Key.cprod_name}).ToList();
+            excludedByQty.AddRange(excluded);
+            
+            
+            
+            if (catProducts.Count-excluded.Count > 0)
+            {
+                var secondPeriodAvg = catProducts.Sum(g => g.Where(p => p.Month21.Between(GetMonthFromNow(firstPeriodEnd + 1), GetMonthFromNow(secondPeriodEnd))).Sum(p => p.Qty) ?? 0) *1.0/ (secondPeriodEnd - firstPeriodEnd);
+                var firstPeriodAvg = catProducts.Sum(g => g.Where(p => p.Month21.Between(GetMonthFromNow(firstPeriodStart),GetMonthFromNow(firstPeriodEnd))).Sum(p => p.Qty) ?? 0) *1.0 / (firstPeriodEnd - firstPeriodStart+1);
+                var factor = firstPeriodAvg > 0 ? secondPeriodAvg*1.0/firstPeriodAvg : 1;
+                
+                var categoryRow = new CategoryData
+                {
+                    Category = new Analytics_categories {category_id = category.cat_id ?? 0, category_name = category.category_name},
+                    Data = new List<BrandStockReportRow>()
+                };
+                brandData.Add(categoryRow);
+                var catData = categoryRow.Data;
+
+                foreach (var g in catProducts.Where(p=>excludedByQty.Count(x=>x.cprod_code1 == p.Key.cprod_code)==0))
+                {
+                    var row = new BrandStockReportRow(factor);
+                    catData.Add(row);
+                    var monthValues = new List<MonthQty>();
+                    row.MonthValues = monthValues;
+                    row.code = g.Key.cprod_code;
+                    row.name = g.Key.cprod_name;
+
+                    for (int i = firstPeriodStart; i <= secondPeriodEnd; i++)
+                    {
+                        monthValues.Add(new MonthQty {Month21 = GetMonthFromNow(i), Qty = g.Where(p => p.Month21 == GetMonthFromNow(i)).Sum(p => p.Qty)});
+                    }
+
+                    row.FutureQty = g.Where(p => p.Month21 > GetMonthFromNow(secondPeriodEnd)).Sum(p => p.Qty);
+                    row.Children = new List<BrandStockReportRow>();
+                    if (string.IsNullOrEmpty(Model.CustomerCode))
+                    {
+                        foreach (var c in g.GroupBy(p => p.customer_code))
+                        {
+                            var childRow = new BrandStockReportRow(factor);
+                            row.Children.Add(childRow);
+                            childRow.code = c.Key;
+                            childRow.MonthValues = new List<MonthQty>();
+                            childRow.FutureQty = c.Where(p => p.Month21 > GetMonthFromNow(secondPeriodEnd)).Sum(p => p.Qty);
+                            for (var i = firstPeriodStart; i <= secondPeriodEnd; i++)
+                            {
+                                childRow.MonthValues.Add(new MonthQty {Month21 = GetMonthFromNow(i), Qty = c.Where(p => p.Month21 == GetMonthFromNow(i)).Sum(p => p.Qty)});
+                            }
+                        }
+                    }
+                }
+                numWarningsAbove += catData.Count(p => p.Warning.StartsWith("above") && p.MonthValues.Take(6).Sum(r => r.Qty) >= productThreshold);
+                numWarningsBelow += catData.Count(p => p.Warning.StartsWith("below") && p.MonthValues.Take(6).Sum(r => r.Qty) >= productThreshold);
+            }
+        }
+        
+        @brandProducts.GroupBy(p=>p.cprod_code).Count() <span>products (excluding spares)</span><br/>
+        @numWarningsAbove <span> products detailed below where current ordered quantities are above expected tolerances</span><br/>
+        @numWarningsBelow <span> products detailed below where current ordered quantities are below expected tolerances</span><br/>
+        @excludedByQty.Count  <span>products excluded from the report due to low turnover (less than @productThreshold units in the last 6 months) – these are listed at the end of the report</span>
+        
+        <table class="datatable">
+            @foreach (var b in brandData)
+            {
+                var catData = b.Data;
+                if (catData.Any(d => d.MonthValues.Take(6).Sum(r => r.Qty) >= productThreshold && (Model.ShowRegularProducts || !string.IsNullOrEmpty(d.Warning))))
+                {
+                    <tr class="datatable_header">
+                        <td style="width: 250px; font-size: 14px; font-weight: bold">@b.Category.category_name</td>
+                        <td style="width: 100px">Code</td>
+                        @for (int i = firstPeriodStart; i <= secondPeriodEnd; i++)
+                        {
+                            <td class="number">@DateTime.Today.AddMonths(i).ToString("MMM/yy")</td>
+                        }
+                        <td class="number">Expected requirement</td>
+                        <td class="number">Future orders</td>
+                        <td>warning</td>
+                    </tr>
+                    foreach (var catRow in catData)
+                    {
+                        if (catRow.MonthValues.Take(6).Sum(r => r.Qty) >= productThreshold && (Model.ShowRegularProducts || !string.IsNullOrEmpty(catRow.Warning)))
+                        {
+                            <tr class="firstrow@(!string.IsNullOrEmpty(catRow.Warning) ? "_" + catRow.Warning.Substring(0,5)  :"")">
+                                <td>@catRow.name</td>
+                                <td style="font-weight: bold">@catRow.code</td>
+                                @for (int i = firstPeriodStart; i <= secondPeriodEnd; i++)
+                                {
+                                    <td style="text-align: right" @(Html.Raw(i == firstPeriodEnd ? "class=bordermonth" : i == firstPeriodStart ? "class=borderfirst" : i == secondPeriodEnd ? "class=bordermonth" : ""))>@catRow.MonthValues[i + -1 * firstPeriodStart].Qty</td>
+                                }
+                                <td class="number">@catRow.Requirement.ToString("N0")</td>
+                                <td class="number">@catRow.FutureQty</td>
+                                <td>@catRow.Warning</td>
+                            </tr>
+                                var counter = 0;
+                                if (string.IsNullOrEmpty(Model.CustomerCode))
+                                {
+                                    foreach (var c in catRow.Children)
+                                    {
+                                    <tr class="@(/*counter++%2 == 0 ? "table" : "alt"*/"table")row@(!string.IsNullOrEmpty(c.Warning) ? "_" + c.Warning.Substring(0,5)  :"")">
+                                        <td></td>
+                                        <td>@c.code</td>
+                                        @for (int i = firstPeriodStart; i <= secondPeriodEnd; i++)
+                                        {
+                                            <td style="text-align: right" @(Html.Raw(i == firstPeriodEnd ? "class=bordermonth" : i == firstPeriodStart ? "class=borderfirst" : i == secondPeriodEnd ? "class=bordermonth" : ""))>@c.MonthValues[i + -1*firstPeriodStart].Qty</td>
+                                        }
+                                        <td class="number">@c.Requirement.ToString("N0")</td>
+                                        <td class="number">@c.FutureQty</td>
+                                        <td>@c.Warning</td>
+                                    </tr>
+                                }
+                            }
+                        }
+                    }
+                    <tr>
+                        <td colspan="5"></td>
+                    </tr>    
+                
+                }
+            }
+        </table>
+        <br/>
+        if (excludedByQty.Count > 0)
+        {
+            <div style="width: 800px">
+                @excludedByQty.Count    <span> products excluded from the report due to low turnover (less than @productThreshold units in the last 6 months)</span><br />
+                @(string.Join(", ", excludedByQty.Select(p => p.cprod_code1)))
+            </div>
+        }
+
+
+    }
+
+</body>
+</html>

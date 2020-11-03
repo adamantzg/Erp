@@ -1,0 +1,8 @@
+.has-error{
+    border-color:darkred;
+    background: #e74c3c;
+}
+
+.table{
+    font-size: 10px;
+}

@@ -1,0 +1,112 @@
+﻿@section head
+{
+    
+    
+    @Styles.Render("~/Content/font-awesome.css")
+    @Styles.Render("~/Content/ionicons.css")
+    @Styles.Render("~/Content/style.css")
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    
+    <link href="~/Content/loading.css" rel="stylesheet" />
+    <!-- google font -->
+    <link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+
+    <style>
+        @@media (min-width: 768px) {
+            #footer {
+                width: 750px
+            }
+        }
+
+        @@media (min-width: 992px) {
+            #footer {
+                width: 970px
+            }
+        }
+
+        @@media (min-width: 1200px) {
+            #footer {
+                width: 1170px
+            }
+        }
+
+        .content {
+            background: none;
+        }
+
+        .main {
+            width: auto;
+        }
+
+        html, body {
+            background: none;
+        }
+
+        .radio-inline > * {
+            padding-top: 0px !important;
+        }
+
+        .imageHolder {
+            position: relative;
+            height: 230px;
+            border: 1px solid black;
+            display: table-cell;
+            vertical-align: middle;
+            width: 300px;
+        }
+
+        .orders_before_ready_date {
+            border: 1px solid red;
+        }
+
+        .badge-success {
+            background: #5cb85c !important
+        }
+
+        .badge-danger {
+            background: #d9534f;
+        }
+
+        label {
+            font-size: 1em !important;
+        }
+
+        .ui-select-choices {
+            position: fixed;
+            top: auto;
+            left: auto;
+            width: inherit;
+        }
+    </style>
+
+}
+
+<div ng-app="app">
+
+    
+
+
+    <div ui-view> </div>
+
+</div>
+
+@section scripts2 {
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/globalize")
+    <script src="~/Scripts/logToServer.js"></script>
+    <script src="~/Scripts/functions.js"></script>
+        
+    <script src="~/AngularApps/Containers/js/app.js"></script>
+    <script src="~/AngularApps/Containers/js/controllers.js"></script>
+    <script src="~/AngularApps/Containers/js/factory.js"></script>
+    <script src="~/Scripts/loading.js"></script>
+    
+    
+}
+
+
+

@@ -1,0 +1,356 @@
+﻿<style>
+    .invalid{
+        color:red;
+    }
+    .invalid-text{
+            position: relative;
+    margin-top: 10px;
+    font-weight: 600;
+    font-size:0.9em
+    }
+    .invalid-ddl{
+        border-color:red;
+    }
+    .valid{
+        color:green;
+    }
+    .dropdown-menu{
+        width:100%;
+    }
+</style>
+<h2 ng-if="false"> {{ctrlName}} - myModalContent.html</h2>
+
+<form name="myInput" class="form-horizontal" novalidate ng-hide="showNamesList">
+    <div class="modal-header">
+        <div class="row">
+            <div class="col-lg-11" style="margin:15px 40px">
+                <span class="h2">
+                    {{title}}
+                    <small></small>
+                    <br />
+                    <small style="margin-left:3px">
+                        Communication Log <span ng-if="!!editLog.customer"> for dealer <strong>{{ editLog.customer}}</strong></span>
+                        <!--<span ng-if="!!parentId">
+                            and parent log is <strong>{{parentId}}</strong>
+                        </span>-->
+                    </small>
+                </span>
+            </div>
+            <!--<div class="col-lg-1 h2"><span class="glyphicon glyphicon-edit"></span></div>-->
+        </div>
+    </div>
+    <div class="modal-body">
+        <!--<h2 class="h3">{{params.title}}</h2>-->
+        <div class="row" style="padding:20px;">
+            <div class="form-group" ng-hide="params.newLog">
+                <label class="control-label col-lg-offset-1 col-lg-2" for="date">Date </label>
+                <div class="col-lg-5">
+                    <span class="form-control col-lg-5" id="date" style="border:none">{{editLog.usaDate|date:'medium':en_US}}</span>
+                </div>
+            </div>
+            <!-- DEALERS -->
+            <div class="form-group" ng-if="dealerListAlpha.length>0">
+                <label class="control-label col-lg-offset-1 col-lg-2" for="dealer">Sage Account </label>
+                <div class="col-lg-6" ng-if="params.newLog">
+                    <select name="category"
+                            class="form-control"
+                            ng-class="{'invalid-ddl':!myInput.category.$valid && myInput.$submitted}"
+                            ng-model="editLog.dealer"
+                            ng-options="cat.customer as getDDLtext(cat) for cat in dealerListAlpha"
+                            style="padding-left:5px;"
+                            required>
+                        <option value="" selected style="display: none;color:#777;">Plese select dealer...</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 invalid invalid-text" ng-if="!myInput.dealer.$valid && myInput.$submitted"> *Required</div>
+                <div ng-if="!params.newLog" class="col-lg-5">
+                    <span class="form-control col-lg-5" id="customer" style="border:none">{{editLog.dealer}}</span>
+                </div>
+            </div>
+            <!-- STAUS - OPEN/CLOSED -->
+            <div class="form-group">
+                <label class="control-label col-lg-offset-1 col-lg-2" for="type">Open/Closed</label>
+                <div class="col-lg-6">
+                    <div class="radio">
+                        <label class="my-icon-label">
+                            <input name="status" ng-value=types.status.open ng-model="editLog.status" type="radio" required />
+                            <!--<i class="ion ion-outlet" ng-class="{'valid':editLog.type===2}"></i>-->
+                            <span ng-class="{'selected':types.status.open === editLog.status}" style="color:darkgreen">open</span>
+
+                            <!--<small class="my-icon-text">Mail</small>-->
+                        </label>&nbsp;&nbsp;
+                        <label class="my-icon-label">
+                            <input name="status" ng-value=types.status.closed ng-model="editLog.status" type="radio" required />
+                            <!--<i class="ion ion-android-call " ng-class="{'valid':editLog.type===1}"></i>-->
+                            <span ng-class="{'selected':types.status.closed === editLog.status}" style="color:darkred">closed</span>
+                            <!--<small class="my-icon-text">Phone</small>-->
+                        </label>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CALL TYPE (phone, mail) -->
+            <div class="form-group">
+                <label class="control-label col-lg-offset-1 col-lg-2" for="type">Type </label>
+                <div class="col-lg-6">
+                    <div class="radio" ng-class="{'invalid':!myInput.type.$valid && myInput.$submitted }">
+                        <label class="my-icon-label">
+                            <input name="type" ng-value=types.chat.mail ng-model="editLog.type" type="radio" required />
+                            <i class="ion ion-android-mail" ng-class="{'valid':editLog.type===2}"></i>
+
+                            <!--<small class="my-icon-text">Mail</small>-->
+                        </label>&nbsp;&nbsp;
+                        <label class="my-icon-label" style="margin-left:27px">
+                            <input name="type" ng-value=types.chat.phone ng-model="editLog.type" type="radio" required />
+                            <i class="ion ion-android-call " ng-class="{'valid':editLog.type===1}"></i>
+                            <!--<small class="my-icon-text">Phone</small>-->
+                        </label>
+
+                    </div>
+                </div>
+                <div class="col-lg-2 invalid invalid-text" ng-if="!myInput.type.$valid && myInput.$submitted"> *Required</div>
+            </div>
+            <!-- INCOMING - OUTGOING  -->
+            <div class="form-group">
+                <label class="control-label col-lg-offset-1 col-lg-2" for="type">Incoming/Outgoing </label>
+                <div class="col-lg-6">
+                    <div class="radio" ng-class="{'invalid':!myInput.inOut.$valid && myInput.$submitted }">
+                        <label class="my-icon-label">
+                            <input name="inOut" ng-value=types.calls.in ng-model="editLog.in_out" type="radio" required />
+                            <i class="ion ion-android-arrow-down-left" ng-class="{'valid':editLog.in_out===1}"></i>
+                            <!--<lgall class="my-icon-text">Mail</lgall>-->
+                        </label>&nbsp;&nbsp;
+                        <label class="my-icon-label" style="margin-left:28px">
+                            <input name="inOut" ng-value=types.calls.out ng-model="editLog.in_out" type="radio" required />
+                            <i class="ion ion-android-arrow-up-right" ng-class="{'valid':editLog.in_out===2}"></i>
+                            <!--<lgall class="my-icon-text">Phone</lgall>-->
+                        </label>
+
+                    </div>
+                </div>
+                <div class="col-lg-2 invalid invalid-text" ng-if="!myInput.inOut.$valid && myInput.$submitted"> *Required</div>
+
+            </div>
+            <!-- CATEGORY -->
+            <!-- in progress - radim na tome - kad završim na drugom nastavljam ovdje  -->
+            <!-- ovo radi samo trebam nastavit da sprema podatke iz list koja je  multi-select -->
+            <div class="form-group">
+                <label class="control-label col-lg-offset-1 col-lg-2" for="category">Categories</label>
+                <div class="col-lg-6">
+                    <div ng-dropdown-multiselect=""
+                         options="logCategories"
+                         translation-texts="translation"
+                         extra-settings="settings"
+                         selected-model="editLog.categories"></div>
+                </div>
+            </div>
+            <!--<div class="form-group">
+        <label class="control-label col-lg-offset-1 col-lg-2" for="category">Category</label>
+        <div class="col-lg-6">
+            <select name="category"
+                    class="form-control"
+                    ng-class="{'invalid-ddl':!myInput.category.$valid && myInput.$submitted}"
+                    ng-model="editLog.category_id"
+                    ng-options="cat.id*1 as cat.name for cat in logCategories"
+                    style="padding-left:5px;"
+                    required>
+                <option value="" disabled selected style="display: none;color:#777;">Please select category...</option>
+            </select>
+        </div>
+        <div class="col-lg-2 invalid invalid-text" ng-if="!myInput.category.$valid && myInput.$submitted"> *Required</div>
+
+    </div>-->
+            <!-- CREATE USER -->
+            <div class="form-group">
+                <label class="control-label col-lg-offset-1 col-lg-2" for="callerName">Caller Name </label>
+                <!--<div class="col-lg-5"><input type="text" value="" ng-model="editLog.person" class="form-control" /></div>-->
+
+                <div ng-class="{'has-error':!!novalidName}" class="col-lg-6">
+
+                    <select name="callerName"
+                            class="form-control"
+                            ng-class="{'invalid-ddl':!myInput.callerName.$valid && myInput.$submitted}"
+                            ng-model="editLog.person"
+                            placeholder="Please select person"
+                            style="padding: 3px; border-radius: 5px;"
+                            ng-if="ddlVisible"
+                            ng-change="setView()"
+                            required>
+                        <option value="" style="color:lightslategray">Please select caller name</option>
+                        <option value="new"> + Add new caller name </option>
+                        <option value="unknown"> - Unknown </option>
+                        <option ng-repeat="person in persons |filter: '!unknown'">{{person}}</option>
+                    </select>
+                   
+                    <div class="btn-group" ng-hide="true">
+
+                        <label class="btn btn-primary" ng-model="editLog.person" uib-btn-radio="'{{person}}'" ng-repeat="person in persons">{{person}}</label>
+                    </div>
+                    <div class="input-group" ng-if="!ddlVisible">
+                        <!--ng-if="showAddNewPerson ||( !showAddNewPerson &&  persons.length <1)">-->
+                        <input name="callerName"
+                               class="form-control"
+                               ng-class="{'invalid-ddl':!myInput.callerName.$valid && myInput.$submitted}"
+                               style="padding-left:5px"
+                               ng-model="editLog.person"
+                               placeholder="Please enter new caller name ... " required />
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary"
+                                    style="margin-bottom:4px;font-weight:100;padding:7px 10px;"
+                                    ng-click="setView('back')">
+
+                                <span class="fa fa-chevron-circle-left"></span>
+                                <!--<span class="fa fa-list fa-changed-color"></span>-->
+                                &nbsp;&nbsp;<i class="ion ion-ios7-arrow-back"></i>&nbsp;Back to list&nbsp;
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="btn btn-default" ng-hide="showNamesList" ng-click="showNamesList = !showNamesList">Remove name</div>
+                </div>
+                <div class="col-lg-2 invalid invalid-text"
+                     ng-if="!myInput.callerName.$valid && myInput.$submitted"
+                     style="font-size:0.9em">&nbsp;*Pleas enter a name.</div>
+
+
+
+            </div>
+            <!-- END CREATE USER -->
+            <!-- ORDER OR RETURN REFERENCE -->
+            <div class="form-group">
+
+                <label class="col-lg-2 col-lg-offset-1 control-label" for="description">Order or Return Reference</label>
+                <div class="col-lg-6" style="padding-top:10px">
+                    <input type="text" name="orderReturnRef"
+                           ng-model="editLog.order_return_ref"
+                           class="form-control" />
+                </div>
+            </div>
+            <!-- END FEDEX REF -->
+            <!-- FEDEX REF -->
+            <div class="form-group">
+
+                <label class="col-lg-2 col-lg-offset-1 control-label" for="description">Tracking Info </label>
+                <div class="col-lg-6">
+                    <input type="text" name="fedex"
+                           ng-model="editLog.fedex_ref"
+                           class="form-control" />
+                </div>
+            </div>
+            <!-- END FEDEX REF -->
+            <!-- RL NOTE -->
+            <!--<div class="form-group">
+        <label class="col-lg-2 col-lg-offset-1 control-label" for="description">R&L Note</label>
+        <div class="col-lg-6">
+            <textarea name="description"
+                      ng-model="editLog.rl_note"
+                      class="form-control"
+
+                      rows="6"
+                      ></textarea>
+        </div>
+
+    </div>-->
+            <!--END DESCRIPTION-->
+            <!-- DESCRIPTION -->
+            <div class="form-group">
+                <label class="col-lg-2 col-lg-offset-1 control-label" for="description">Description</label>
+                <div class="col-lg-6">
+                    <textarea name="description"
+                              ng-model="editLog.note"
+                              class="form-control"
+                              ng-class="{'invalid-ddl':!myInput.description.$valid && myInput.$submitted}"
+                              rows="6"
+                              required></textarea>
+                </div>
+                <div class="col-lg-2 invalid invalid-text" ng-if="!myInput.description.$valid && myInput.$submitted"> &nbsp;*Please enter a note.</div>
+
+            </div>
+            <!--END DESCRIPTION-->
+
+
+            <div class="form-group">
+                <label class="col-lg-2 col-lg-offset-1 control-label" for="upload">Upload file</label>
+                <button id="upload"
+                        plupload="fileUpload.url"
+                        plupload-options="fileUpload.options"
+                        plupload-callbacks="fileUpload.callbacks"
+                        class="btn btn-default create_new"
+                        style="margin-left:20px;">
+                    <i class="fa fa-upload"></i> Upload
+                </button>
+            </div>
+            <div class="row row-my-margin" style="padding-bottom:20px">
+                <div class="col-lg-offset-3 col-lg-9 ">
+                    <div class="image-holder" ng-repeat="image in editLog.images">
+                        <i class="fa fa-2x fa-close delete-image" ng-click="deleteImage(image,$index)"></i>
+                        <img ng-src="{{image.log_image}}" class="img-thumbnail" style="max-height:150px!important" />
+                    </div>
+                    <div ng-repeat="image in Images" class="image-holder">
+                        <i class="fa fa-2x fa-close delete-image"
+                           ng-click="deleteTempImage($index)"></i>
+                        <img ng-src="{{GetFileImage(image)}}" class="img-thumbnail" style="max-height:150px!important" />
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-footer">
+
+        <div class="btn btn-warning" ng-click="cancel()">Cancel</div>
+        <input type="submit" class="btn btn-primary" ng-click="myInput.$valid  && save()" value="Save"/>
+        <div class="row" ng-if="!!ERROR">
+            <div class="col-sm-12">
+                <div class="alert alert-danger text-left" role="alert">
+                    <h4>ERROR</h4>
+                    <b class="h3">{{ERROR.status}}</b>
+                    <span class="h3"> - {{ ERROR.data.message}}</span><br />
+                    <span>{{ERROR.data.exceptionMessage}}</span><br />
+                    <span>{{ERROR.data.exceptionType}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div style="padding-left:20px; padding-right:20px" ng-show="showNamesList">    
+        <div class="modal-header">
+            <div class="h2">
+               Show/Hide names
+            </div>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+            <div class="col-sm-6 col-sm-push-2">
+                <div ng-repeat="person in personsObject">
+                    <div class="col-sm-12">
+                        <label>
+                            <input type="checkbox" name="name" value="" ng-model="person.hide_person" ng-true-value="0" ng-false-value="1" />
+                            {{person.person}}
+                        </label>
+                        
+                    </div>
+                </div>
+            </div>
+                </div>
+        </div>
+        <div class="modal-footer">
+
+            <div class="pull-right">
+                <div class="btn btn-info" ng-click="updateShowHideNames()">
+                    Save changes
+                </div>
+            </div>
+
+            <div class="pull-right">
+                <div class="btn btn-warning" ng-click="showNamesList = !showNamesList" style="margin-right:10px">Cancel</div>
+            </div>
+
+        </div>
+   
+</div>

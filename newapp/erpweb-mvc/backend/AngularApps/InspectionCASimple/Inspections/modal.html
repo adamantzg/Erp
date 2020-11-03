@@ -1,0 +1,42 @@
+﻿        <!--<div class="modal-header col-xs-12">
+            
+                
+                
+                <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <div class="col-xs-10" style="padding-left:0"><span>&nbsp;{{vm.test}}&nbsp;</span></div><div class="col-xs-2">
+            </div>
+        </div>-->
+        <div class="modal-body" style="padding:1px">
+
+            <table class="table table-striped">
+                <tr ng-repeat="item in vm.products track by $index">
+                    <td style="padding: 7px 0 7px 35px">
+                        <div class="checkbox" >
+                        <input style="margin-top:0px" 
+                               ng-model="vm.selectedItems[$index]" 
+                               type="checkbox"
+                               ng-true-value="{{item}}" 
+                               ng-false-value="false"
+                               ng-change="vm.checkSelections()"/>
+                            <span class="item-title">{{item.cprod_code}}</span>
+                        </div>
+                    </td>
+                </tr>
+                
+            </table>
+        </div>
+        <div class="modal-footer">
+            
+            <button type="button" class="btn btn btn-default" aria-label="Clear" ng-click="vm.clear()">
+                <span aria-hidden="true">Clear</span>
+            </button>
+            <button type="button" class="btn btn btn-default" aria-label="Cancel" ng-click="vm.cancel()">
+                <span aria-hidden="true">CANCEL</span>
+            </button>
+            <button type="button" class="btn btn btn-default" aria-label="Ok" ng-click="vm.save()" ng-disabled="vm.selectedEmpty">
+                <span aria-hidden="true">OK</span>
+            </button>
+            <!--<span class="btn btn-default"><i class="glyphicon glyphicon-ok"></i></span>
+            <span class="btn btn-default"><i class="glyphicon glyphicon-re"></i></span>-->
+
+        </div>

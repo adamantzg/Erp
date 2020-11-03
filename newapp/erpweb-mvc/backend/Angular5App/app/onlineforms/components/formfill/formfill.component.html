@@ -1,0 +1,18 @@
+<div class="row">
+    <div class="col-md-12 text-center"><h4>{{model.form?.title}}</h4></div>
+    
+</div>
+<div style="margin-bottom: 5px">
+    <button class="btn btn-primary" routerLink="../..">Back to form list</button>
+</div>
+<div class="panel panel-primary" *ngFor="let s of model.form?.sections">
+    <div class="panel-heading">{{s?.section?.title}}</div>
+    <div class="panel-body">
+        <div class="form form-horizontal">
+            <app-formsection [source]="q" [types]="model.types" [renderMethods]="model.renderMethods" 
+            *ngFor="let q of s?.section?.questions, let index = index" [last]="index == s?.section?.questions?.length - 1"></app-formsection>
+        </div>
+        
+    </div>
+</div>
+<button class="btn btn-primary" (click)="submitForm()">Submit form</button>

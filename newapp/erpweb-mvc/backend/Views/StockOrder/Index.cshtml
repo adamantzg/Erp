@@ -1,0 +1,103 @@
+﻿@model StockOrderListModel
+
+
+<h2>Stock orders</h2>
+@using (Html.BeginForm())
+{
+    <table style="width: 300px">
+        <tr >
+            <td class="table_main_td_label">From:</td>
+            <td >@*@{ var d = Html.DateTimeFor(m => m.From, dateInCalendar: true); }
+                @d.DateCalendar(WebUtilities.GetDefaultCalendarOptions(), inLine: false)*@
+                @Html.TextBoxFor(m => m.From, "{0:d}", new { isDate = true })
+            </td>
+        </tr>
+        <tr>
+            <td class="table_main_td_label">To:</td>
+            <td >
+                @*@{ var d1 = Html.DateTimeFor(m => m.To, dateInCalendar: true); }@d1.DateCalendar(WebUtilities.GetDefaultCalendarOptions(), inLine: false)*@ 
+                @Html.TextBoxFor(m => m.To, "{0:d}", new { isDate = true })
+            </td>
+        </tr>
+        <tr>
+            <td class="table_main_td_label">Factory:</td>
+            <td>@Html.DropDownListFor(m => m.Factory_id, new SelectList(Model.Factories, "user_id", "factory_code"), "(All)")</td>
+        </tr>
+    </table>
+    <input type="submit" value="Search" /><input type="button" id="btnCalc" value="Calculation" style="display: none"/>
+    <p></p>
+}  
+    @Html.Partial("_LinkButtonPartial", new LinkButtonModel { NavigateUrl = Url.Action("Create",new {Model.Factory_id}), Text = "Create" })
+
+    <table class="table">
+        <tr class="table_headerrow">
+            <td></td>
+            <td></td>
+            <td style="width: 130px">Order number</td>
+            <td style="width: 110px">Factory</td>
+            <td style="width: 110px">Order date</td>
+            
+        </tr>
+        @{ int i = 0; }
+        @if (Model.Orders != null)
+        {
+            foreach (var order in Model.Orders)
+            {
+                <tr class="@(i%2 == 0 ? "tablerow" : "tablerow_alt")">
+                    <td><a href="@Url.Action("Edit", new {id = order.porderid})"><img src="/Images/menus/EditItem.gif"/></a></td>
+                    <td><a href="javascript:void(0)" onclick="return DeleteItem(@order.porderid)"><img src="/Images/menus/Delete.gif"/></a></td>
+                    <td>@order.poname</td>
+                    <td>@(order.Factory != null ? order.Factory.factory_code : "") </td>
+                    <td>@order.orderdate.ToString("d")</td>
+                </tr>
+                i++;
+            }
+        }
+    </table>
+@section head
+{
+   <style>
+        input[type=text] {width:auto}
+    </style>
+}
+
+
+@section scripts
+{
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="/Scripts/MVCControlToolkit.Controls-2.2.5.min.js" type="text/javascript"></script>
+    <script type='text/javascript' >
+        //$.validator.setDefaults({
+        //    ignore: "not([data-elementispart]):hidden"
+        //});
+    </script>
+    
+    @Html.GlobalizationScript()   
+    
+
+    <script type="text/javascript">
+        $(function() {
+            $('#Factory_id').change(function() {
+                var factory_id = $(this).val();
+                if (factory_id.length > 0) {
+                    $('input[value="Create"]').attr('onclick', 'location.href=\'@Url.Action("Create")/?factory_id=' + factory_id + '\';');
+                    $('#btnCalc').show();
+                } else {
+                    $('#btnCalc').hide();
+                }
+            });
+            $('#btnCalc').click(function () {
+                var factory_id = $('#Factory_id').val();
+                window.open('@Url.Action("CalculationReport")/?factory_id=' + factory_id);
+            });
+        });
+
+        function DeleteItem(id) {
+            if (confirm('Delete order?')) {
+                location.href = '@Url.Action("Delete")/' + id;
+            }
+        }
+    </script>
+    
+}

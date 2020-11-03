@@ -1,0 +1,28 @@
+<h3>Freight costs</h3>
+<div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
+<button class="btn btn-primary" (click)="update()">Update</button> <button class="btn btn-default" (click)="back()">Back</button>
+<div class="row" style="margin-top:5px"> 
+  <div class="col-sm-12">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Location</th>
+          <th>Market</th>
+          <th *ngFor="let c of containers">{{c.shortname}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-template ngFor let-r [ngForOf]="rows">
+          <tr *ngFor="let m of r.Markets;let i=index">
+            <td *ngIf="i==0" [rowSpan]="markets.length">{{r.name}}</td>
+            <td>{{m.name}}</td>
+            <td *ngFor="let c of m.Containers">
+              <input type="text" class="form-control" [(ngModel)]="c.Cost.value">
+            </td>
+          </tr>          
+        </ng-template>
+        <tr></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

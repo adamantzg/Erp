@@ -1,0 +1,47 @@
+<h3 *ngIf="showTitle">Pricing model levels</h3>
+<div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
+<div *ngIf="showButtons">
+    <button class="btn btn-primary" (click)="update()">Update</button> <button class="btn btn-default" (click)="back()">Back</button>
+</div>
+<div class="row" style="margin-top:5px"> 
+  <div class="col-sm-12">
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width:20%"></th>
+          <th style="width:20%" *ngIf="showMarkets"></th>
+          <th *ngIf="levels.length > 0" [colSpan]="levels.length + (showButtons ? 1: 0)" class="text-center" >Discount levels {{mode == componentModes.EditPercentages ? '(%)' : ''}}</th>          
+        </tr>
+        <tr>
+          <th>Model</th>
+          <th *ngIf="showMarkets">Market</th>
+          <th *ngFor="let l of levels | orderBy: 'level'" class="text-right">{{l.level}}</th>
+          <th *ngIf="showButtons"><button class="btn glyphicon glyphicon-plus" (click)="addLevel()"></button></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let m of models; let i = index">
+          <td>
+            <input *ngIf="showEditors" type="text" class="form-control" [(ngModel)]="m.name">
+            <span *ngIf="!showEditors">{{m.name}}</span>
+          </td>
+          <td *ngIf="showMarkets">
+            <select class="form-control" [(ngModel)]="m.market_id">
+              <option *ngFor="let ma of markets" [value]="ma.id">{{ma.name}}</option>
+            </select>
+          </td>
+          <td  *ngFor="let l of m.levels | orderBy: 'level'" class="text-right">
+            <!-- <input type="text" class="form-control" [(ngModel)]="l.value" *ngIf="showEditors"> -->
+            <app-percentageinput [(Data)]="l.value" *ngIf="showEditors"></app-percentageinput>
+            <span *ngIf="prices">{{calculateDiscount(m, l) | number:numFormat}}</span>
+          </td>
+          <td *ngIf="showButtons"><button class="btn glyphicon glyphicon-remove" (click)="removeModel(i)"></button></td>
+        </tr> 
+        <tr *ngIf="showButtons">
+          <td><button class="btn glyphicon glyphicon-plus" (click)="addModel()"></button></td>
+          <td [colSpan]="levels.length + (showButtons ? 1: 0) + (showMarkets ? 1 : 0)"></td>
+        </tr>       
+      </tbody>      
+    </table>
+  </div>
+</div>

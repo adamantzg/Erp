@@ -1,0 +1,416 @@
+﻿@using company.Common
+@model StockSummaryReportModel
+
+@{
+    Layout = null;
+    var categories = Model.Categories.Where(c => Model.Products.Select(p => p.cprod_brand_cat).Contains(c.brand_cat_id)).ToList();
+    var total = 0.0;
+    var customers = Model.OrderSummary.Select(o => o.CustomerCode).Distinct().ToList();
+    var customerStats = new Dictionary<string, StockSummaryCustomerData>();
+}
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Stock summary</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+
+        <style>
+            body {
+                font-family: arial;
+                font-size: 12px;
+            }
+            .container {
+                width: 100%;
+            }
+            table {
+                font-family: arial;
+                font-size: 12px
+            } 
+            .table .table {
+                margin-bottom:0;
+            }
+             .center {text-align:center;font-weight: bold}
+            .number {text-align: right}
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .table td {
+            border: 1px solid #D0D0D0;
+            min-width: 53px;
+        }
+        .table thead th,.table thead td {
+            font-weight:bold;
+        }
+        .bolded {
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            font-weight:bold;
+        }
+        .row {
+            margin-bottom: 1rem;
+        }
+        .img-hide {
+            position:absolute;
+            bottom:5px;
+            left:0;
+            right:0;
+        }
+        .img-hide:hover {
+            cursor:pointer;
+            text-decoration:underline;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="list-inline">
+                        <li>
+                            <h2 class="left">Brand @(Model.CountryFilter == CountryFilter.UKOnly ? "UK" : "Non UK") stock summary for @Model.Brand.brandname</h2>
+                        </li>
+                        <li>
+                            <h4 class="left">(@DateTime.Today.ToString("d"))</h4>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-9 col-md-9">
+                    <table class="table table-responsive">
+                        <tr>
+                            <td>
+                                <table class="table table-bordered table-hover table-responsive">
+                                    <thead>
+                                        <tr class="warning">
+                                            <td class="center" width="5%">Location</td>
+                                            <td class="center" width="30%">Delivery status (on the basis of product units)</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                <td class="center number">@c</td>
+                                            }
+                                            <td class="center number">Total</td>
+                                        </tr>
+                                    </thead>
+                                    @{
+                                        var statuses = new[]
+                                {
+                                    new {status = OrderDeliveryStatus.Delivered, text = "Delivered to UK distributors' warehouse"}, new {status = OrderDeliveryStatus.OnWater, text = "Shipped and on water"},
+                                    new {status = OrderDeliveryStatus.ToBeShipped, text = "Open to be shipped"}
+                                };
+                                    }
+                                    <tbody>
+                                        @foreach (var lg in Model.OrderSummary.GroupBy(o => o.Location))
+                                        {
+                                            foreach (var s in statuses)
+                                            {
+                                                total = 0;
+                                                <tr>
+                                                    @if (s.status == OrderDeliveryStatus.Delivered)
+                                                    {
+                                                        <td rowspan="3">@lg.Key</td>
+                                                    }
+                                                    <td>@s.text</td>
+
+                                                    @foreach (var c in customers)
+                                                    {
+                                                        var customerQty = lg.Where(o => o.CustomerCode == c && o.Status == s.status).Sum(o => o.Qty) ?? 0;
+                                                        total += customerQty;
+                                                        <td class="number">@customerQty.ToString("N0")</td>
+                                                    }
+                                                    <td class="number success">@total.ToString("N0")</td>
+                                                </tr>
+                                            }
+                                        }
+                                        <tr class="success">
+                                            <td colspan="2" class="center bolded">Total</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                <td class="number">@Model.OrderSummary.Where(o => o.CustomerCode == c).Sum(o => o.Qty).ToString("N0")</td>
+                                            }
+                                            <td class="number">@Model.OrderSummary.Sum(o => o.Qty).ToString("N0")</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <img src="@Html.Raw(WebUtilities.GetSiteUrl() + Url.Action("BrandStockSummaryUnitsShippedGraph", new {statsKey = Settings.Default.StatsKey, brand_id = Model.Brand.IfNotNull(b => b.brand_id)}))" class="center-block img-thumbnail img-responsive" />
+                    <div class="img-hide text-center">Hide</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-9 col-md-9">
+                    <table class="table table-responsive">
+                        <tr>
+                            <td>
+                                <table class="table table-bordered table-hover table-responsive">
+                                    <thead>
+                                        <tr class="warning">
+                                            <td align="left">(on the basis of product units)</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                customerStats[c] = new StockSummaryCustomerData();
+                                                <td class="center number">@c</td>
+                                            }
+                                            <td class="center number">Total</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            @{
+                                                total = 0;
+                                            }
+                                            <td align="left">total order qty</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                var qty = Model.OrderSummary.Where(o => o.CustomerCode == c).Sum(o => o.Qty) ?? 0;
+                                                customerStats[c].OrderQty = Convert.ToInt32(qty);
+                                                total += qty;
+                                                <td class="number">@qty</td>
+                                            }
+                                            <td class="number success">@total.ToString("N0")</td>
+                                        </tr>
+                                        <tr>
+                                            @{
+                                                total = 0;
+                                            }
+                                            <td align="left">total display qty</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                var qty = Model.DisplayCountByDistributor.Where(o => o.distributor_code == c).Sum(o => o.DisplayCount);
+                                                customerStats[c].DisplayQty = qty;
+                                                <td class="number">@qty</td>
+                                            }
+                                            <td class="number success">@Model.DisplayCount.ToString("N0")</td>
+                                        </tr>
+                                        <tr>
+                                            @{
+                                                total = 0;
+                                            }
+                                            <td align="left">total sales qty</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                var qty = Model.DealerSalesByCustomer.Where(o => o.customer_code == c).Sum(o => o.Qty);
+                                                customerStats[c].SalesQty = qty;
+                                                total += qty;
+                                                <td class="number">@qty</td>
+                                            }
+                                            <td class="number success">@total.ToString("N0")</td>
+                                        </tr>
+                                        <tr>
+                                            @{
+                                                total = 0;
+                                            }
+                                            <td align="left">total return qty</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                var qty = Model.ReturnsByCustomers.Where(o => o.customer_code == c).Sum(o => o.Qty);
+                                                customerStats[c].ReturnQty = qty;
+                                                total += qty;
+                                                <td class="number">@qty</td>
+                                            }
+                                            <td class="number success">@total.ToString("N0")</td>
+                                        </tr>
+                                        <tr>
+                                            @{
+                                                total = 0;
+                                            }
+                                            <td align="left">estimated stock</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                total += customerStats[c].Stock;
+                                                <td class="number">@customerStats[c].Stock</td>
+                                            }
+                                            <td class="number success">@total.ToString("N0")</td>
+                                        </tr>
+                                        <tr>
+                                            @{
+                                                total = 0;
+                                            }
+                                            <td align="left">% of Display</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                total += customerStats[c].Stock;
+                                                <td class="number">@customerStats[c].DisplayToOrderQty.ToString("P2")</td>
+                                            }
+                                            <td class="number success">@((Model.DisplayCount / Model.OrderSummary.Sum(o => o.Qty)).ToString("P2"))</td>
+                                        </tr>
+                                        <tr>
+                                            @{
+                                                total = 0;
+                                            }
+                                            <td align="left">% of Sales</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                total += customerStats[c].SalesQty;
+                                                <td class="number">@customerStats[c].SalesToOrderQty.ToString("P2")</td>
+                                            }
+                                            <td class="number success">@((Model.DealerSalesQty / Model.OrderSummary.Sum(o => o.Qty)).ToString("P2"))</td>
+                                        </tr>
+                                        <tr>
+                                            @{
+                                                total = 0;
+                                            }
+                                            <td align="left">% of Return</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                total += customerStats[c].ReturnQty;
+                                                <td class="number">@customerStats[c].ReturnToOrderQty.ToString("P2")</td>
+                                            }
+                                            <td class="number success">@((Model.ReturnsByCustomers.Sum(r => r.Qty) / Model.OrderSummary.Sum(o => o.Qty)).ToString("P2"))</td>
+                                        </tr>
+                                        <tr>
+                                            @{
+                                                total = 0;
+                                            }
+                                            <td align="left">% of Stock</td>
+                                            @foreach (var c in customers)
+                                            {
+                                                total += customerStats[c].Stock;
+                                                <td class="number">@customerStats[c].StockToOrderQty.ToString("P2")</td>
+                                            }
+                                            <td class="number success">@((customerStats.Sum(c => c.Value.Stock) / Model.OrderSummary.Sum(o => o.Qty)).ToString("P2"))</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <img src="@Html.Raw(WebUtilities.GetSiteUrl() + Url.Action("BrandStockSummaryBreakDownGraph", new { statsKey = Settings.Default.StatsKey, brand_id = Model.Brand.IfNotNull(b => b.brand_id) }))" class="center-block img-thumbnail img-responsive" />
+                    <div class="img-hide text-center">Hide</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-9 col-md-9">
+                    <table class="table table-responsive">
+                        <tr>
+                            <td>
+                                <table class="table table-bordered table-hover table-responsive">
+                                    <thead>
+                                        <tr class="warning">
+                                            <td>Delivery group</td>
+                                            @*<td style="width:100%!important;">Definition (on basis of product type)</td>*@
+                                            @{
+                                                var catGroups = categories.Where(c => c.group_id != null).GroupBy(c => c.group_id).Select(g => new CatGroup { Id = g.Key.Value, Name = g.First().Group.name, Categories = g.ToList() }).
+                                                    Union(categories.Where(c => c.group_id == null).Select(c => new CatGroup { Id = c.brand_cat_id, Name = c.brand_cat_desc, Categories = new List<BrandCategory> { new BrandCategory { brand_cat_id = c.brand_cat_id, brand_cat_desc = c.brand_cat_desc } } })).ToList();
+                                            }
+                                            @foreach (var c in catGroups.OrderBy(c => c.Name))
+                                            {
+                                                <td class="number">@c.Name</td>
+                                            }
+                                            <td class="success" width="10%">Total</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @Html.Partial("_ProductGroupPartial", new ProductGroupPartialModel { Categories = categories, CategoryGroups = catGroups, ProductGroup = "S", Products = Model.Products, Description = "In stock can ship within 14 days" })
+                                        @Html.Partial("_ProductGroupPartial", new ProductGroupPartialModel { Categories = categories, CategoryGroups = catGroups, ProductGroup = "A", Products = Model.Products, Description = "In production can ship within 21 days" })
+                                        @Html.Partial("_ProductGroupPartial", new ProductGroupPartialModel { Categories = categories, CategoryGroups = catGroups, ProductGroup = "B", Products = Model.Products, Description = "In production can ship within 28 days" })
+                                        @Html.Partial("_ProductGroupPartial", new ProductGroupPartialModel { Categories = categories, CategoryGroups = catGroups, ProductGroup = "C", Products = Model.Products, Description = "In production can ship within 35 days" })
+                                        @*@Html.Partial("_ProductGroupPartial", new ProductGroupPartialModel { Categories = categories, CategoryGroups = catGroups, ProductGroup = "C+", Products = Model.Products, Description = "In production but can only ship above 35 days" })*@
+                                        <tr class="success">
+                                            @{
+                                                var totalsByCatGroup = new Dictionary<int, int>();
+                                                var groups = new[] { "S", "A", "B", "C" };
+                                            }
+                                            <td class="center bolded">Total</td>
+                                            @foreach (var c in catGroups.OrderBy(c => c.Name))
+                                            {
+                                                totalsByCatGroup[c.Id] = Model.Products.Count(p => c.Categories.Count(cat => cat.brand_cat_id == p.cprod_brand_cat) > 0 && p.MastProduct != null && groups.Contains(p.MastProduct.product_group));
+                                                <td class="number">@totalsByCatGroup[c.Id]</td>
+                                            }
+                                            <td class="number success">
+                                                @totalsByCatGroup.Sum(t => t.Value)
+                                            </td>
+                                        </tr>
+                                        <tr class="active">
+                                            @{ total = 0;}
+                                            <td class="center bolded" width="10%">In stock%</td>
+                                            @foreach (var c in catGroups.OrderBy(c => c.Name))
+                                            {
+                                                <td class="number">
+                                                    @{
+                                                var inStock = Model.Products.Count(p => c.Categories.Count(cat => cat.brand_cat_id == p.cprod_brand_cat) > 0 && p.MastProduct != null && p.MastProduct.product_group == "S");
+                                                total += inStock;
+                                                    }
+                                                    @((inStock * 1.0 / totalsByCatGroup[c.Id]).ToString("P0"))
+                                                </td>
+                                            }
+                                            <td class="number">@((total * 1.0 / totalsByCatGroup.Sum(t => t.Value)).ToString("P0"))</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <img src="@Html.Raw(WebUtilities.GetSiteUrl() + Url.Action("BrandStockSummaryProductGroupGraph", new { statsKey = Settings.Default.StatsKey, brand_id = Model.Brand.IfNotNull(b => b.brand_id) }))" class="center-block img-thumbnail img-responsive" />
+                    <div class="img-hide text-center">Hide</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-9 col-md-9">
+                    <table class="table table-bordered table-responsive">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class="table table-bordered table-hover table-responsive">
+                                        <thead>
+                                            <tr class="warning">
+                                                <td width="10%">Factory Code</td>
+                                                <td class="number">Value (USD)*</td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var v in Model.StocksummaryFactoryvalues)
+                                            {
+                                                <tr>
+                                                    <td class="bolded" align="center"><strong>@v.Factory.factory_code</strong></td>
+                                                    <td class="number success">@v.value.ToString("N0")</td>
+                                                </tr>
+                                            }
+                                            <tr class="success">
+                                                <td class="bolded" align="center">TOTAL</td>
+                                                <td class="number">@Model.StocksummaryFactoryvalues.Sum(v => v.value).ToString("N0")</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <h5><strong>Notes</strong></h5>
+                    <p>* estimated data provide by factories on @Model.StocksummaryFactoryvalues.Max(v => v.dateprovided).ToString("D")</p>
+                </div>
+            </div>
+        </div>
+        @Scripts.Render("~/bundles/jquery")
+        @Scripts.Render("~/bundles/bootstrap")
+        <script>
+            $(document).on("click", ".img-hide", function () {
+                if ($(this).prev("img").css("opacity") == 0)
+                {
+                    $(this).prev("img").css("opacity", "1");
+                    $(this).text("Hide");
+                }
+                else
+                {
+                    $(this).prev("img").css("opacity", "0");
+                    $(this).text("Show");
+                }
+                    
+            })
+        </script>
+    </body>
+</html>

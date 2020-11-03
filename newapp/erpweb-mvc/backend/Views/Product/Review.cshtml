@@ -1,0 +1,274 @@
+﻿@model ProductReviewModel
+@{
+    ViewBag.Title = "Review";
+}
+
+<div ng-app="ProductReviewApp">
+    <div ng-controller="PrController" ng-cloak>
+        <uib-tabset>
+            <uib-tab heading="Summary">
+                <h2>BBD Products Review</h2>
+                <div>All data excludes spares</div>
+                <div>Data based on sales to UK/IE distributors only</div>
+                <table class="table table-bordered">
+                    <tr>
+                        <td></td>
+                        <td colspan="2" class="summary_current_status_head">Current status</td>
+                        <td colspan="3" class="summary_removals_head">Proposed removals</td>
+                        <td colspan="2" class="summary_adjusted_status_head">Adjusted status</td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td class="number summary_head">no. of products</td>
+                        <td class="number summary_head">GBP sales last 12m*</td>
+                        <td class="number summary_head">no. of products</td>
+                        <td class="number summary_head">% of total products</td>
+                        <td class="number summary_head">% of last 12m GBP sales</td>
+                        <td class="number summary_head">no. of products</td>
+                        <td class="number summary_head">GBP sales last 12m*</td>
+                    </tr>
+                    <tr ng-repeat="tab in Tabs.slice(0,-1)">
+                        <td class="summary_brandname">{{tab.brandname}}</td>
+                        <td class="number">{{tab.Qty}}</td>
+                        <td class="number">{{FormatNumber(tab.GBP)}}</td>
+                        <td class="number">{{DiscontQty(tab)}}</td>
+                        <td class="number">{{FormatPercent(DiscontQty(tab)/tab.Qty)}}</td>
+                        <td class="number">{{FormatPercent(DiscontGBP(tab)/tab.GBP)}}</td>
+                        <td class="number">{{RemainingQty(tab)}}</td>
+                        <td class="number">{{FormatNumber(RemainingGBP(tab))}}</td>
+                    </tr>
+                    <tr class="summary_total">
+                        <td>TOTAL</td>
+                        <td class="number">{{BrandQty}}</td>
+                        <td class="number">{{FormatNumber(BrandGBP)}}</td>
+                        <td class="number">{{DiscontQtyBrands()}}</td>
+                        <td class="number">{{FormatPercent(DiscontQtyBrands()/BrandQty)}}</td>
+                        <td class="number">{{FormatPercent(DiscontGBPBrands()/BrandGBP)}}</td>
+                        <td class="number">{{RemainingQtyBrands()}}</td>
+                        <td class="number">{{FormatNumber(RemainingGBPBrands())}}</td>
+                    </tr>
+                    <tr ng-repeat="tab in Tabs | filter: {user_id : 81}">
+                        <td class="summary_brandname">{{tab.brandname}}</td>
+                        <td class="number">{{tab.Qty}}</td>
+                        <td class="number">{{FormatNumber(tab.GBP)}}</td>
+                        <td class="number">{{DiscontQty(tab)}}</td>
+                        <td class="number">{{FormatPercent(DiscontQty(tab)/tab.Qty)}}</td>
+                        <td class="number">{{FormatPercent(DiscontGBP(tab)/tab.GBP)}}</td>
+                        <td class="number">{{RemainingQty(tab)}}</td>
+                        <td class="number">{{FormatNumber(RemainingGBP(tab))}}</td>
+                    </tr>
+                </table>
+                <div>* GBP values calculated at distributor prices, based on UK sales only except for OEM products</div>
+                <div style="font-weight: bold">Summary of products proposed for deletion
+                </div>
+                <table class="datatable">
+                    <tr class="datatable_header" style="font-weight: bold">
+                        <td>Brand</td>
+                        <td>Description</td>
+                        <td>Code</td>
+                        <td class="number">previous 6m</td>
+                        <td class="number">last 6m</td>
+                        <td class="number">Total</td>
+                        <td class="number">Display Qty</td>
+                        <td class="number">FE Stock Qty</td>
+                        <td class="number">Month sales in stock</td>
+                    </tr>
+                    <tr ng-repeat="p in GetDiscontinued()">
+                        <td>{{BrandName(p.brand_user_id)}}</td>
+                        <td>{{p.cprod_name}}</td>
+                        <td>{{p.cprod_code1}}</td>
+                        <td class="number">{{p.TotalPrevious6m}}</td>
+                        <td class="number">{{p.TotalLast6m}}</td>
+                        <td class="number">{{p.Total}}</td>
+                        <td class="number">{{p.DisplayQty}}</td>
+                        <td class="number">{{p.FactoryStock}}</td>
+                        <td class="number">{{FormatNumber(p.FactoryStock/(p.Total/12.0))}}</td>
+                    </tr>
+                </table>
+            </uib-tab>
+            
+            <uib-tab ng-repeat="tab in Tabs" heading="{{tab.brandname}}">
+                <h2>{{tab.brandname}}</h2>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <td style="width:50%">this is our current status</td>
+                                    <td class="number bold">Qty</td>
+                                    <td class="number bold">last 12m spend GBP*</td>
+                                </tr>
+                                <tr>
+                                    <td>Number of products within {{tab.brandname}} **</td>
+                                    <td class="number">{{tab.Qty}}</td>
+                                    <td class="number">{{FormatNumber(tab.GBP)}}</td>
+                                </tr>
+                                <tr style="height:20px">
+                                    <td>This is our proposal</td>
+                                    <td colspan="2"></td>
+                                </tr>
+                                <tr>
+                                    <td>Products to discontinue</td>
+                                    <td class="number">{{DiscontQty(tab)}}</td>
+                                    <td class="number">{{FormatNumber(DiscontGBP(tab))}}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="height:20px"></td>
+                                </tr>
+                                <tr>
+                                    <td>Remaining products</td>
+                                    <td class="number">{{RemainingQty(tab)}}</td>
+                                    <td class="number">{{FormatNumber(RemainingGBP(tab))}}</td>
+                                </tr>
+                            </table>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="datatable" ng-repeat="(key, value) in BrandCatData[tab.user_id].Categories" style="margin-top:10px">
+                                <tr class="datatable_header" style="font-weight: bold">
+                                    <td rowspan="{{GetRowSpan(tab.user_id)}}" style="width:35%">{{key}}</td>
+                                    <td rowspan="{{GetRowSpan(tab.user_id)}}" style="width:10%">Code</td>
+                                    <td class="number" style="text-align: {{HasOptions(tab.user_id) ? 'center' : 'right'}}" colspan="{{GetColSpan(tab.user_id)}}">previous 6m</td>
+                                    <td class="number" style="text-align: {{HasOptions(tab.user_id) ? 'center' : 'right'}}" colspan="{{GetColSpan(tab.user_id)}}">last 6m</td>
+                                    <td class="number" rowspan="{{GetRowSpan(tab.user_id)}}">Total</td>
+                                    <td class="number" rowspan="{{GetRowSpan(tab.user_id)}}">Display Qty</td>
+                                    <td class="number" rowspan="{{GetRowSpan(tab.user_id)}}">First Ship date</td>
+                                    <td class="number" rowspan="{{GetRowSpan(tab.user_id)}}">Remove </td>
+                                </tr>
+                                <tr class="datatable_header" style="font-weight:bold" ng-show="HasOptions(tab.user_id)">
+                                    <td class="number" ng-repeat="o in BrandOptions[tab.user_id]">{{o.option_name}}</td>
+                                    <td class="number">Total previous 6m</td>
+                                    <td class="number" ng-repeat="o in BrandOptions[tab.user_id]">{{o.option_name}}</td>
+                                    <td class="number">Total last 6m</td>
+                                </tr>
+                                <tr ng-repeat="r in value.Data" ng-class-even="'even'">
+                                    <td>{{r.Name}}</td>
+                                    <td>{{r.Code}}</td>
+                                    <td class="number" ng-repeat="o in r.STotalsOpPrevious6m" ng-show="HasOptions(tab.user_id)">{{o.TotalList}}</td>
+                                    <td class="number">{{r.TotalPrevious6m}}</td>
+                                    <td class="number" ng-repeat="o in r.STotalsOpLast6m" ng-show="HasOptions(tab.user_id)">{{o.TotalList}}</td>
+                                    <td class="number">{{r.TotalLast6m}}</td>
+                                    <td class="number">{{r.Total}}</td>
+                                    <td class="number">{{r.DisplayQty}}</td>
+                                    <td class="number">{{FormatDate(r.FirstShipDate)}}</td>
+                                    <td style="text-align:center">
+                                        <input type="image" ng-src="{{GetImageUrl(r)}}" ng-click="TogglePopup(r)" style="width: 18px;border:0;background-color:transparent" />
+                                        <div ng-show="ActiveSubCatId == r.Id" style="text-align:left">
+                                            <div ng-repeat="p in r.Products"><input type="checkbox" ng-model="p.proposed_discontinuation" ng-change="SaveProduct(p)" /> {{p.cprod_code1}} <span ng-if="tab.user_id == null">({{p.brand_code}})</span></div>
+                                            <div><input type="button" value="Close" ng-click="OpenClosePopup(r, false)" /></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="datatable_header" style="font-weight:bold">
+                                    <td colspan="2">TOTAL</td>
+                                    <td class="number" ng-repeat="t in value.OptionsTotalsPrev" ng-show="HasOptions(tab.user_id)">{{t.TotalList}}</td>
+                                    <td class="number">{{value.SumPrev}}</td>
+                                    <td class="number" ng-repeat="t in value.OptionsTotalsLast" ng-show="HasOptions(tab.user_id)">{{t.TotalList}}</td>
+                                    <td class="number">{{value.SumLast}}</td>
+                                    <td class="number">{{value.SumPrev + value.SumLast}}</td>
+                                    <td class="number">{{value.SumDisplayQty}}</td>
+                                    <td class="number"></td>
+                                    <td></td>
+                                </tr>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+
+            </uib-tab>
+            
+            
+        </uib-tabset>
+</div>
+</div>
+
+@section head
+{
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    <style>
+         [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+          display: none !important;
+        }
+        .number {text-align: right;}
+        .bold {
+            font-weight: bold;
+            background-color: #E0E0E0;
+        }
+        .summary_current_status_head {
+            background-color: #ffd800;
+            text-align: center;
+        }
+        .summary_removals_head {
+            background-color: #ed8135;
+            text-align: center;
+        }
+        .summary_adjusted_status_head {
+            background-color: #abe054;
+            text-align: center;
+        }
+        .summary_head {
+            background-color: #E0E0E0;
+        }
+        .summary_total {
+            background-color: black;
+            color: white;
+            font-weight: bold;
+        }
+        .summary_brandname {
+            background-color: #808080;
+            font-weight: bold;
+        }
+        .datatable {
+			width: 95%;
+			font-family:Arial, Helvetica, sans-serif; 
+			font-size:11px; 
+			border-style:solid; 
+			border:1px; 
+			border-color:#000;
+	        border-collapse: collapse;
+		}
+        .even
+        {
+            background-color: #E0E0E0;
+        }
+        .datatable td {
+	        padding: 5px;
+        }
+        .datatable tr {
+	        border-right: 1px solid black;
+            border-left: 1px solid black;
+        }
+		.datatable_header {
+			height: 25px;
+			text-align: left;
+			background-color: #B9C9FE;
+            font-weight: bold;
+		}
+        .datatable_header td
+        {
+            border: 1px solid black;
+        }
+
+    </style>
+}
+
+@section scripts2
+{
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    <script src="~/Scripts/logToServer.js"></script>
+<script>
+    var model = @Html.Raw(WebUtilities.JsonSerialize(Model));
+    </script>
+       
+    <script src="~/AngularApps/ProductReview/js/app.js"></script>
+<script src="~/AngularApps/ProductReview/js/controllers.js"></script>
+}
+

@@ -1,0 +1,61 @@
+﻿@model List<Dealer>
+
+@{
+    ViewBag.Title = "Dealers at pending status";
+    Layout = null;
+}
+<html>
+<head>
+    <title>Dealers at pending status</title>
+    <style>
+        body {
+            font-family: arial;
+            font-size: 11px;
+        }
+        table {
+            font-size: 11px;
+        }
+         thead tr {
+             background-color: #B0B0B0;
+             font-weight: bold;
+         }
+        tbody tr:nth-child(even) {
+            background-color: #E0E0E0;
+        }
+    </style>
+</head>
+<body>
+<h2>Dealers at pending status</h2>
+<p>
+    Below list all dealers that have been created and subsequently updated by FE office but where the dealer has not clicked to activate the dealer record
+</p>
+    <table>
+        <thead>
+            <tr>
+                <td>Dealer name</td>
+                <td>Postcode</td>
+                <td>Id</td>
+                <td>Distributors</td>
+                <td>Data last updated</td>
+                <td>No. of photos</td>
+                <td>No. of displays</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var d in Model.OrderBy(de=>de.user_name))
+            {
+                <tr>
+                    <td>@d.user_name</td>
+                    <td>@d.postcode</td>
+                    <td>@d.user_id</td>
+                    <td>@(d.Distributors != null ? string.Join(",", d.Distributors.Select(dist => dist.customer_code)) : "")</td>
+                    <td>@d.user_modified.ToString("d")</td>
+                    <td>@d.Dealer_Images.Count</td>
+                    <td>@d.AllDisplays.Count</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</body>
+</html>

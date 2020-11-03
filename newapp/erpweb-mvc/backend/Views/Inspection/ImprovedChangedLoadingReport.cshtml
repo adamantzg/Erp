@@ -1,0 +1,273 @@
+﻿@{
+    ViewBag.Title = "ImprovedChangedLoadingReport";
+    Layout = null;
+}
+@using company.Common
+@model ImprovedChangedLoadingReportModel
+
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>N report</title>
+    <style>
+        body
+        {
+	
+	        width: 100%;
+	         min-width: 1050px;
+	        margin: 10px auto;
+	        padding: 0;
+	        background: #fff;
+	        /*background-image:url(/images/wild_oliva.png);*/
+	        /*-background-repeat: no-repeat;
+	        background-attachment: fixed;
+	        background-position: center top;*/
+	        font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        img
+        {
+	        border: 0px;
+        }
+
+
+
+
+        .container
+        {
+	        width: 1000px;
+	        min-height:200px;
+	        /*min-height: 450px;*/
+	        margin: 0px auto;
+	        /*font-family: Tahoma, Geneva, sans-serif;*/
+	        /*background: #fff;*/
+           /* overflow: hidden;*/
+	        /*border: 1px solid #333;*/
+	        background: #fff;
+	        position: relative;
+	        overflow:auto;
+	        font-size: 12px;
+	
+        }
+
+        .title {
+		        font-size: 14px;
+        }
+
+        .bold {
+	        font-weight: bold;
+        }
+
+        .doc_name {
+		        font-size: 22px;
+		        padding: 10px 0 10px 0;
+		        }
+		
+        .row_name {
+		        font-size: 18px;
+		        padding: 10px 0 10px 0;
+		        }
+
+        .backgr1 {
+		        background: #e5e5e5;
+        }
+
+        .backgr2 {
+		        background:#f4f4f4;
+        }
+
+
+        .prod_img img {
+		        max-width: 320px;
+        }
+        .imagebox {
+             width: 300px;
+            float: left;
+            padding: 2px;
+        }
+        .imagebox img {
+            width: 98%;
+        }
+        
+
+    </style>
+    
+</head>
+@{
+    var insp = Model.Inspection;
+}
+<body>
+    <div class="container">
+        <table width="100%" border="0" cellspacing="2" cellpadding="3">
+            <tr>
+                <td colspan="6"><img style="width: 250px;" src="/Images/asaq_logo.jpg"/></td>
+
+            </tr>
+            <tr>
+                <td colspan="6" align="center" class="doc_name">Improved / Changed Product Loading Notification</td>
+
+            </tr>
+            <tr>
+                <td class="backgr1"><span class="title bold">PO Numbers</span></td>
+                <td class="backgr1">@(string.Join(",", insp.CustPos.OrderBy(s => s)))</td>
+                <td class="backgr2"><span class="title bold">Date of Inspection</span></td>
+                <td class="backgr2">
+                    @if (insp.insp_start != null)
+                    {
+                        @insp.insp_start.ToString("d")@(insp.insp_days > 1 ? "-" + insp.insp_start.Value.AddDays(Convert.ToDouble(insp.insp_days)) : "")
+                    }
+
+                </td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td class="backgr1"><span class="title bold">QC Inspectors</span></td>
+                <td class="backgr1">@string.Join("/", insp.Controllers.Select(c => c.Controller.user_initials))</td>
+                <td class="backgr2"><span class="title bold">Report Number</span></td>
+                <td class="backgr2">@Model.insp_document</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td class="backgr1">Container No:</td>
+                <td class="backgr1">&nbsp;</td>
+                <td class="backgr2"><span class="title bold">ETD</span></td>
+                <td class="backgr2">@(Model.InspectionLinesNotified != null && Model.InspectionLinesNotified.Count > 0 ? Model.InspectionLinesNotified.Max(l => l.etd).ToString("d") : "")</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td class="backgr1">&nbsp;</td>
+                <td class="backgr1">&nbsp;</td>
+                <td class="backgr2"><span class="title bold">ETA</span></td>
+                <td class="backgr2">@(Model.InspectionLinesNotified != null && Model.InspectionLinesNotified.Count > 0 ? Model.InspectionLinesNotified.Max(l => l.eta).ToString("d") : "")</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr class="title bold">
+                <td>Factory</td>
+                <td>Factory Product Code</td>
+                <td>Client Product Code</td>
+                <td>Product Description</td>
+                <td>Qty of Products</td>
+                <td>Container number</td>
+            </tr>
+            @{
+                var counter = 0;
+            }
+            @if (Model.InspectionLinesNotified != null)
+            {
+                foreach (var d in Model.InspectionLinesNotified)
+                {
+                    <tr class="backgr@((counter++)%2 + 1)">
+                        <td>@d.insp_factory</td>
+                        <td>@d.insp_mfg_code</td>
+                        <td>@d.insp_cust_code</td>
+                        <td>@d.insp_description</td>
+                        <td align="center">@d.insp_qty</td>
+                        <td>@d.insp_container_number</td>
+                    </tr>
+                }
+            }
+
+        </table>
+
+        @if (Model.InspectionNotifiedSummary != null)
+        {
+            @Html.Partial("_ImprovedChangedImagesPartial", new ImprovedChangedImagesPartialModel { Caption = "Improved / Changed Details:",SubTitle = Model.InspectionNotifiedSummary.insp_summary_comments,Images = Model.InspectionNotifiedSummaryImages.Where(im=>im.insp_type == "NR2").Select(im=>im.insp_image).ToList(),ShowCaptions = true})    
+            
+            @Html.Partial("_ImprovedChangedImagesPartial", new ImprovedChangedImagesPartialModel { Caption = "Marking on box for improved / changed product:", SubTitle = Model.InspectionNotifiedSummary.insp_summary_changedetails, Images = Model.InspectionNotifiedSummaryImages.Where(im => im.insp_type == "NR3").Select(im=>im.insp_image).ToList(),ShowCaptions = true})
+            
+            @Html.Partial("_ImprovedChangedImagesPartial", new ImprovedChangedImagesPartialModel { Caption = "Loading of improved / changed product:", SubTitle = Model.InspectionNotifiedSummary.insp_summary_reason, Images = Model.InspectionNotifiedSummaryImages.Where(im => im.insp_type == "NR4").Select(im=>im.insp_image).ToList(),ShowCaptions = true})
+            
+        }
+        @{
+            var linesToShow = Model.InspectionLinesNotified.IfNotNull(l => l.Where(ln => ln.insp_line_show == 1).ToList());
+        }
+        @if (linesToShow != null && linesToShow.Count > 0)
+        {
+            <table class="prod_img" width="100%" border="0" cellspacing="2" cellpadding="2">
+                <tr>
+                    <td colspan="3" class="row_name">Improved / Changed Details:</td>
+
+                </tr>
+            </table>
+            foreach (var line in linesToShow) {
+                if (line.insp_line_type != null) {
+                    var comment = line.insp_comments;
+                    if (string.IsNullOrEmpty(comment)) {
+                        var changenotices = Model.ChangeNotices[line.insp_line_unique];
+                        if (changenotices != null && changenotices.Count > 0) {
+                            comment = changenotices[0].cn_details;
+                        }
+                    }
+                    <table class="prod_img" width="100%" border="0" cellspacing="2" cellpadding="2">
+                        <tr><td colspan="3" style="font-weight: bold">@line.insp_cust_code</td></tr>
+                        <tr><td colspan="3" style="font-weight: bold">@comment</td></tr>
+                    </table>
+
+                    @Html.Partial("_ImprovedChangedImagesPartial", new ImprovedChangedImagesPartialModel { Images = Model.InspectionImages.Where(im => im.insp_type == "NR2").Select(im => im.insp_image).ToList() })
+                }
+
+            }
+
+            //NR3
+            <table class="prod_img" width="100%" border="0" cellspacing="2" cellpadding="2">
+                <tr>
+                    <td colspan="3" class="row_name">Marking on box for improved / changed product:</td>
+
+                </tr>
+            </table>
+            foreach (var line in linesToShow) {
+                if (line.insp_line_type != null) {
+                    
+                    <table class="prod_img" width="100%" border="0" cellspacing="2" cellpadding="2">
+                        <tr><td colspan="3" style="font-weight: bold">@line.insp_cust_code</td></tr>
+                        <tr><td colspan="3" style="font-weight: bold">@line.changed_detail</td></tr>
+                    </table>
+
+                    @Html.Partial("_ImprovedChangedImagesPartial", new ImprovedChangedImagesPartialModel { Images = Model.InspectionImages.Where(im => im.insp_type == "NR3").Select(im => im.insp_image).ToList() })
+                }
+
+            }
+
+            //NR4
+            <table class="prod_img" width="100%" border="0" cellspacing="2" cellpadding="2">
+                <tr>
+                    <td colspan="3" class="row_name">Loading of improved / changed product:</td>
+
+                </tr>
+            </table>
+            foreach (var line in linesToShow) {
+                if (line.insp_line_type != null) {
+
+                    <table class="prod_img" width="100%" border="0" cellspacing="2" cellpadding="2">
+                        <tr><td colspan="3" style="font-weight: bold">@line.insp_cust_code</td></tr>
+                        <tr><td colspan="3" style="font-weight: bold">@line.insp_reason</td></tr>
+                    </table>
+
+                    @Html.Partial("_ImprovedChangedImagesPartial", new ImprovedChangedImagesPartialModel { Images = Model.InspectionImages.Where(im => im.insp_type == "NR4").Select(im => im.insp_image).ToList() })
+                }
+
+            }
+        }
+
+
+</div>
+
+</body>
+</html>
+
+
+

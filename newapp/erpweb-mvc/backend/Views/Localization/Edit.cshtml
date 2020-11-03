@@ -1,0 +1,361 @@
+﻿@model LocalizationEditModel
+
+<h4>@ViewBag.recordTitle</h4>
+@using (Html.BeginForm("Edit", "Localization", new { what = ViewBag.What, language = ViewBag.lang, ViewBag.brand_id }, FormMethod.Post))
+{
+	<input type="submit" value="Update"/> @Html.Partial("_LinkButtonPartial", new LinkButtonModel { Text = "Back", NavigateUrl = @Url.Action("Index", new { what = ViewBag.What, ViewBag.lang, ViewBag.brand_id, ViewBag.id }) })
+
+    
+    <table class="table_main">
+        @{ string what = ViewBag.What;}
+        @switch (what)
+        {
+            case "cat":
+                <tr class="table_main_td">
+                    <td><strong>image</strong></td>
+                    <td colspan="2">
+                        <img src="@string.Format("{0}web/{1}/category/{2}",Settings.Default.imagesRootFolder,ViewBag.brand_code,System.IO.Path.GetFileName(Model.Category.brand_cat_image))"/>
+                    </td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>Web name</strong></td>
+                    <td style="width:40%">@Model.Category.web_description</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocCategory.web_description)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>Description</strong></td>
+                    <td>@Model.Category.brand_cat_desc</td>
+                    <td>@Html.TextAreaFor(m => m.LocCategory.brand_cat_desc)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>Why so good - title</strong></td>
+                    <td>@Html.Raw(Model.Category.why_so_good_title)</td>
+                    <td>@Html.TextBoxFor(m => m.LocCategory.why_so_good_title)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>Why so good - text</strong></td>
+                    <td>@Html.Raw(Model.Category.why_so_good)</td>
+                    <td style="vertical-align: top">@Html.TextAreaFor(m => m.LocCategory.why_so_good, new { @class = "mceEditor_long" }) @Html.HiddenFor(m => m.LocCategory.brand_cat_id) @Html.HiddenFor(m => m.LocCategory.lang) </td>
+                </tr>
+                break;
+            case "subcat":
+                <tr class="table_main_td">
+                    <td><strong>image</strong></td>
+                    <td colspan="2">
+                        <img src="@string.Format("{0}web/{1}/{2}",Settings.Default.imagesRootFolder,ViewBag.brand_code,System.IO.Path.GetFileName(Model.Subcategory.sub_image1))"/>
+                    </td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>name</strong></td>
+                    <td style="width:40%">@Model.Subcategory.brand_sub_desc</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocSubcategory.brand_sub_desc)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>description</strong></td>
+                    <td>@Model.Subcategory.sub_description</td>
+                    <td>@Html.TextAreaFor(m => m.LocSubcategory.sub_description)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>details</strong></td>
+                    <td>@Html.Raw(Model.Subcategory.sub_details)</td>
+                    <td>@Html.TextAreaFor(m => m.LocSubcategory.sub_details, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>pricing note</strong></td>
+                    <td style="width:40%">@Model.Subcategory.pricing_note</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocSubcategory.pricing_note)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>group</strong></td>
+                    <td style="width:40%">@Model.Subcategory.group</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocSubcategory.group)@Html.HiddenFor(m=>m.LocSubcategory.brand_sub_id)@Html.HiddenFor(m=>m.LocSubcategory.lang)</td>
+                </tr>
+                break;
+            case "subsubcat":
+                <tr class="table_main_td">
+                    <td><strong>image</strong></td>
+                    <td colspan="2">
+                        <img src="@string.Format("{0}web/{1}/{2}",Settings.Default.imagesRootFolder,ViewBag.brand_code,System.IO.Path.GetFileName(Model.SubsubCategory.image1))"/>
+                    </td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>name</strong></td>
+                    <td style="width:40%">@Model.SubsubCategory.brand_sub_sub_desc</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocSubsubCategory.brand_sub_sub_desc)@Html.HiddenFor(m=>m.LocSubsubCategory.brand_sub_sub_id)@Html.HiddenFor(m=>m.LocSubsubCategory.lang)</td>
+                </tr>
+                break;
+            case "group":
+                <tr class="table_main_td">
+                    <td><strong>name</strong></td>
+                    <td style="width:40%">@Model.Brandgroup.group_desc</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocBrandGroup.group_desc)@Html.HiddenFor(m=>m.LocBrandGroup.brand_group)@Html.HiddenFor(m=>m.LocBrandGroup.lang)</td>
+                </tr>
+                break;
+            case "prod":
+                <tr class="table_main_td">
+                    <td><strong>image</strong></td>
+                    <td colspan="2">
+                        <img src="@string.Format("{0}web/{1}/{2}",Settings.Default.imagesRootFolder,ViewBag.brand_code,System.IO.Path.GetFileName(Model.Product.web_image1))"/>
+                    </td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>name</strong></td>
+                    <td style="width:40%">@Model.Product.web_name</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.web_name)@Html.HiddenFor(m=>m.LocProduct.web_unique)@Html.HiddenFor(m=>m.LocProduct.lang)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>description</strong></td>
+                    <td>@Html.Raw(Model.Product.web_description)</td>
+                    <td>@Html.TextAreaFor(m => m.LocProduct.web_description)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>picture notes</strong></td>
+                    <td style="width:40%">@Model.Product.web_pic_notes</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.web_pic_notes)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>details</strong></td>
+                    <td style="width:40%">@Model.Product.web_details</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.web_details)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech finishes</strong></td>
+                    <td style="width:40%">@Model.Product.tech_finishes</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.tech_finishes)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech product type</strong></td>
+                    <td style="width:40%">@Model.Product.tech_product_type</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.tech_product_type)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech construction</strong></td>
+                    <td style="width:40%">@Model.Product.tech_construction</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.tech_construction)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech material</strong></td>
+                    <td style="width:40%">@Model.Product.tech_material</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.tech_material)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>basin size</strong></td>
+                    <td style="width:40%">@Model.Product.tech_basin_size</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.tech_basin_size)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech overall height</strong></td>
+                    <td style="width:40%">@Model.Product.tech_overall_height</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.tech_overall_height)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech tap holes</strong></td>
+                    <td style="width:40%">@Model.Product.tech_tap_holes</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.tech_tap_holes)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech fixing</strong></td>
+                    <td style="width:40%">@Model.Product.tech_fixing</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.tech_fixing)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech compliance 1</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_compliance1)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_compliance1, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech compliance 2</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_compliance2)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_compliance2, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech compliance 3</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_compliance3)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_compliance3, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech compliance 4</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_compliance4)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_compliance4, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech compliance 5</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_compliance5)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_compliance5, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech additional 1</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_additional1)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_additional1, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech additional 2</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_additional2)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_additional2, new {@class = "mceEditor"})</td>
+                </tr>                
+                <tr class="table_main_td">
+                    <td><strong>tech additional 3</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_additional3)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_additional3, new {@class = "mceEditor"})</td>
+                </tr>        
+                <tr class="table_main_td">
+                    <td><strong>tech additional 4</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_additional4)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_additional4, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech additional 5</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_additional5)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_additional5, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech additional 6</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_additional6)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_additional6, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech additional 7</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_additional7)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_additional7, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech additional 8</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_additional8)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_additional8, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech additional 9</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_additional9)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_additional9, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech additional 10</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_additional10)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_additional10, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>tech additional 11</strong></td>
+                    <td style="width:40%">@Html.Raw(Model.Product.tech_additional11)</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.tech_additional11, new {@class = "mceEditor"})</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>bar 01</strong></td>
+                    <td style="width:40%">@Model.Product.bar01</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.bar01)</td>
+                </tr>                                                                		
+                <tr class="table_main_td">
+                    <td><strong>bar 02</strong></td>
+                    <td style="width:40%">@Model.Product.bar02</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.bar02)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>bar 05</strong></td>
+                    <td style="width:40%">@Model.Product.bar05</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.bar05)</td>
+                </tr>        
+                <tr class="table_main_td">
+                    <td><strong>bar 10</strong></td>
+                    <td style="width:40%">@Model.Product.bar10</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.bar10)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>bar 20</strong></td>
+                    <td style="width:40%">@Model.Product.bar20</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.bar20)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>bar 30</strong></td>
+                    <td style="width:40%">@Model.Product.bar30</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.bar30)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>combination comments</strong></td>
+                    <td style="width:40%">@Model.Product.combination_comments</td>
+                    <td style="width:50%">@Html.TextAreaFor(m => m.LocProduct.combination_comments)</td>
+                </tr>                                
+                <tr class="table_main_td">
+                    <td><strong>water volume note</strong></td>
+                    <td style="width:40%">@Model.Product.tech_water_volume_note</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.tech_water_volume_note)</td>
+                </tr>
+                <tr class="table_main_td">
+                    <td><strong>option_name</strong></td>
+                    <td style="width:40%">@Model.Product.option_name</td>
+                    <td style="width:50%">@Html.TextBoxFor(m => m.LocProduct.option_name)</td>
+                </tr>        		
+                <tr class="table_main_td">
+                    <td><strong>components</strong></td>
+                    <td colspan="2">
+                        <table style="width: 100%">
+                            @foreach (var comp in Model.Product.Components.GroupBy(c=> new {c.cprod_id, c.cprod_name}))
+                            {
+                                var locComponent = Model.LocComponents.FirstOrDefault(c => c.cprod_id == comp.Key.cprod_id);
+                                <tr class="table_main_td">
+                                    <td style="width: 40%">@comp.Key.cprod_name</td>
+                                    <td style="width:50%">@Html.TextBox(string.Format("component_{0}", comp.Key.cprod_id),locComponent.cprod_name)</td>
+                                </tr>
+                            }
+                        </table>
+                    </td>
+                </tr>
+                break;
+        }
+    </table>
+     
+}
+
+@section head
+{
+	@*<style>
+		.mceEditor > table {
+			height: auto !important;
+		}
+		.mceEditor td.mceIframeContainer iframe {
+			min-height: 650px !important;
+		}
+	</style>*@
+	<style>
+		.table_main_td img {
+			max-height: 400px !important;
+		}
+	</style>
+}
+
+@section scripts
+{
+	<script src="/Scripts/tinymce/tiny_mce.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			tinyMCE.init({
+				mode: "specific_textareas",
+				editor_selector: "mceEditor_long",
+				encoding: "xml",
+				width: "98 %",
+				height: "650",
+				plugins: "tabfocus",
+				tab_focus: ":prev,:next",
+				theme_advanced_buttons3: "",
+				theme_advanced_buttons1_add: "fontselect,fontsizeselect",
+				theme_advanced_buttons2_add: "cut, copy, paste"
+			});
+		    
+			tinyMCE.init({
+			    mode: "specific_textareas",
+			    editor_selector: "mceEditor",
+			    encoding: "xml",
+			    width: "98 %",
+			    plugins: "tabfocus",
+			    tab_focus: ":prev,:next",
+			    theme_advanced_buttons3: "",
+			    theme_advanced_buttons1_add: "fontselect,fontsizeselect",
+			    theme_advanced_buttons2_add: "cut, copy, paste"
+			});
+		});
+	</script>
+}
+
+
+@section title
+{
+	@ViewBag.Title
+}

@@ -1,0 +1,148 @@
+﻿@using company.Common
+@model LoginHistoryModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Login history</title>
+        <style>
+            .number {text-align: right;}
+            table td {border: 1px solid black;}
+        </style>
+    </head>
+    <body style="font-size:12px;font-family: arial">
+        
+        <div style="font-weight: bold; font-size: 14px">
+            Summary
+        </div>
+        <table style="font-size:12px;font-family: arial;border: 1px solid black;border-collapse: collapse;padding: 5px">
+            <tr style="font-weight: bold">
+                <td style="width: 250px">@(Model.ShowUsers ? "User" : "Company")</td>
+                <td style="width: 100px; text-align: right">No. of logins</td>
+
+                @if (Model.ShowAllActiveUsers)
+                {
+                    <td style="width: 150px; text-align: center">Last login date</td>
+                }
+
+                @{
+                    var groupedPages = Model.HistoryPageCounts.GroupBy(p => p.Description).OrderByDescending(g => g.Sum(p=>p.Count)).ToList();
+                }
+                @if (Model.ShowPages)
+                {
+                    for (int i = 0; i < Model.PagesToShow; i++)
+                    {
+                        <td class="number">@if (groupedPages.Count > i)
+                            {
+                                @groupedPages[i].Key
+                            }</td>
+                    }
+                    <td class="number">Others</td>
+                }
+            </tr>
+            @{
+                var counter = 0;
+                var topPages = groupedPages.Take(Model.PagesToShow).Select(g => g.Key).ToList();
+            }
+            @if (!Model.ExpandUsers) {
+                foreach (var g in Model.HistorySimple.GroupBy(h => Model.ShowUsers ? h.login_username : h.Company.user_id.ToString()).OrderByDescending(g => g.Count())) {
+                    <tr style="border: 1px solid black@(counter++ % 2 == 0 ? ";background-color: #E0E0E0" : "")">
+                        <td>@(Model.ShowUsers ? g.Key : g.First().Company.user_name)</td>
+                        <td style="text-align: right">@g.Count()</td>
+
+
+                        @if (Model.ShowPages) {
+                        for (int i = 0; i < Model.PagesToShow; i++) {
+                                <td class="number">
+                                    @if (groupedPages.Count > i) {
+                                        @Model.HistoryPageCounts.Where(p => p.Username == g.Key && p.Description == groupedPages[i].Key).Sum(p => p.Count)
+                                    }
+                                </td>
+                            }
+                            <td class="number">@Model.HistoryPageCounts.Where(p => p.Username == g.Key && !topPages.Contains(p.Description)).Sum(p => p.Count)</td>
+                        }
+                    </tr>
+                }
+            }
+            else {
+                foreach (var g in Model.HistorySimple.GroupBy(h => h.Company.user_id.ToString()).OrderByDescending(g => g.Count())) {
+                    <tr style="border: 1px solid black;background-color: #E0E0E0;font-weight: bold">
+                        <td>@(g.First().Company.user_name)</td>
+                        <td style="text-align: right">@g.Count()</td>                        
+
+                        @if (Model.ShowAllActiveUsers)
+                        {
+                            <td>&nbsp;</td>
+                        }
+
+                    </tr>
+                    foreach(var ug in g.GroupBy(hi=>hi.login_username).OrderByDescending(ug=>ug.Count())) {
+                        <tr style="border: 1px solid black">
+                            <td> - @(ug.First().User != null ? ug.First().User?.userwelcome : ug.First().login_username)</td>
+                            <td style="text-align:right">@ug.Count()</td>
+                            @if (Model.ShowAllActiveUsers)
+                            {
+                                <td style="text-align:center;">@ug.Max(t => t.login_date)</td>
+                            }
+                        </tr>
+                    }
+
+                    if (Model.ShowAllActiveUsers)
+                    {
+                        var usersWithLogin = Model.HistorySimple.Where(m => m.user_id == Convert.ToInt32(g.Key)).Select(l => l.User?.userid).ToList();
+                        var usersOfCompany = Model.AllActiveUsers.Where(m => m.Company?.user_id == Convert.ToInt32(g.Key)).ToList();
+                        var usersWithNoLogin = usersOfCompany.Where(m => !usersWithLogin.Contains(m.userid)).ToList();
+
+                        foreach (var nlogin in usersWithNoLogin.GroupBy(u => u.userwelcome))
+                        {
+                            var lastLoginDate = Model.AllActiveUsersLoginHistory.Where(l => l.login_username == nlogin.First().username).Max(md => md.login_date);
+
+                            <tr style="border: 1px solid black">
+                                <td> - @(nlogin.First().userwelcome)</td>
+                                <td style="text-align:right">0</td>
+                                <td style="text-align:center;">@(lastLoginDate != null ? lastLoginDate.ToString("dd/MM/yyyy hh:mm:ss") : "")</td>
+                            </tr>
+                        }
+                            
+                    }
+                }
+            }
+
+        </table>
+        <br/>
+        @*<div style="font-weight: bold; font-size: 14px">
+            Login history for period: @Model.dateFrom.ToString("d") - @Model.dateTo.ToString("d")
+        </div>
+        
+        <table style="font-size:12px;font-family: arial;border: 1px solid black;border-collapse: collapse;padding: 5px">
+            <tr style="font-weight: bold">
+                <td style="width: 150px">Date/time</td>
+                <td style="width: 100px">User login</td>
+                <td style="width: 100px">User name</td>
+                <td style="width: 150px">Company</td>
+                <td style="width: 150px">IP address</td>
+
+
+            </tr>
+            @{ counter = 0;}
+            @foreach (var g in Model.HistorySimple.OrderBy(g => g.login_date))
+            {
+                <tr style="border: 1px solid black@(counter++ % 2 == 0 ? ";background-color: #E0E0E0" : "")">
+                    <td>@g.login_date.ToString()</td>
+                    <td>@g.login_username</td>
+                    <td>@g.User.IfNotNull(u => u.userwelcome)</td>
+                    <td>@g.Company.user_name</td>
+                    <td>@g.ip_address</td>
+                </tr>
+            }
+        </table>*@
+        
+    </body>
+
+
+</html>

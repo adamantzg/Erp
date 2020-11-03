@@ -1,0 +1,123 @@
+﻿@model InspectionExportModel
+
+@{
+    Layout = null;
+}
+<html>
+    <head>
+        <title>Export inspections</title>
+        <style>
+            body { font-family: arial;font-size: 10px}
+            .leftheader {background-color: lightcyan}
+            .rightheader {background-color: #888}
+            .inspection {background-color: lightyellow}    
+            .loading {background-color: violet}
+            .production {background-color: darkgray}
+            table {font-family: arial;font-size: 10px;border-collapse: collapse}
+            td { border-collapse: collapse}
+        </style>
+    </head>
+<body>
+    <table border="1">
+        <tr>
+            <td rowspan="2" class="leftheader">Factory</td>
+            <td rowspan="2" class="leftheader">Customer</td>
+            <td rowspan="2" class="leftheader">PO number</td>
+            <td rowspan="2" class="leftheader">Models</td>
+            <td rowspan="2" class="leftheader">Quantity</td>
+            <td rowspan="2" class="leftheader">New </td>
+            <td rowspan="2" class="leftheader">Change</td>
+            <td rowspan="2" class="leftheader">ETD</td>
+            <td rowspan="2" class="leftheader">Container</td>
+            @for(int i=0;i<=(Model.To-Model.From).TotalDays;i++)
+            {
+                <td class="rightheader">@Model.From.AddDays(i).ToString("dddd")</td>
+            }
+            <td rowspan="2" class="leftheader">PO remark</td>
+            <td rowspan="2" class="leftheader">product remark</td>
+        </tr>   
+        <tr>
+            @for(int i=0;i<=(Model.To-Model.From).TotalDays;i++)
+            {
+                <td class="rightheader">@Model.From.AddDays(i).ToString("d")</td>
+            }
+        </tr>
+        @foreach (var insp in Model.Inspections.Select(i=>new {custpo = string.Join(",",i.CustPos),i.factory_code,i.customer_code }).Distinct())
+        {
+            var custpos = insp.custpo.Split(',').ToList();
+            var lines = Model.Lines.Where(l => custpos.Contains(l.Header.custpo)).ToList();
+            var numNew = 0;
+            var loading = Model.LoadingInspections.FirstOrDefault(l => l.factory_code == insp.factory_code && l.custpo == insp.custpo && l.customer_code == insp.customer_code);
+            foreach (var line in lines)
+            {
+                if (Model.ProductPreviousShipments[line.cprod_id.Value] == 0)
+                {
+                    numNew++;
+                }
+            }
+            <tr>
+                <td>@insp.factory_code</td>
+                <td>@insp.customer_code</td>
+                <td>@Html.Raw(string.Join("<br>",custpos))</td>
+        
+                <td>@(lines.Count)</td>
+                <td>@lines.Sum(l=>l.orderqty)</td>
+                <td>@numNew</td>
+                <td>@(Model.InspectionChangedProducts[insp.custpo + ","+ insp.factory_code])</td>
+                <td>@lines.Max(l=>l.Header.po_req_etd).ToString("d")</td>
+                <td>@{
+                        if (loading != null)
+                        {
+                            var text = new List<string>();
+                            if (loading.gp40 > 0)
+                            {
+                                text.Add(string.Format("{0}*40GP",loading.gp40));
+                            }
+                            if (loading.gp20 > 0)
+                            {
+                                text.Add(string.Format("{0}*20GP", loading.gp20));
+                            }
+                            if (loading.hc40 > 0)
+                            {
+                                text.Add(string.Format("{0}*40HC", loading.hc40));
+                            }
+                            if (loading.lcl > 0)
+                            {
+                                text.Add(string.Format("{0}*LCL", loading.lcl));
+                            }
+                            @(string.Join(",",text))
+                        }
+                    }</td>
+                @for (int i = 0; i <= (Model.To - Model.From).TotalDays; i++)
+                                {
+                    var day = Model.From.AddDays(i);
+                    var inspection = Model.Inspections.FirstOrDefault(ins => ins.insp_start.Date() == day && ins.customer_code == insp.customer_code  && string.Join(",",ins.CustPos) == insp.custpo);
+                    if (inspection != null)
+                    {
+                        var text = "inspection";
+                        switch(inspection.insp_type) {
+                            case "LO":
+                                text = "loading";
+                                break;
+                            case "PR":
+                                text = "production";
+                             break;
+                        }
+                        <td class="@text">@text</td>
+                    }
+                    else
+                    {
+                        <td></td>
+                    }
+                }
+                <td>
+                    @(Html.Raw(string.Join("<br>",lines.Where(l=>!string.IsNullOrEmpty(l.POHeader.special_comments)).Select(l=>new {l.Header.custpo, l.POHeader.special_comments}).Distinct().Select(r=>string.Format("PO: {0}--Notes: {1}",r.custpo,r.special_comments)))))
+                </td>
+                <td>
+                    @(Html.Raw(string.Join("<br>",lines.Where(l=>!string.IsNullOrEmpty(l.Cust_Product.MastProduct.special_comments)).Select(l=>new {l.Cust_Product.cprod_code1,l.Cust_Product.MastProduct.factory_ref,l.Cust_Product.MastProduct.special_comments}).Distinct().Select(r=>string.Format("MFG code: {0}--Cust code: {1}--Notes: {2}",r.factory_ref,r.cprod_code1,r.special_comments)))))
+                </td>
+            </tr>
+        }
+    </table>
+</body>
+</html>

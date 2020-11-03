@@ -1,0 +1,72 @@
+﻿@model dynamic
+
+@{
+    Layout = null;
+    var date = (DateTime)ViewBag.Date;
+    var rows = (List<tp2_sales_export_all>)ViewBag.Rows;
+}
+
+<html>
+<head>
+    <style>
+        table {
+            width: 900px;
+            border-collapse: collapse;
+            font-family: arial;
+            font-size: 10px;
+        }
+
+        thead {
+            font-weight: bold;
+        }
+
+        td {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h2>Sales export report for @date.ToString("MMMM yyyy")</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <td style="width: 48pt">Brand</td>
+                <td style="width: 68pt">Product category</td>
+                <td style="width: 64pt">Client</td>
+                <td style="width: 62pt">Code</td>
+                <td style="width: 305pt">Description</td>
+                <td style="width: 69pt">PO#</td>
+                <td style="width: 22pt">Qty</td>
+                <td style="width: 65pt">GPB value</td>
+                <td style="width: 71pt">ETA +1 WEEK</td>
+                <td style="width: 56pt">USD cost</td>
+                <td style="width: 56pt">GBP cost</td>
+                <td style="width: 56pt">EUR cost</td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in rows)
+            {
+                
+                <tr>
+                    <td>@r.Brand</td>
+                    <td>@r.Product_category</td>
+                    <td>@r.Client</td>
+                    <td>@r.Code</td>
+                    <td>@r.Description</td>
+                    <td>@r.PO</td>
+                    <td>@r.Qty</td>
+                    <td style="text-align: right">@r.GBP_value</td>
+                    <td>@r.ETA_1_week.ToString("dd.MM.yyyy")</td>
+                    <td style="text-align: right">@r.USD_cost</td>
+                    <td style="text-align: right">@r.GBP_cost</td>
+                    <td style="text-align: right">@r.EUR_cost</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+</body>
+</html>

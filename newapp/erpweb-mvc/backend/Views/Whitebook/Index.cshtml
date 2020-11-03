@@ -1,0 +1,26 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Whitebook</h2>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3>
+            Export..
+        </h3>
+    </div>
+    <div class="panel-body">
+            <div class="col-sm-4" style="float:left;margin-left:10px">
+                <a href="@Url.Action("Export",new { type="templates"})" class="btn btn-default btn-sm"> Whitebook Templates</a>
+            </div>
+        <div class="col-sm-4" style="float:left;margin-left:10px;margin-bottom:80px">
+            <a href="@Url.Action("Export",new {type="components" })" class="btn btn-default btn-sm"> Components </a>
+        </div>
+    </div>
+</div>
+@section head{
+
+<link href="~/Content/bootstrap.css" rel="stylesheet" />
+    }

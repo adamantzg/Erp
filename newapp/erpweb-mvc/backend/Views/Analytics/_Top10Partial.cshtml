@@ -1,0 +1,102 @@
+﻿@model AnalyticsModel
+
+
+
+                    @{
+                        var row = 0;
+                        var divOrder = 0;
+                    }
+<div style="width:900px">
+            
+    <div class="top10box" @(Html.Raw(divOrder++ % 2 == 0 ? "style=\"clear:left\"" : ""))>
+        <div style="font-weight: bold">Clearwater (top selling baths)</div>
+        <table class="top10table">
+            <tr class="clienttable_header">
+                <td style="width: 90px;">Product code</td>
+                <td >Product name</td>
+                <td style="width: 90px; text-align: right" >Units</td>
+            </tr>
+            @{ row = 0;}
+            @foreach (var p in Model.Top10By201)
+            {
+                <tr style="background-color: @((row++)%2 == 0 ? "#FFFFFF" : "#F4F4F4")">
+                    <td>@p.cprod_code</td>    
+                    <td>@p.cprod_name</td>
+                    <td style="text-align: right">@p.numOfUnits.ToString("N0")</td>
+                </tr>
+            }
+        </table>
+                                
+    </div>
+
+    @foreach (var b in Model.Brands.Where(brand=>brand.brand_id != 1))
+    {
+        <div class="top10box" @(Html.Raw(divOrder++ % 2 == 0 ? "style=\"clear:left\"" : ""))>
+            <div style="font-weight: bold">@b.brandname @(b.brand_id == 5 ? "Baths" : "")</div>
+            <table class="top10table">
+                <tr class="clienttable_header">
+                    <td style="width: 90px;">Product code</td>
+                    <td >Product name</td>
+                    <td style="width: 90px; text-align: right" >Units</td>
+                </tr>
+                @{ row = 0;}
+                @foreach (var p in Model.Top10ByBrand.Where(t => t.brand_code == b.code).Take(Settings.Default.Analytics_BrandSales_NumOfProductsPerBrand))
+                {
+                    <tr style="background-color: @((row++)%2 == 0 ? "#FFFFFF" : "#F4F4F4")">
+                        <td>@p.cprod_code</td>    
+                        <td>@p.cprod_name</td>
+                        <td style="text-align: right">@p.numOfUnits.ToString("N0")</td>
+                    </tr>
+                }
+            </table>
+                                
+        </div>
+        if (b.brand_id == 5)
+        {
+            <div class="top10box" @(Html.Raw(divOrder++ % 2 == 0 ? "style=\"clear:left\"" : ""))>
+                <div style="font-weight: bold">Cleargreen trays</div>
+                <table class="top10table">
+                    <tr class="clienttable_header">
+                        <td style="width: 90px;">Product code</td>
+                        <td >Product name</td>
+                        <td style="width: 90px; text-align: right" >Units</td>
+                    </tr>
+                    @{ row = 0;}
+                    @foreach (var p in Model.Top10By907)
+                    {
+                        <tr style="background-color: @((row++)%2 == 0 ? "#FFFFFF" : "#F4F4F4")">
+                            <td>@p.cprod_code</td>    
+                            <td>@p.cprod_name</td>
+                            <td style="text-align: right">@p.numOfUnits.ToString("N0")</td>
+                        </tr>
+                    }
+                </table>
+                                
+            </div>
+                            
+        }
+    }
+                       
+    <div class="top10box" @(Html.Raw(divOrder++ % 2 == 0 ? "style=\"clear:left\"" : ""))>
+        <div style="font-weight: bold">Universal</div>
+        <table class="top10table">
+            <tr class="clienttable_header">
+                <td style="width: 90px;">Product code</td>
+                <td >Product name</td>
+                <td style="width: 90px; text-align: right" >Units</td>
+            </tr>
+            @{ row = 0;}
+            @foreach (var p in Model.Top10Universal)
+            {
+                <tr style="background-color: @((row++)%2 == 0 ? "#FFFFFF" : "#F4F4F4")">
+                    <td>@p.cprod_code</td>    
+                    <td>@p.cprod_name</td>
+                    <td style="text-align: right">@p.numOfUnits.ToString("N0")</td>
+                </tr>
+            }
+        </table>
+                                
+    </div>
+
+
+</div>

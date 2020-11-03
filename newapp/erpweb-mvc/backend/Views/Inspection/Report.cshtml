@@ -1,0 +1,586 @@
+﻿@using Microsoft.Owin.Security.DataHandler
+@using Utilities = company.Common.Utilities
+@using backend.Properties;
+@model InspectionReportModel
+@{
+    Layout = null;
+}
+
+@functions 
+{
+	public double? GetQty(Inspection_lines_tested lt)
+	{
+		return lt.insp_override_qty > 0 ? lt.insp_override_qty : lt.OrderLine != null ? lt.OrderLine.orderqty : lt.insp_qty;
+	}
+
+	public double? GetInspectedQty(InspectionReportModel m, Inspection_lines_tested l, Return_category c)
+	{
+
+		if (l.OrderLine?.Cust_Product?.MastProduct?.insp_check_override_percent != null && c.inspection_full_check == true)
+		{
+			return Math.Round(l.OrderLine?.orderqty * l.OrderLine?.Cust_Product?.MastProduct?.insp_check_override_percent ?? 0);
+		}
+		if (m.Inspection.insp_start >= Settings.Default.InspectionReportAqlStartDate && 
+		    (Settings.Default.InspectionReportClientsForAql == null || Settings.Default.InspectionReportClientsForAql.Contains(m.Client.user_id) ))
+		{
+			var level_id = m.Category1ReturncategoryLevels.FirstOrDefault(crl => crl.category1_id == l?.OrderLine?.Cust_Product?.MastProduct?.category1
+			                                                                     && crl.returncategory_id == c.returncategory_id)?.level_id;
+			if (level_id != null)
+			{
+				var qty = GetQty(l);
+				var range_id = m.Ranges.FirstOrDefault(r => qty >= r.qty_from && qty <= r.qty_to)?.id;
+				if (range_id != null)
+				{
+					return Utilities.Min(m.RangeLevelSamples.FirstOrDefault(rls => rls.range_id == range_id && rls.level_id == level_id)?.SampleSize?.sample_size, qty);
+				}
+			}
+		}
+		var percentage = Settings.Default.InspectionReportQuantityPercentage * 1.0 / 100;
+		return Math.Ceiling((l.RejectedLines != null && l.RejectedLines.Sum(r => r.insp_qty2) > 0 ?
+			l.RejectedLines.Sum(r => r.insp_qty2) :
+			l.AcceptedLines.Where(a => a.insp_line_type == "A")
+			.Sum(a => a.insp_qty2) > 0 ? l.AcceptedLines.Where(a => a.insp_line_type == "A")
+				.Sum(a => a.insp_qty2) : percentage * (l.insp_override_qty > 0 ? l.insp_override_qty : l.OrderLine != null ? l.OrderLine.orderqty : l.insp_qty)) ?? 0);
+	}
+}
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Inspection report</title>
+    <style type="text/css">
+        body {
+	        background: #fff;
+	        height: 100%;
+	        width: 100%;
+	        margin: 0;
+	        padding: 0;
+	        font-family: arial;
+	        }
+
+        img {
+	        border: 0px;
+	        }
+
+        .container {
+	        /*height: 600px;*/
+
+	        width: 1000px;
+	        background: #FFF;
+	        overflow: hidden;
+	        border: 2px solid #f4f4f4;
+	        -webkit-border-radius: 10px;
+	        -moz-border-radius: 10px;
+	        border-radius: 10px;
+	        margin: 10px auto;
+	        /*margin-bottom: -100px;*/
+	        }
+        .logo {
+		        /*height: 90px;*/
+		        width: 1000px;
+		        /*background:#999;*/
+		        /*float: left;*/
+        }
+
+        .logo img {
+
+		        margin: 10px 0 0 20px;
+        }
+
+
+
+        .main {
+	        width: 980px;
+	        margin-left: 10px;
+	        margin-bottom: 20px;
+            margin-top:0px;
+	        font-size:12px;
+        }
+
+        .inspection_title {
+		        font-size: 28px;
+		        width: 100%;
+		        text-align: center;
+		        color: #4E9BEF;
+		        margin: 10px 0 0 10px;
+		        letter-spacing: 3px;
+		        /*float: left;*/
+        }
+
+        .gpc_title {
+		        width: 99%;
+		        height: 18px;
+		        background: #4E9BEF;
+		        color: #fff;
+		        text-align: center;
+		        font-size: 16px;
+		        /*float: left;*/
+		        line-height: 18px;
+		        padding: 5px;
+		        margin-top: 0px;
+        }
+
+        .table_general {
+	        margin: 2px 0 0 0;
+	        /*float: left;*/
+	        /*border: 3px solid #e4e4e4;*/
+            width: 100%;
+            margin-top: 0px;
+        }
+
+        .table_general img {
+		        width: 430px;
+		        height: 322px;
+                margin-top:0px;
+        }
+
+        .first_row {
+	        background: #f4f4f4;
+        }
+
+        .dotted_row {
+		        border-bottom: 1px dotted #e4e4e4;
+            text-align: right;
+        }
+
+        .text_area {
+		        margin: 3px;
+		        border:3px solid #e4e4e4;
+		        padding: 2px;
+        }
+
+        .unpacked {
+		        background: #E5E5E5;
+            text-align: right;
+        }
+
+        .packed {
+		        background: #CFCFCF;
+            text-align: right;
+        }
+
+        .sub_title {
+		        font-size: 14px;
+		        font-weight: bolder;
+        }
+        .note {
+            font-size: small;
+            font-style: italic;
+            text-align: left;
+        }
+		.note_bold {
+			font-size: small;
+			font-style: italic;
+            font-weight: bold;
+			text-align: left;
+		}
+
+</style>
+</head>
+<body>
+    <div>
+        <div id="top" class="logo">
+            <img src="/images/asaq_ext2.jpg" alt="logo" />
+        </div><!--logo-->
+
+
+
+        <div class="main">
+
+            <span class="inspection_title">INSPECTION REPORT</span>
+
+            <table id="technical" class="gpc_title"><tr><td>Part 1 - GENERAL</td></tr></table><!--gpc_title-->
+
+            <table class="table_general" width="100%" border="0" cellspacing="1" cellpadding="1">
+                <tr>
+                    <td width="150" height="18" class="first_row">Client</td>
+                    <td class="dotted_row" style="text-align:left;">
+                        @if (Model.Inspection != null)
+                        {
+                        <span>
+                            @Model.Inspection.customer_code
+                        </span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Report #:</td>
+                    <td class="dotted_row" style="text-align:left;">
+                        @if (Model.Inspection != null)
+                        {
+                        <span>
+                            @Model.Inspection.insp_id
+                        </span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Service type:</td>
+                    <td class="dotted_row" style="text-align:left;">Final inspection</td>
+                </tr>
+                @*<tr>
+                    <td width="150" height="18" class="first_row">Supplier name:</td>
+                    <td class="dotted_row" style="text-align:left;">@Model.Factory.user_name</td>
+                </tr>*@
+                <tr>
+                    <td width="150" height="18" class="first_row">Inspection date:</td>
+                    <td class="dotted_row" style="text-align:left;">
+                        @if (Model.Inspection != null)
+                        {
+                            <span>
+                                @Model.Inspection.insp_start
+                            </span>
+                        }
+                    </td>
+
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Inspectors</td>
+                    <td class="dotted_row" style="text-align:left">
+                        @if (Model.Inspection != null)
+                        {
+                            <span>
+                                @Model.InspectorName
+                            </span>
+                        }
+                    </td>
+
+                </tr>
+                @* <tr>
+                    <td width="150" height="18" class="first_row">Inspection location:</td>
+                    <td class="dotted_row" style="text-align:left;">@WebUtilities.ArrayToString(new string[]{Model.Factory.user_address1,Model.Factory.user_address2,Model.Factory.user_address3,Model.Factory.user_address4, Model.Factory.user_address5}, ",")</td>
+                </tr>*@
+                <tr>
+                    <td width="150" height="18" class="first_row">P.O. No:</td>
+                    <td class="dotted_row" style="text-align:left;">
+                        @if (Model.Inspection != null)
+                        {
+                            <span>
+                                @Model.Inspection.custpo
+                            </span>
+                        }
+                    </td>
+
+                </tr>
+                <tr>
+                    <td width="150" height="18" class="first_row">Total quantity:</td>
+                    <td class="dotted_row" style="text-align:left;">
+                        @if (Model.Inspection != null)
+                        {
+                            <span>
+                                @{ var totalQuantity = Model.InspectionLinesTested.Sum(l => l.insp_override_qty > 0 ? l.insp_override_qty : l.OrderLine != null ? l.OrderLine.orderqty : l.insp_qty); }@totalQuantity
+                            </span>
+                         }
+                    </td>
+                </tr>
+	            <tr>
+					@{
+						//calculate inspected qty
+						var inspectedQtys = Model.InspectionLinesTested.ToDictionary(l => l.insp_line_unique, 
+							l => Model.ReturnCategories.ToDictionary(c => c.returncategory_id,c=> GetInspectedQty(Model,l, c)));
+					}
+		            <td width="150" height="18" class="first_row">Inspected Quantity:</td>
+		            <td class="dotted_row" style="text-align: left;">
+			            @*@Math.Ceiling((Model.InspectionLinesTested.Sum(l => l.RejectedLines != null && l.RejectedLines.Sum(r => r.insp_qty2) > 0 ?
+				            l.RejectedLines.Sum(r => r.insp_qty2) :
+				            l.AcceptedLines.Where(a => a.insp_line_type == "A").Sum(a => a.insp_qty2) > 0 ? l.AcceptedLines.Where(a => a.insp_line_type == "A").Sum(a => a.insp_qty2) : 0.1 * (l.insp_override_qty > 0 ? l.insp_override_qty : l.OrderLine != null ? l.OrderLine.orderqty : l.insp_qty)) ?? 0))*@
+						@foreach (var c in Model.ReturnCategories.OrderBy(x => x.category_code))
+						{
+							@c.category_name<span>: </span>@inspectedQtys.Values.Sum(v=>v[c.returncategory_id])<span>; </span>
+						}
+						
+		            </td>
+	            </tr>
+
+        </table>
+
+        <div class="table_general" style="clear:both;">
+            <div style="margin-top:0px;">
+                <br />
+                <div class="note">
+                    This document is strictly private, confidential and personal to its recipients and should not be copied, distributed or reproduced in whole or in part, 
+                </div>
+                <div class="note">nor passed to any third party.
+                </div>
+                <br />
+                <div class="note_bold">
+                    This document is a field report. The photo resolution and quality might vary depending on multiple factors such as weather and lighting.
+                </div>
+	            <div class="note_bold">
+		            English is not a native language for the report makers, and the language used in this document might not be accurate.
+	            </div>
+	            <div class="note_bold">
+		            Due to the limit of storage and bandwidth, not every inspection photo is uploaded into the report, and photos uploaded are compressed. 
+	            </div>
+                <br />
+            </div>
+        </div>
+
+        <table class="gpc_title"><tr><td>Part 2 - SUMMARY INFORMATION</td></tr></table><!--gpc_title-->
+
+        <table class="table_general" width="100%" border="0" cellspacing="1" cellpadding="1">
+	        <tr class="first_row">
+		        <td rowspan="2">Ref.</td>
+		        <td rowspan="2">Order Qty</td>
+		        @*<td>Inspection Qty</td>*@
+		        @foreach (var c in Model.ReturnCategories.OrderBy(x => x.category_code))
+		        {
+			        <td colspan="2">@c.category_name</td>
+		        }
+		        <td rowspan="2">CA Required</td>
+	        </tr>
+	        <tr class="first_row">
+		        @foreach (var c in Model.ReturnCategories.OrderBy(x => x.category_code))
+		        {
+			        <td>Insp. Qty.</td>
+			        <td>Status</td>
+		        }
+	        </tr>
+            @foreach (var lt in Model.InspectionLinesTested)
+			{
+	            var qty = GetQty(lt);
+	            
+	            if (qty > 0)
+	            {
+	                <tr>
+	                    <td class="dotted_row" style="text-align: left">@(!string.IsNullOrEmpty(lt.insp_client_ref) ? lt.insp_client_ref : lt.OrderLine?.Cust_Product?.cprod_code1)</td>
+	                    <td class="dotted_row" style="text-align: center;">@qty</td>
+		                @*<td class="dotted_row" style="text-align: center;">@inspqty</td>*@
+		                @foreach (var c in Model.ReturnCategories.OrderBy(x => x.category_code))
+		                {
+			                <td class="dotted_row" style="text-align: center;">@(inspectedQtys[lt.insp_line_unique][c.returncategory_id])</td>
+			                <td class="dotted_row" style="text-align: center;">
+				                @(lt.CA != null && lt.CA.reason ==  c.category_code ? "CA" : "OK")
+			                </td>
+		                }
+	                    @*<td class="dotted_row" style="text-align: center;">@(lt.RejectedLines != null && lt.RejectedLines.FirstOrDefault(r => r.insp_line_type == "A") != null ? "Not OK" : "OK")</td>
+	                    <td class="dotted_row" style="text-align: center;">@(lt.RejectedLines != null && lt.RejectedLines.FirstOrDefault(r => r.insp_line_type == "D") != null ? "Not OK" : "OK")</td>
+	                    <td class="dotted_row" style="text-align: center;">@(lt.RejectedLines != null && lt.RejectedLines.FirstOrDefault(r => r.insp_line_type == "F") != null ? "Not OK" : "OK")</td>
+	                    <td class="dotted_row" style="text-align: center;">@(lt.RejectedLines != null && lt.RejectedLines.FirstOrDefault(r => r.insp_line_type == "M") != null ? "Not OK" : "OK")</td>
+	                    <td class="dotted_row" style="text-align: center;">@(lt.RejectedLines != null && lt.RejectedLines.FirstOrDefault(r => r.insp_line_type == "P") != null ? "Not OK" : "OK")</td>*@
+	                    <td class="dotted_row" style="text-align: center;">@(lt.CA != null ? "YES" : "NO")</td>
+	                </tr>
+				}
+			}
+        </table>
+    </div>
+
+    <div style="height:1px"></div>
+    <div class="main" style="text-align:left;clear:both;">&copy; Big Company</div>
+    <br style="page-break-after: always; height:1px"></br>
+
+    @*<div class="main">
+        <table class="gpc_title"><tr><td>Part 3 - CORRECTIVE ACTION</td></tr></table><!--gpc_title-->
+        <div class="table_general">
+            @if (Model.InspectionLinesRejected.Count(r => r.insp_ca > 0) == 0)
+            {
+                <span>No Corrective actions required</span>
+            }
+            @{ var ca = false;}
+            @foreach (var l in Model.InspectionLinesRejected.Where(r => r.insp_ca > 0))
+            {
+            ca = true;
+            var lineTested = l.LineTested;
+            string client_ref, factory_ref, client_desc;
+            client_ref = lineTested != null ? lineTested.insp_client_ref : "";
+            factory_ref = lineTested != null ? lineTested.insp_factory_ref : "";
+            client_desc = lineTested != null ? lineTested.insp_client_desc : "";
+            var counter = 0;
+
+            <div style="clear: both">
+                <div class="text_area">@client_ref @factory_ref @client_desc @l.insp_comments @l.insp_document</div>
+                @if (!string.IsNullOrEmpty(l.insp_line_rejection))
+                {
+                <div class="sub_title">Rejection</div>
+                <div>@l.insp_line_rejection</div>
+                }
+                @if (!string.IsNullOrEmpty(l.insp_reason))
+                {
+                <div class="sub_title">Reason</div>
+                <div>@l.insp_reason</div>
+                }
+                @if (!string.IsNullOrEmpty(l.insp_line_action))
+                {
+                <div class="sub_title">Action</div>
+                <div>@l.insp_line_action</div>
+                }
+                @if (!string.IsNullOrEmpty(l.insp_permanent_action))
+                {
+                <div class="sub_title">Permanent Action</div>
+                <div>@l.insp_permanent_action</div>
+                }
+            </div>
+
+        if (lineTested != null)
+        {
+            foreach (var image in Model.InspectionImages.Where(i => i.insp_line_unique == lineTested.insp_line_unique && i.insp_type == "C"))
+            {
+                <div style="width: 450px; margin-right: 20px; margin-top: 5px; float: left@(counter++%2 == 0 ? ";clear:left" : "")">
+
+                    <div style="display: table-cell; width: 100%">
+                        <img src="@WebUtilities.HandleInspectionFolderUrl(image.insp_image,Model.ImagesFolder)" style="text-align: center" />
+                    </div>
+                </div>
+            }
+        }
+
+        }
+        </div>
+    </div>
+        @if (ca)
+        {
+            <div style="height: 1px"></div>
+            <div class="main" style="text-align:left;clear:both;">&copy; Big Company</div>
+            <br style="page-break-after: always; height: 1px"/>
+        }
+		*@
+    
+    <div class="main">
+        <table class="gpc_title"><tr><td>Part 3 - REJECTED UNITS</td></tr></table><!--gpc_title-->
+        @{ ViewData["type"] = "R";}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+    </div>
+
+    <div class="main">
+        <table class="gpc_title"><tr><td>Part 4 - APPEARANCE</td></tr></table><!--gpc_title-->
+        @{ ViewData["type"] = "A";}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+    </div>
+
+    <div class="main">
+        <table class="gpc_title"><tr><td>Part 5 - DIMENSION</td></tr></table><!--gpc_title-->
+        <table class="table_general" width="100%" border="0" cellspacing="1" cellpadding="1">
+            <tr>
+                <td class="first_row">&nbsp;</td>
+                <td colspan="4" style="text-align: center"><div align="center" class="first_row">Unpacked unit</div></td>
+                <td colspan="4" style="text-align: center"><div align="center" class="first_row">Packed unit</div></td>
+            </tr>
+            <tr>
+                <td class="first_row">Product code</td>
+                <td class="unpacked">length mm</td>
+                <td class="unpacked">width mm</td>
+                <td class="unpacked">height mm</td>
+                <td class="unpacked">Net weight (kg)</td>
+                <td class="packed">length mm</td>
+                <td class="packed">width mm</td>
+                <td class="packed">height mm</td>
+                <td class="packed">Gross weight (kg)</td>
+            </tr>
+
+            @{var prods = false;}
+
+            @foreach (var prod in Model.CustProducts)
+            {
+                if (Model.InspectionLinesTested.Count(l => l.insp_client_ref == prod.cprod_code1 && GetQty(l) > 0) > 0)
+                {
+                    prods = true;
+
+                    <tr>
+                        <td class="first_row">@prod.cprod_code1</td>
+                        <td class="dotted_row">@prod.MastProduct.prod_length</td>
+                        <td class="dotted_row">@prod.MastProduct.prod_width</td>
+                        <td class="dotted_row">@prod.MastProduct.prod_height</td>
+                        <td class="dotted_row">@prod.MastProduct.prod_nw</td>
+                        <td class="dotted_row">@prod.MastProduct.pack_length</td>
+                        <td class="dotted_row">@prod.MastProduct.pack_width</td>
+                        <td class="dotted_row">@prod.MastProduct.pack_height</td>
+                        <td class="dotted_row">@prod.MastProduct.pack_GW</td>
+                    </tr>
+                }
+            }
+
+        </table>
+
+        @if (prods)
+        {
+            <div style="height: 1px"></div>
+            <div class="main" style="text-align:left;clear:both;">&copy; Big Company</div>
+            <br style="page-break-after: always; height: 1px" />
+        }
+
+        @{ ViewData["type"] = "D";}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+    </div>
+
+    <div class="main">
+        <table class="gpc_title"><tr><td>Part 6 - FUNCTION</td></tr></table><!--gpc_title-->
+        @{ ViewData["type"] = "F";}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+    </div>
+
+
+    @* @if (Html.Partial("_ReportImagesPartial", Model, ViewData) == null){
+    <div style="height:1px"></div>
+    <br style="page-break-after: always; height:1px"></br>
+    }*@
+
+    <div class="main">
+        <table class="gpc_title"><tr><td>Part 7 - MATERIAL</td></tr></table><!--gpc_title-->
+        @{ ViewData["type"] = "M";}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+
+    </div>
+
+    <div class="main">
+        <table class="gpc_title"><tr><td>Part 8 - PACKAGING</td></tr></table><!--gpc_title-->
+        @{ ViewData["type"] = "P";}
+        @Html.Partial("_ReportImagesPartial", Model, ViewData)
+    </div>
+
+    @if (Model.ProductTrackNumbers != null && Model.ProductTrackNumbers.Count > 0)
+    {
+    <div class="main">
+        <table class="gpc_title"><tr><td>Part 9 - PRODUCT TRACK NUMBERS</td></tr></table><!--gpc_title-->
+
+        <table>
+            <tr style="font-weight: bold">
+                <td>Ref</td>
+                <td>Tracking codes</td>
+            </tr>
+            @foreach (var p in Model.ProductsForTracking)
+            {
+            <tr>
+                <td>@p.cprod_code1</td>
+                <td>@string.Join(", ", Model.ProductTrackNumbers.Where(pt => pt.mastid == p.cprod_mast).Select(pt => pt.track_number))</td>
+            </tr>
+            }
+        </table>
+
+    </div>
+}
+
+
+    
+    </div>
+
+    <div class="main" style="clear:both;margin-top:20px;">
+        <div style="margin-top:20px;">
+            <br />
+            <div class="note">
+                This document is strictly private, confidential and personal to its recipients and should not be copied, distributed or reproduced in whole or in part,
+            </div>
+            <div class="note">
+                nor passed to any third party.
+            </div>
+            <br />
+            <div class="note_bold">
+                This document is a field report. The photo resolution and quality might vary depending on multiple factors such as weather and lighting.
+            </div>
+            <div class="note_bold">
+                English is not a native language for the report makers, and the language used in this document might not be accurate.
+            </div>
+            <div class="note_bold">
+                Due to the limit of storage and bandwidth, not every inspection photo is uploaded into the report, and photos uploaded are compressed.
+            </div>
+            <br />
+            <div style="text-align:left;">
+                &copy; Big Company
+            </div>
+        </div>
+    </div>
+</body>
+</html>

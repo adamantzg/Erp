@@ -1,0 +1,45 @@
+﻿@model backend.Models.ContainerLoadResultsModel
+
+@{
+    ViewBag.Title = "title";
+    
+}
+
+<h2>Results</h2>
+Customer code: @string.Join(",", Model.Customers.Select(c=>c.customer_code).ToArray())<br/>
+Customer po:@string.Join(",", Model.Orders.Select(c=>c.custpo).ToArray())<br/>
+ETD: @Model.ETD
+@{
+    var calcResult = Model.CalculationResult;
+}
+@for (int i = 0; i < calcResult.Containers.Length; i++)
+{
+    var container = calcResult.Containers[i];
+    <table>
+        <tr>
+            <td>Container no:</td><td>@container.Id</td>
+        </tr>
+        <tr>
+            <td>Container name:</td><td>@container.Name</td>
+        </tr>
+        <tr>
+            <td>Volume %:</td><td>@container.VolumePercentage</td>
+        </tr>
+        <tr>
+            <td>Total weight:</td><td>@container.Weight</td>
+        </tr>
+    </table>
+    <img src="/Order/GetContainerLoadingImage/?session_id=@calcResult.sessionId&cont_index=@i&segment_index="/>
+    
+    <div>Loading instructions</div>
+    
+    for (int s = 0; s < container.Segments.Length; s++)
+    {
+        var seg = container.Segments[s];
+        <span class="container_imagebox" >
+            <img src="/Order/GetContainerLoadingImage/?session_id=@calcResult.sessionId&cont_index=@i&segment_index=@s"/><br/>
+             @string.Format("{0} items of type {1}, {2}x{3}x{4}",seg.ItemCount, seg.ItemName, seg.WidthQty, seg.LengthQty, seg.HeightQty)         
+        </span>
+    }
+    
+}

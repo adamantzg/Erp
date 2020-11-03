@@ -1,0 +1,485 @@
+﻿@model StockSummaryModel
+
+@{
+    Layout = null;
+}
+
+@functions {
+
+    private string GetImageUrl(string chartname, string factoryCode)
+    {
+        return string.Format("{0}{1}", WebUtilities.GetSiteUrl(), Url.Action("Image", new { param = string.Format("{0}_{1}", factoryCode, chartname) + "#" + Settings.Default.StatsKey }));
+    }
+
+    private double? AdjustGBP(double? gpb)
+    {
+        return 1.338*gpb;
+    }
+
+    private string FormatCBM(double? cbm)
+    {
+        return cbm.ToString("N0");
+    }
+
+    private string FormatGBP(double? gbp)
+    {
+        return gbp.ToString("N0");
+    }
+
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Stock summary</title>
+        <link href="/Content/Style-backend.css" rel="stylesheet"/>
+        <style type="text/css">
+            .factoryhead {
+                font-size: 16px;
+                font-weight: bold;
+            }
+            .subtitle {
+                font-weight: bold;
+                font-size: 12px;
+                margin-top: 10px;
+            }
+            body {
+                background-color: white;
+                font-family: arial;
+            }
+            td {
+                padding: 5px;
+            }
+            .type {
+                color: blue;
+            }
+            .stock_heading {
+                font-weight: bold;
+                font-size: 16px;
+            }
+            .type_desc {
+                font-weight: bold;
+                
+            }
+            .codetable td {
+                padding: 1px;
+            }
+        </style>
+    </head>
+    <body>
+        @{
+            var weekSalesHeading = "CWH forecast weeks sales";
+            var gbpFactor = 0.338;
+        }
+        <div style="text-align: right" >@if (Model.HeaderCompany != null)
+              {
+                  <img src="/images/clientlogos/@(Model.HeaderCompany.clientlogo)" alt="logo"/>
+              }
+        </div>
+        <div class="stock_heading">Stock summary report - @DateTime.Today.ToShortDateString()</div>
+        @*<table class="table" style="width: 100%;border:0">
+            <tr>
+                <td rowspan="3" style="font-weight: bold;vertical-align: top">Notes:</td>
+                <td>Any USD values converted to GBP using 1.6 USD/GBP. The cost values are then inflated by the following to determine the landed value - freight 15%, QC 15.8%, duty 3%.<br/>
+                    Any "Weeks Sales" figures are calculated using sales forecasting information<br/>
+                    The definition of key,core,slow and new products are as follows:
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="codetable">
+                        <tr><td style="width:250px" class="type_desc">key</td>
+                            <td>highest selling products that generate 50% of sales</td>
+                        </tr>
+                        <tr><td class="type_desc">core</td>
+                            <td>products that generate the next 25% of sales</td>
+                        </tr>
+                        <tr><td class="type_desc">slow</td>
+                            <td>products that make up the final 25% of sales</td>
+                        </tr>
+                        <tr><td class="type_desc">new</td>
+                            <td>products introduced within the last 12 months</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    1 month forecast data represents the expected UK stock balance 1 month from today. This should be correct to within 5 working days based on shipping dates & sales forecast information.
+                    <br/>
+                    Frequency of order represents how many orders have been placed for this product in the last 12 months
+                </td>
+            </tr>
+        </table>*@
+        
+        @{
+            var sCode = Model.StockCodes.FirstOrDefault(s => s.stock_code_id == Stock_code.Key);
+        }
+        <table width="100%" border="0" cellspacing="0" cellpadding="2" style="font-family:Arial, Helvetica, sans-serif; font-size:11px; border:1px; border-style:dotted; border-color:#000">
+            <tr>
+                <td colspan="2"><strong><span style="font-size:14px;">Notes</span></strong></td>
+            </tr>
+            <tr>
+                <td colspan="2">Any USD values converted to GBP using 1.6 USD/GBP. The cost values are then inflated by the following to determine the landed value - freight 15%, QC 15.8%, duty 3%.<br />
+                    <br />
+                    The CWH definition of product classifications are as follows: <br /></td>
+            </tr>
+            <tr>
+                <td width="4%"><p><strong>key<br />
+                                      core<br />
+                                      slow<br />
+                                      new<br />
+                                      other
+                                  </strong></p></td>
+                <td width="96%">highest selling products that generate 50% of sales<br />
+                    products that generate the next 25% of sales<br />
+                    products that make up the final 25% of sales<br />
+                    products introduced within the last 12 months<br />
+                    those not categorised above - these would generally be discontinued items<br /></td>
+            </tr>
+            @{
+                var keyRow = Model.TotalRows.FirstOrDefault(r => r.Stock_code.stock_code_id == Stock_code.Key);
+            }
+            <tr>
+                <td colspan="2">1 month forecast data represents the expected UK stock balance 1 month from today. This should be correct to within 5 working days based on shipping dates &amp; sales forecast information. <br />
+                    <br />
+                    Frequency of order represents how many stock orders have been placed for this product in the last 12 months.<br />
+                    <br />
+                    <em><strong>Weeks Sales </strong></em><br />
+                    Any &quot;CWH forecast Weeks Sales&quot; figures are calculated using CWH provided sales forecasting information. Example follows:<br />
+                    Looking at the ALL FACTORIES SUMMARY, under &quot;<strong>key</strong>&quot; we show:<br />
+                    <br />
+                    @if(keyRow != null && sCode != null)
+{
+                        <div>
+                        - a 
+                        TARGET of @sCode.target_weeks weeks sales. For this we look at <strong>individual</strong> products within that group and detemine how much stock (in GBP &amp; CBM) is required to fulfil the next 10 weeks forecasts. The total of these individual values are then shown as the entires CBM @FormatCBM(keyRow.CBM_Target) &amp; GBP @FormatGBP(AdjustGBP(keyRow.GBP_Target)) figures.<br />
+                        - under ACTUAL we first look at the total value of stock of products within &quot;key&quot;. This value is @FormatGBP(AdjustGBP(keyRow.GBP_Actual)). We then look ahead at the total sales forecast in GBP for key products by month and detemine how many weeks it will take to use up that value of stock. In this case @keyRow.WeeksSalesActual.ToString("N1")<br />
+                        <br />
+                        Of course in reality not every product within &quot;key&quot; holds @keyRow.WeeksSalesActual.ToString("N1") weeks worth of forecast stock, some will hold more, some less but this figure represents on average how long it will take to sell that value of stock.<br />
+                                </div>
+                        
+                    }
+                </td>
+            </tr>
+        </table>
+        <br/>
+        <br />
+
+        <div>
+            
+            <div class="factoryhead">ALL FACTORIES SUMMARY</div>
+            <table class="table" style="width:100%">
+                <thead>
+                    <tr>
+                        <td colspan="3"></td>
+                        <td colspan="8" class="table_headerrow">On order</td>
+                        <td colspan="9" class="table_headerrow">UK warehouse</td>
+                    </tr>
+                    <tr class="table_headerrow">
+                        <td rowspan="3">TYPE</td>
+                        <td rowspan="2" colspan="2"># of products</td>
+                        <td colspan="2" style="text-align: center">IN PRODUCTION</td>
+                        <td colspan="4" style="text-align: center">READY AT FACTORY</td>
+                        <td colspan="2" style="text-align: center">ON WATER</td>
+                        <td colspan="3" style="text-align: center">TARGET</td>
+                        <td colspan="3" style="text-align: center">ACTUAL</td>
+                        <td colspan="3" style="text-align: center">1 month forecast</td>
+                    </tr>
+                    <tr class="table_headerrow">
+                        
+                        <td class="number" rowspan="2">CBM</td>
+                        <td class="number" rowspan="2">GBP</td>
+                        <td colspan="2" style="text-align: center">within limits</td>
+                        <td colspan="2" style="text-align: center">overdue</td>
+                        <td class="number" rowspan="2">CBM</td>
+                        <td class="number" rowspan="2">GBP</td>
+                        <td class="number" rowspan="2">@weekSalesHeading</td>
+                        <td class="number" rowspan="2">CBM</td>
+                        <td class="number" rowspan="2">GBP</td>
+                        <td class="number" rowspan="2">@weekSalesHeading</td>
+                        <td class="number" rowspan="2">CBM</td>
+                        <td class="number" rowspan="2">GBP</td>
+                        <td class="number" rowspan="2">@weekSalesHeading</td>
+                        <td class="number" rowspan="2">CBM</td>
+                        <td class="number" rowspan="2">GBP</td>
+                    </tr>
+                    <tr class="table_headerrow">
+                        <td class="number">Std.</td>
+                        <td class="number">spares</td>
+                        <td class="number">CBM</td>
+                        <td class="number">GBP</td>
+                        <td class="number">CBM</td>
+                        <td class="number">GBP</td>
+                    </tr>
+
+                </thead>
+                @{ var rowIndex = 0;
+                    var totalRows = Model.TotalRows;}
+                <tbody>
+                    @foreach (var r in totalRows.OrderBy(r=>r.Stock_code.stock_code_id > 0 ? r.Stock_code.stock_code_id : 100))
+                    {
+                        <tr class="@(Html.Raw(rowIndex%2 == 1 ? "tablerow_alt" : "tablerow"))">
+                            <td class="type">@r.Stock_code.stock_code_name</td>
+                            <td class="number">@r.ProductCount</td>
+                            <td class="number">@r.ProductCountSpares</td>
+                            <td class="number">@FormatCBM(r.CBM_Production)</td>
+                            <td class="number">@AdjustGBP(r.GBP_Production).ToString("N0")</td>
+                            <td class="number">@FormatCBM(r.CBM_Factory_InLimits)</td>
+                            <td class="number">@AdjustGBP(r.GBP_Factory_InLimits).ToString("N0")</td>
+                            <td class="number">@FormatCBM(r.CBM_Factory_Overdue)</td>
+                            <td class="number">@AdjustGBP(r.GBP_Factory_Overdue).ToString("N0")</td>
+                            <td class="number">@FormatCBM(r.CBM_Water)</td>
+                            <td class="number">@AdjustGBP(r.GBP_Water).ToString("N0")</td>
+                            <td class="number">@r.Stock_code.target_weeks</td>
+                            <td class="number">@FormatCBM(r.CBM_Target)</td>
+                            <td class="number">@AdjustGBP(r.GBP_Target).ToString("N0")</td>
+                            <td class="number">@r.WeeksSalesActual.ToString("N1")<span>@(r.WeeksSalesActualOverflow ? "+" : "")</span></td>
+                            <td class="number">@FormatCBM(r.CBM_Actual)</td>
+                            <td class="number">@AdjustGBP(r.GBP_Actual).ToString("N0")</td>
+                            <td class="number">@r.FutureData[0].WeeksSales.ToString("N1")<span>@(r.FutureData[0].WeeksSalesActualOverflow ? "+" : "")</span></td>
+                            <td class="number">@FormatCBM(r.FutureData[0].CBM)</td>
+                            <td class="number">@AdjustGBP(r.FutureData[0].GBP).ToString("N0")</td>
+                        </tr>
+                        rowIndex++;
+                    }
+                    <tr>
+                        <td >TOTAL</td>
+                        <td class="number">@totalRows.Sum(r=>r.ProductCount)</td>
+                        <td class="number">@totalRows.Sum(r=>r.ProductCountSpares)</td>
+                        <td class="number">@FormatCBM(totalRows.Sum(s=>s.CBM_Production))</td>
+                        <td class="number">@AdjustGBP(totalRows.Sum(s=>s.GBP_Production)).ToString("N0")</td>
+                        <td class="number">@FormatCBM(totalRows.Sum(s=>s.CBM_Factory_InLimits))</td>
+                        <td class="number">@AdjustGBP(totalRows.Sum(s=>s.GBP_Factory_InLimits)).ToString("N0")</td>
+                        <td class="number">@FormatCBM(totalRows.Sum(s=>s.CBM_Factory_Overdue))</td>
+                        <td class="number">@AdjustGBP(totalRows.Sum(s=>s.GBP_Factory_Overdue)).ToString("N0")</td>
+                        <td class="number">@FormatCBM(totalRows.Sum(s=>s.CBM_Water))</td>
+                        <td class="number">@AdjustGBP(totalRows.Sum(s=>s.GBP_Water)).ToString("N0")</td>
+                        <td></td>           
+                        <td class="number">@FormatCBM(totalRows.Sum(s=>s.CBM_Target))</td>
+                        <td class="number">@AdjustGBP(totalRows.Sum(s=>s.GBP_Target)).ToString("N0")</td>
+                        <td></td>           
+                        <td class="number">@FormatCBM(totalRows.Sum(s=>s.CBM_Actual))</td>
+                        <td class="number">@AdjustGBP(totalRows.Sum(s=>s.GBP_Actual)).ToString("N0")</td>
+                        <td></td>           
+                        <td class="number">@FormatCBM(totalRows.Sum(s=>s.FutureData[0].CBM))</td>
+                        <td class="number">@AdjustGBP(totalRows.Sum(s=>s.FutureData[0].GBP)).ToString("N0")</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="height: 20px"></div>
+            <table style="width: 100%">
+                <tr style="font-weight: bold">
+                    <td colspan="2">TARGET VS ACTUAL (CWH FORECAST WEEKS SALES)</td>
+                </tr>
+                <tr>
+                    <td style="width: 50%;font-weight: bold">NOW</td>
+                    <td style="width: 50%;font-weight: bold">FORECAST IN 1 MONTH</td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="@GetImageUrl("Chart_StockSummary","all")"/>            
+                    </td>
+                    <td>
+                        <img src="@GetImageUrl("Chart_StockSummary_1","all")"/>
+                    </td>
+                </tr>
+                <tr style="font-weight: bold">
+                    <td colspan="2">TARGET VS ACTUAL (GBP)</td>
+                </tr>
+                <tr>
+                    <td style="width: 50%;font-weight: bold">NOW</td>
+                    <td style="width: 50%;font-weight: bold">FORECAST IN 1 MONTH</td>
+                </tr>
+                <tr>
+                    <td>
+                        <img src="@GetImageUrl("Chart_StockSummary_GBP","all")"/>            
+                    </td>
+                    <td>
+                        <img src="@GetImageUrl("Chart_StockSummary_GBP_1","all")"/>
+                    </td>
+                </tr>
+            </table>
+            
+            <div style="page-break-before: always"/>
+            @{ var factoryCounter = 1;}
+            @foreach (var summaryRows in Model.Rows.GroupBy(r => r.Factory.user_id))
+            {
+                var f = summaryRows.First().Factory;
+                <div class="factoryhead" style="margin-top:20px;font-weight: bold">@f.factory_code</div>
+                <table class="table" style="width:100%">
+                    <thead>
+                        <tr>
+                            <td colspan="3"></td>
+                            <td colspan="8" class="table_headerrow">On order</td>
+                            <td colspan="9" class="table_headerrow">UK warehouse</td>
+                        </tr>
+                        <tr class="table_headerrow">
+                            <td rowspan="3">TYPE</td>
+                            <td rowspan="2" colspan="2"># of products</td>
+                            <td colspan="2" style="text-align: center">IN PRODUCTION</td>
+                            <td colspan="4" style="text-align: center">READY AT FACTORY</td>
+                            <td colspan="2" style="text-align: center">ON WATER</td>
+                            <td colspan="3" style="text-align: center">TARGET</td>
+                            <td colspan="3" style="text-align: center">ACTUAL</td>
+                            <td colspan="3" style="text-align: center">1 month forecast</td>
+                        </tr>
+                        <tr class="table_headerrow">
+                            <td class="number" rowspan="2">CBM</td>
+                            <td class="number" rowspan="2">GBP</td>
+                            <td colspan="2" style="text-align: center"> < @(f.stock_order_month_limit ?? 6) m</td>
+                            <td colspan="2" style="text-align: center"> > @(f.stock_order_month_limit ?? 6) m</td>
+                            
+                            <td class="number" rowspan="2">CBM</td>
+                            <td class="number" rowspan="2">GBP</td>
+                            <td class="number" rowspan="2">@weekSalesHeading</td>
+                            <td class="number" rowspan="2">CBM</td>
+                            <td class="number" rowspan="2">GBP</td>
+                            <td class="number" rowspan="2">@weekSalesHeading</td>
+                            <td class="number" rowspan="2">CBM</td>
+                            <td class="number" rowspan="2">GBP</td>
+                            <td class="number" rowspan="2">@weekSalesHeading</td>
+                            <td class="number" rowspan="2">CBM</td>
+                            <td class="number" rowspan="2">GBP</td>
+                        </tr>
+                        <tr class="table_headerrow">
+                            <td class="number">Std.</td>
+                            <td class="number">spares</td>
+                            <td class="number">CBM</td>
+                            <td class="number">GBP</td>
+                            <td class="number">CBM</td>
+                            <td class="number">GBP</td>
+                        </tr>
+                    </thead>
+                
+                    <tbody>
+                        @foreach (var r in summaryRows.OrderBy(r=>r.Stock_code.stock_code_id > 0 ? r.Stock_code.stock_code_id : 100))
+                        {
+                            <tr class="@(Html.Raw(rowIndex%2 == 1 ? "tablerow_alt" : "tablerow"))">
+                                <td class="type">@r.Stock_code.stock_code_name</td>
+                                <td class="number">@r.ProductCount</td>
+                                <td class="number">@r.ProductCountSpares</td>
+                                <td class="number">@FormatCBM(r.CBM_Production)</td>
+                                <td class="number">@AdjustGBP(r.GBP_Production).ToString("N0")</td>
+                                <td class="number">@FormatCBM(r.CBM_Factory_InLimits)</td>
+                                <td class="number">@AdjustGBP(r.GBP_Factory_InLimits).ToString("N0")</td>
+                                <td class="number">@FormatCBM(r.CBM_Factory_Overdue)</td>
+                                <td class="number">@AdjustGBP(r.GBP_Factory_Overdue).ToString("N0")</td>
+                                <td class="number">@FormatCBM(r.CBM_Water)</td>
+                                <td class="number">@AdjustGBP(r.GBP_Water).ToString("N0")</td>
+                                <td class="number">@r.Stock_code.target_weeks</td>
+                                <td class="number">@FormatCBM(r.CBM_Target)</td>
+                                <td class="number">@AdjustGBP(r.GBP_Target).ToString("N0")</td>
+                                <td class="number">@r.WeeksSalesActual.ToString("N1")<span>@(r.WeeksSalesActualOverflow ? "+" : "")</span></td>
+                                <td class="number">@FormatCBM(r.CBM_Actual)</td>
+                                <td class="number">@AdjustGBP(r.GBP_Actual).ToString("N0")</td>
+                                <td class="number">@r.FutureData[0].WeeksSales.ToString("N1")<span>@(r.FutureData[0].WeeksSalesActualOverflow ? "+" : "")</span></td>
+                                <td class="number">@FormatCBM(r.FutureData[0].CBM)</td>
+                                <td class="number">@AdjustGBP(r.FutureData[0].GBP).ToString("N0")</td>
+                            </tr>
+                            rowIndex++;
+                        }
+                        <tr>
+                            <td >TOTAL</td>
+                            <td class="number">@summaryRows.Sum(r=>r.ProductCount)</td>
+                            <td class="number">@summaryRows.Sum(r=>r.ProductCountSpares)</td>
+                            <td class="number">@FormatCBM(summaryRows.Sum(s=>s.CBM_Production))</td>
+                            <td class="number">@AdjustGBP(summaryRows.Sum(s=>s.GBP_Production)).ToString("N0")</td>
+                            <td class="number">@FormatCBM(summaryRows.Sum(s=>s.CBM_Factory_InLimits))</td>
+                            <td class="number">@AdjustGBP(summaryRows.Sum(s=>s.GBP_Factory_InLimits)).ToString("N0")</td>
+                            <td class="number">@FormatCBM(summaryRows.Sum(s=>s.CBM_Factory_Overdue))</td>
+                            <td class="number">@AdjustGBP(summaryRows.Sum(s=>s.GBP_Factory_Overdue)).ToString("N0")</td>
+                            <td class="number">@FormatCBM(summaryRows.Sum(s=>s.CBM_Water))</td>
+                            <td class="number">@AdjustGBP(summaryRows.Sum(s=>s.GBP_Water)).ToString("N0")</td>
+                            <td></td>           
+                            <td class="number">@FormatCBM(summaryRows.Sum(s=>s.CBM_Target))</td>
+                            <td class="number">@AdjustGBP(summaryRows.Sum(s=>s.GBP_Target)).ToString("N0")</td>
+                            <td></td>           
+                            <td class="number">@FormatCBM(summaryRows.Sum(s=>s.CBM_Actual))</td>
+                            <td class="number">@AdjustGBP(summaryRows.Sum(s=>s.GBP_Actual)).ToString("N0")</td>
+                            <td></td>           
+                            <td class="number">@FormatCBM(summaryRows.Sum(s=>s.FutureData[0].CBM))</td>
+                            <td class="number">@AdjustGBP(summaryRows.Sum(s=>s.FutureData[0].GBP)).ToString("N0")</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div style="height: 20px"></div>@*
+                <table style="width: 100%">
+                    <tr>
+                        <td style="width: 50%;font-weight: bold">NOW</td>
+                        <td style="width: 50%;font-weight: bold">FORECAST IN 1 MONTH</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="@GetImageUrl("Chart_StockSummary",summaryRows.First().Factory.factory_code)"/>            
+                        </td>
+                        <td>
+                            <img src="@GetImageUrl("Chart_StockSummary_1",summaryRows.First().Factory.factory_code)"/>
+                        </td>
+                    </tr>
+                </table>*@
+             
+                <div style="font-weight: bold">Top @Model.WorstLimit worst performing products (from within key,core & slow)</div>
+                <table class="table" style="width: 100%">
+                    <tr class="table_headerrow">
+                        <td colspan="3">&nbsp;</td>
+                        <td colspan="3" style="text-align: center">UK stock</td>
+                        <td colspan="7" style="text-align: center">orders&nbsp;</td>
+                    </tr>
+                    <tr class="table_headerrow">
+                        <td rowspan="2">Type</td>
+                        <td rowspan="2">Code</td>
+                        <td rowspan="2">Description</td>
+                        <td rowspan="2" class="number">units</td>
+                        <td rowspan="2" class="number">GBP</td>
+                        <td rowspan="2" class="number">weeks sales</td>
+                        <td colspan="2" style="text-align: center">In production</td>
+                        <td colspan="2" style="text-align: center">ready at factory</td>
+                        <td colspan="2" style="text-align: center">on water</td>
+                        
+                        <td rowspan="2" class="number">frequency of order</td>
+                    </tr>
+                    <tr class="table_headerrow">
+                        <td class="number">units</td>
+                        <td class="number">GBP</td>
+                        <td class="number">units</td>
+                        <td class="number">GBP</td>
+                        <td class="number">units</td>
+                        <td class="number">GBP</td>
+                    </tr>
+                    @foreach (var prod in Model.ProductData[f.user_id].Where(p=>p.Product.cprod_stock_code != Stock_code.New).OrderByDescending(p => p.WeeksSalesActual).Take(Model.WorstLimit))
+                    {
+                        var stockCode = Model.StockCodes.FirstOrDefault(s => s.stock_code_id == prod.Product.cprod_stock_code);
+                        <tr>
+                            <td>@(stockCode != null ? stockCode.stock_code_name : "")</td>
+                            <td>@prod.Product.cprod_code1</td>
+                            <td>@prod.Product.cprod_name</td>
+                            <td class="number">@prod.Product.cprod_stock</td>
+                            <td class="number">@prod.Product.StockGBP.ToString("N0")</td>
+                            <td class="number">@prod.WeeksSalesActual.ToString("N1")<span>@(prod.WeeksSalesActualOverflow ? "+" : "")</span></td>
+                            <td class="number">@prod.Qty_Production.ToString("N0")</td>
+                            <td class="number">@prod.GBP_Production.ToString("N0")</td>
+                            <td class="number">@prod.Qty_Factory.ToString("N0")</td>
+                            <td class="number">@prod.GBP_Factory.ToString("N0")</td>
+                            <td class="number">@prod.Qty_Water.ToString("N0")</td>
+                            <td class="number">@prod.GBP_Water.ToString("N0")</td>
+                        
+                            <td class="number">@prod.NumOfOrders</td>
+                            
+
+                        </tr>
+                    }
+                </table>
+
+                factoryCounter++;
+                if (factoryCounter%2 == 1)
+                {
+                    <div style="page-break-before: always"/>
+                }
+
+            }
+            
+        </div>
+    </body>
+</html>

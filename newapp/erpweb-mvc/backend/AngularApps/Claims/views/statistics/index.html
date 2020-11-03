@@ -1,0 +1,63 @@
+﻿<section class="panel panel-primary">
+
+    <header class="panel-heading">
+        Claims statistics
+    </header>
+
+    <div class="panel-body">
+
+        <div class="row">
+            <div class="col-md-5" style="font-size: 0.8em">
+                <label>
+                    From:
+
+                </label>
+                <div uib-datepicker ng-model="monthStart" datepicker-options="monthSelectorOptions"></div>
+            </div>
+            <div class="col-md-5" style="font-size: 0.8em">
+                <label>
+                    To:
+                </label>
+                <div uib-datepicker ng-model="monthEnd" datepicker-options="monthSelectorOptions"></div>
+            </div>
+
+            <div class="col-md-2">
+
+                <button class="btn btn-primary" ng-click="showData()" style="margin-top: 22px">Show data</button>
+            </div>
+        </div>
+
+        <strong style="margin-top:5px">Avg. monthly sales is calculated from the last 3 months sales based on ETA</strong>
+
+        <div style="margin-top:5px">
+            <table class="table" datatable="ng" dt-options="dtOptions" dt-instance="dtInstance">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Brand</th>
+                        <th class="text-right">Claim value</th>
+                        <th class="text-right">Avg. monthly sales</th>
+                        <th class="text-right">Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="d in data">
+                        <td>
+                            <span class="glyphicon glyphicon-plus" ng-show="!d.expanded" ng-click="expand(d,$index)"></span>
+                            <span class="glyphicon glyphicon-minus" ng-show="d.expanded" ng-click="expand(d,$index)"></span>
+                        </td>
+                        <td>{{d.brand}}</td>
+                        <td class="text-right">{{format(d.credit_value)}}</td>
+                        <td class="text-right">{{format(d.sales)}}</td>
+                        <td class="text-right">{{format(d.ratio*100,1)}} %</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+
+
+    </div>
+
+</section>

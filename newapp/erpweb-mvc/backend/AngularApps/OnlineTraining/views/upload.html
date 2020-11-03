@@ -1,0 +1,226 @@
+﻿
+
+
+    <div class="row col-lg-8  col-lg-offset-2  col-xs-12" style="margin-bottom:10px"> 
+        <button class="btn btn-default create_new pull-left" type="submit" ui-sref="home">Back to list</button>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2 col-xs-12">
+            <section class="panel">
+                <div ng-if="state === 'publish'">
+                    <header class="panel-heading">
+                        Publish new version
+                    </header>
+                </div>
+                <div ng-if="state === 'edit'">
+                    <header class="panel-heading">
+                        Edit document
+                    </header>
+                </div>
+                <div ng-if="state === 'upload'">
+                    <header class="panel-heading">
+                        Upload new document
+                    </header>
+                </div>
+
+                <div class="panel-body">
+                    <section class="panel general">
+
+                        <div class="form-group">
+                            <div ng-if="state === 'upload'">
+                                <div>
+                                    <button class="btn" plupload="fileUpload.url"
+                                            plupload-options="fileUpload.options"
+                                            plupload-callbacks="fileUpload.callbacks">
+                                        Choose file
+                                    </button>
+                                    <button class="btn" ng-show="documents.length > 0 && checkAllUploaded() && selectedDocumentUsers" ng-click="create()">Publish</button>
+                                </div>
+                            </div>
+                            <div style="margin-bottom:5px">
+                                <div>
+                                    <button ng-if="state !== 'upload' && state !== 'edit'" class="btn" plupload="fileUpload.url"
+                                            plupload-options="fileUpload.editOptions"
+                                            plupload-callbacks="fileUpload.editCallbacks">
+                                        Select document
+                                    </button>
+                                    <button ng-if="state !== 'upload'" class="btn" ng-show="showSave()" ng-click="update()">Save</button>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row col-lg-12">
+
+                            <div ng-show="documents.length > 0">
+                                <div class="col-lg-6">
+                                    <form name="mainform" class="form-horizontal tasi-form" method="get">
+
+                                        <div class="form-group">
+                                            <label class="col-sm-2 col-sm-2 control-label">Name</label>
+                                            <div class="col-sm-10 col-lg-10">
+                                                <input name="docName" type="text" class="form-control" ng-model="documents[0].filename" required>
+                                                <span ng-show="mainform.docName.$error.required"></span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 col-sm-2 control-label">Version</label>
+                                            <div class="col-sm-10 col-lg-2">
+                                                <input name="docVersion" type="text" class="form-control" ng-model="documents[0].version" required>
+                                                <span ng-show="mainform.docName.$error.required"></span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 col-sm-2 control-label">Subject</label>
+                                            <div class="col-sm-10">
+                                                <input name="docSubject" type="text" class="form-control" ng-model="documents[0].subject" required>
+                                                <span ng-show="mainform.docSubject.$error.required"></span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 col-sm-2 control-label">Note</label>
+                                            <div class="col-sm-10">
+                                                <input type="text" class="form-control" ng-model="documents[0].note">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="row col-lg-12">
+                                <div ng-show="documents.length > 0 && !selectedDocumentUsers" class="alert alert-danger col-lg-2 m-t-15" role="alert">No audience selected!</div>
+                            </div>
+                            <div class="row col-lg-12 col-md-12 col-sm-12 clearfix" style="display:flex;" ng-show="documents.length > 0">
+                                <h4>Related audience</h4>
+                            </div>
+
+                            <div class="row col-lg-12 col-md-12 col-sm-12 clearfix" style="display:flex;" ng-show="documents.length > 0">
+
+                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 one_scroll">
+                                        <form class="form-horizontal tasi-form">
+                                            <h4 class="factory_scroll">FC</h4>
+                                            <div class="form-group col-lg-12 pre-scrollable tab-pane">
+                                                <label class="col-sm-2 control-label col-lg-2" for="inputSuccess"></label>
+                                                <div class="col-lg-10">
+
+                                                    <input type="checkbox" ng-model="all['fc']" ng-change="selectAll('fc')" />
+                                                    <span>Select ALL</span>
+                                                    <div ng-repeat="u in users | userTypeFilter:'fc'">
+
+                                                        <input type="checkbox" ng-model="u.selected"  />
+                                                        <span>{{u.name}}</span>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 one_scroll">
+                                        <form class="form-horizontal tasi-form">
+                                            <h4 class="factory_scroll">CC</h4>
+                                            <div class="form-group col-lg-12 pre-scrollable tab-pane">
+                                                <label class="col-sm-2 control-label col-lg-2" for="inputSuccess"></label>
+                                                <div class="col-lg-10">
+                                                    <div class="control-label" style="text-align:left">
+                                                        <input type="checkbox" ng-model="all['cc']" ng-change="selectAll('cc')" />
+                                                        <span>Select ALL</span>
+                                                    </div>
+                                                    <div>
+                                                        <div ng-repeat="u in users | userTypeFilter:'cc'">
+                                                            <span style="margin-right: 3px">
+                                                                <input type="checkbox" ng-model="u.selected" />
+                                                                <span>{{u.name}}</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 one_scroll">
+                                        <form class="form-horizontal tasi-form">
+                                            <h4 class="factory_scroll">QC</h4>
+                                            <div class="form-group col-lg-12 pre-scrollable tab-pane">
+                                                <label class="col-sm-2 control-label col-lg-2" for="inputSuccess"></label>
+                                                <div class="col-lg-10">
+                                                    <div class="control-label" style="text-align:left">
+                                                        <input type="checkbox" ng-model="all['qc']" ng-change="selectAll('qc')" />
+                                                        <span>Select all</span>
+                                                    </div>
+                                                    <div>
+                                                        <div ng-repeat="u in users | userTypeFilter:'qc'">
+                                                            <span style="margin-right: 3px">
+                                                                <input type="checkbox" ng-model="u.selected" />
+                                                                <span>{{u.name}}</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-6 one_scroll">
+                                        <form class="form-horizontal tasi-form">
+                                            <h4 class="factory_scroll">QA</h4>
+                                            <div class="form-group col-lg-12 pre-scrollable tab-pane">
+                                                <label class="col-sm-2 control-label col-lg-2" for="inputSuccess"></label>
+                                                <div class="col-lg-10">
+                                                    <div class="control-label" style="text-align:left">
+                                                        <input type="checkbox" ng-model="all['qa']" ng-change="selectAll('qa')" />
+                                                        <span>Select all</span>
+                                                    </div>
+                                                    <div>
+                                                        <div ng-repeat="u in users | userTypeFilter:'qa'">
+                                                            <span style="margin-right: 3px">
+                                                                <input type="checkbox" ng-model="u.selected" ng-change="usersSelected()" />
+                                                                <span>{{u.name}}</span>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                            </div> <!--row -->
+                        </div>
+
+                        <div class="row col-lg-12" style="margin-top:15px" ng-show="documents.length > 0">
+                            <form class="form-horizontal tasi-form">
+                                <div class="col-lg-12">
+                                    <div class="inline col-lg-3">
+                                        <label class="control-label">Acknowledgement required</label>
+                                        <input type="checkbox" ng-model="commonOptions.acknowledge" />
+                                    </div>
+                                    <div class="inline col-lg-8">
+                                        <label class="control-label">Timeline (days)</label>
+                                        <select ng-model="commonOptions.timeline" ng-options="n as n for n in timeline">
+                                            <option value="">select day(s)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div> <!--row -->
+                        <div class="row">
+                            <div>{{usersSelected()}}</div>
+                            <div ng-show="commonOptions.acknowledge && commonOptions.timeline === null  && documents.length > 0" class="alert alert-danger col-lg-2 m-t-15" role="alert">No timeline selected!</div>
+                        </div>
+
+                        <div ng-show="documents.length > 0 && !checkAllUploaded() && state === 'upload'"  class="col-lg-12">
+                            <button class="btn btn-info m-t-15" ng-show="documents.length > 0 && !checkAllUploaded() && state === 'upload'" ng-click="startUpload()">Upload</button>
+                        </div>
+
+                    </section> <!--panel general-->
+                </div> <!-- panel general div -->
+            </section> <!-- panel-->
+
+          </div>
+    </div> <!-- row -->
+
+
+
+

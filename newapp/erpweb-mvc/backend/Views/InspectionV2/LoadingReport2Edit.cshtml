@@ -1,0 +1,1098 @@
+﻿@using company.Common
+@model LoadingInspectionV2ReportModel
+
+@{
+    Layout = null;
+}
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    @*<meta http-equiv="X-UA-Compatible" content="IE=10">*@
+    <title>Loading inspection report</title>
+    <link href="/Content/inspection/main_report.css" rel="stylesheet" type="text/css">
+    
+    <style>
+        .imageHolder {
+            position: relative;
+            height: 230px;
+            border: 1px solid black;
+            display: table-cell;
+            vertical-align: middle;
+            width: 330px;
+        }
+        .container {
+                height: auto;
+            width: 1150px;
+            }
+        .data_holder input[type="text"], .data_holder2 input[type="text"] {
+            width: 30px;
+            font-size: 9px;
+            text-align: right;
+        }
+        .button {
+            height: 30px;
+            min-width: 120px;
+            font-weight: bold;
+
+        }
+        .mixedPallets_availableqty_positive {
+            color: black;
+        }
+        .mixedPallets_availableqty_negative {
+            color: red;
+        }
+        .loading_quantities_dont_match
+        {
+            color: red;
+        }
+        .loading-dialog {
+            display: none;
+            position: fixed;
+            z-index: 1100;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background: rgba( 0, 0, 0, .3 ) url('/images/loading2.gif') 50% 50% no-repeat;
+        }
+    </style>    
+</head>
+
+<body>
+
+    @{
+        var insp = Model.Inspection;
+        ViewBag.ForPdf = Model.ForPdf;
+    }
+
+<div id="app" ng-app="app" ng-cloak>
+    <div id="controller" ng-controller="controller">
+        <div ng-repeat="c in Containers">
+            <div class="container">
+                @Html.Partial("_LoadingReport2Header", Model)
+                <table style="margin-top: 10px;" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="row_name_gray" width="150"><span class="white">Container No:</span></td>
+                        <td class="row_name_gray" width="300"><span class="white"><input type="text" ng-model="c.container_no" /></span></td>
+                        <td class="row_name_gray" width="150"><span class="white">Seal No:</span></td>
+                        <td class="row_name_gray"><span class="white"><input type="text" ng-model="c.seal_no" /></span></td>
+                    </tr>
+                </table>
+
+                <table class="prod_img" style="margin-top: 10px;" width="100%" border="0" cellspacing="0" cellpadding="5">
+                    <tr>
+                        <td width="240" align="center">Empty container</td>
+                        <td width="240" align="center">Sealed container - from inside</td>
+                        <td width="240" align="center">Sealed container - from outside</td>
+                        <td width="240" align="center">Container seal</td>
+                    </tr>
+                    @*@{
+                                var cont_images = cont.Images.OrderBy(i => i.order).Take(3).ToList();
+                    }*@
+                    <tr>
+                        <td ng-repeat="im in c.Images | orderBy: 'order'  | limitTo: 4" style="vertical-align: middle; text-align: center">
+                            <div class="imageHolder">
+                                <img ng-src="{{GetContainerImageUrl(im)}}" ng-show="im.insp_image" style="width: 100%"/>
+                                <a id="deleteImage" ng-click="DeleteContainerImage(im)" ng-show="im.insp_image" style="position: absolute; top: 2px; right: 36px"><img src="/Images/inspection/status-remove.png" style="width: 32px"/></a>
+                                <a plupload="fileUploadC.url"
+                                   plupload-options="fileUploadC.options[c.id][im.order]"
+                                   plupload-callbacks="fileUploadC.callbacks[c.id][im.order]" style="cursor: pointer; position: absolute; top: 2px; right: 2px">
+                                    <img src="/images/inspection/add.png" style="width: 32px"/>
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+                </table>
+                @{
+                    var allLoadings = Model.AllLoadings;
+                }
+
+                @Html.Partial("_LoadingReport2LoadingsTable", new InspectionLoadingTableModel {StartIndex = 0, Loadings = allLoadings, IsEdit = true})
+                
+
+                <div style="clear:both">
+                    <div ng-repeat="p in MixedPalletsList(c)">{{p}}</div>
+                </div>
+
+                <table style="margin-top: 15px; clear: both" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr align="right">
+                        <td class="footer"><span class="white">Big Company. Copyright @DateTime.Now.Year</span></td>
+                    </tr>
+                </table>
+
+                <br style="page-break-after: always"/>
+            </div>
+            <div class="container">
+                @Html.Partial("_LoadingReport2Header", Model)
+
+                <table style="margin-top: 10px;" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td class="row_name_gray" width="150"><span class="white">Container No:</span></td>
+                        <td class="row_name_gray" width="300"><span class="white"><input type="text" ng-model="c.container_no" /></span></td>
+                        <td class="row_name_gray" width="150"><span class="white">Seal No:</span></td>
+                        <td class="row_name_gray"><span class="white"><input type="text" ng-model="c.seal_no" /></span></td>
+                    </tr>
+                </table>
+                <button plupload="fileUploadMulti.url" plupload-options="fileUploadMulti.options"
+                               plupload-callbacks="fileUploadMulti.callbacks" style="margin-top: 10px">Upload images</button>
+                <table class="prod_img" style="margin-top: 10px;" width="100%" border="0" cellspacing="0" cellpadding="5">
+                    <tbody ng-repeat="r in rows">
+                    <tr>
+                        <td width="330" height="20" align="center" ng-repeat="c in columns">Image {{r * 3 + c + 1}}</td>
+                    </tr>
+                    <tr>
+                        <td width="330" ng-repeat="c in columns">
+                        <div class="imageHolder">
+                            <img ng-src="{{GetInspectionImageUrl(r,c)}}" ng-show="GetInspectionImageUrl(r,c)" style="width: 100%"/>
+                            <a id="deleteInspImage" ng-click="DeleteInspectionImage(r,c)" ng-show="GetInspectionImageUrl(r,c)" style="position: absolute; top: 2px; right: 36px"><img src="/Images/inspection/status-remove.png" style="width: 32px"/></a>
+                            <a ng-click="MoveUp(r,c)" ng-show="GetInspectionImageUrl(r,c).length > 0 && !(r == 0 && c == 0)" style="position: absolute; top: 2px; right: 105px"><img src="/Images/inspection/up.png" style="width: 32px"/></a>
+                            <a ng-click="MoveDown(r,c)" ng-show="GetInspectionImageUrl(r,c).length > 0 && !(r == 2 && c==2)" style="position: absolute; top: 2px; right: 70px"><img src="/Images/inspection/down.png" style="width: 32px"/></a>
+                            <a plupload="fileUpload.url"
+                               plupload-options="fileUpload.options"
+                               plupload-callbacks="fileUpload.callbacks[r*rows.length+c]" style="cursor: pointer; position: absolute; top: 2px; right: 2px">
+                                <img src="/images/inspection/add.png" style="width: 32px"/>
+                            </a>
+                        </div>
+                    </tr>
+
+                    </tbody>
+
+
+                </table>
+
+
+
+                <table style="margin-top: 15px; clear: both" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr align="right">
+                        <td class="footer"><span class="white">Big Company. Copyright @DateTime.Now.Year</span></td>
+                    </tr>
+                </table>
+
+
+            </div>
+
+        </div>
+        <div class="container">
+            <br />
+            <div id="confirmMsg" style="color: green; display: none; font-size: 12px; float: left">The inspection has been updated</div>
+            <div id="wait" style="display: none">
+                <img src="/images/Spinning_wheel_throbber.gif" />
+            </div>
+            <input type="button" class="button" value="Update" ng-click="Update()"/> 
+            @if (Model.AllLoadings.Any(l => l.Line?.OrderLine?.Cust_Product?.MastProduct?.range1 == 1)) {
+                <input type="button" class="button" value="Upload Tracking List" ng-click="UploadTrackingList()" />
+            }
+            <input type="button" class="button" value="Submit Report" ng-click="SubmitReport()" ng-disabled="!checkQT()"/>
+            <input type="button" class="button" value="Define mixed pallets" ng-click="definePallets()" />
+            <br />    
+        </div>
+        
+    </div>
+    <div>
+      <script type="text/ng-template" id="modalDefinePallets.html">
+            <div class="modal-header">
+                @*<button type="button" class="close"  aria-label="Close" ng-click="close()"><span aria-hidden="true">&times;</span></button>*@
+                <h3 class="modal-title">Define pallets</h3>
+            </div>      
+             <div class="modal-body">
+                 <table style="padding: 2px; border: 1px solid black">
+                     <thead>
+                         <tr style="font-weight: bold">
+                             <th style="width: 50%;text-align:left">Pallet name</th>
+                             <th style="width: 20%;text-align:left">Area</th>
+                             <th style="width: 30%;text-align:left"></th>
+                         </tr>  
+                     </thead>
+                     <tbody>
+                         <tr ng-repeat="p in MixedPallets">
+                             <td><input type="text" ng-model="p.name" /></td>
+                             <td><select ng-options="a as a.name for a in Areas track by a.id" ng-model="p.area"></select></td>
+                             <td><button ng-click="remove(p)" style="width: 65px"> Remove </button></td>
+                         </tr>
+                     </tbody>
+                     <tfoot>
+                         <tr style="border-top: 1px solid #E0E0E0">
+                             <td><input type="text" ng-model="newPallet.name" /></td>
+                             <td><select ng-options="a as a.name for a in Areas track by a.id" ng-model="newPallet.area"></select></td>
+                             <td><button ng-click="add(p)" style="width: 65px"> Add </button></td>
+                         </tr>
+                     </tfoot>
+                 </table>
+                                  
+                 <br />
+                 
+             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="close()">Close</button>
+                <button type="button" class="btn btn-primary" ng-click="saveDefinitions()">Save changes</button>
+          </div>
+      </script>
+      <script type="text/ng-template" id="modalLoadingPallets.html">
+            <div class="modal-header">
+                @*<button type="button" class="close"  aria-label="Close" ng-click="close()"><span aria-hidden="true">&times;</span></button>*@
+                <h3 class="modal-title">Edit quantity on mixed pallets</h3>
+            </div>      
+             <div class="modal-body">
+                 <div style="font-weight: bold">Product: {{Product}}</div>
+                 <div style="font-weight: bold">Available Qty: <span>{{initQty}}</span></div>
+                 <div style="font-weight: bold">Remaining Qty: <span ng-class="getCss()">{{calcQty()}}</span></div>
+                 <br />
+                 <div style="display:table;width:90%;border: 1px solid black">
+                     <div style="display:table-row;font-weight:bold" >
+                        <div style="display:table-cell;width:50%">Pallet name</div>
+                        <div style="display:table-cell;width:20%">Area</div>
+                        <div style="display:table-cell;width:30%">Qty</div>
+                     </div>                     
+                    <div style="display:table-row" ng-repeat="p in MixedPallets">
+                        <div style="display:table-cell;width:50%">{{p.name}}</div>
+                        <div style="display:table-cell;width:20%">{{p.area.name}}</div>
+                        <div style="display:table-cell;width:30%"><input type="text" ng-model="p.qty" /></div>
+                    </div>                     
+                 </div>                 
+                 
+             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" ng-click="close()">Close</button>
+                <button type="button" class="btn btn-primary" ng-click="saveDefinitions()">Save changes</button>
+          </div>
+      </script>
+    </div>
+    <div loading class="loading-dialog"></div> 
+</div>
+
+            @Html.Raw(JSNLog.JavascriptLogging.Configure())
+            @Scripts.Render("~/bundles/jquery")
+            @Scripts.Render("~/bundles/jqueryui")
+            @Scripts.Render("~/bundles/angular")
+            
+            @Scripts.Render("~/bundles/globalize")
+            @Scripts.Render("~/bundles/jqueryval")
+            @Scripts.Render("~/bundles/ang-bootstrap")
+            <script src="~/Scripts/logToServer.js"></script>
+            @{ 
+                string flashUrl, silverUrl, runtimes;
+                flashUrl = "/Scripts/plupload-2.0.0/js/Moxie.swf";
+                silverUrl = "/Scripts/plupload-2.0.0/js/Moxie.xap";
+            }
+            @Scripts.Render("~/bundles/plupload2")                
+            @if (Request.Browser.Browser == "InternetExplorer") {
+                //@Scripts.Render("~/bundles/plupload")                
+                runtimes = "flash,html5,silverlight, html4";
+            }
+            else {                
+                runtimes = "html5, flash, silverlight, html4";
+            }
+    
+            <script src="~/Scripts/angular-plupload/angular-plupload.js"></script>
+
+            <script src="~/Scripts/autocomplete.js"></script>
+            <script src="~/Scripts/lodash.js"></script>
+            <script src="~/Scripts/functions.js"></script>
+            
+            
+            
+            <script type="text/javascript">
+                var app = angular.module('app', ['ngSanitize', 'angular-plupload','ui.bootstrap', 'logToServer'])
+        .config(function(pluploadOptionProvider) {
+            // global setting
+            pluploadOptionProvider.setOptions({
+                flash_swf_url: '@flashUrl',
+                silverlight_xap_url: '@silverUrl',
+                runtimes: '@runtimes',
+                max_file_size: '10mb'
+            });
+        });
+        </script>
+        <script src="~/Scripts/loading.js"></script>
+    <script>
+    
+    var maxContainerImages = 4;
+    var loadingsPerColumn = 28;
+    var loadingColumns = 2;
+    var imageCount = 9;
+    var imagesPerRow = 3;
+
+    var model = @Html.Raw(WebUtilities.JsonSerialize(Model.EditModel));
+
+    PrepareContainerImages(model.Containers);
+    PrepareInspectionImages(model.AllImages,model.Inspection.Lines.length > 0 ? model.Inspection.Lines[0].id : null);
+
+    app.controller('controller', [
+        '$scope', '$http', '$timeout','$uibModal',
+        function($scope, $http, $timeout,$uibModal) {
+
+            $scope.Inspection = model.Inspection;
+            $scope.Containers = model.Containers;
+            $scope.Areas = model.Areas;
+            $scope.AllLoadings = model.AllLoadings;
+            $scope.AllImages = model.AllImages;
+            $scope.uploader = null;
+            $scope.uploadedContainerFiles = {}; //dictionary with uploaded files
+            $scope.uploadedInspectionFiles = new Array(imageCount);
+            $scope.uploadedImages = [];
+            //$scope.percent = -1;
+            //$scope.uploadInProgress = false;
+            $scope.editedContainerIndex = null;
+            $scope.editedContainerImageIndex = null;
+
+            $scope.rows = [0,1,2];
+            $scope.columns = [0,1,2];
+
+            $scope.GetImageIndex = function(row, col) {
+                return row * $scope.rows.length + col;
+            }
+
+            $scope.GetContainerImageUrl = function(im)
+            {
+                if (im.new)
+                    //temp file
+                    return $.validator.format('@Url.Action("GetTempFileC")/?file={0}&container_id={1}&imageOrder={2}', im.insp_image, im.container_id, im.order);
+                else
+                    return CombineUrls('@Settings.Default.InspectionImagesFolder', im.insp_image);
+            }
+
+            //$scope.StartContainerImageEdit = function(contIndex, imageIndex) {
+            //    $scope.editedContainerIndex = contIndex;
+            //    $scope.editedContainerImageIndex = imageIndex;
+            //}
+
+            $scope.DeleteContainerImage = function(im) {
+                im.insp_image = '';
+            }
+
+            $scope.GetInspectionImageUrl = function(row,col) {
+                var im = _.find($scope.AllImages, {order: row*$scope.rows.length + col});
+                if (im.insp_image.length == 0)
+                    return '';
+                if (im.new)
+                    //temp file
+                    return $.validator.format('@Url.Action("GetTempFile")/?file={0}&id={1}', im.insp_image, im.comments);
+                else
+                    return CombineUrls('@Settings.Default.InspectionImagesFolder', im.insp_image);
+            }
+
+            $scope.MoveDown = function(row,col)
+            {
+                var order = row*$scope.rows.length + col;
+                var im = _.find($scope.AllImages, {order: order});
+                if(im != null && order < 8)
+                {
+                    var newIm = _.find($scope.AllImages, {order: order+1});
+                    if(newIm != null)
+                    {
+                        var oldData = JSON.parse(JSON.stringify(newIm));
+
+                        newIm.insp_image = im.insp_image;
+                        newIm.insp_line = im.insp_line;
+                        newIm.new = im.new;
+                        newIm.comments = im.comments;
+                        newIm.id = im.id;
+
+                        im.insp_image = oldData.insp_image;
+                        im.new = oldData.new;
+                        im.comments = oldData.comments;
+                        im.id = oldData.id;
+                    }
+                }
+            }
+
+            $scope.MoveUp = function(row,col)
+            {
+                var order = row*$scope.rows.length + col;
+                var im = _.find($scope.AllImages, {order: order});
+                if(im != null && order >0)
+                {
+                    var newIm = _.find($scope.AllImages, {order: order-1});
+                    if(newIm != null)
+                    {
+                        var oldData = JSON.parse(JSON.stringify(newIm));
+
+                        newIm.insp_image = im.insp_image;
+                        newIm.insp_line = im.insp_line;
+                        newIm.new = im.new;
+                        newIm.comments = im.comments;
+                        newIm.id = im.id;
+
+                        im.insp_image = oldData.insp_image;
+                        im.new = oldData.new;
+                        im.comments = oldData.comments;
+                        im.id = oldData.id;
+                    }
+                }
+            }
+
+            $scope.DeleteInspectionImage = function(row, col) {
+                var image = _.find($scope.AllImages, { order: row * $scope.rows.length + col });
+                if (image != null) {
+                    image.insp_image = '';
+                    image.comments = '';
+                }
+
+            }
+
+            $scope.fileUploadC = {
+                url: '@Url.Action("ContainerFiles")',
+                options: {},
+                callbacks: {}
+            };
+            $scope.PrepareLoadings = function() {
+                var len = $scope.AllLoadings.length;
+                for (var i = 0; i < (len % 2 == 0 ? len : len+1); i++) {
+                    var curr_loading = ($scope.AllLoadings.length > i) ? $scope.AllLoadings[i] : null;
+                    if (curr_loading != null) {
+
+                        curr_loading.totalqty_pallet = function() {
+                            return Coalesce(this.full_pallets,0) * Coalesce(this.qty_per_pallet,0);
+                        };
+                        curr_loading.totalqty = function() {
+                            return CalculateTotalQty(this,true);
+                        }
+                        curr_loading.totalqty_mixedpallets = function() {
+                            if(this.QtyMixedPallets != null)
+                            {
+                                return _.sumBy(this.QtyMixedPallets, 'qty');
+                            }
+                            return 0;
+                        };
+                        curr_loading.loadingClass = function () {
+                            var tmp = CalculateTotalQty(this, true);
+                            var isEqualQty = tmp == this.qty;
+
+                            return isEqualQty ? '' : 'loading_quantities_dont_match';
+                        };
+
+                        if(curr_loading.OrderLine != null && curr_loading.OrderLine.Cust_Product != null && curr_loading.OrderLine.Cust_Product.MastProduct != null && curr_loading.OrderLine.Cust_Product.MastProduct.Factory != null)
+                            curr_loading.factory = curr_loading.OrderLine.Cust_Product.MastProduct.Factory.factory_code;
+
+                        //curr_loading.custpo = curr_loading.Line.OrderLine != null ? curr_loading.Line.OrderLine.Header.custpo : '';
+
+                    } else {
+                        $scope.AllLoadings.push({ cprod_code: '', custpo: '', full_pallets: '', qty_per_pallet: '', totalqty_pallet : function() {return '';} , totalqty: function () { return '';}, area_id: null, Area: null });
+                    }
+                }
+
+            }
+
+            //$scope.Inspection.AllLoadings = function() {
+            //    var result = [];
+            //    $scope.Inspection.Lines.forEach(function(l) {
+            //        result = _.union(result, l.Loadings);
+            //    });
+            //    return result;
+            //}
+
+            $scope.PrepareLoadings();
+
+            $scope.Containers.forEach(function(c) {
+                $scope.fileUploadC.options[c.id] = [];
+                $scope.fileUploadC.callbacks[c.id] ={};
+                c.Images.forEach(function(im) {
+                    im.new = false;
+                    $scope.fileUploadC.options[c.id].push(
+                        {
+                            multi_selection: false,
+                            max_file_size: '32mb',
+                            //browse_button: 'uploadImageC_' + c.id + '_' + im.order,
+                            resize: { width: 1280, height: 1024, quality: 80 },
+                            filters: [
+                                {
+                                    extensions: 'jpg,png'
+                                }
+                            ]
+                        }
+                    );
+
+                    $scope.fileUploadC.callbacks[c.id][im.order] =
+                        {
+                            filesAdded: function(uploader, files) {
+                                $scope.uploadInProgress = true;
+                                $scope.uploadedContainerFiles[c.id] = {};
+                                files.forEach(function(elem) {
+                                    //initial progress value
+                                    var file = new File(elem.id,elem.name, 0, elem.size);
+                                    $scope.uploadedContainerFiles[c.id][elem.id] = file;
+                                });
+                                $timeout(function() {
+                                    uploader.start();
+                                }, 1);
+                            },
+                            uploadProgress: function(uploader, file) {
+                                //$scope.loading = file.percent/100.0;
+                                if ($scope.uploadedContainerFiles != null && c != null && file != null && $scope.uploadedContainerFiles[c.id][file.id] != null)
+                                    $scope.uploadedContainerFiles[c.id][file.id].percent = file.percent;
+                            },
+                            beforeUpload: function(uploader, file) {
+                                uploader.settings.multipart_params = { container_id: c.id, imageOrder: im.order };
+                            },
+                            fileUploaded: function(uploader, file, response) {
+                                im.insp_image = file.name;
+                                //im.id = -1;
+                                im.new = true;
+                                im.container_id = c.id;
+                                //$scope.EditedDetail.Images.push({ image: file.name, sid: file.id, id: 0, meeting_detail_id: $scope.EditedDetail.meeting_detail_id });
+                                if ($scope.uploadedContainerFiles != null && c != null && file != null && $scope.uploadedContainerFiles[c.id][file.id] != null)
+                                    $scope.uploadedContainerFiles[c.id][file.id].percent = 100;
+
+                                //if (_.every($scope.files, function(f) { return f.percent === 100;}))
+                                //    $scope.uploadInProgress = false;
+                            },
+                            error: function(uploader, error) {
+                                $scope.loading = false;
+                                alert(error.message);
+                            }
+                        };
+                });
+            });
+
+            $scope.fileUpload = {
+                url: '@Url.Action("Images")',
+                options: {
+                    multi_selection: false,
+                    max_file_size: '32mb',
+                    resize: { width: 1280, height: 1024, quality: 80 },
+                    filters: [
+                        {
+                            extensions: 'jpg,png'
+                        }
+                    ]
+                },
+                callbacks: []
+            };
+
+            $scope.fileUploadMulti = {
+                url: '@Url.Action("Images")',
+                options: {
+                    multi_selection: true,
+                    max_file_size: '32mb',
+                    resize: { width: 1280, height: 1024, quality: 80 },
+                    filters: [
+                        {
+                            extensions: 'jpg,png'
+                        }
+                    ]
+                },
+                callbacks: {
+                    filesAdded: function(uploader, files) {
+                        $scope.uploadInProgress = true;
+
+                        files.forEach(function(elem) {
+                            //initial progress value
+                            var file = new File(elem.id,elem.name, 0, elem.size);
+                            $scope.uploadedImages.push(file);
+                        });
+                        $timeout(function() {
+                            uploader.start();
+                        }, 1);
+                    },
+                    uploadProgress: function(uploader, file) {
+                        //$scope.loading = file.percent/100.0;
+                        var f = _.find($scope.uploadedImages, {id: file.id});
+                        if(f != null)
+                            f.percent = file.percent;
+                    },
+                    beforeUpload: function(uploader, file) {
+                        uploader.settings.multipart_params = { id: file.id };
+                    },
+                    fileUploaded: function(uploader, file, response) {
+                        var f = _.find($scope.uploadedImages, {id: file.id});
+                        if(f != null)
+                        {
+                            f.insp_image = file.name;
+                            f.new = true;
+                            f.percent = 100;
+                        }
+                        if(_.every($scope.uploadedImages, {percent: 100}))
+                        {
+                            var i=0;
+                            var maxImageOrder = 0;
+                            var max = _.maxBy(_.filter($scope.AllImages, function(im) {
+                                    return im.insp_image.length > 0;
+                                    }), 'order');
+                            if(max != null)
+                                maxImageOrder = max.order+1;
+                            $scope.uploadedImages.forEach(function(im) {
+                                if(maxImageOrder <= 8)
+                                {
+                                    var imageIndex = _.findIndex($scope.AllImages, {order: maxImageOrder});
+                                    if(imageIndex >= 0)
+                                    {
+                                        im.order = maxImageOrder;
+                                        im.comments = im.id;
+                                        im.id = 0;
+                                        im.insp_line = $scope.AllImages[imageIndex].insp_line;
+                                        $scope.AllImages[imageIndex] = im;
+                                        maxImageOrder++;
+                                    }
+
+                                }
+                            });
+                            $scope.uploadedImages = [];
+                        }
+                    },
+                    error: function(uploader, error) {
+                        $scope.loading = false;
+                        alert(error.message);
+                    }
+                }
+            };
+
+            $scope.fileUpload.callbacks = {};
+
+            $scope.AllImages.forEach(function(im) {
+                im.new = false;
+                var index = im.order;// Math.floor(im.order/3) + im.order % 3;
+                $scope.fileUpload.callbacks[index] =
+                    {
+                        filesAdded: function(uploader, files) {
+                            $scope.uploadInProgress = true;
+                            //$scope.uploadedContainerFiles[c.id] = {};
+                            files.forEach(function(elem) {
+                                //initial progress value
+                                var file = new File(elem.id,elem.name, 0, elem.size);
+                                $scope.uploadedImages.push(file);
+                            });
+                            $timeout(function() {
+                                uploader.start();
+                            }, 1);
+                        },
+                        uploadProgress: function(uploader, file) {
+                            //$scope.loading = file.percent/100.0;
+                            //$scope.uploadedInspectionFiles[im.order].percent = file.percent;
+                            var f = _.find($scope.uploadedImages, {id: file.id});
+                            if(f != null)
+                                f.percent = file.percent;
+                        },
+                        beforeUpload: function(uploader, file) {
+                            uploader.settings.multipart_params = { id: file.id };
+                        },
+                        fileUploaded: function(uploader, file, response) {
+                            /*im.insp_image = file.name;
+                            //im.id = -1;
+                            im.new = true;
+                            im.id = "";
+
+                            //$scope.EditedDetail.Images.push({ image: file.name, sid: file.id, id: 0, meeting_detail_id: $scope.EditedDetail.meeting_detail_id });
+                            $scope.uploadedInspectionFiles[im.order].percent = 100;*/
+
+                            //if (_.every($scope.files, function(f) { return f.percent === 100;}))
+                            //    $scope.uploadInProgress = false;
+                            var f = _.find($scope.uploadedImages, {id: file.id});
+                            if(f != null)
+                            {
+                                f.percent = 100;
+                            }
+                            //im.id = 0;
+                            im.comments = file.id;
+                            im.insp_image = file.name;
+                            im.new = true;
+                            $scope.uploadedImages = [];
+                            //im.id = "";
+
+                        },
+                        error: function(uploader, error) {
+                            $scope.loading = false;
+                            alert(error.message);
+                        }
+
+                    };
+            });
+
+            $scope.GetLoadings = function(c) {
+                var rows = _.filter($scope.AllLoadings, { container_id: c.id });
+                return rows;
+            };
+
+
+
+            $scope.GetEmptyRows = function (c, index)
+            {
+                var result = []
+                var max = @(LoadingInspectionV2ReportModel.LoadingTableRowsPerFirstPage);
+                var loadings = _.filter($scope.AllLoadings, { container_id: c.id });
+                //var limit = index == 0 ? max - loadings.length : loadings.length > max ? 2 * max - loadings.length : max;
+                var limit = index == 0 ? max - loadings.length : loadings.length > max ? max - loadings.length : max;
+                for (var i = 0; i < limit; i++) {
+                    result.push(i);
+                }
+                return result;
+            }
+
+            $scope.GetLoadingLimit = function(c) {
+                var len = $scope.GetLoadings(c).length;
+                //return _.max([28, len % 2 == 0 ? len / 2 : Math.floor(len / 2) + 1]);
+                return _.max([28,len]);
+            };
+
+            $scope.GetLoadingIndex = function(c,secondpart) {
+                return secondpart ? $scope.GetLoadingLimit(c) : 0;
+            };
+
+            $scope.Update = function() {
+
+                var combinedLoadings = [];
+
+                //$('#wait').show();
+                //get loadings values from Allloadings
+                $scope.AllLoadings.forEach(function(l) {
+                    var idx = _.findIndex($scope.Inspection.Lines, { id: l.insp_line });
+                    if (idx >= 0) {
+                        var line = $scope.Inspection.Lines[idx];
+                        var loidx = _.findIndex(line.Loadings, { id: l.id });
+                        if (loidx >= 0) {
+                            var lo = line.Loadings[loidx];
+                            lo.full_pallets = l.full_pallets;
+                            lo.loose_load_qty = l.loose_load_qty;
+                            lo.mixed_pallet_qty = l.mixed_pallet_qty;
+                            lo.mixed_pallet_qty2 = l.mixed_pallet_qty2;
+                            lo.mixed_pallet_qty3 = l.mixed_pallet_qty3;
+                            lo.area_id = l.area_id;
+                            lo.qty_per_pallet = l.qty_per_pallet;
+                            lo.AreasText = l.AreasText;
+                            $scope.ProcessAreas(lo);
+                            lo.QtyMixedPallets = l.QtyMixedPallets;
+                        }
+                    }
+                    else
+                    {
+                        if (l.id > 0) {
+                            $scope.ProcessAreas(l);
+                            combinedLoadings.push(l);
+                        }
+
+                    }
+                });
+
+                $scope.AllImages.forEach(function(i) {
+                    var idx = _.findIndex($scope.Inspection.Lines, { id: i.insp_line });
+                    if (idx >= 0) {
+                        var line = $scope.Inspection.Lines[idx];
+
+                        if (line.Images == null)
+                            line.Images = [];
+                        if (i.id > 0) {
+                            var imidx = _.findIndex(line.Images, { id: i.id });
+                            if (imidx >= 0) {
+                                if (i.insp_image.length > 0) {
+                                    var im = line.Images[imidx];
+                                    im.insp_image = i.insp_image;
+                                    im.comments = i.comments;
+                                    im.order = i.order;
+                                } else {
+                                    line.Images.splice(imidx, 1);
+                                }
+
+                            }
+                        }
+                        else if(i.insp_image.length > 0) {
+                            line.Images.push({ insp_image: i.insp_image, insp_line: i.insp_line,order:i.order, comments: i.comments, id:0 });
+                        }
+
+                    }
+                });
+
+                var data = JSON.parse(JSON.stringify($scope.Inspection));
+                data.Containers = JSON.parse(JSON.stringify($scope.Containers));
+                delete data.AllLoadings;
+                delete data.AllImages;
+
+                //Remove images without name
+                data.Containers.forEach(function(c) {
+                    _.remove(c.Images, function(im) {
+                        return im.insp_image.length == 0;
+                    });
+                });
+
+                
+
+                $http.post('@Url.Action("UpdateLoading")', {insp:data, combinedLoadings: combinedLoadings}).
+                    success(function(data, status, headers, config) {
+                        
+                        location.href = location.href;
+                    }).
+                    error(function(data, status, headers, config) {
+                        //alert(status);
+                        $('#wait').hide();
+                    });
+            };
+
+            $scope.SubmitReport = function() {
+                $http.post('@Url.Action("SubmitReport")', {id: $scope.Inspection.id }).then(function(response) {
+                    location.href = location.href;
+                });
+            };
+
+            $scope.UploadTrackingList = function() {
+                location.href = '@Url.Action("TrackingNumbersEdit")/?id=' + $scope.Inspection.id.toString();
+            };
+
+            $scope.ProcessAreas = function(lo) {
+                var area_names = lo.AreasText.split(',');
+                lo.Areas = [];
+                area_names.forEach(function(name) {
+                    var area = _.find($scope.Areas, {name: name});
+                    if(area != null)
+                        lo.Areas.push(area);
+                });
+            };
+
+            $scope.definePallets = function()
+            {
+                var modalInstance = $uibModal.open({
+                    controller: function($scope,$uibModalInstance, model) {
+                        $scope.newid = -1;
+                        $scope.Areas = model.Areas;
+                        $scope.MixedPallets = clone(model.Inspection.MixedPallets);
+                        $scope.MixedPallets.forEach(function(mp) {
+                            mp.area = _.find($scope.Areas, {id: mp.area_id});
+                        });
+                        $scope.Inspection = model.Inspection;
+                        $scope.close = function() {
+                            $uibModalInstance.dismiss('cancel');
+                        };
+                        $scope.saveDefinitions = function() {
+                            $uibModalInstance.close($scope.MixedPallets);
+                        };
+                        $scope.newPallet = { name: '', area: null, insp_id: model.Inspection.id};
+                        $scope.add = function() {
+                            if($scope.MixedPallets == null)
+                                $scope.MixedPallets = [];
+                            var newp = JSON.parse(JSON.stringify($scope.newPallet));
+                            newp.id = $scope.newid;
+                            $scope.MixedPallets.push(newp);
+                            $scope.newPallet.name = '';
+                            $scope.newPallet.area = null;
+                            $scope.newid--;
+                        };
+                        $scope.remove = function(p)
+                        {
+                            _.remove($scope.MixedPallets, {id: p.id});                            
+                        }
+                    },
+                    templateUrl: 'modalDefinePallets.html',
+                    size: 'lg',
+                    resolve: {
+                        model: function () {
+                            return { 
+                                Inspection: $scope.Inspection, 
+                                Areas: $scope.Areas
+                            };
+                        }
+                    }
+
+                });
+                modalInstance.result.then(function(pallets) {
+                    pallets.forEach(function(p) {
+                        if(p.area != null)
+                            p.area_id = p.area.id;
+                        delete p.area;
+                    });
+                    $scope.Inspection.MixedPallets = pallets;
+                    $scope.Update();
+                });
+            };
+
+            $scope.assignMixedPallets = function(l)
+            {
+                var modalInstance = $uibModal.open({
+                    controller: function($scope,$uibModalInstance, model) {
+                        $scope.Areas = model.Areas;
+                        $scope.Product = l.cprod_code + ' (' + l.factory_ref + ')';
+                        $scope.MixedPallets = clone(model.Inspection.MixedPallets);
+                        $scope.MixedPallets.forEach(function(mp) {
+                            mp.area = _.find($scope.Areas, {id: mp.area_id});
+                            if(l.QtyMixedPallets != null)
+                                var qmp = _.find(l.QtyMixedPallets, {pallet_id: mp.id});
+                                if(qmp != null)
+                                    mp.qty = qmp.qty;
+                        });
+
+                        $scope.Inspection = model.Inspection;
+                        $scope.close = function() {
+                            $uibModalInstance.dismiss('cancel');
+                        };
+                        $scope.saveDefinitions = function() {
+                            $uibModalInstance.close($scope.MixedPallets);
+                        };
+                        
+                        $scope.initQty = Coalesce(l.qty,0) - CalculateTotalQty(l,false);
+                        
+                        $scope.calcQty = function() {
+                            return $scope.initQty - Coalesce(_.sumBy($scope.MixedPallets, function(mp) {
+                                var r = parseInt(mp.qty);
+                                if(!isNaN(r))
+                                    return r;
+                                return 0;
+                            }),0);
+                        };
+
+                        $scope.getCss = function() 
+                        {
+                            return $scope.calcQty() >= 0 ? "mixedPallets_availableqty_positive" : "mixedPallets_availableqty_negative";
+                        }
+
+                    },
+                    templateUrl: 'modalLoadingPallets.html',
+                    size: 'lg',
+                    resolve: {
+                        model: function () {
+                            return { 
+                                Inspection: $scope.Inspection, 
+                                Areas: $scope.Areas,
+                                Loading: l
+                            };
+                        }
+                    }
+
+                });
+                modalInstance.result.then(function(pallets) {
+                    pallets.forEach(function(p) {
+                        if(p.qty > 0)
+                        {
+                            if(l.QtyMixedPallets == null)
+                                l.QtyMixedPallets = [];
+                            var qmp = _.find(l.QtyMixedPallets, {pallet_id: p.id});
+                            if(qmp != null)
+                                qmp.qty = p.qty;
+                            else
+                                l.QtyMixedPallets.push({pallet_id: p.id, qty: p.qty, loading_id: l.id});
+                        }
+                        else
+                        {
+                            if(l.QtyMixedPallets != null)
+                            {
+                                _.remove(l.QtyMixedPallets, {pallet_id: p.id});
+                            }
+                        }
+                    });
+                    //$scope.Inspection.MixedPallets = pallets;
+                    //$scope.Update();
+                });
+            };
+
+            $scope.MixedPalletsList = function(c) {
+                var loadings = $scope.GetLoadings(c);
+                var palletesSummary = {};
+                loadings.forEach(function(l) {
+                    if(l.QtyMixedPallets != null)
+                    {
+                        l.QtyMixedPallets.forEach(function(qmp) {
+                            if(qmp.pallet_id in palletesSummary)
+                            {
+                                palletesSummary[qmp.pallet_id].quantities.push(l.cprod_code + 'x' + qmp.qty.toString());
+                            }
+                            else
+                            {
+                                var pallet = _.find($scope.Inspection.MixedPallets, {id: qmp.pallet_id});
+                                if(pallet != null)
+                                    palletesSummary[qmp.pallet_id] = { name: pallet.name, quantities: [l.cprod_code + 'x' + qmp.qty.toString()]};
+                            }
+                        });
+                    }
+                } );
+                var result = [];
+                for(var p in palletesSummary)
+                {
+                    result.push(palletesSummary[p].name + ': ' + palletesSummary[p].quantities.join(', ') ) ;
+                }
+                return result;
+            };
+
+            $scope.checkQT = function () {
+                var len = $scope.AllLoadings.length;
+
+                var checkOk = true;
+
+                for (var i = 0; i < len; i++) {
+                    var curr_loading = ($scope.AllLoadings.length > i) ? $scope.AllLoadings[i] : null;
+                    if (curr_loading != null && curr_loading.loadingClass != null) {
+                        var tmp = curr_loading.loadingClass();
+                        if (tmp == 'loading_quantities_dont_match')
+                            checkOk = false;
+                    };
+                };
+
+                return checkOk;
+            };
+
+        }
+    ]);
+
+    
+
+    function File(id,name, percent, size) {
+        this.id = id;
+        this.name = name;
+        this.percent = percent;
+        this.size = size;
+    }
+
+    function Coalesce(value, default_value) {
+        if (value == null || value=='')
+            return default_value;
+        var numValue = parseInt(value);
+        if (typeof(numValue) == typeof(undefined))
+            return default_value;
+        return numValue;
+    }
+
+    function PrepareContainerImages(containers) {
+        var order = 0;
+        containers.forEach(function(elem) {
+            var len = elem.Images.length;
+            for (var i = 0; i < maxContainerImages; i++) {
+                //if (i < len)
+                //    elem.Images[i].order = order++;
+                //else
+                //    elem.Images.push({ insp_image: '', order: order++ });
+                //TODO: preserve order of existing images
+                if (typeof(_.find(elem.Images, { order: i })) == typeof(undefined)) {
+                    elem.Images.push({ insp_image: '', order: i});
+                }
+            }
+
+        });
+
+
+
+    }
+
+    function PrepareInspectionImages(images,line_id) {
+        //inspection.AllImages.forEach(function(elem) {
+            for (var i = 0; i < imageCount; i++) {
+                if (typeof(_.find(images, { order: i })) == typeof(undefined)) {
+                    var insp_line = -1;
+                    if (images.length > 0)
+                        insp_line = images[0].insp_line;
+                    else {
+                        insp_line = line_id;
+                    }
+                    images.push({ id: -1,insp_image: '', order: i, insp_line: insp_line});
+                }
+            }
+        //});
+    }
+
+    function CalculateTotalQty(l, includeMixedPallets) {
+        var result =  Coalesce(l.totalqty_pallet(), 0) + Coalesce(l.loose_load_qty, 0);
+        if(includeMixedPallets)
+        {
+            //result += Coalesce(l.mixed_pallet_qty, 0) + Coalesce(l.mixed_pallet_qty2, 0) + Coalesce(l.mixed_pallet_qty3, 0);
+            if(l.QtyMixedPallets != null)
+            {
+                l.QtyMixedPallets.forEach(function(qmp) {
+                    result += Coalesce(qmp.qty, 0);
+                });
+            }
+        }
+        return result;
+    };
+            </script>
+
+
+</body>
+</html>
+

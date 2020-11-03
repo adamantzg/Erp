@@ -1,0 +1,1 @@
+﻿var prApp = angular.module('ProductReviewApp', ['ui.bootstrap', 'logToServer']);

@@ -1,0 +1,92 @@
+﻿@using Utilities = company.Common.Utilities
+@model StockOrderCalculationModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Stock order calculation</title>
+        <style>
+            body { font-family: arial;font-size: 11px}
+            .header1 {background-color: lightskyblue}
+            .header2 {
+                background-color: lightsalmon;
+                text-align: right
+            }
+            .header3 { background-color: yellow;text-align: right}
+            .number {text-align: right}
+            .altrow {background-color: lightgrey}
+            td { border: 1px solid black;padding: 2px}
+        </style>
+    </head>
+    <body>
+        <h3>Factory: @(ViewBag.Factory != null ? ViewBag.Factory.factory_code : string.Empty)</h3>
+        <div>
+            <table style="width: 1100px;border-collapse: collapse">
+                <tr class="header1">
+                    <td style="width: 300px" rowspan="2">Description</td>
+                    <td style="color:red" rowspan="2">Client MOQ</td>
+                    <td colspan="6">Sales</td>
+                    <td rowspan="2" class="number">monthly average</td>
+                    <td rowspan="2" class="header2"><span title="Current total stock (minus all outstanding orders)">Current total stock</span>  </td>
+                    <td rowspan="2" class="header3">Current stock level</td>
+                    <td rowspan="2" >Factory MOQ</td>
+                    <td rowspan="2" >Lead time</td>
+                    <td rowspan="2" class="header3"><span title="Suggest order quantity to achieve the target free stock level">Suggest order quantity</span></td>
+                    <td rowspan="2" class="header2"><span title="target free stock level by the time the stock order is ready">target free stock level</span></td>
+                    <td rowspan="2" class="number">all outstanding orders</td>
+                    <td rowspan="2" class="number"><span title="Actual free stock level by the time the stock order is ready">Actual free stock level</span> </td>
+                    <td rowspan="2">Remark</td>
+                    <td rowspan="2" class="number" style="background-color: lightgreen">current stock /MOQ</td>
+                    <td rowspan="2" class="header2">Updated stock/MOQ</td>
+                </tr>
+                <tr class="header1">
+                    @for (int i = -6; i <= -1; i++)
+                    {
+                        <td>@DateTime.Today.AddMonths(i).ToString("MMM")</td>
+                    }
+                </tr>
+                @{ var counter = 0;}
+                @foreach (var p in Model.Products.GroupBy(prod=>prod.cprod_mast).OrderBy(prod=>prod.First().MastProduct.asaq_name))
+                {
+                    var mp = p.First().MastProduct;
+                    
+                    <tr @Html.Raw(counter++%2 == 1 ? "class=altrow" : "")>
+                        <td>@mp.asaq_name</td>
+                        <td>@{ var clientMOQ = p.Max(pr => pr.moq); }@clientMOQ</td>
+                        @for (var i = -6; i <= -1; i++)
+                        {
+                            <td class="number">
+                                @Model.ProductSalesData.Where(prod => p.Any(pr => pr.cprod_id == prod.cprod_id) && prod.month21 == Utilities.GetMonthFromNow(i)).Sum(ps=>ps.QtySold)
+                            </td>
+                        }
+                        <td class="number">@{ var avg6Month = Model.ProductSalesData.Where(prod => p.Any(pr => pr.cprod_id == prod.cprod_id)).Average(prod => prod.QtySold); }@avg6Month.ToString("N0")</td>
+                        <td class="number">@{ var stock = mp.stock_qty;
+                                var outstorders = Model.OrderSummary.Where(o => p.Any(pr => pr.cprod_id == o.cprod_id)).Sum(or => or.TotalQty); }@(stock-outstorders)</td>
+                        <td class="number">@((avg6Month > 0 ? mp.stock_qty/avg6Month : 0).ToString("N2") )</td>
+                        <td>@mp.factory_moq</td>
+                        <td>@mp.lead_time</td>
+                        <td class="number">@{ var target = Settings.Default.StockOrderCalculationThreshold;
+                                // clientmoq*ROUND((target*average-totalstock + average*(leadtime/30-1))/clientmoq;0)
+                                var suggestedOrderQty = clientMOQ > 0 ? Math.Round(clientMOQ*(target*avg6Month - (stock - outstorders) + avg6Month*(mp.lead_time/30 - 1))/clientMOQ ?? 0, 0) : 0;
+                               
+                            }@suggestedOrderQty</td>
+                        <td class="number">@target</td>
+                        <td class="number">@outstorders</td>
+                        <td class="number">@{
+                                //=(totalstock+suggested-average*(lead/30-1))/average
+                                @( (avg6Month > 0 ? ((stock-outstorders) + suggestedOrderQty - avg6Month*(mp.lead_time/30-1))/avg6Month : 0).ToString("N2"))
+                            }</td>
+                        <td></td>
+                        <td class="number">@((clientMOQ > 0 ? (stock-outstorders)/clientMOQ : 0))</td>
+                        <td class="number">@((clientMOQ > 0 ? (stock - outstorders+suggestedOrderQty)/clientMOQ : 0).ToString("N2"))</td>
+                    </tr>
+                }
+            </table>  
+        </div>
+    </body>
+</html>

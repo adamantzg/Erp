@@ -1,0 +1,42 @@
+﻿@model List<asaq2.Model.Cust_products>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#checkall').change(function () {
+            var checked = $('#checkall').attr('checked');
+            if (checked != null && checked.length > 0)
+                $('[id^=chk_]').attr('checked', 'checked');
+            else {
+                $('[id^=chk_]').removeAttr('checked');
+            }
+        });
+        $('#checkall').attr('checked', 'checked');
+        $('[id^=chk_]').attr('checked', 'checked');
+    });
+    
+    @Html.Raw("//@ sourceURL=dynamicScript.js")
+</script>
+
+<table style="width: 100%">
+    
+    @foreach (var prod in Model.Select(p=>new {p.MastProduct.factory_ref,cprod_code1 = (p.cprod_id >0 ?  p.cprod_code1 : string.Empty),p.cprod_name, p.MastProduct.asaq_name, p.MastProduct.mast_id,p.cprod_id }).OrderBy(p=>p.factory_ref).Distinct().ToList())
+   
+    {
+        var id = (prod.cprod_id > 0 ? prod.cprod_id : prod.mast_id);
+        <tr class="tablerow">
+            <td style="width: 85px">
+                <span title="@prod.factory_ref">@(prod.factory_ref?.Length > 30 ? prod.factory_ref.Substring(0,30) + "..." : prod.factory_ref )</span>
+            </td>
+            <td style="width: 70px">
+                @prod.cprod_code1
+            </td>
+            <td>
+                @(prod.cprod_id>0 ? prod.cprod_name : prod.asaq_name)
+                @*@prod.asaq_name*@
+            </td>
+            <td style="width: 20px">
+                <input type="checkbox" id="chk_@id" name="chk_@id"/>
+            </td>
+        </tr>
+    }
+</table>

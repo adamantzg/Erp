@@ -1,0 +1,246 @@
+﻿
+<div class="nav navbar-default col-sm-12"  style="margin-top:-36px;margin-bottom:25px; padding:5px;" >
+    <div class="container-fluid">
+        <ul class="nav navbar-nav  pull-right">
+
+            <li>
+                <div class="btn btn-danger pull-xs-left pull-sm-right" title="PDF View" ng-click="vm.openPdf(vm.model.notice.id)">
+                    <i class="fa fa-file-pdf-o" style="font-size:18px"></i>
+                </div>
+            </li>
+        </ul>
+    </div>
+    
+</div>
+<div class="row">
+    <div class="col-xs-6 col-sm-12 col-md-7">
+        <div class="panel panel-default">
+
+            <div class="panel-heading">
+                <div class="panel-title"><i class="glyphicon glyphicon-th"></i> Summary</div>
+            </div>
+
+            <div class="panel panel-body">
+                <div class="list-group ">
+                    <div class="list-group-item ">
+                        <span class="h4">
+                            <span class="col-sm-6 title-description">Factory&nbsp; </span>
+                            <span class=" text-align text-muted"> {{vm.factoryCode}}&nbsp;</span>
+                        </span>
+
+                        <!--<span class="badge badge-default badge-pill">No</span>-->
+                    </div>
+                    <div class="list-group-item ">
+                        <span class="h4">
+                            <span class="col-sm-6 title-description">
+                                Category&nbsp;
+                            </span>
+                            <span class="text-muted text-align"> {{vm.categoryName}}&nbsp;</span>
+                        </span>
+                    </div>
+                    <div class="list-group-item ">
+                        <span class="h4">
+                            <span class="col-sm-6 title-description" style="padding-right:0">
+                                Reason
+                            </span>
+                            <span class="text-muted text-align"> {{vm.reason}}&nbsp;</span>
+                        </span>
+                    </div>
+                    <div class="list-group-item ">
+                        <span class="h4">
+                            <span class="col-sm-6 title-description">
+                                Date Created
+                            </span>
+                            <span class="text-muted text-align">
+                                {{vm.FormatDate(vm.model.notice.datecreated)}}&nbsp;
+                            </span>
+                        </span>
+                    </div>
+
+                    <div class="list-group-item ">
+                        <span class="h4">
+                            <span class="col-sm-6 title-description" style="padding-right:0">
+                                Expected ready date
+                            </span>
+                            <span class="text-muted text-align">
+                                {{vm.FormatDate(vm.model.notice.expectedReadyDate)}}&nbsp;
+                            </span>
+                        </span>
+                    </div>
+                    <div class="list-group-item ">
+                        <span class="h4">
+                            <span class="col-sm-6 title-description">
+                                Status
+                            </span>
+                            <span class="text-muted text-align">
+                                {{vm.status}}&nbsp;
+                            </span>
+                        </span>
+                    </div>
+                    <div class="list-group-item ">
+                        <h4 class="list-group-item-heading col-sm-12">
+                            <span>Description</span>
+
+                        </h4>
+                        <span class="list-group-item-text text-define">
+                            {{vm.description}}&nbsp;
+                        </span>
+                    </div>
+                    <!--<div class="list-group-item disabled">
+                        <span class="list-group-item-text">text 2</span>
+                        <span class="badge badge-default badge-pill">Yes</span>
+                    </div>
+                    <div class="list-group-item disabled">
+                        <span class="list-group-item-text">text 2</span>
+                        <span class="badge badge-default badge-pill">Yes</span>
+                    </div>-->
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+    <div class="col-xs-12 visible-xs" >&nbsp;</div>
+    <div class="col-xs-6 col-sm-12 col-md-5">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="panel-title"><i class="fa fa-file"></i> Documents</div>
+            </div>
+            <div class="panel panel-body">
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <span class="h4">
+                            <span>Product Drawing</span>
+                            <span class="badge pull-right"
+                                  ng-class="vm.model.notice.document.product_drawing ? 'badge-success':'badge-default'">{{vm.model.notice.document.product_drawing}}</span>
+                        </span>
+                    </div>
+                    <div class="list-group-item">
+                        <span class="h4">
+                            <span>Instructions</span>
+                            <span class="badge pull-right"
+                                  ng-class="vm.model.notice.document.instructions ? 'badge-success':'badge-default'">{{vm.model.notice.document.instructions}}</span>
+                        </span>
+                    </div>
+                    <div class="list-group-item">
+                        <span class="h4 ">
+                            <span>Label</span>
+                            <span class="badge pull-right"
+                                  ng-class="vm.model.notice.document.label ? 'badge-success':'badge-default'"
+                                  >{{vm.model.notice.document.label}}</span>
+                        </span>
+                    </div>
+                    <div class="list-group-item">
+                        <span class="h4 ">
+                            <span>Packaging</span>
+                            <span class="badge  pull-right"
+                                   ng-class="vm.model.notice.document.packaging ? 'badge-success':'badge-default'">{{vm.model.notice.document.packaging}}</span>
+                        </span>
+                    </div>
+                    <div class="list-group-item">
+                        <span class="h4 ">
+                            <span>Photo</span>
+                            <span class="badge pull-right"
+                                  ng-class="vm.model.notice.document.photo ? 'badge-success':'badge-default'">{{vm.model.notice.document.photo}}</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<!-- END SUMMARY AND DOCUMENTS PANEL HOLDER -->
+
+<!-- PANEL FILES -->
+
+<div class="row">
+    <div class="col-xs-6 col-sm-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="panel-title"><i class="glyphicon glyphicon-picture"></i> Files</div>
+
+            </div>
+            <div class="panel-body" ng-repeat="r in vm.rows">
+                <div class="row" ng-if="r==0">
+                    <div class="col-sm-6" colspan="3">
+                        <span class="h4">
+                            <span>Before change</span>
+                        </span>
+                    </div>
+
+
+                    <div class="col-cm-6" colspan="3">
+                        <span class="h4">
+                            <!-- style="margin-left:30px" -->
+                            <span style="margin-left:15px">After change</span>
+                        </span>
+                    </div>
+                </div>
+                <!--<div class="row" >
+                    <div class="col-sm-2"  align="center" ng-repeat="c in vm.columns">
+                    <span>File {{r * vm.columns.length + c  + 1}}</span>
+                    </div>
+                </div>-->
+                <div class="row">
+
+                    <div class="col-xs-4 col-sm-2" ng-repeat="c in vm.columns">
+                        <div class="caption text-muted">
+                            <span class="h5"> File {{r * vm.columns.length + c  + 1}}</span>
+                        </div>
+                        <div class="lg-icon" ng-if="!vm.IsPicture(r,c)">
+                            <a ng-href="{{vm.getImageUrl(r,c)}}" target="_blank">
+                                <div ng-class="vm.GetBootstrapDocIcon(r,c,true)">
+                                    <div ng-class="vm.GetBootstrapDocIcon(r,c)"></div>
+                                </div>
+                            </a>
+                        </div>
+                        <div ng-if="vm.IsPicture(r,c)" style="text-align:center;">
+                            <img class="image-change thumbnail" ng-src="{{vm.getImageUrl(r,c)}}" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END PANEL FILES -->
+
+<!-- PANEL PRODUCTS -->
+<div class="row">
+    <div class="col-xs-6 col-sm-12 ">
+        <div class="panel panel-default ">
+            <div class="panel-heading">
+                <div class="panel-title"><i class="glyphicon glyphicon-th-list"></i> Products</div>
+
+            </div>
+            <div class="panel-body table-responsive" style="padding-left:0;padding-right:0;">
+                <table class="table  table-striped" style="border:none">
+                    <thead>
+                        <tr>
+                            <th style="padding-left:20px">Code</th>
+                            <th>Description</th>
+                            <th>Client</th>
+                            <th>Starting PO</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="a in vm.model.notice.allocations">
+                            <td style="padding-left:20px">{{a.product.cprod_code1}}</td>
+                            <td>{{a.product.cprod_name}}</td>
+                            <td>{{a.product.brandCompany.customer_code}}</td>
+                            <td> <span ng-repeat="o in a.orders">&nbsp;{{o.customer_code}}</span></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END PANEL PRODUCTS -->
+<div class="row">
+</div>

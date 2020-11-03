@@ -1,0 +1,585 @@
+﻿@model     FilteredBulkDownload
+
+
+@{
+    ViewBag.Title = "David Bulk Download";
+    Layout = "/Views/Shared/_Layout.cshtml";
+
+}
+
+<div style="margin-right:0px;width:900px;padding-right:30px"  ng-app="bulkInspections">
+    
+    @section head{
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/bootsrapfix.css" rel="stylesheet" />
+        @*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />*@
+   
+        <style type="text/css">
+           
+            .small-body {
+                /*font-family: Verdana, Geneva, sans-serif;*/
+                font-family: 'Arial';
+                font-size: 10px;
+                font-style: normal;
+                color: #000;
+            }
+
+            .small-desc {
+                font-family: 'Arial';
+                font-size: 12px;
+                font-style: normal;
+                color: #000;
+            }
+
+            .data-block-rows-header {
+                /*font-family: 'Arial, Helvetica, sans-serif'*/;
+                font-family: 'Arial';
+                font-size: 11px;
+                height: 500px;
+                width: 760px;
+                /*margin-left:10px;*/
+                overflow: auto;
+                margin-bottom: 0px;
+                margin-top: 10px;
+                text-align: left;
+                border: 0px;
+                border-style: dashed;
+                border-color: #999;
+                padding: 2px;
+                position: relative;
+            }
+
+            .small-body-faint {
+                /*font-family: Verdana, Geneva, sans-serif;*/
+                font-family: 'Arial';
+                font-size: 10px;
+                font-style: normal;
+                color: #666;
+            }
+
+            .small-body-wonb {
+                /*font-family: Verdana, Geneva, sans-serif;*/
+                font-family: 'Arial';
+                font-size: 10px;
+                font-style: normal;
+                color: #FFF;
+            }
+
+            .odd {
+                background-color: #ffffff;
+            }
+
+            .even {
+                background-color: #dddddd;
+            }
+
+            .scrollable-menu{
+                height:auto;
+
+                max-height:310px;
+                overflow-x:hidden;
+            }
+            li{
+                color:blue}
+            li:nth-child(even){
+                background-color:#fff;
+            }
+            li:nth-child(odd){
+                background-color:#ecf6fb;
+            }
+
+        </style>
+    }
+    <br />
+
+    <div ng-controller="bulkCtrl" style="min-height:500px; margin-top:50px;">
+        @*<span style="color:#ff6a00;font-size:38px"><b>{{ checkedSelected.types.length }} &nbsp;&nbsp; {{checkedSelected.products.length}} - {{InspId}} - @Model.Insepctions.First().cprod_id </b></span><br />
+            <span style="color:#ff6a00">@ViewBag.user - @ViewBag.id </span>*@
+        @*<span style="color:#ff6a00">{{linklog}} </span>*@
+
+        <div   ng-init="checkDocTypesAll()">
+            @*<div class="row">
+                    <div class="col-sm-2">
+                        <div class="dropdown" >
+                            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" style="width:160px">
+                                {{selectedFactory.user_id>0?'Factory: '+selectedFactory.factory_code:'Select factory'}}
+                                &nbsp;<span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu scrollable-menu">
+                                <li ng-repeat="item in Factories |orderBy:'factory_code'"
+                                    ng-click="getCustomers(item.user_id,item.factory_code)">
+                                    <a href="#">{{item.factory_code}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="dropdown">
+                            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown" style="width:160px">
+                                {{selectedDistributor.cprod_user>0?'Customer: '+selectedDistributor.customer_code:'Select Customer'}}
+                               &nbsp; <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu scrollable-menu">
+                                <li ng-repeat="item in Dealers |orderBy:'customer_code'"
+                                    ng-click="getProducts(item.cprod_user,item.customer_code)">
+                                    <a href="#">{{item.customer_code}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>*@
+
+            @*<select ng-model="selectedFactory"
+                            ng-options="item as item.factory_code for item in Factories|orderBy:'factory_code'"
+
+                            ng-change="getDistributors()"></select>
+                &nbsp;
+                    <select ng-model="selectedDistributor"
+                            ng-options="item as item.customer_code for item in Dealers|orderBy:'customer_code'"
+                            ng-change="getDownloadList()">
+
+                    </select>*@
+
+        </div>
+        <div>
+            @*Type of document to download: <br />*@
+            @*<input type="checkbox"
+                id="chkDocTypeAll"
+                ng-model="selectedAll"
+                ng-click="checkToggle()" />*@
+            @*<strong>All</strong>*@
+            @*<span ng-repeat="chkTypeDoc in DocTypes">
+                    <input type="checkbox"
+                           checklist-model="checkedSelected.types"
+                           checklist-value="chkTypeDoc.id"
+                           ng-click="isCheckedAll()" /><span>{{chkTypeDoc.name}}</span>
+                </span>*@
+            @*<br />*@
+            @*<input type="button" value="Download" ng-click="Download()" />*@
+
+            @*<br /><span>&nbsp;</span>*@
+
+            
+
+            <table class="table table-striped" style="border:solid 1px #ddd;width:100%;">
+                <tr style="padding:3px; border-bottom:solid 1px #666">
+                    <td colspan="4" style="padding:0px">
+
+                        <div class="dropdown" style="float:left;padding-left:38px">
+                            <button style="width:250px;padding:4px;margin:2px 0px;font-size:1em" class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                                {{selectedFactory.user_id>0?'Factory: '+selectedFactory.factory_code:' Select factory '}}
+                                &nbsp;<span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu scrollable-menu" style="margin-left:38px;width:250px">
+                                <li ng-repeat="item in Factories |orderBy:'factory_code'"
+                                    ng-click="getCustomers(item.user_id,item.factory_code)">
+                                    <a href="#">{{item.factory_code}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="dropdown" style="float:left">
+                            <button style="width:250px;padding:4px;margin:2px 0px 2px 2px;font-size:1em" class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"
+                                    ng-disabled="!Dealers.length > 0">
+                                {{selectedDistributor.cprod_user>0?'Customer: '+selectedDistributor.customer_code:' Select Customer '}}
+                                &nbsp; <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu scrollable-menu" style="width:250px">
+                                <li ng-repeat="item in Dealers |orderBy:'customer_code'"
+                                    ng-click="getProducts(item.cprod_user,item.customer_code)">
+                                    <a href="#">{{item.customer_code}}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div style="float:left;padding-top:5px" ng-show="show">
+                            <img src="~/Images/animated_spinner.gif" width="20px" style="margin:0px 10px 0 20px;position:relative" />
+                        </div>
+
+
+                    </td>
+                    @*<td></td>
+                        <td></td>
+                        <td></td>*@
+                    <td class="small-desc" colspan="3" style="padding:0px">
+
+                        <div style="padding-top:10px;position:relative;color:GrayText">
+                            Select documents to download
+                            &nbsp;&nbsp;
+                        </div>
+
+                    </td>
+                    <td @*style="text-align:right"*@ style="padding:0px">
+                        <input class="btn btn-primary" 
+                               style="background-color:#337AB7;padding:4px;font-size:1em;margin-top:2px" type="button" value="Download"
+                               ng-disabled="!DownloadEnable()"
+                               ng-click="Download()" style="" />
+                    </td>
+                </tr>
+                @*<tr>*@
+                @* check box *@
+                @*<td></td>*@
+                @* factory *@
+                @*<td></td>*@
+                @* client code *@
+                @*<td></td>*@
+                @* client description *@
+                @*<td></td>*@
+
+                @*<td ng-repeat="chkTypeDoc in DocTypes" class="small-desc">
+                        <span style="display:block">
+                            <input type="checkbox"
+                                   checklist-model="checkedSelected.types"
+                                   checklist-value="chkTypeDoc.id"
+                                   ng-click="isCheckedAll()" />
+                            <span style="margin-top:2px;position:absolute">{{chkTypeDoc.name}}</span>
+                        </span>
+                    </td>*@
+                @*<td></td>
+                    <td></td>
+                    <td></td>*@
+                @*</tr>*@
+                <tr bgcolor="#EFEFEF" class="normal_body" style="font-family:'Arial';" ng-show="Inspections.length>0">
+                    <td align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        <input type="checkbox"
+                               ng-model="selectedProductAll"
+                               ng-click="checkProductToggle()" />
+                    </td>
+                    <td align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        Factory <br /> Product <br /> Code
+                    </td>
+                    <td align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        Client <br /> Product <br /> Code
+                    </td>
+                    <td align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        Client Description
+                    </td>
+                    @*<td widht="60" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                Insp. <br /> Quantity
+            </td>*@
+                    @*<td widht="60" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                basic<br />drawing
+            </td>*@
+                    <td align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        drawing <br />
+                        <input type="checkbox"
+                               checklist-model="checkedSelected.types"
+                               checklist-value="3"
+                               ng-click="isCheckedAll()" />
+                    </td>
+                    @*<td widht="60" align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                CAD
+            </td>*@
+                    <td align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        Instr. <br />
+                        <input type="checkbox"
+                               checklist-model="checkedSelected.types"
+                               checklist-value="4"
+                               ng-click="isCheckedAll()" />
+                    </td>
+                    <td align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        label <br />
+                        <input type="checkbox"
+                               checklist-model="checkedSelected.types"
+                               checklist-value="5"
+                               ng-click="isCheckedAll()" />
+                    </td>
+                    <td align="left" valign="top" bgcolor="#666666" class="small-body-wonb">
+                        pkg. <br />
+                        <input type="checkbox"
+                               checklist-model="checkedSelected.types"
+                               checklist-value="6"
+                               ng-click="isCheckedAll()" />
+                    </td>
+                </tr>
+                <tbody ng-repeat="inspection in Inspections" style="font-size:10px">
+                    <tr style="border-left:1px solid gray; border-right:1px solid gray">
+                        <td>
+                            <input type="checkbox"
+                                   checklist-model="checkedSelected.products"
+                                   checklist-value="inspection.mast_id"
+                                   ng-click="isCheckedProductsAll()" />
+                            {{checkedSelected.products[0]}}
+                        </td>
+                        <td>
+                            <span>{{inspection.insp_factory_ref}}</span>
+                        </td>
+                        <td>
+                            <span>{{inspection.insp_client_ref}}</span>
+                        </td>
+                        <td>
+                            <span>{{inspection.insp_client_desc}}</span>
+                        </td>
+                        @*<td>
+                                <span>{{inspection.insp_qty}}</span>
+                            </td>*@
+                        @*<td>*@
+                        @*basic drawing*@
+                        @*<a href="{{GetTechPdfLink(inspection,'')}}" download
+                                   ng-click="CreateLog(GetTechPdfLink(inspection,''),inspection.cprod_id,inspection.mast_id)">
+                                    <img src="/images/small/pdf_icon.gif" ng-show="IconPdfVisible" />
+                                </a>
+                            </td>*@
+                        <td>
+                            <a href="{{GetTechPdfLink(inspection,2)}}" download
+                               ng-click="CreateLog(GetTechPdfLink(inspection,2),inspection.cprod_id,inspection.mast_id)">
+                                <img src="/images/small/pdf_icon.gif" ng-show="IconPdfVisible" />
+                            </a>
+                        </td>
+                        @*<td>*@
+                        @* dwg *@
+                        @*<a href="{{inspection.prod_image3}}" download
+                               ng-click="CreateLog(GetLinkPdf(inspection.prod_image3),inspection.cprod_id,inspection.mast_id)">
+                                <img src="/images/small/technical.jpg"
+                                     ng-show="{{inspection.prod_image3 != ''}}"
+                                     width="19" height="18" border="0" />
+                            </a>*@
+                        @*</td>*@
+
+                        <td>
+                            @* instructions *@
+                            @*<a ng-href="~/{{inspection.cprod_instructions !=''?inspection.cprod_instructions:inspection.prod_instructions}}">
+                                    <img src="/images/small/pdf_icon.gif" alt="Alternate Text" visible="" />
+                                </a>*@
+                            <a href="{{GetLinkPdf(inspection.cprod_instructions,inspection.prod_instructions)}}" download
+                               ng-click="CreateLog(GetLinkPdf(inspection.cprod_instructions,inspection.prod_instructions),inspection.cprod_id,inspection.mast_id)">
+                                <img src="/images/small/pdf_icon.gif" ng-show="IconPdfVisible" />
+                            </a>
+                        </td>
+                        <td>                            
+                            <a ng-href="{{GetLinkPdf(inspection.prod_image4,'')}}" download
+                               ng-click="CreateLog(GetLinkPdf(inspection.prod_image4),inspection.cprod_id,inspection.mast_id)">
+                                <img src="/images/small/pdf_icon.gif" ng-show="IconPdfVisible" />
+                            </a>
+                        </td>
+                        <td>
+                            <a ng-href="{{GetLinkPdf(inspection.prod_image5,'')}}" download
+                               ng-click="CreateLog(GetLinkPdf(inspection.prod_image5),inspection.cprod_id,inspection.mast_id)">
+                                <img src="/images/small/pdf_icon.gif" ng-show="IconPdfVisible" />
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/jqueryval")
+    @*// @Scripts.Render("~/bundles/knockout")*@
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/angularmodel")
+    @*<script src="~/Scripts/angularjs-cheklist-model.js"></script>*@
+    <script src="~/Scripts/bootstrap.js"></script>
+    <script type="text/javascript">
+        @{
+            var serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+            var json = serializer.Serialize(Model.DocTypes.Where(c=>c.id != 2 && c.id != 7 ));
+            var jsonInspection = serializer.Serialize(Model.Insepctions);
+            var jsonFactories = serializer.Serialize(Model.Factories.Select(s => new {user_id=s.user_id,coustomer_code=s.customer_code,factory_code=s.factory_code  }).ToList());
+
+        }
+        
+        $(document).ready(function(){
+            $("#footer").attr("style","width:940px");
+        });
+        var downloadURL=function downloadURL(url){
+            var hiddenIFrameID='hiddenDownloader',
+                iframe=document.getElementById(hiddenIFrameID);
+            if(iframe===null){
+                iframe=document.createElement('iframe');
+                iframe.id = hiddenIFrameID;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+            }
+            iframe.src = url;
+        }
+        var bulkInspections = angular.module('bulkInspections', ["checklist-model"])
+        .controller("bulkCtrl", function ($scope,$http,dataService) {
+            //model DocTypes
+            $scope.show=false;
+            $scope.selectedFactory={};
+            $scope.selectedFactory.user_id=0;
+            $scope.selectedDistributor={};
+            $scope.DocTypes=@Html.Raw(json);
+            @*$scope.Inspections=@Html.Raw(jsonInspection);*@
+            $scope.Inspections=[];
+            $scope.Factories=@Html.Raw(jsonFactories);
+            $scope.InspId= $scope.Inspections > 1?$scope.Inspections[0].insp_id:0;
+
+            //$scope.isFactorySelected();
+            $scope.CreateLog=function(link,cprod_id,mast_id){
+                $scope.linklog=link;
+                $http.post("/Inspection/CreateLog",{link:link,cprodId:cprod_id,mastId:mast_id})
+                    .error(function(responseData){
+                        console.log("Error!" + responseData);
+                    });
+            }
+            $scope.DownloadEnable=function(){
+                var prodids=$scope.checkedSelected.products;
+                var docTypesId=$scope.checkedSelected.types;
+                if (prodids.length >0 && docTypesId.length >0) {
+                    return true;
+                }
+                return false;
+            }
+            $scope.Download=function(){
+                var prodids=$scope.checkedSelected.products;
+                var docTypesId=$scope.checkedSelected.types;
+
+                if(prodids.length>0 && docTypesId.length>0){
+                    downloadURL($.validator.format('@Url.Action("Download")?prodIds={0}&docTypeIds={1}&inspId={2}&factory_id={3}&customer_id={4}',
+                        $scope.checkedSelected.products.join(),$scope.checkedSelected.types.join(),$scope.InspId,$scope.selectedFactory.user_id,$scope.selectedDistributor.cprod_user));
+                }else{
+                    alert("no product or document type selected");
+                }
+            }
+            //links
+            $scope.asproot='@Settings.Default.aspsite_root';
+            $scope.IconPdfVisible=false;
+
+            $scope.GetTechPdfLink = function(prod,prefix){
+                $scope.IconPdfVisible=false;
+                //$scope.pr=prod.mast_id;
+                if(prod.mast_id != null ){
+                    //$scope.pr=prod.mast_id;
+                    if(prod.mast_id!=''){
+                        //$scope.pr=prod.mast_id;
+                        $scope.IconPdfVisible=true;
+
+                    }
+
+                }
+                if($scope.IconPdfVisible)
+                {
+                    //return "www.net.hr";
+                    //return $.validator.format('{0}/asaq-back/factory_PR_4_tech_pdf.asp?prod_id={1}&cprod_code={2}',$scope.asproot,prod.mast_id,prod.insp_client_ref);
+                    return $.validator.format('{0}/asaq_back/factory_PR_4_tech{3}_pdf.asp?prod_id={1}&cprod_code={2}',$scope.asproot,prod.mast_id,prod.insp_client_ref,prefix);
+                }
+                return '';
+            }
+            $scope.GetLinkPdf=function(field1,field2){
+                var field='';
+                $scope.IconPdfVisible=false;
+                if(field1 != null){
+                    if(field1 != ''){
+                        field=field1;
+                        $scope.IconPdfVisible=true;
+                    }
+                }else{
+                    if(field2 != null){
+                        if (field2 != '') {
+                            field=field2
+                            $scope.IconPdfVisible=true;
+                        }
+                    }
+                }
+                return field;
+            }
+
+
+
+            $scope.selectedAll=true;
+            $scope.selectedProductAll=false;
+
+            $scope.checkedSelected={types:[],products:[]};
+
+            //$scope.selectedLength=$scope.checkDocSelected.types.lenght;
+            //FOR DOC TYPES
+            $scope.isCheckedAll=function(){
+                if ($scope.DocTypes.length != $scope.checkedSelected.types.length) {
+                    $scope.selectedAll=false;
+                }else{
+                    $scope.selectedAll=true;
+                }
+            };
+            $scope.checkToggle = function(){
+                if($scope.selectedAll){$scope.checkDocTypesAll()}
+                else{$scope.unselectDocTypesAll()}
+            };
+            $scope.checkDocTypesAll=function(){
+                $scope.checkedSelected.types=$scope.DocTypes.map(function(item){return item.id});
+            };
+            $scope.unselectDocTypesAll=function(){
+                $scope.checkedSelected.types=[];
+            }
+
+            //FOR PRODUCTS
+            $scope.isCheckedProductsAll=function(){
+                if($scope.Inspections.length != $scope.checkedSelected.products.length){$scope.selectedProductAll=false;}
+                else{$scope.selectedProductAll=true;}
+            }
+            $scope.checkProductToggle=function(){
+                if($scope.selectedProductAll){$scope.checkProductTypesAll()}
+                else{ $scope.unselectProductTypesAll();}
+            }
+            $scope.checkProductTypesAll=function(){
+                $scope.checkedSelected.products=$scope.Inspections.map(function(insp){return insp.mast_id});
+            }
+            $scope.unselectProductTypesAll=function(){
+                $scope.checkedSelected.products=[];
+            }
+
+            // $scope.factory_code="";
+            $scope.getCustomers=function(user_id,factory_code){
+                //Clean dropdown list
+                $scope.selectedDistributor.cprod_user=0;
+                //clean table
+                $scope.Inspections=[];
+
+                $scope.selectedFactory.user_id=user_id;
+                $scope.selectedFactory.factory_code=factory_code
+                $scope.getDistributors();
+            }
+            $scope.getDistributors=function(){
+                $scope.show=true;
+                dataService.getDistributors($scope.selectedFactory.user_id).then(
+
+                    function(response){
+                        $scope.Dealers=response.data;
+                        //console.log(response);
+                        $scope.show=false;
+
+                    },function(response){
+                        $scope.show=false;
+                        alert("Error:  ", response);
+                        console.log(response);
+                    });
+            }
+            $scope.getProducts=function(cprod_user,customer_code){
+                $scope.selectedDistributor.cprod_user=cprod_user;
+                $scope.selectedDistributor.customer_code=customer_code;
+                $scope.getDownloadList();
+
+            }
+            $scope.getDownloadList=function(){
+                $scope.show=true;
+                dataService.getDownloadList($scope.selectedFactory.user_id,$scope.selectedDistributor.cprod_user).then(
+                    function(response){
+                        $scope.show=false;
+                        console.log(response);
+                        $scope.Inspections=response.data;
+                    },function(response){
+                        $scope.show=false;
+                        alert("Error: ", response);
+                        console.log("Error:  ",response);
+                    });
+
+            }
+        }).factory('dataService',function($http){
+            var getDistributors=function(model){
+                return $http.get("/Inspection/getDistributors",{params:{factory_id:model}})
+            }
+            var getDownloadList=function(customer_id,cprod_user){
+
+
+                return $http.get("/Inspection/FilteredDownload",{params:{factory_id:customer_id,customer_id:cprod_user}});
+            }
+            return{
+                getDistributors:getDistributors,
+                getDownloadList:getDownloadList
+            }
+        });
+    </script>
+    </body>
+</div>

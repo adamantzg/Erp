@@ -1,0 +1,22 @@
+.active a {
+    background-color: #AAA;
+    color: #FFF;
+}
+input {
+    width: 65px;
+    font-size: 1em;
+}
+.number, .number input {
+    text-align: right;
+}
+
+.hidden {
+    display: none;
+}
+
+.padding {
+    padding-right: 5px;
+}
+.form-group label {
+    padding-right: 3px;
+}

@@ -1,0 +1,64 @@
+﻿@model SmallItemsReportModel
+
+@{
+    ViewBag.Title = "Small items report";
+    Layout = null;
+}
+<html>
+    <head>
+        <style>
+            body {
+                font-family: arial;
+            }
+
+            .row td {
+                border: 1px solid #c0c0c0;
+                padding: 2px;
+            }
+
+            .row_alt td {
+                border: 1px solid #c0c0c0;
+                background-color: #e6e6fa;
+                padding: 2px;
+            }
+
+            .number {
+                text-align: right;
+            }
+
+            .headerrow td {
+                font-weight: bold;
+                background-color: #c0c0c0;
+                padding: 2px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Small items report for orders between @Model.From.ToString("d") and @Model.To.ToString("d")</h2>
+
+        <table style="border-collapse: collapse;font-size: 11px">
+            <tr class="headerrow">
+                <td>customer code</td>
+                <td>custpo</td>
+                <td>code</td>
+                <td>name</td>
+                <td>order qty</td>
+                <td>Qty per carton</td>
+            </tr>
+            @{
+                var counter = 0;
+            }
+            @foreach (var l in Model.Lines)
+            {
+                <tr class="row@(counter++%2==1 ? "_alt" : "")">
+                    <td>@(l.Header != null ? l.Header.Client.customer_code : "")</td>
+                    <td>@l.Header.custpo</td>
+                    <td>@l.Cust_Product.cprod_code1</td>
+                    <td>@l.Cust_Product.cprod_name</td>
+                    <td>@l.orderqty</td>
+                    <td>@l.Cust_Product.MastProduct.units_per_carton</td>
+                </tr>
+            }
+        </table>
+    </body>
+</html>

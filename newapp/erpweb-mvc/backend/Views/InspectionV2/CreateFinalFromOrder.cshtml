@@ -1,0 +1,323 @@
+﻿@model OrderLoadingModelFinal
+
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html ng-app="inspApp">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>New final inspection</title>
+    <link href="~/Content/bootstrap/bootstrap.css" rel="stylesheet" />
+    @*<script src="~/Scripts/bootstrap.js"></script>*@
+    @*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />*@
+    <style>
+        .sub-title{
+            background-color:lightgray;
+        }
+        .body-form{
+            background-color:#F0F0F0;
+        }
+        .input-def{
+            height:15px;
+        }
+        .vcenter {
+            display: inline-block;
+            /*vertical-align: middle;*/
+            margin-top:5px;
+            float: none;
+        }
+    </style>
+</head>
+<body style="width:740px;border:solid 1px gray;font-size:12px" ng-controller="inspectionCtrl">
+   
+    <div class="container body-form" style="width:740px">
+        <form role="form" ng-submit="submitForm()">
+            <div class="row" style="background-color:white">
+                <div class="col-xs-12" style="background-color:gray;height:28px">
+                    <span class="h5 vcenter" style="color:white">Create <span>{{getInspectionType()}}</span> Inspection List</span>
+                </div>
+            </div>
+            <div class="row sub-title">
+                @*<div class="col-xs-1"></div>*@
+                <div class="col-xs-9">
+                    <span class="vcenter">{{getInspectionType()}} is not required or will be created by another factory for this order</span>
+                </div>
+                <div class="col-xs-2">
+                    <input type="checkbox" value="" />
+                </div>
+            </div>
+            <div class="row body-form">
+                <div class="co-xs-12">
+                    <div class="alert alert-success "
+                         style="padding:2px 5px 2px 5px;"
+                         ng-show="SUCCESS">
+                        @*<span>{{SUCCESS.statusText}}</span>*@
+                        &nbsp;&nbsp;<span> Inspection list saved successfully</span>
+                    </div>
+                    <div class="alert alert-danger"
+                         style="padding:2px 5px 2px 5px; margin:0"
+                         ng-show="EXCEPTION">
+                        <span>{{EXCEPTION.statusText}}</span>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <div class="row body-form">
+                <div class="col-xs-3">
+                    <b class="vcenter"> Inspection Type</b>
+                </div>
+                <div class="col-xs-3">
+                    @*<span class="pull-left vcenter">Loading</span>*@
+                    <div class="form-group form-group-sm">
+                        <select class="form-control"
+                                style="height:25px;font-size:12px; padding:1px"
+                                ng-model="inspectionType"
+                                disabled
+                                >
+
+                            <option ng-repeat="insp in inspectionTypes" 
+                                    value="{{insp.id}}"
+                                    ng-selected="{{insp.id===inspectionType}}">{{insp.name}}</option>
+
+                        </select>
+                    </div>
+
+                </div>
+                <div class="col-xs-2">
+                    <b class="vcenter">QC Required</b>
+                </div>
+                <div class="col-xs-2">
+                    <div class="form-group form-group-xs">
+                        <select class="form-control"
+                                style="height:25px;font-size:12px;padding:1px"
+                                ng-model="inspectionV2.qc_required"
+                                ng-options="opt for opt in qcRequired"
+                                ng-disabled="buttonVisible">                          
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row body-form">
+                <div class="col-xs-3">
+                    <span><b>Start Date</b><br /> (YYYY-MM-DD) <b> / Days</b></span>
+                </div>
+                <div class="col-xs-3">
+                    <div class="form-group form-group-sm">
+                        <p class="input-group">
+                            <input class="form-control"
+                                   type="text"
+                                   @*pattern="YYYY-MM-dd"*@
+                                   style="height:25px"
+                                   name="name" value=" "
+                                   ng-model="inspectionV2.startdate"
+                                   placeholder="YYYY-MM-DD"
+                                   ng-disabled="buttonVisible"
+                                   datepicker-popup="{{format}}"
+                                   datepicker-options="dateOptions"
+                                   is-open="opened"                                   
+                                   date-disabled="disabled(date,mode)" close-text="Close"/>
+                            <span class="input-group-btn">
+                                <button type="button"
+                                        class="btn btn-default"
+                                        style="height:25px; padding-top:2px"
+                                        ng-click="open($event)"
+                                        ng-disabled="buttonVisible">
+                                    <i class="glyphicon glyphicon-calendar"></i>
+                                </button>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="col-xs-2">
+                    <div class="form-group form-group-sm">
+                        <select class="form-control"
+                                style="height:25px"
+                                ng-model="inspectionV2.duration"
+                                ng-options="day for day in days"
+                                ng-disabled="buttonVisible">                           
+                        </select>
+                    </div>
+                </div>
+                <div class="col-xs-4" >
+                    @*<div class="alert alert-warning">
+                        {{inspectionV2.startdate}}
+                    </div>*@
+                </div>
+            </div>
+            <div class="row body-form">
+                <div class="col-xs-3 "><b class="vcenter">Comments</b></div>
+                <div class="col-xs-9">
+                    <textarea rows="4" cols="63"
+                              ng-model="inspectionV2.comments" ng-disabled="buttonVisible"></textarea>
+                </div>
+            </div>
+            <div class="row body-form">
+                <div class="col-xs-3"><b class="vcenter">Note</b></div>
+                <div class="col-xs-7">
+                    <span>
+                        by creating {{getInspectionType()}} the products on this order will be added onto the {{getInspectionType}} for the main order. By creating the {{getInspectionType()}}
+                        this will mean that will be flagged as the loading factory tor this order.
+                    </span>
+                </div>
+            </div>
+            
+            <br />
+            <div class="row body-form">
+                <span class="h4">&nbsp;&nbsp;Order lines</span>
+            </div>
+            <div class="row body-form">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Cprod code</th>
+                            <th>Factory ref</th>
+                            <th>Cprod name</th>
+                            <th>Order qty</th>
+                            <th style="text-align:center">Insp qty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="(i,name) in inspLinesTable track by $index">
+                            <td><span>{{name.insp_custproduct_code}}</span></td>
+                            <td><span>{{name.insp_mastproduct_code}}</span></td>
+                            <td><span>{{name.insp_custproduct_name}}</span></td>
+                            <td><span>{{name.OrderLine.orderqty}}</span></td>
+                            <td style="width:100px;text-align:center" >
+                                <span>
+                                    <input ng-disabled="buttonVisible" style="width:40px;text-align:right" ng-model="name.qty" />                                    
+                                </span>
+                               
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            @* Button *@
+            <div class="row body-form">
+                <div class="col-xs-3"></div>
+                <div class="col-xs-7">
+                    <img class="pull-right" src="~/Images/animated_spinner.gif" width="22px" ng-show="loadVisible" />
+                </div>
+                <div class="col-xs-2">
+                    <input type="submit"
+                           style="width:100px"
+                           class="btn btn-primary btn-xs pull-right" name="name" value="Add"
+                           ng-disabled="loadVisible"
+                           ng-hide="buttonVisible" /></input>
+                    <input style="width:100px;background-color:lightgray"
+                           value="Add"
+                           class="btn btn-default btn-xs  pull-right"
+                           ng-show="buttonVisible"
+                           disabled />
+                </div>
+            </div>
+            <br />
+        </form>
+        
+    </div>
+    <script src="~/Scripts/angular.js"></script>
+    @*<script src="~/Scripts/angular-ui/ui-bootstrap.js"></script>*@
+<script src="~/Scripts/angular-ui-tpl/ui-bootstrap-tpls-0.13.0.min.js"></script>
+    <script src="~/Scripts/lodash.js"></script>
+
+    <script>
+        var inspApp = angular.module('inspApp', ['ui.bootstrap'])
+            .constant("baseUrl","/InspectionV2/")
+        .controller("inspectionCtrl", function ($scope,dataService) {
+            $scope.orderHeader=@Html.Raw(WebUtilities.JsonSerialize(Model));
+            $scope.inspectionTypes=@Html.Raw(WebUtilities.JsonSerialize(Model.InspectionTypes));
+            $scope.orderLines=@Html.Raw(WebUtilities.JsonSerialize(Model.OrderLines));
+            $scope.inspLinesTable=@Html.Raw(WebUtilities.JsonSerialize(Model.InspectionLinesTable));
+            $scope.inspectionType = 2;
+            $scope.qcRequired = [1, 2, 3, 4, 5];
+            $scope.days = [1, 2, 3, 4, 5];
+            $scope.inspectionV2 = {};
+            $scope.inspectionV2.duration = 1;
+            $scope.inspectionV2.startdate = '';
+            
+            $scope.getInspectionType=function(){
+               // alert("prije");
+                for (var i = 0; i < $scope.inspectionTypes.length; i++) {
+                    if($scope.inspectionTypes[i].id == $scope.inspectionType){
+                //        alert("insp type");
+                        return $scope.inspectionTypes[i].name;
+                    }
+                }
+                return [];
+            }
+            $scope.today = function () {
+               // $scope.inspectionV2.startdate = new Date();
+                
+            };
+            $scope.format = 'yyyy-MM-dd';
+            $scope.today();
+            $scope.dateOptions = {
+                formatYear: 'yyyy',
+                startingDay: 1
+            };
+            $scope.open = function ($event) {
+                $event.preventDefault();
+                $event.stopPropagation();
+                $scope.opened = true;
+            }
+            /*load image and save button enable-disable*/
+            $scope.loadVisible = false;
+
+            /*button show-hide and enable-disable input fields*/
+            $scope.buttonVisible = false;
+
+            console.log($scope.orderHeader);
+            $scope.submitForm = function () {
+                $scope.loadVisible = true;
+                $scope.inspectionV2.type = 1;
+                $scope.inspectionV2.custpo = $scope.orderHeader.OrderHeader.custpo;
+                $scope.inspectionV2.factory_id = $scope.orderHeader.OrderHeader.loading_factory;
+                $scope.inspectionV2.client_id = $scope.orderHeader.OrderHeader.userid1;
+                $scope.container_type = $scope.orderHeader.OrderHeader.container_type === null ? 0 : $scope.orderHeader.OrderHeader.container_type;
+                $scope.inspectionV2.Containers = [{ id: $scope.container_type,num:1 }];
+                //var orderid = $scope.orderHeader.OrderHeader.orderid;
+                $scope.inspectionV2.orderids = null;
+
+                $scope.inspectionV2.Lines=angular.copy($scope.inspLinesTable);
+                _.remove($scope.inspectionV2.Lines, function(l) {
+                    return l.OrderLine.orderqty <= 0;
+                });
+
+                $scope.inspectionV2.Lines.forEach(function(l) {
+                    if (l.qty == l.OrderLine.orderqty)
+                        l.qty = null;
+                });
+
+                dataService.createOrderLoading($scope.inspectionV2)
+                    .then(
+                       function (results) {
+                           $scope.buttonVisible = true;
+                           $scope.loadVisible = false;
+                           $scope.SUCCESS = results;
+                           $scope.EXCEPTION = null;
+                       }, function (results) {
+                           $scope.loadVisible = false;                              
+                           $scope.EXCEPTION = results;
+                       }
+                    )
+
+                console.log($scope.inspectionV2);
+
+            }
+
+        })
+        .factory('dataService', function ($http,baseUrl) {
+            var createOrderLoading = function (data) {
+                return $http.post("@Url.Action("CreateInspection")",data);
+            }
+            return {
+                createOrderLoading:createOrderLoading
+            }
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+﻿@model StockOrderAllocationsModel
+
+@{
+    ViewBag.Title = "title";
+    
+}
+
+<h3>Stock order allocations</h3>
+
+
+@using (Html.BeginForm("SoAllocations", "Order", FormMethod.Post, new {target = "_blank", id="mainForm"}))
+{
+    var dataSource = Model.Factories.Select(f => new {userids = f.user_id.ToString(), f.factory_code}).ToList();
+    var combined_groups = Model.Factories.Where(f=>f.combined_factory>0).GroupBy(f => f.combined_factory).Select(g => new {combined = g.Key,code = g.First().factory_code.Substring(0,2)});
+    foreach (var combinedGroup in combined_groups)
+    {
+        dataSource.Add(new {userids=string.Join(",", Model.Factories.Where(f=>f.combined_factory == combinedGroup.combined).Select(f=>f.user_id)),factory_code = combinedGroup.code});
+    }
+    <span>Factory:</span> @Html.DropDownListFor(m => m.factory_ids, new SelectList(dataSource, "userids", "factory_code"),"(All)")
+    <span>@Html.RadioButtonFor(m=>m.DateType,0) ETD @Html.RadioButtonFor(m=>m.DateType,1) ETA from:</span> @Html.TextBoxFor(m=>m.From,"{0:dd/MM/yyyy}", new {isDate="true"})
+    <div>
+        <div style="display: table-cell;vertical-align: middle"> Clients:</div><div style="display: table-cell"> @Html.EditorFor(m=>m.Clients)</div>
+    </div>
+    <div style="display: table; border-collapse: separate; border-spacing: 0px;">
+        <div style="display: table-row">
+            <div style="display: table-cell;vertical-align: middle"> Include discontinued:</div><div style="display: table-cell">@Html.EditorFor(m => m.IncludeDiscontinued)</div>
+            <div style="display:table-cell;width: 10px"></div>
+            <div style="display: table-cell;vertical-align: middle"> Include pallet qty:</div><div style="display: table-cell">@Html.EditorFor(m => m.IncludePalletQty)</div>
+            <div style="display:table-cell;width: 10px"></div>
+            <div style="display: table-cell;vertical-align: middle"> Ignore stock codes:</div><div style="display: table-cell">@Html.EditorFor(m => m.IgnoreStockCodes)</div>
+        </div>
+    </div>
+    @Html.HiddenFor(m=>m.Excel)
+
+    <input type="submit" value="Export" />
+}
+
+@section head
+{
+    <style type="text/css">
+        input[type="text"] {
+            width: auto;
+        }
+    </style>
+}
+
+@section scripts2
+{
+    <script>
+        function testSubmit()
+        {
+            $('#Excel').val('false');
+            $('#mainForm').removeAttr('target');
+            $('#mainForm').submit();
+        }
+    </script>
+    
+    
+}
+

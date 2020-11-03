@@ -1,0 +1,96 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <style>
+        .dataTable > thead > tr > th[class*="sort"]:after {
+            content: "" !important;
+        }
+        .sorting, .sorting_asc, .sorting_desc {
+            background: none !important;
+        }
+    </style>
+
+    @Styles.Render("~/Content/DataTables/style/css")
+    @Styles.Render("~/Content/font-awesome.css")
+    @Styles.Render("~/Content/ionicons.css")
+    @Styles.Render("~/Content/style.css")
+    @Styles.Render("~/Content/bootstrapStyle/bootstrap")
+    @*<link href="~/Scripts/lightbox/css/lightbox.css" rel="stylesheet" />*@
+    <link href="~/Scripts/angular-bootstrap-lightbox/angular-bootstrap-lightbox.css" rel="stylesheet" />
+    <!-- google font -->
+    <link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+
+    <title>Sample inspections</title>
+</head>
+<body ng-app="app" class="skin-black">
+    <div class="wrapper">
+        <section class="content">
+
+            <div loading class="loading-dialog"></div>
+
+            <div class="pull-left image logo">
+                <a href="#"><img src="~/Images/Big Company B.png" alt="logo" width="400" /></a>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12">
+                    
+                    <ol class="breadcrumb">
+                        <li>
+                            <i class="fa fa-dashboard"></i> <a ui-sref="home">Sample inspections</a>
+                        </li>
+
+                        <li>
+                            <i class="fa fa-edit" ng-show="state.length > 0 && state !== 'home'"></i><a>{{state}}</a>
+                        </li>
+                    </ol>
+
+                </div>
+            </div>
+
+            <div ui-view> </div>
+
+            <div class="footer-main">
+                Big Company PLC @DateTime.Today.Year
+            </div>
+        </section> <!--content-->
+
+    </div> <!--wrapper-->
+    @Html.Raw(JSNLog.JavascriptLogging.Configure())
+    @Scripts.Render("~/bundles/jquery")
+    @*@Scripts.Render("~/bundles/bootstrap")*@
+    @Scripts.Render("~/bundles/angular")
+    @Scripts.Render("~/bundles/ang-bootstrap")
+    @*<script src="http://compact.github.io/angular-bootstrap-lightbox/lib/ui-bootstrap-tpls.js?v1.3.1"></script>*@
+    @Scripts.Render("~/bundles/utils")
+    @Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/DataTable")
+    @Scripts.Render("~/bundles/AngularDataTable")
+    @Scripts.Render("~/bundles/plupload2")
+    <script src="~/Scripts/logToServer.js"></script>
+    <script src="~/Scripts/angular-plupload/angular-plupload.js"></script>
+    <script src="~/Scripts/functions.js"></script>
+    <script src="~/Scripts/angular-bootstrap-lightbox/angular-bootstrap-lightbox.min.js"></script>
+    <script src="~/AngularApps/InspectionSample/js/app.js"></script>
+    <script src="~/AngularApps/InspectionSample/services/modalService.js"></script>
+    <script src="~/AngularApps/InspectionSample/js/controller.js"></script>
+    <script src="~/AngularApps/InspectionSample/js/factory.js"></script>
+    <script src="~/Scripts/lightbox/js/lightbox-2.6.min.js"></script>
+    <script src="~/Scripts/loading.js"></script>
+
+    @*<script>
+        lightbox.option({
+            'maxWidth': 800,
+            'maxHeight': 600
+        })
+    </script>*@
+    
+</body>
+</html>

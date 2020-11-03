@@ -1,0 +1,102 @@
+﻿@using company.Common
+@model LoginHistoryInspectorsModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Login history</title>
+</head>
+<body style="font-size:12px;font-family: arial">
+    
+    <h2>Login history for QC users from @Model.dateFrom.ToString("d") to @Model.dateTo.ToString("d")</h2>
+
+    <div style="font-weight: bold; font-size: 14px">
+        Summary
+    </div>
+    <table style="font-size:12px;font-family: arial;border: 1px solid black;border-collapse: collapse;padding: 5px">
+        <tr style="font-weight: bold">
+            <td style="width: 250px" rowspan="2">@(Model.ShowUsers ? "User" : "Company")</td>
+            <td style="width:100px;text-align: right" rowspan="2">No. of logins</td>
+            <td style="width:50px;text-align: right" rowspan="2">FI</td>
+            <td style="width:50px;text-align: right" rowspan="2">LI</td>
+            <td style="width:50px;text-align: right" rowspan="2">SP</td>
+            <td style="width:100px;text-align: right" rowspan="2">No. Reports submitted</td>
+            <td colspan="3" style="width:150px;text-align: right"> days between inspection and report submission</td>
+        </tr>
+        <tr style="font-weight: bold">
+            <td style="padding: 5px">0-3 days</td>
+            <td style="padding: 5px">4-7 days</td>
+            <td style="padding: 5px">> 7 days</td>
+        </tr>
+        @foreach (var lg in Model.HistorySimple.GroupBy(hs => hs.User.IfNotNull(u => u.consolidated_port)).OrderBy(lg=>lg.Key))
+        {
+            <tr>
+                <td colspan="9" style="font-weight: bold;padding-top: 10px;padding-bottom: 10px">Location @lg.Key <br/></td>
+            </tr>
+            var counter = 0;
+            foreach (var g in lg.GroupBy(h => h.login_username).OrderByDescending(g => g.Count()))
+            {
+                var inspections = Model.Inspections.Where(insp => insp.Controllers.Any(c => c.Controller.username == g.First().login_username)).ToList();
+                var qc_commments = Model.QcComments.Where(c => c.Creator.username == g.First().login_username && c.insp_comments == "Report Submitted").GroupBy(c => c.insp_unique).
+                    Select(gc => new { gc.Key, InspectionDate = gc.First().Inspection.insp_start,gc.First().Inspection.insp_id,gc.First().Inspection.insp_type, DateSubmitted = gc.Min(i => i.insp_comments_date) }).ToList();
+                var submittedComments = qc_commments.Where(c => c.DateSubmitted != null).ToList();
+
+                <tr style="border: 1px solid black@(counter++ % 2 == 0 ? ";background-color: #E0E0E0" : "")">
+                    <td>@(Model.ShowUsers ? g.Key : g.First().Company.user_name)</td>
+                    <td style="text-align: right">@g.Count()</td>
+                    <td style="text-align: right">@inspections.Count(i => i.insp_type == "FI")</td>
+                    <td style="text-align: right">@inspections.Count(i => i.insp_type == "LO")</td>
+                    <td style="text-align: right">@inspections.Count(i => i.insp_type == "SP")</td>
+                    <td style="text-align: right">
+                        @if (submittedComments.Count > 0 && Model.ShowLinks)
+                        {
+                            <a style="cursor: pointer;text-decoration: underline"  onclick="ToggleDetails('@g.Key')">@submittedComments.Count</a>
+                        }
+                        else
+                        {
+                            @submittedComments.Count
+                        }
+                    </td>
+                    <td style="text-align: right">@submittedComments.Count(c => (c.DateSubmitted.Value - c.InspectionDate.Value).TotalDays < 4)</td>
+                    <td style="text-align: right">@submittedComments.Count(c => (c.DateSubmitted.Value - c.InspectionDate.Value).TotalDays >=4 && (c.DateSubmitted.Value - c.InspectionDate.Value).TotalDays <= 7)</td>
+                    <td style="text-align: right">@submittedComments.Count(c => (c.DateSubmitted.Value - c.InspectionDate.Value).TotalDays > 7)</td>
+                    @*<td style="text-align: right">@((submittedComments.Count > 0 ? submittedComments.Average(c=>((c.DateSubmitted.Value-c.InspectionDate.Value).TotalDays)) : 0).ToString("N0"))</td>*@
+                </tr>
+                if (submittedComments.Count > 0 && Model.ShowLinks)
+                {
+                    <tr style="border: 1px solid black;display: none" id="@g.Key">
+                        <td colspan="3"></td>
+                        <td colspan="6">
+                            <table>
+                                @foreach (var c in submittedComments)
+                                {
+                                    <tr>
+                                        <td><a href="@(c.insp_type == "LO" ? Url.Action("LoadingReport","Inspection",new {id=c.Key}) : c.insp_type == "FI" ? Url.Action("Report","Inspection",new {id=c.Key}) : "")" target="_blank">@c.insp_id</a></td>
+                                        <td>@c.insp_type</td>
+                                        <td>@c.InspectionDate.ToString("d")</td>
+                                    </tr>
+                                }
+                            </table>
+                        </td>
+                    </tr>     
+                }
+            }
+        }
+        
+    </table>
+    @Scripts.Render("~/bundles/jquery")
+    <script type="text/javascript">
+        function ToggleDetails(id) {
+            $('[id="' + id + '"]').toggle();
+        }
+    </script>
+
+</body>
+
+
+</html>

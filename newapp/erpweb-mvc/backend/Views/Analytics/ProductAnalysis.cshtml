@@ -1,0 +1,467 @@
+﻿@{
+    Layout = null;
+    var sortResults=new List<AnalyticsSubCatSummaryRow>();
+   // List<STotalsOp> oq = new List<STotalsOption>();
+    List<STotalsOption> totOption;
+    var doubles=new List<double>();
+}
+
+@functions {
+    private string GetImageUrl(string chartname)
+    {
+        return string.Format("{0}{1}", WebUtilities.GetSiteUrl(), Url.Action("Image", new {param = string.Format("{0}_{1}", Model.ChartKey, chartname) + "#" + Settings.Default.StatsKey}));
+    }
+
+    private string FormatGBP(double? gbp)
+    {
+        return gbp.ToString("N0");
+    }
+
+}
+
+@model ProductAnalysisModel
+
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Product Analysis</title>
+    <style type="text/css">
+        <!--
+
+        body {
+            font-family:Arial, Helvetica, sans-serif;
+            margin: 0; /* it's good practice to zero the margin and padding of the body element to account for differing browser defaults */
+            padding: 0;
+            text-align: left; /* this centers the container in IE 5* browsers. The text is then set to the left aligned default in the #container selector 
+		*/
+            font-family:Arial, Helvetica, sans-serif; font-size:10px;
+        }
+
+        .oneColFixCtrHdr #container {
+            width: 980px;  /* using 20px less than a full 800px width allows for browser chrome and avoids a horizontal scroll bar */
+            background: #FFFFFF;
+            margin: 0 auto; /* the auto margins (in conjunction with a width) center the page */
+            border: 1px solid #000000;
+            text-align: left; /* this overrides the text-align: center on the body element. */
+        }
+
+        .oneColFixCtrHdr #mainContent {
+            padding: 0 20px; /* remember that padding is the space inside the div box and margin is the space outside the div box */
+            background: #FFFFFF;
+            text-align: left;
+            height: auto;
+            overflow: visible;
+        }
+
+        ul {
+            font-family: Arial, Helvetica, sans-serif;
+            margin:4px;
+            padding:0px;
+            padding-left:12px;
+        }
+
+        li { list-style:circle; 
+            list-style-type: circle;
+        }
+
+        .main_header_section {
+            width:896px; 
+            /*	background-color:#EAF5FD; */
+            height:40px; 
+            padding-left:2px; 
+            font-family:Arial, Helvetica, sans-serif; 
+            color:#000; 
+            font-size:30px;
+            border-top:0px; border-right:0px; border-left:0px; border-bottom:3px;
+            border-color:#999;
+            border-style:solid;
+            margin-bottom:10px;
+            float:left;
+        }
+
+        .main_header_number {
+            width:60px; 
+            height:40px; 
+            float:left; 
+            font-size:24px; 
+            color:#999;
+        }
+
+
+
+        .header_section {
+            width:896px; 
+            /*	background-color:#EAF5FD; */
+            height:auto; 
+            padding-left:2px; 
+            font-family:Arial, Helvetica, sans-serif; 
+            color:#000; 
+            font-size:12px;
+            /*	border-top:1px; border-right:1px; border-left:1px; border-bottom:0px;
+	        border-color:#CCC;
+	        border-style:solid;*/
+        }
+
+        .header_number {
+            width:60px; 
+            height:60px; 
+            float:left; 
+            font-size:24px; 
+            color:#999;
+        }
+
+        .header_title {
+            width:836px;
+            height:auto;
+            float:left;
+            font-size:18px;
+        }
+
+        .sub_title {
+            /*width:384px;*/
+            height:auto;
+            /*float:left;*/
+            /*text-align:center;*/
+            font-size:14px;
+            font-weight:bold;
+        }
+
+        .sub_title2 {
+            width:444px;
+            height:auto;
+            float:left;
+            text-align:center;
+            font-size:14px;
+            font-weight:bold;
+        }
+
+        .header_notes {
+            width:836px;
+            height:auto;
+            float:left;
+            font-size:12px;
+            color:#666;
+        }
+
+        .normal_body {
+            font-family:Arial, Helvetica, sans-serif;
+            font-size:11px;
+            color:#333;
+        }
+        .footer {	width:900px;
+            font-family:Arial, Helvetica, sans-serif;
+            font-size:11px;
+            color:#999;
+            position:absolute;
+            bottom:0;
+            height:18px;
+            left:20px;
+            border-top:1px; border-top-color:#333; border-top-style:solid;
+        }
+        .distgraph_box {
+            float: left;
+            width: 30%;
+            margin-right: 10px;
+            margin-top: 5px;
+            border: 1px solid black;
+            background-color: #EFEFEF
+        }
+        .distgraph_box img {
+            width: 100%;
+        }
+        .subtitle {
+            font-family:Arial,Helvetica, sans-serif; 
+            font-size:14px; 
+            font-weight:bold;
+        }
+        .datatable {
+            width: 920px;
+            font-family:Arial, Helvetica, sans-serif; 
+            font-size:11px; 
+            border-style:solid; 
+            border:1px; 
+            border-color:#000;
+        }
+        .datatable_header {
+            height: 25px;
+            text-align: left;
+            background-color: #B9C9FE;
+        }
+        .altrow {
+            background-color: #E0E0E0
+        }
+        .number {text-align: right}
+    </style>
+
+</head>
+<body>
+    <table style="width:920px" border="0" cellpadding="0" cellspacing="0" >
+        <tr>
+            <td style="width:145px"><img src="@WebUtilities.GetSiteUrl()/Images/@(Path.GetFileNameWithoutExtension(Model.Brand.image) + "_narrow.jpg")" style="width: 140px"></td>
+            <td style="width:595px"><span style="font-size: 18px; color: #000000">P</span><span style="font-size:18px; color:#000000;">roduct Analysis</span> - 
+                <span style="font-size:14px; color:#000;">Units shipped after @Model.StartDate.ToString("d")</span><br>
+                                                                                                                   <span style="font-size:10px;">* data for these products also include sales of the same product in other brands.</span>
+                                                                                                                   <p></p></td>
+            <td width="180" align="right">&nbsp;</td>
+        </tr>
+    </table>
+    @if (Model.Brand.brand_id == Brand.AquaCabinets)
+    {
+        <table style="width: 920px" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td style="width: 460px;vertical-align: top"><span style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold;">&nbsp;&nbsp;Total UK Unit sales percentage by colour</span><br />
+                    &nbsp;&nbsp;<img src="@GetImageUrl("Chart_ByColorTotal")"/>
+                </td>
+                <td>
+                    <span style="font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold;">Distributor specific sales percentage by colour</span>
+                    <br>
+                    <div>
+                    @foreach (var d in Model.Distributors)
+                    {
+                        <div class="distgraph_box">
+                            <img src="@GetImageUrl(string.Format("Chart_ByColor_{0}",d.customer_code))"/>
+                        </div>
+                    }
+                    </div>
+                </td>
+
+            </tr>
+        </table>
+    }
+    <br/>
+    @{var rowIndex = 0;}
+    <div class="sub_title">Total UK Unit sales percentage by range</div>
+    <table class="datatable">
+        <tr class="datatable_header">
+            <td style="width:60%">Product</td>
+            @foreach (var dist in Model.Distributors)
+            {
+                <td style="text-align: right">@dist.user_name</td>
+            }
+            <td style="text-align: right">% age of sales</td>
+            <td style="text-align: right">% age of GP</td>
+            
+        </tr>
+        @{
+            var brandSalesData = Model.SalesData.Where(s => s.brand_user_id == Model.Brand.user_id).ToList();
+
+            var totalSales = Model.SalesData.Where(s => s.analytics_category != null).Sum(s => s.rowprice_gbp);
+            var totalSalesGP = Model.SalesData.Where(s => s.analytics_category != null).Sum(s => s.rowprice_gbp - s.PO_rowprice_gbp);
+            var distTotals = new Dictionary<int, double?>();
+            foreach (var dist in Model.Distributors)
+            {
+                distTotals[dist.user_id] = brandSalesData.Where(s => s.analytics_category != null && s.customer_code == dist.customer_code).Sum(s => s.rowprice_gbp);
+            }
+        }
+        
+
+        @foreach (var category in Model.Categories)
+        {
+            var totalSaleCat = brandSalesData.Where(s => s.Category != null && s.Category.category_id == category.category_id).Sum(s => s.rowprice_gbp);
+            var totalGPCat = brandSalesData.Where(s => s.Category != null && s.Category.category_id == category.category_id).Sum(s => s.rowprice_gbp - s.PO_rowprice_gbp);
+            <tr @Html.Raw(rowIndex++%2 == 0 ? "class=\"altrow\"" : "")>
+                <td style="width: 50%">@category.category_name</td>
+                @foreach (var dist in Model.Distributors)
+                {
+                    var distSale = brandSalesData.Where(s => s.Category != null && s.Category.category_id == category.category_id && s.customer_code == dist.customer_code).Sum(s => s.rowprice_gbp);
+                    <td style="text-align: right;width:80px">@( (distTotals[dist.user_id] > 0 ? distSale/distTotals[dist.user_id] : 0).ToString("P0"))</td>
+                }   
+                <td style="text-align: right;background-color: #DAE2FE;width:80px">@((totalSaleCat/totalSales).ToString("P0"))</td>
+                <td style="text-align: right;background-color: #EBEFFE;width:80px">@((totalGPCat/totalSalesGP).ToString("P0"))</td>
+            </tr>
+        }
+        
+
+    </table>
+    <br/>
+    @foreach (var cat in brandSalesData.Where(s => s.analytics_category != null && s.brand_user_id == Model.Brand.user_id).GroupBy(s => s.Category.category_id).OrderBy(s => s.First().Category.category_seq))
+    {
+        rowIndex = 0;   
+        var category = Model.Categories.FirstOrDefault(s => s.category_id == cat.Key);
+        if (category != null)
+        {
+            <table class="datatable">
+                <tr class="datatable_header">
+                    <td style="font-size: 14px;width: 60%;font-weight: bold">@category.category_name</td>
+                    @foreach (var option in Model.Options)
+                    {
+                        <td style="text-align: right">@option.option_name</td>
+                    }
+                    <td style="text-align: right">Total</td>
+                </tr>
+                @{ var totalForCat = 0.0;}
+                @foreach (var sub in Model.Subcategories.Where(s=>s.category_id == category.category_id).OrderBy(s=>s.seq))
+                {
+                    var products = Model.CustProducts.Where(c => c.analytics_category == sub.subcat_id || Model.CustProducts.Any(p =>p.cprod_id != c.cprod_id && p.cprod_mast == c.cprod_mast && p.analytics_category == sub.subcat_id)).ToList();
+                   
+                      totOption =new List<STotalsOption>();
+                     
+                        
+                        foreach (var option in Model.Options)
+                        {
+
+                         // doubles.Add((double) Model.SalesData.Where(s => s.analytics_category == sub.subcat_id && s.analytics_option == option.option_id).Sum(s => s.orderqty));
+                            totOption.Add(new STotalsOption { TotalList = Model.SalesData.Where(s => s.analytics_category == sub.subcat_id && s.analytics_option == option.option_id).Sum(s => s.orderqty) });
+
+
+
+                        }
+                        //totOption.Add(new STotalsOption {TotalList = doubles.Select()});
+                                                          
+                           var totalSubCat = (Model.SalesData.Where(s => products.Count(p=>p.cprod_id == s.cprod_id)> 0).Sum(s => s.orderqty) ?? 0);
+                           totalForCat+= totalSubCat;
+                                                      
+                        
+                            string name = sub.subcategory_name ;
+                            name += (products.Count(p => p.brand_userid != Model.Brand.user_id) > 0 ? "*" : "");
+                            sortResults.Add( new AnalyticsSubCatSummaryRow
+                                {
+                                    Name=(name),
+                                    STotalsOpLast6m = totOption,
+                                    TotalLast6m = totalSubCat
+                                });
+                           
+                  }                         
+                @foreach (var nameTotal in sortResults.OrderByDescending(s => s.TotalLast6m))
+                {  
+                    <tr @Html.Raw(rowIndex++%2 == 0 ? "class=\"altrow\"" : "")>
+                        
+                        <td style="text-align: left"> @nameTotal.Name</td>
+                        @*<td>@nameTotal.STotalsOp</td>*@
+                        @foreach (var i in nameTotal.STotalsOpLast6m)
+                        {
+                            <td style="text-align: right">@(i.TotalList > 0 ? i.TotalList.ToString() : string.Empty)</td>
+                        }
+                           
+                            <td style="text-align: right"> @nameTotal.TotalLast6m</td>
+                          
+
+                    </tr> 
+                }
+               
+                @{
+                    sortResults.Clear();
+                        
+                }
+                   
+                        
+                <tr class="datatable_header">
+                    <td>TOTAL</td>
+                    @foreach (var option in Model.Options)
+                    {
+                        <td style="text-align: right;font-weight: bold">@(Model.SalesData.Where(s=>s.Category != null && s.Category.category_id == category.category_id && s.analytics_option == option.option_id).Sum(s=>s.orderqty))</td>
+                    }
+                    <td style="text-align: right;font-weight: bold">@totalForCat</td>
+                </tr>
+            </table>
+            <br/>
+        }
+    }
+    
+    @{ var categoryNames = Model.brand_cats != null && Model.brand_cats.Count > 0 ? string.Join(",", Model.Categories.Where(c => Model.brand_cats.Contains(c.category_id)).Select(c => c.category_name)) : "";}
+    
+    <div class="sub_title">Dealer displays @(!string.IsNullOrEmpty(categoryNames) ? "(" + categoryNames + ")" : "") </div>
+    <table class="datatable">
+        <tr class="datatable_header">
+            <td rowspan="2">Distributor</td>
+            <td rowspan="2" class="number">Units displayed</td>
+            <td colspan="2" class="number">Sales</td>
+            <td rowspan="2" class="number">GBP sales/displays</td>
+        </tr>
+        <tr class="datatable_header">
+            <td class="number">units</td>
+            <td class="number">GBP</td>
+        </tr>
+        @{ rowIndex = 0;
+            int? totalDisplayCount = 0;
+            double? totalUnits = 0;
+            double? totalgpb = 0;
+            }
+        @foreach (var dist in Model.Distributors)
+        {
+            int? displayCount = 0;
+            //distributors.Add(dg.Key);
+            var distData = Model.SalesData.Where(s => s.customer_code == dist.customer_code && s.category1 != Category1.category1_spares && (Model.brand_cats == null || (s.Category != null && Model.brand_cats.Contains(s.Category.category_id) )));
+            
+            displayCount = Model.ProductDisplayCounts.Where(dc => dc.distributor_code == dist.customer_code).Sum(dc => dc.DisplayCount);
+            
+            totalDisplayCount += displayCount;
+            var units = distData.Sum(l => l.orderqty);
+            var gbp = distData.Sum(l => l.rowprice_gbp);
+            totalUnits += units;
+            totalgpb += gbp;
+            <tr @Html.Raw(rowIndex++%2 == 0 ? "class=\"altrow\"" : "")>
+                <td>@dist.customer_code</td>
+                <td class="number">@displayCount</td>
+                <td class="number">@units</td>
+                <td class="number">@FormatGBP(gbp)</td>
+                <td class="number">@FormatGBP(displayCount > 0 ?  gbp/displayCount : 0)</td>
+            </tr>
+        }
+        <tr class="altrow" style="font-weight: bold">
+            <td>TOTAL</td>
+            <td class="number">@totalDisplayCount</td>
+            <td class="number">@totalUnits</td>
+            <td class="number">@FormatGBP(totalgpb)</td>
+            <td class="number">@FormatGBP(totalUnits > 0 ?  totalgpb/totalDisplayCount : 0)</td>
+        </tr>
+    </table>
+    <div style="height: 20px"></div>
+    <div class="sub_title">Top displaying products @(!string.IsNullOrEmpty(categoryNames) ? "(" + categoryNames + ")" : "")</div>
+    <table class="datatable">
+        <tr class="datatable_header">
+            <td rowspan="2">Product code</td>
+            <td rowspan="2">Product name</td>
+            <td colspan="@Model.Distributors.Count" style="text-align: center">units displayed</td>
+            <td rowspan="2" class="number" style="width: 35px">TOTAL</td>
+            <td colspan="@Model.Distributors.Count" style="text-align: center">units sold</td>
+            <td rowspan="2" class="number" style="width: 35px">TOTAL</td>
+            <td rowspan="2" class="number" style="width: 35px">units sales/displays</td>
+        </tr>
+        <tr class="datatable_header">
+            @foreach (var dist in Model.Distributors)
+            {
+                <td class="number" style="width: 35px">@dist.customer_code</td>
+            }
+            @foreach (var dist in Model.Distributors)
+            {
+                <td class="number" style="width: 35px">@dist.customer_code</td>
+            }
+        </tr>
+        @{ rowIndex = 0;}
+        @foreach (var pd in Model.ProductDisplayCounts.GroupBy(pd => pd.cprod_id).OrderByDescending(g => g.Sum(pd => pd.DisplayCount)))
+        {
+            var prod = Model.CustProducts.FirstOrDefault(p => p.cprod_id == pd.Key);
+            if (prod != null)
+            {
+                var multipleBrands = prod != null ? Model.SalesData.Any(s => s.distributor > 0 && s.cprod_mast == prod.cprod_mast && s.brand_user_id != Model.Brand.user_id) : false;
+                <tr @Html.Raw(rowIndex++%2 == 0 ? "class=\"altrow\"" : "")>
+                    <td>@pd.First().cprod_code1 @(multipleBrands ? "*" : "")</td>
+                    <td>@pd.First().cprod_name</td>
+                    @{ var total = 0; }
+                    @foreach (var dist in Model.Distributors)
+                    {
+                        var displaysForDist = pd.Where(p => p.distributor_code == dist.customer_code).Sum(p => p.DisplayCount);
+                        total += displaysForDist;
+                        <td class="number">@displaysForDist</td>
+                    }
+                    <td class="number datatable_header">@total</td>
+                    @{ var totalUnitSales = 0; }
+                    @foreach (var dist in Model.Distributors)
+                    {
+                        var salesForDist = Model.SalesData.Where(s => s.customer_code == dist.customer_code && s.cprod_mast == prod.cprod_mast).Sum(s => s.orderqty);
+                        totalUnitSales += Convert.ToInt32(salesForDist);
+                        <td class="number">@salesForDist</td>
+                    }
+                    <td class="number datatable_header">@totalUnitSales</td>
+                    <td class="number">@((total > 0 ? totalUnitSales/total : 0).ToString("N1"))</td>
+                </tr>
+            }
+        }
+    </table>
+
+</body>
+</html>

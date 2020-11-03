@@ -1,0 +1,68 @@
+﻿@using company.Common
+@model TechnicalDataGenerationReportModel
+
+@{
+    ViewBag.Title = "title";
+    Layout = null;
+}
+<html>
+<head>
+    <title>Technical data</title>
+    <style type="text/css">
+        .tableheader {
+            font-weight: bold;
+        }
+
+        body, table {
+            font-family: arial;
+            font-size: 12px;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            padding: 2px;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+<h2>Technical data report</h2>
+
+Clients: @string.Join(",", Model.ClientCodes) <br/>
+Category: @Model.SubCategory.IfNotNull(c => c.cat2_desc)<p>
+
+<table>
+    <tr class="tableheader">
+        <td>mast_id</td>
+        <td>Factory</td>
+        <td>Code</td>
+        <td>Description</td>
+        <td>Factory code</td>
+        @foreach (var type in Model.TechnicalDataTypes.OrderBy(t => t.sequence))
+        {
+            <td>@type.TechnicalDataType.data_type_desc</td>
+        }
+    </tr>
+    @foreach (var p in Model.CustProducts.OrderBy(p => p.cprod_code1))
+    {
+        <tr>
+            <td>@p.cprod_mast</td>
+            <td>@p.MastProduct.IfNotNull(mp => mp.Factory).IfNotNull(f => f.factory_code)</td>
+            <td>@p.cprod_code1</td>
+            <td>@p.cprod_name</td>
+            <td>@p.MastProduct.IfNotNull(mp => mp.factory_ref)</td>
+            @foreach (var type in Model.TechnicalDataTypes.OrderBy(t => t.sequence)) {
+                <td>@{
+                    var data = Model.TechnicalProductData.FirstOrDefault(d => d.mast_id == p.cprod_mast && d.technical_data_type == type.technical_data_type);
+                        if (data != null)
+                        {
+                            @data.technical_data
+                        }
+                    }</td>
+            }
+        </tr>
+    }
+</table>
+</body>
+</html>

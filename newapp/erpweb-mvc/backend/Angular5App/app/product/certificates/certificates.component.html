@@ -1,0 +1,68 @@
+<h1>Product and factory certificates</h1>
+<app-errormessage [errorMessage]="errorMessage"></app-errormessage>
+<tabset>
+    <tab heading="Products">
+        <app-mastproductselector [model]="selectorModel" (onAction)="onSelectorAction($event)"></app-mastproductselector> 
+        <section class="panel panel-primary">
+
+            <header class="panel-heading">
+                Products
+            </header>        
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-xs-8">
+                        <tabset *ngIf="showCustProducts">
+                            <tab heading="Factory products">
+                                <div class="mt-2">
+                                    <app-certproductlist [products]="mastProducts" (FilterApplied)="onMastProductListFilterApplied($event)"
+                                    (FileRemoved)="onMastProductFileRemoved($event)" ></app-certproductlist>
+                                </div>                                
+                            </tab>
+                            <tab heading="Customer products">
+                                <div class="mt-2">
+                                    <app-certproductlist [products]="custProducts" (FilterApplied)="onCustProductListFilterApplied($event)"
+                                    (FileRemoved)="onCustProductFileRemoved($event)" ></app-certproductlist>
+                                </div>                                
+                            </tab>
+                        </tabset>
+                        <app-certproductlist *ngIf="!showCustProducts" [products]="mastProducts" (FilterApplied)="onMastProductListFilterApplied($event)" 
+                        (FileRemoved)="onMastProductFileRemoved($event)"></app-certproductlist>
+                    </div>                        
+                    <div class="col-xs-4">
+                        <app-fileselector [files]="files" [uploadedFiles]="uploadedFiles"
+                         (FileDeleteClicked)="onFileDeleteClicked($event)"></app-fileselector>
+                        <div class="mt-2">
+                            <button class="btn btn-block btn-primary" (click)="assignFiles()" 
+                            *ngIf="(getSelectedMastProductsCount()>0 || getSelectedCustProductsCount() > 0) 
+                                    && (getSelectedFilesCount() > 0 || getUploadedFilesCount() > 0)">Assign files</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </tab>
+    <tab heading="Factories">            
+        <section class="panel panel-primary">
+
+            <header class="panel-heading">
+                Factories
+            </header>        
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-xs-8"><app-certfactorylist [factories]="selectorModel.factories"></app-certfactorylist> </div>
+                    <div class="col-xs-4"><app-fileselector #factoryFileSelector [files]="filesFactories" [uploadedFiles]="uploadedFilesFactories" 
+                        (FileDeleteClicked)="onFileDeleteClicked($event)" [showDescription]="true" [descriptionLabel]="'Name'" [allowDescriptionEdit]="true"
+                        (FileEditClicked)="onFileEditClicked($event)"
+                        ></app-fileselector>
+                        <div class="mt-2">
+                            <button class="btn btn-block btn-primary" (click)="assignFilesFactories()" 
+                            *ngIf="getSelectedFactoriesCount()>0 && (getSelectedFilesFactoriesCount() > 0 || getUploadedFilesFactoriesCount() > 0)">Assign files</button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </section>
+            
+    </tab>
+</tabset>

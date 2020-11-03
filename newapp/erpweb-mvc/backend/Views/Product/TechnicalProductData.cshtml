@@ -1,0 +1,680 @@
+﻿@model    TechnicalProductDataModel
+
+@{
+    Layout = null;
+    ViewBag.Title = "TechnicalProductData";
+}
+
+
+<!DOCTYPE html>
+<html ng-app="techApp">
+<head>
+    <title>Input form</title>
+    @*<link href="~/Content/bootsrap/bootstrap.min.css" rel="stylesheet" />*@
+    <link href="~/Content/bootstrap/bootstrap-theme-spacelab.css" rel="stylesheet" />
+    @*<link href="~/Content/bootstrap/bootstrap-theme-paper.css" rel="stylesheet" />*@
+    @*<link href="~/Content/bootstrap/bootstrap.min.lumen.css" rel="stylesheet" />*@
+    @*<link href="~/Content/bootstrap/bootstrap-theme-readibility.css" rel="stylesheet" />*@
+    @*<link href="~/Content/bootstrap/bootstrap-theme-flatly.css" rel="stylesheet" />*@
+    @*<link href="~/Content/bootstrap/bootstrap-lipi.css" rel="stylesheet" />*@
+    @*<script src="~/Scripts/jquery-1.7.1.min.js"></script>*@
+    <style>
+        [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+    </style>
+</head>
+<body  ng-controller="technicalCtrl">
+<div class="container">
+<div class="panel panel-default">
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand">Technical product data</a>
+        </div>
+    </div>
+</nav>
+
+<div class="panel-body">
+    <form class="form-horizontal" novalidate name="myForm" ng-cloak>
+        <div class="row">
+            <fieldset style="border: none">
+
+                <legend>Input </legend>
+
+
+
+                <div class="form-group">
+                    <label class="col-md-2 control-label"> Select client </label>
+                    <div class="col-md-3">
+                        <select class="form-control"
+                                ng-model="currentUser"
+                                ng-options="client as client.customer_code for client in clients"
+                                ng-change="listProducts()">
+                            <option value="">(Pick client)</option>
+                        </select>
+                        
+                    </div>
+                    <div class="col-md-1">
+
+                        <img src="~/Images/animated_spinner.gif" ng-show="spinerProducts" style="width:25px;height:25px;margin-top:5px;"/>
+                    </div>
+                    <label class="col-md-2 control-label text-warning text-left"  ng-cloak>
+                        {{currentUser.user_name}}
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-2 control-label">
+                        Select product
+                    </label>
+                    <div class="col-md-3 control-group">
+                        @* DROPDOOWN *@
+                        @*<select class="form-control"
+                            ng-model="currentProduct"technicalDataType
+                            ng-options="product.cprod_mast as product.cprod_code1 for product in products"
+                            ng-change="listTechnicalData()"></select>*@
+                        @* auto complete *@
+                        <input type="text" name="autocomplete"
+                               class="form-control"
+                               ng-model="currentProduct"
+                               uib-typeahead="product as product.cprod_code1 for product in products | filter:{cprod_code1:$viewValue}|limitTo:13|orderBy:'cprod_code1'"
+                               typeahead-on-select="listTechnicalData();getSubcategories(currentProduct.cprod_mast); "
+                                />
+
+                    </div>
+                    <div class="col-md-1" style="margin-top: 9px"  ng-cloak>
+                        <div class="label label-primary" ng-show="showBadge"><span style="font-size: small"  ng-cloak>{{products.length}}</span></div>
+                    </div>
+
+                    <label class="col-md-2 control-label text-warning text-left"  ng-cloak>
+
+                        <small>mast-id: </small> {{currentProduct.cprod_mast}}
+                        @*<small>mast-id: </small> {{currentProduct}}*@
+                    </label>
+                    @* EXCEL *@
+                    @*<div class="col-sm-1">
+                        <input id="readfile" type="file" ng-mouseleave="loadFile($event);$event.stopPropagation();">
+
+
+                    </div>*@
+                </div>
+               
+            </fieldset>
+        </div>
+        <div class="row" style="border: none" ng-show="showMultipleInputTechnicalType"   ng-cloak>
+            <div class="col-sm-12">
+                <h3>Add new data </h3>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+
+                    <table>
+                        <tr>
+                            <td><h4>New data type</h4></td>
+                        </tr>
+                        <tr ng-repeat="item  in newTechnicalDataType track by $index">
+                            <td>{{item}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-sm-3">
+                    <h4>Existing technical</h4>
+                    <table>
+                        <tr ng-repeat="item in oldTechnicalDataType track by $index">
+                            <td>  {{item}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-sm-3">
+                    <h4>All technical from Excel</h4>
+                    <table>
+                        <tr ng-repeat="name in allTechnicalDataTypeFromExcel">
+                            <td>{{name}}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-2">
+                    <button class="btn btn-primary btn-sm pull-right"
+                            ng-click="createNewDataTypes()">Save</button>
+                </div>
+            </div>
+        </div>
+        <div class="row" ng-show="showMultipleInput"  ng-cloak>
+            <h3>Multiple input from excel {{eData.length}} </h3>
+            <table class="table table-bordered">
+
+                <tr >
+                    <td>
+                        
+                    </td>
+                    <td ng-repeat="item in propertyNames">{{item}}</td>
+
+                    <td></td>
+                </tr>
+
+                @*<tr ng-repeat="item in eData">*@
+                <tr ng-repeat="(key,item) in eData ">
+                    <td>{{item.Client_code}}-{{item.length}}</td>
+                    <td></td>
+                </tr>
+            </table>
+        </div>
+        <div class="row" ng-cloak>
+            <fieldset>
+                <legend>
+                    Existing data &nbsp;&nbsp;&nbsp;<span class="label label-primary" ng-show="technicalData.length > 1" style="font-size: small">
+                        @*<span style="font-size:18px">{{technicalData.length}}</span>*@
+                        {{technicalData.length}}
+                    </span>
+                </legend>
+                @* Repeat *@
+                <div class="col-md-2" ng-hide="hideSingleInput"></div>
+                <div class="form-group col-md-9" ng-hide="hideSingleInput">
+                    <table class="table table-striped table-hover ">
+                        <caption ng-show="currentProduct.cprod_mast > 0">Editing data for technical product data table </caption>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <label class="col-md-3">Technical data type</label>
+                                    <label class="col-md-5">Technical data</label>
+                                </th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-show="spinLoadTechnical">
+                                <td colspan="2" style="text-align:center" >
+                                    <img src="~/Images/animated_spinner.gif" style="width:60px; height:60px"/>
+                                </td>
+                                <td></td>
+                            </tr>
+                            <tr ng-repeat="prod in technicalData track by $index" ng-show="currentProduct.cprod_mast > 0">
+                                <td>
+                                    <label class="col-md-3 control-label">
+
+                                        <small>{{prod.technicalDataType.data_type_desc}}</small>
+
+                                    </label>
+                                    <div class="col-md-5">
+
+                                        <input type="text" value="" class="form-control"
+                                               ng-model="prod.technical_data"
+                                               ng-disabled="true"
+                                               ng-hide="(prod.technical_data === '') || (prod.unique_id==currentItem.unique_id)" />
+                                        <input type="text" class="form-control"
+                                               ng-model="addReqTypeDescr.text"
+                                               ng-hide="prod.technical_data !== '' || prod.unique_id > 0" />
+                                        <input type="text" value="" class="form-control"
+                                               ng-model="currentItem.technical_data"
+                                               ng-show="prod.unique_id>0 && (prod.unique_id==currentItem.unique_id)" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span>
+                                            @* ADD *@
+                                            <button class="btn btn-xs btn-primary" style="width: 80px"
+                                                    ng-click="createTechnical({'technical_data_type':prod.technical_data_type,'technical_data':addReqTypeDescr.text},$index)"
+                                                    ng-hide="prod.unique_id >0"
+                                                    ng-disabled="!(addReqTypeDescr.text.length > 0)">
+                                                <span class="glyphicon glyphicon-pencil">&nbsp;Add</span>
+                                            </button>
+                                            @* EDIT *@
+                                            <button class="btn btn-xs btn-primary" style="width: 80px"
+                                                    ng-click="editOrCreateTechnical(prod)"
+                                                    ng-hide="(prod.technical_data==='')|| (prod.unique_id==currentItem.unique_id) || (prod.unique_id== productDelete.unique_id)">
+                                                <span class="glyphicon glyphicon-pencil">&nbsp;Edit</span>
+                                            </button>
+                                            <button class="btn btn-xs btn-success" style="width: 80px"
+                                                    ng-click="saveEdit(currentItem,$index)"
+                                                    ng-show="prod.unique_id > 0 && (prod.unique_id==currentItem.unique_id)">
+                                                <span class="glyphicon glyphicon-ok">&nbsp;Save</span>
+                                            </button>
+                                            @* DELETE *@
+                                            <button class="btn btn-xs btn-danger" style="width: 80px"
+                                                    ng-click="forDelete(prod)"
+                                                    ng-hide="prod.technical_data === '' || prod.unique_id==productDelete.unique_id">
+                                                &nbsp;
+                                                <span class="glyphicon glyphicon-remove">&nbsp;Delete</span>
+                                            </button>
+                                            <button class="btn btn-xs btn-warning" style="width: 80px"
+                                                    ng-click="deleteTechnical(prod);addReqTypeDescr.text=''"
+                                                    ng-show="productDelete.unique_id > 0 && prod.unique_id==productDelete.unique_id">
+                                                &nbsp;
+                                                <span class="glyphicon glyphicon-remove-circle">&nbsp;Confirm</span>
+                                            </button>
+                                            <button class="btn btn-xs btn-primary" style="width: 80px"
+                                                    ng-click="forDelete({})"
+                                                    ng-show="productDelete.unique_id > 0 && prod.unique_id==productDelete.unique_id">
+                                                &nbsp;
+                                                <span class="glyphicon glyphicon-ban-circle">&nbsp;Cancel</span>
+                                            </button>
+                                        </span>
+                                    </div>
+                                </td>
+                                <td style="min-width:25px">
+                                    <img src="~/Images/animated_spinner.gif" style="width:20px; height:20px" ng-show="spinChange[$index]"/>
+                                </td>
+
+                            </tr>
+                            @*<tr class="active" ng-show="currentProduct.cprod_mast > 0">
+                                <td>
+                                    <div class="form-group">
+                                        <div class="col-md-4">
+                                            <input name="autocomplete"
+                                                   class="form-control"
+                                                   ng-model="newCurrentDataTypee"
+                                                   typeahead="type as type.data_type_desc for type in technicalDataTypes|filter:{data_type_desc:$viewValue}|limitTo:12"
+                                                   typeahead-on-select="setCurrentDataType($item)"
+                                                   typeahead-editable="false" />
+                                         
+                                        </div>
+                                        <div class="col-md-5">
+                                            <input type="text"
+                                                   ng-model="currentDataType.technical_data" class="form-control" />
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button class="btn btn-primary"
+                                                    ng-disabled="incomplete2"
+                                                    ng-click="createTechnical(currentDataType)">
+                                                <span class="glyphicon glyphicon-ok">   Add</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>*@
+                        </tbody>
+                    </table>
+                </div>
+                @* /Repeat *@
+            </fieldset>
+        </div>
+        <div class="row" ng-cloak>
+            <fieldset style="border: none" ng-hide="hideSingleInput">
+                <legend>Add new data {{hideSingleInput}}</legend>
+                <div class="form-group" ng-show="currentProduct.cprod_mast>0">
+                    <label class="col-md-3 control-label">Add new data type </label>
+                    <div class="col-md-5">
+                        <input type="text"
+                               class="form-control"
+                               ng-model="newDataType" />
+                    </div>
+                    <div class="col-md-1">
+                        <button class="btn btn-primary"
+                                ng-click="createNewDataType(newDataType)"
+                                ng-disabled="incomplete">
+                            <span class="glyphicon glyphicon-ok"> Add</span>
+                        </button>
+
+                    </div>
+                </div>
+                @*<div class="form-group">
+                        <label class="col-md-2 control-label">Data value</label>
+                        <div class="col-md-5">
+                            <input class="form-control" type="text"  />
+                       </div>
+                    </div>*@
+
+
+
+            </fieldset>
+        </div>
+
+
+    </form>
+</div>
+</div>
+
+</div>
+    <script src="~/Scripts/lodash.js"></script>
+    <script src="~/Scripts/angular.js"></script>
+    <script src="~/Scripts/jquery-2.1.4.js"></script>
+
+    @* for excel and csv *@
+    <script src="~/Scripts/Map/alasql.js"></script>
+    <script src="~/Scripts/Map/xlsx.core.min.js"></script>
+
+
+    <script src="~/Scripts/angular-route.js"></script>
+    <script src="~/Scripts/angular-ui/ui-bootstrap-tpls.js"></script>
+
+    <script>
+        var techApp = angular.module('techApp', ["ngRoute", "ui.bootstrap"])
+            .constant("baseUrl", "/Product/")
+            .controller("technicalCtrl", function($scope, $http, $rootScope, $timeout, baseUrl) {
+                @*$scope.clients = "@Html.Raw(Model)";*@
+                $scope.clients=@Html.Raw(WebUtilities.JsonSerialize(Model.Users.Where(c => c.customer_code != "").Select(s => new { user_id = s.user_id, customer_code = s.customer_code}).OrderBy(c => c.customer_code)));
+                $scope.test = "test";
+                $scope.currentUser = {};
+                $scope.showBadge = false;
+                // $scope.currentProductMastId = null;
+                $scope.currentProduct = "";//$scope.currentProductMastId.cprod_mast;
+                $scope.products = [];
+                $scope.currentTechnicalData = {};
+                $scope.currentItem = null;
+                $scope.productDelete = null;
+
+                $scope.newDataType = '';
+                $scope.data_type_desc = '';
+                $scope.incomplete = true;
+                $scope.incomplete2 = true;
+
+                $scope.currentDataType = {};
+                $scope.currentDataType.technical_data_type = 0;
+                $scope.currentDataType.technical_data = '';
+
+                /*prepared for saving to the database*/
+                $scope.newTechnicalDataType = [];
+                $scope.oldTechnicalDataType = [];
+                $scope.allTechnicalDataType = [];
+                $scope.newTechnicalData = [];
+
+                $scope.showMultipleInput = false;
+                $scope.showMultipleInputTechnicalType=false;
+                /*Read from EXCEL*/
+                $rootScope.loadFile = function ($event) {
+                    if (event.fromElement.files.length == 0) {
+                        return (false);
+                    }
+                    $scope.hideSingleInput = true;
+                    $scope.showMultipleInput = true;
+                    $scope.showMultipleInputTechnicalType = true;
+
+                    alasql('SELECT FROM FILE(?,{headers:true})', [event], function (data) {
+
+                        $rootScope.eData = data;
+
+                        $scope.newTechnicalDataType = [];
+                        $scope.oldTechnicalDataType = [];
+                        /* New data type koji se treba dotati u bazu ako ne postoji u bazi */
+                        /* From excel */
+                        var propertyNames = tempNewTechnical = Object.getOwnPropertyNames($rootScope.eData[0]).slice(4);
+                        angular.forEach(tempNewTechnical, function(v, k) {
+                            tempNewTechnical[k] = v.replace(/_/g,' ');/*U bazi je zapisan bez _ */
+                        });
+                        //var tempTechnical = _.pluck($scope.technicalDataTypes,  'data_type_desc');
+                        console.log("TEMP TECHNICAL");
+                        var tempTechnical = _.map($scope.technicalDataTypes, function(item) {
+                            return _.pick(item,['data_type_id', 'data_type_desc']);
+                        });
+                        angular.forEach(tempTechnical, function(value, key) {
+                            console.log(value.data_type_id, value.data_type_desc);
+                        });
+
+                        //console.log(tempTechnical);
+                        console.log("GOTOVO");
+                        $scope.allTechnicalDataTypeFromExcel = angular.copy(tempNewTechnical);
+                        /*prođem kroz sve new technical data taype i razvrstam na one koji postoje i na one koji ne postoje*/
+                        angular.forEach(tempNewTechnical, function (value, key) {
+                            //if (!_.contains(tempTechnical, value)) {
+                            if(!_.contains(_.pluck($scope.technicalDataTypes,'data_type_desc'),value)){
+                                $scope.newTechnicalDataType.push(value);
+                            } else {
+                                $scope.oldTechnicalDataType.push(value);
+                            }
+
+                        });
+                        /*predstavljaju imena zaglavlja u tablici*/
+                        $scope.propertyNames = angular.copy(propertyNames);
+                        console.log(propertyNames);
+                        /*FIX*/
+                        /*jer mi nije učitavao tablicu u scope, nego sam morao ponovo okinut mouseleave ili click*/
+                        $timeout(function () {
+                            /*something is wrong, I made fix with jQuery*/
+                            //angular.element(document).find('#readfile').trigger('mouseleave');
+                            //angular.element('#readfile').trigger('mouseleave');
+                            $("#readfile").mouseleave();
+                        }, 100);
+
+
+                    });
+                };
+                $scope.requiredDataTypes=[];
+                $scope.getSubcategories=function(mast_id){
+                    //alert(mast_id);
+                    $scope.requiredDataTypes=[];
+                    $http.get(baseUrl + "GetSubcategories/",{params:{mast_id:mast_id}})
+                        .then(function (response) {
+                            //$scope.technicalDataTypes = response.data;
+                            $scope.requiredDataTypes=response.data;
+                        }, function () {
+                            alert("Error") 
+                        });
+                  
+                }
+                $scope.listProducts = function () {
+                    $scope.spinerProducts=true;
+                    $http.get(baseUrl + "TechnicalGetProductsByUser/", { params: { cprod_user: $scope.currentUser.user_id } }).then(function (response) {
+                        $scope.products = [];
+                        $scope.products = response.data;
+                        $scope.currentProduct = "";
+                        $scope.technicalData = [];
+                        $scope.showBadge = true;
+                        $scope.spinerProducts=false;
+                        //console.log($scope.products.length);
+                        //for (var i = 0; i < $scope.products.length; i++) {
+                        //    if ($scope.products[i].cprod_code1 == 20050070900)
+                        //        console.log(i + 1 + " - " + $scope.products[i].cprod_id);
+                        //}
+                    }, function () {
+
+                    });
+                }
+                $scope.ATdata=[];
+                $scope.listTechnicalData = function () {
+                    $scope.spinLoadTechnical=true;
+                    $http.get(baseUrl + "TechnicalGetProductData/", { params: { mast_id: $scope.currentProduct.cprod_mast } }).then(function (response) {
+                        var _technicalData = response.data;
+                        //var _requiredDataTypes =$scope.requiredDataTypes;
+                        console.log("Get list technical Data");
+                        $scope.ATdata = response.data;
+                        $scope.spinLoadTechnical=false;
+                        
+                    }, function () {
+
+                    });
+                   
+                }
+                $scope.filterData=function(){
+                    $scope.technicalData=[];
+                    for (var i = 0; i < $scope.requiredDataTypes.length; i++) { 
+                        var thesame=true;
+                        for (var a = 0; a < $scope.ATdata.length; a++) {
+                            if ($scope.requiredDataTypes[i].technical_data_type === $scope.ATdata[a].technical_data_type) {
+                                thesame=true;
+                                $scope.technicalData.push($scope.ATdata[a]);  
+                                break
+                            }else{
+                                thesame=false;
+                            }
+                        }
+                        if(($scope.ATdata.length<1) || !thesame ){
+                            $scope.technicalData.push({
+                                mast_id:$scope.currentProduct.cprod_mast,
+                                technical_data_type:$scope.requiredDataTypes[i].technical_data_type,
+                                technical_data:"",
+                                technicalDataType:{
+                                    data_type_id:$scope.requiredDataTypes[i].technical_data_type,
+                                    data_type_desc:$scope.requiredDataTypes[i].TechnicalDataType.data_type_desc
+                                }
+                            });
+                        }
+                    }
+                }
+                $scope.$watchGroup(['requiredDataTypes','ATdata'],function(_new,_old,scope){
+                        $scope.filterData();
+                })
+                $scope.setCurrentDataType = function (item) {
+                    $scope.currentDataType.technical_data_type = item.data_type_id;
+                }
+
+                $scope.listTechnicalTypes = function () {
+                    $http.get(baseUrl + "TechnicalTypes/")
+                        .then(function (response) {
+                            $scope.technicalDataTypes = response.data;
+                        }, function () { });
+                }
+                $scope.createTechnicalsProductsData = function () {
+                    /* Izradit novi array*/
+                    /*  pronaći sve TechnicalData type
+                    *   spojiti ga sa Technical Product Data
+                    */
+                    /*DOHVATI SVE KOJI SU POTREBNI TechnicalDataType*/
+                    angular.forEach($scope.allTechnicalDataType, function(val, key) {
+
+                    });
+                }
+                $scope.createNewDataTypes=function() {
+                    angular.forEach($scope.newTechnicalDataType,function(value,key) {
+                        //$scope.createNewDataType=;
+                        if (_.contains($scope.technicalDataTypes)) {
+
+                        }
+                        // console.log(value);
+
+                    });
+
+                    $scope.newTechnicalDataType = [];
+                    $scope.showMultipleInputTechnicalType = false;
+
+                    /*osvježi iz baze da dobijemo sve technical types i snimljene i one od prije*/
+                    $scope.listTechnicalTypes();
+
+
+                }
+                $scope.createNewDataType = function (data) {
+
+                    //$scope.technicalDataTypes.push(data)
+                    var d = {};
+                    d.data_type_desc = data;
+                    $http.post(baseUrl + "CreateTechnicalDataType/", d)
+                    .then(function (response) {
+                        $scope.newDataType = '';
+                        $scope.technicalDataTypes = response.data;
+                    })
+
+                }
+
+                $scope.forDelete = function (data) {
+                    $scope.productDelete = angular.copy(data);
+                }
+              //  $scope.addReqTypeDescr=[]
+                $scope.deleteTechnical = function (data) {
+                    var _index=$scope.technicalData.indexOf(data);
+                    $scope.spinChange[_index]=true;
+                    $http.get(
+                         //   $scope.technicalData.splice($scope.technicalData.indexOf(data), 1)
+                        baseUrl + "DeleteTechnical/", { params: { id: data.unique_id } }
+                        ).then(
+                    function () {
+                        $scope.technicalData[$scope.technicalData.indexOf(data)].technical_data="";
+                        $scope.technicalData[$scope.technicalData.indexOf(data)].unique_id='';
+                        $scope.spinChange[_index]=false;
+                    }, function () {
+
+                    }
+                    )
+                }
+                $scope.spinChange=[];
+
+                $scope.createTechnical = function (data,_index) {
+
+                    $scope.spinChange[_index]=true;
+                    data.mast_id = $scope.currentProduct.cprod_mast;
+                    //data.technical_data_type = 0;
+                    //data.technical_data="";
+                    $scope.technicalData =[];
+                    $scope.technicalData.push(data);
+
+                    $http.post(baseUrl + "CreateTechnical/", data)
+                        .then(function(response) {
+                            $scope.currentDataType = {};
+                            $scope.newCurrentDataTypee = "";
+                            $scope.ATdata = response.data;
+                            $scope.spinChange[_index]=false;
+                        });
+                }
+                $scope.updateTechnical = function (currentItem) {
+                    for (var i = 0; i < $scope.technicalData.length; i++) {
+                        if ($scope.technicalData[i].unique_id == currentItem.unique_id) {
+                            $scope.technicalData[i] = currentItem;
+                            break;
+                        }
+                        console.log($scope.technicalData);
+                    }
+                    $scope.currentItem = {};
+                }
+
+                $scope.editOrCreateTechnical = function (currentItem) {
+                    $scope.currentItem = currentItem ? angular.copy(currentItem) : {};
+
+                    //console.log("okinut edit");
+                    console.log($scope.currentItem)
+                }
+
+                $scope.saveEdit = function (currentItem,_index) {
+                    $scope.spinChange[_index]=true;
+                    console.log("Save data");
+                    console.log(currentItem);
+                    if(currentItem.unique_id == 0){
+                        $scope.createTechnical(currentItem);
+                        return null;
+                    }
+                    if (angular.isDefined(currentItem.unique_id)) {
+
+                        $http.post(baseUrl + "UpdateTechnical/", currentItem).then(
+                            function () {
+                                //console.log(currentItem);
+                                console.log("updated");
+                                $scope.updateTechnical(currentItem);
+                                $scope.spinChange[_index]=false;
+                            }), function () {
+
+                            }
+
+                    } else {
+                      //  console.log("NOVI");
+                        $scope.createTechnical(currentItem);
+                    }
+
+                }
+                $scope.cancelEdit = function () {
+                    $scope.currentItem = {}
+                }
+                $scope.listTechnicalTypes();
+
+
+
+
+                $scope.$watch('newDataType', function () { $scope.test(); });
+                $scope.$watch('currentDataType.technical_data', function () { $scope.test2(); });
+                $scope.$watch('currentDataType.technical_data_type', function () { $scope.test2(); });
+
+                $scope.test2 = function () {
+                    if ($scope.currentDataType.technical_data_type > 0 && $scope.currentDataType.technical_data.length) {
+                        console.log("U petlji" + $scope.currentDataType.technical_data_type);
+                        $scope.incomplete2 = false;
+                    } else {
+
+                        $scope.incomplete2 = true;
+                    }
+                }
+
+                $scope.test = function () {
+                    if ($scope.newDataType.length) {
+                        $scope.incomplete = false;
+                    } else {
+                        $scope.incomplete = true;
+                    }
+                }
+
+                // console.log($scope.listProducts);
+            })
+        
+    </script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>PackingListBillOfLadingReport</title>
+    <style>
+        thead tr {
+            font-weight: bold;
+        }
+
+        td, th {
+            border: 1px solid black;
+            padding: 3px;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<body>
+@{
+    var rows = (ViewBag.data as List<PackingListBillOfLadingReportRow>);
+}
+<div>
+    <table>
+        <thead>
+        <tr>
+            <th>ETA</th>
+            <th>Container number</th>
+            <th>PO number</th>
+            <th>Factory </th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var r in rows.OrderBy(r=>r.Eta))
+        {
+            <tr>
+                <td>@r.Eta.ToString("d")</td>
+                <td>@r.Container</td>
+                <td>@r.Po</td>
+                <td>@r.factory_code</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

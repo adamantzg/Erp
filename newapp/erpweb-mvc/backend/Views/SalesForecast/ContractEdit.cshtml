@@ -1,0 +1,162 @@
+﻿@model ContractSalesForecastModel
+
+
+<DIV class=aftersales_groupheader>Contract sales forecast</DIV>
+
+<div class="edit_main">
+    @{ Html.EnableClientValidation(); }
+    
+    @using (Html.BeginForm(ViewBag.Mode == "new" ? "Create" : "Edit", "SalesForecast", FormMethod.Post, new { id = "mainform" }))
+    {
+        @Html.ValidationSummary()
+        <input class="button_create" type="submit" value="@if (ViewBag.Mode == "new")
+                                                          {
+                                                              @Html.Raw("Create")
+                                                          }
+                                                          else
+                                                          {
+                                                              @Html.Raw("Update")
+                                                          }"  />
+        @Html.Partial("_LinkButtonPartial", new LinkButtonModel { Text = "Cancel", NavigateUrl = Url.Action("Contract") })
+        <div style="width:870px">
+        <table class="table_main" cellspacing="0">
+            <tr>
+                <td width="140" class="table_main_td">Reference:</td>
+                <td width="330" class="table_main_td">@Html.TextBoxFor(m => m.Forecast.reference)</td>
+                <td>Please enter a reference to later identify this contract</td>
+            </tr>
+            <tr>
+                <td class="table_main_td">Start month:</td>
+                <td class="table_main_td">@{ var d = (ViewBag.Mode == "new" ? Html.TextBoxFor(m => m.StartMonth, "{0:d}", new { isDate = true }) : Html.TextBoxFor(m => m.Forecast.startmonth, "{0:d}", new { isDate = true })); }@d</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td class="table_main_td">Duration (months):</td>
+                <td class="table_main_td">@Html.TextBoxFor(m => m.Forecast.monthduration,new {style="width:50px"})</td>
+                <td></td>
+            </tr>
+            <tr><td class="table_main_td">Product / Monthly Qty / Duration:</td>
+                <td class="table_main_td" colspan="2"><table id="linesTable">
+                                              @if (Model.Forecast != null && Model.Forecast.Lines != null)
+                                              {
+                                                  foreach (var line in Model.Forecast.Lines)
+                                                  {
+                                                      <tr id="@line.lines_id">
+                                                      
+                                                          <td>@Html.Hidden(string.Format("lines_id_{0}", line.lines_id), line.lines_id)@Html.Hidden(string.Format("lines_cprod_id_{0}", line.lines_id), line.cprod_id, new { lineid = line.lines_id })@Html.TextBox(string.Format("lines_cprod_name_{0}", line.lines_id), string.Format("{0} - {1}",line.cprod_code, line.cprod_name), new { lineid = line.lines_id })</td>
+                                                          <td>@Html.TextBox(string.Format("lines_qty_{0}", line.lines_id), line.qty)</td>
+                                                          <td>@Html.TextBox(string.Format("lines_duration_{0}", line.lines_id), line.monthduration)</td>
+                                                          <td><img src="/Images/menus/Delete.gif" onclick="DeleteLine(@line.lines_id)"/></td>
+                                                          <td></td>
+                                                      </tr>
+                                                  }
+                                              }
+                                              <tr id="0">
+                                                  <td width="300">@Html.Hidden("lines_id_0",0)@Html.Hidden("lines_cprod_id_0", "", new { lineid = 0 })@Html.TextBox("lines_cprod_name_0", "", new { lineid = 0 })</td>
+                                                  <td width="50">@Html.TextBox("lines_qty_0")</td>
+                                                  <td width="50">@Html.TextBox("lines_duration_0")</td>
+                                                  <td><img src="/Images/menus/add1.gif" onclick="AddLine()"/></td>
+                                                  <td>Start typing a product code or description and select from the list</td>
+                                              </tr>
+                                          </table></td>
+                
+            </tr>
+        </table>
+        </div>
+    }
+</div>
+
+@section scripts
+{
+@Scripts.Render("~/bundles/globalize")
+    @Scripts.Render("~/bundles/jqueryval")
+    
+    <script type='text/javascript' >
+        //$.validator.setDefaults({
+        //    ignore: "not([data-elementispart]):hidden"
+        //});
+    </script>
+    
+    @Html.GlobalizationScript()   
+    
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#StartMonth___Day").hide();
+            $("#Forecast_startmonth___Day").hide();
+            $('input[id*="cprod_name"]').autocomplete({
+                source: function(request, response) {
+
+                    var id = this.element[0].id;
+
+                    $.ajax({
+                        type: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        url: "/Common/GetProductsForCompanyCompletionJSON",
+                        dataType: "json",
+                        data: "{" +
+                            "'prefixText': '" + request.term + "'," +
+                            "'count': '100', " +
+                            "'company_id': '" + @Model.company_id + "'}",
+                        success: function(data) {
+                            response(data);
+                        },
+                        error: function(data) {
+                        }
+                    });
+                },
+                minLength: 0,
+                select: function(event, ui) {
+                    if (ui.item) {
+                        var id = this.id;
+                        var lineid = $("#" + id).attr("lineid");
+                        var hidden = $('input[type="hidden"][lineid="' + lineid + '"]');
+                        hidden.val(ui.item.id);
+                    }
+                },
+                change: function(event, ui) {
+                    var id = '';
+                    if (ui.item != null)
+                        id = ui.item.id;
+                    $("#Enquiry_cprod_id").val(id);
+                    return false;
+                },
+                open: function() {
+                    $(this).removeClass("ui-corner-all").addClass("ui-corner-top");
+                },
+                close: function() {
+                    $(this).removeClass("ui-corner-top").addClass("ui-corner-all");
+                }
+            });
+        });
+
+        var new_line_id = -1;
+
+        function AddLine() {
+            var prod_id = $("#lines_cprod_id_0").val();
+            var prod_name = $("#lines_cprod_name_0").val();
+            var qty = $("#lines_qty_0").val();
+            var duration = $("#lines_duration_0").val();
+            if (prod_id.length > 0 && qty.length > 0) {
+                if ($('input[id^="lines_cprod_id_"][value="' + prod_id + '"]').length > 1)
+                    alert("Product already added to lines");
+                else {
+                    //Add new table row
+                    var tr = $('<tr id="' + new_line_id + '"></tr>');
+                    tr.append($.validator.format('<td><input type="hidden" id="lines_id_{0}" name="lines_id_{0}" value="{0}"/><input type="hidden" id="lines_cprod_id_{0}" name="lines_cprod_id_{0}" value="{1}"/><input type="text" id="lines_cprod_name_{0}" name="lines_cprod_name_{0}" value="{2}"/></td>', new_line_id, prod_id, prod_name));
+                    tr.append($.validator.format('<td><input type="text" id="lines_qty_{0}" name="lines_qty_{0}" value="{1}"/></td>', new_line_id, qty));
+                    tr.append($.validator.format('<td><input type="text" id="lines_duration_{0}" name="lines_duration_{0}" value="{1}"/></td>', new_line_id, duration));
+                    tr.append($.validator.format('<td><img src="/Images/menus/Delete.gif" onclick="DeleteLine({0})"/></td>', new_line_id));
+                    $('#linesTable tr:last').before(tr);
+                    $("#lines_cprod_id_0").val('');
+                    $("#lines_cprod_name_0").val('');
+                    $("#lines_qty_0").val('');
+                    new_line_id--;
+                }
+            }
+        }
+
+        function DeleteLine(id) {
+            $('#linesTable tr[id="' + id + '"]').remove();
+        }
+    </script>
+}

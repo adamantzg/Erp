@@ -1,0 +1,322 @@
+﻿@using company.Common
+@model ProductDetailModel
+
+@functions {
+    //private string GetImageUrl(string chartname)
+    //{
+    //    return string.Format("{0}{1}", WebUtilities.GetSiteUrl(), Url.Action("Image", new { param = string.Format("{0}_{1}#{2}", tKey, chartname,Settings.Default.StatsKey) }));
+    //}
+
+    private string CreateDocumentLink(string folder, string file)
+    {
+        if (!string.IsNullOrEmpty(file))
+            return Path.Combine(folder, Path.GetFileName(file));
+        return string.Empty;
+    }
+}
+
+@section title
+{
+    <div id="title">PRODUCT DETAIL</div>
+}
+
+<div class="main">
+    <div class="product_details">
+        <table width="40%" border="0" cellspacing="2" cellpadding="2">
+            <tr>
+                <td width="150" height="25" bgcolor="#CCC">Product code</td>
+                <td bgcolor="#CCC">@(Model.CustProduct != null ? Model.CustProduct.cprod_code1 : Model.MastProduct.IfNotNull(p=>p.factory_ref))</td>
+            </tr>
+            @if (Model.CustProduct != null)
+            {
+                <tr>
+                    <td width="150" height="25" bgcolor="#EEE">Brand</td>
+                    <td bgcolor="#EEE">@Model.Brand.IfNotNull(b=>b.brandname)</td>
+                </tr>
+            }
+        </table>
+        @{
+            string imagePath = string.Empty;
+            if (Model.CustProduct != null)
+            {
+                imagePath = !string.IsNullOrEmpty(Model.CustProduct.cprod_image1) ? Path.Combine(Settings.Default.CustProductImagesRoot, Path.GetFileName(Model.CustProduct.cprod_image1)) : "";
+            }
+            else
+            {
+                imagePath = !string.IsNullOrEmpty(Model.MastProduct.prod_image1) ? Path.Combine(Settings.Default.MastProductImagesRoot, Path.GetFileName(Model.MastProduct.prod_image1)) : "";
+            }
+                
+                
+        }
+        
+        @if (!string.IsNullOrEmpty(imagePath))
+        {
+            <div class="product_details_image"><img src="@imagePath" /></div>
+        }
+        
+        
+        <table style="margin-bottom: 0 !important;  border-bottom: 0 !important;" width="100%" border="0" cellspacing="2" cellpadding="2">
+            <tr>
+                <td height="18" colspan="8" align="center" bgcolor="#D9E1F2" class="bold">Shipping history</td>
+
+            </tr>
+            <tr>
+                <td height="18">&nbsp;</td>
+                <td height="18" colspan="6" align="center" bgcolor="#CCC">Units shipped</td>
+                <td height="18">&nbsp;</td>
+            </tr>
+            @{
+                var years = Model.YearlySalesData.GroupBy(d => Month21.GetDate(d.Month21).Year).Select(g=>g.Key).ToList();
+                years.Sort();
+                var colors = new[] {"#F3F3F3", "#E6E6E6", "#E2E2E2", "#D8D8D8"};
+                var counter = 0;
+                var lastYear = DateTime.Today.Year;
+            }
+            <tr>
+                <td width="120" height="18" class="bold">Client</td>
+                @foreach (var y in years.Where(y => y != lastYear))
+                {
+                    <td width="120" height="18" align="right" bgcolor="@colors[counter % 4]" class="bold">@y</td>
+                    counter++;
+                }
+                <td width="120" height="18" align="right" bgcolor="@colors[counter % 4]" class="bold">@(lastYear)TD</td>
+                
+                <td width="120" height="18" align="right" bgcolor="#E2E2E2" class="bold">last 6 months</td>
+                <td width="120" height="18" align="right" bgcolor="#E6E6E6" class="bold">previous 6 months</td>
+                <td width="120" height="18" align="right" bgcolor="#F3F3F3" class="bold">Change</td>
+            </tr>
+           
+            @foreach (var g in Model.YearlySalesData.GroupBy(d => d.customer_code))
+            {
+                counter = 0;
+                var last6mSales = Model.Last6mSales.Where(s => s.customer_code == g.Key).Sum(s => s.numOfUnits);
+                var previous6mSales = Model.Previous6mSales.Where(s => s.customer_code == g.Key).Sum(s => s.numOfUnits);
+                <tr>
+                    <td width="120" height="18" >@g.Key</td>
+                    @foreach (var y in years.Where(y => y != lastYear))
+                    {
+                        <td width="120" height="18" align="right" bgcolor="@colors[counter % 4]" >
+                            @g.Where(d => Month21.GetDate(d.Month21).Year == y).Sum(d => d.numOfUnits)
+                        </td>
+                        counter++;
+                    }
+                    <td width="120" height="18" align="right" bgcolor="@colors[counter % 4]" >@g.Where(d => Month21.GetDate(d.Month21).Year == lastYear).Sum(d => d.numOfUnits)</td>
+
+                    <td width="120" height="18" align="right" bgcolor="#E2E2E2">@last6mSales</td>
+                    <td width="120" height="18" align="right" bgcolor="#E6E6E6">@previous6mSales</td>
+                    <td width="120" height="18" align="right" bgcolor="#F3F3F3">@((previous6mSales) > 0 ? (last6mSales*1.0/previous6mSales-1).ToString("P0") : "" )</td>
+                </tr>
+                
+            }
+            
+        </table>
+        
+        <div class="line"></div>
+
+        <table style="border-top: 0 !important" width="100%" border="0" cellspacing="2" cellpadding="2">
+            <tr class="bold">
+                <td width="117" height="18">TOTAL shipped</td>
+                @{
+                    counter = 0;
+                    var last6mSalesTotal = Model.Last6mSales.Sum(s => s.numOfUnits);
+                    var previous6mSalesTotal = Model.Previous6mSales.Sum(s => s.numOfUnits);
+                }
+                @foreach (var y in years.Where(y => y != lastYear))
+                {
+                    <td width="120" height="18" align="right" bgcolor="@colors[counter % 4]" class="bold">
+                        @Model.YearlySalesData.Where(d => Month21.GetDate(d.Month21).Year == y).Sum(d => d.numOfUnits)
+                    </td>
+                    counter++;
+                }
+                <td width="120" height="18" align="right" bgcolor="@colors[counter % 4]" class="bold">
+                    @Model.YearlySalesData.Where(d => Month21.GetDate(d.Month21).Year == lastYear).Sum(d => d.numOfUnits)
+                </td>
+
+                <td width="120" height="18" align="right" bgcolor="#E2E2E2" class="bold">@last6mSalesTotal</td>
+                <td width="120" height="18" align="right" bgcolor="#E6E6E6" class="bold">@previous6mSalesTotal</td>
+                <td width="120" height="18" align="right" bgcolor="#F3F3F3" class="bold">
+                    @((previous6mSalesTotal) > 0 ? (last6mSalesTotal * 1.0 / previous6mSalesTotal - 1).ToString("P0") : "")
+                </td>
+            </tr>
+        </table>
+        <table width="100%" border="0" cellspacing="2" cellpadding="2">
+
+            <tr>
+                <td height="18" colspan="8" align="center" bgcolor="#D9E1F2" class="bold">Claims history</td>
+            </tr>
+            @{
+                counter = 0;
+                var last6mReturnsTotal = Model.Last6mReturns.IfNotNull(r=>r.CountReturns);
+                var previous6mReturnsTotal = Model.Previous6mReturns.IfNotNull(r=>r.CountReturns);
+            }
+            <tr>
+                <td width="120" height="18">Accepted claims</td>
+                @foreach (var y in years.Where(y => y != lastYear))
+                {
+                    <td width="120" height="18" align="right" bgcolor="@colors[counter % 4]">
+                        @Model.ReturnsYearlyData.Where(d => Month21.GetDate(d.created_month).Year == y).Sum(d=>d.CountReturns)
+                    </td>
+                    counter++;
+                }
+                <td width="120" height="18" align="right" bgcolor="@colors[counter % 4]">
+                    @Model.ReturnsYearlyData.Where(d => Month21.GetDate(d.created_month).Year == lastYear).Sum(d => d.CountReturns)
+                </td>
+
+                <td width="120" height="18" align="right" bgcolor="#E2E2E2">@last6mReturnsTotal</td>
+                <td width="120" height="18" align="right" bgcolor="#E6E6E6">@previous6mReturnsTotal</td>
+                <td width="120" height="18" align="right" bgcolor="#F3F3F3">@((previous6mReturnsTotal) > 0 ? (last6mReturnsTotal * 1.0 / previous6mReturnsTotal - 1).ToString("P0") : "")</td>
+            </tr>
+            @{ counter = 0;}
+            <tr>
+                <td height="18">claims as % of sales</td>
+                @foreach (var y in years.Where(y => y != lastYear))
+                {
+                    var returns = Model.ReturnsYearlyData.Where(d => Month21.GetDate(d.created_month).Year == y).Sum(d => d.CountReturns);
+                    var sales = Model.YearlySalesData.Where(d => Month21.GetDate(d.Month21).Year == y).Sum(d => d.numOfUnits);
+                    <td width="120" height="18" align="right" bgcolor="@colors[counter % 4]">
+                        @(sales > 0 ? (returns * 1.0 / sales).ToString("P1") : "")
+                    </td>
+                    counter++;
+                }
+                @{
+                    var returnsYtd = Model.ReturnsYearlyData.Where(d => Month21.GetDate(d.created_month).Year == lastYear).Sum(d => d.CountReturns);
+                    var salesYtd = Model.YearlySalesData.Where(d => Month21.GetDate(d.Month21).Year == lastYear).Sum(d => d.numOfUnits);
+                }
+                <td width="120" height="18" align="right" bgcolor="@colors[counter % 4]">@(salesYtd > 0 ? (returnsYtd*1.0/salesYtd).ToString("P1") : "")</td>
+
+                <td height="18" align="right" bgcolor="#E2E2E2">@(last6mSalesTotal > 0 ? (last6mReturnsTotal * 1.0 / last6mSalesTotal).ToString("P1") : "")</td>
+                <td height="18" align="right" bgcolor="#E6E6E6">@(previous6mSalesTotal > 0 ? (previous6mReturnsTotal * 1.0 / previous6mSalesTotal).ToString("P1") : "")</td>
+                <td height="18" align="right" bgcolor="#F3F3F3">&nbsp;</td>
+            </tr>
+        </table>
+        <table width="100%" border="0" cellspacing="2" cellpadding="2">
+            <tr>
+                <td height="18" align="center" bgcolor="#D9E1F2" class="bold">Accepted Claims - reasons (last 12 months)</td>
+            </tr>
+            <tr>
+                <td>&nbsp; <img src="@Url.Action("ClaimsByReasonChart",new {chartWidth = Model.ChartWidth, chartHeight=Model.ChartHeight, statsKey = Settings.Default.StatsKey, from = Model.ChartDataFrom, to = Model.ChartDataTo, cprod_ids = string.Join(",", Model.cprod_ids)})"/></td>
+            </tr>
+        </table>
+        
+        <table width="100%" border="0" cellspacing="2" cellpadding="2">
+            <tr>
+                <td height="18" colspan="4" align="center" bgcolor="#D9E1F2" class="bold">Feedback history</td>
+
+            </tr>
+            <tr class="bold">
+                <td width="120">Reference</td>
+                <td width="120">Date</td>
+                <td width="600">Fault</td>
+                <td align="center">Detail</td>
+            </tr>
+            @foreach (var f in Model.Feedbacks.OrderByDescending(fd => fd.request_date))
+            {
+                <tr>
+                    <td>@f.return_no</td>
+                    <td>@f.request_date.ToString("d")</td>
+                    <td>@f.client_comments</td>
+                    <td align="center">
+                        @if (f.Comments.Count > 0)
+                        {
+                            <a style="cursor: pointer" class="feedbacklink" id="@f.returnsid"><img src="/images/product/arrow.png" /></a>
+                        }
+                    </td>
+                </tr>
+                <tr id="comments_@f.returnsid" style="display:none">
+                    <td colspan="4">
+                        <table>
+                            <tr>
+                                <td style="width: 20px"></td>
+                                <td>
+                                    <table class="product_details_infobox" width="100%" border="0" cellspacing="2" cellpadding="2">
+                                        <tr>
+                                            <td colspan="2" align="center" bgcolor="#F3F3F3"><span class="bold">Feedback details</span></td>
+
+                                        </tr>
+                                        @foreach (var c in f.Comments.OrderByDescending(c=>c.comments_date))
+                                        {
+                                            <tr>
+                                                <td width="100" valign="top" bgcolor="#F3F3F3">@c.Creator.IfNotNull(cr=>cr.userwelcome)<br/>@c.comments_date.ToString("d")</td>
+                                                <td>@Html.Raw(c.comments)
+                                                    
+                                                </td>
+                                            </tr>
+                                        }
+                                        
+                                    </table>
+
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            }
+        </table>
+        <table width="100%" border="0" cellspacing="2" cellpadding="2">
+            <tr>
+                <td height="18" colspan="2" align="center" bgcolor="#D9E1F2" class="bold">Documents</td>
+
+            </tr>
+            @{
+                string instructionsLink = Model.CustProduct != null ? CreateDocumentLink(Settings.Default.CustProductInstructionsRoot, Model.CustProduct.cprod_instructions) :
+                    CreateDocumentLink(Settings.Default.MastProductInstructionsRoot, Model.MastProduct.prod_instructions);
+                var dwgLink = Model.CustProduct != null ? CreateDocumentLink(Settings.Default.CustProductDrawingsRoot, Model.CustProduct.cprod_dwg) :
+                    CreateDocumentLink(Settings.Default.MastProductDrawingsRoot, Model.MastProduct.prod_image3);
+                var pngLink = dwgLink != string.Empty ?
+                    Model.CustProduct != null ? Path.Combine(Settings.Default.CustProductDrawingsPngRoot, Path.GetFileNameWithoutExtension(Model.CustProduct.cprod_dwg)) + ".png" :
+                    Path.Combine(Settings.Default.MastProductDrawingsPngRoot, Path.GetFileNameWithoutExtension(Model.MastProduct.prod_image3) + ".png") : "";
+                    
+                
+            }
+            <tr class="bold">
+                <td>@if (instructionsLink != string.Empty)
+                    {
+                        <a href="@instructionsLink">Instructions</a>
+                    }
+                    else
+                    {
+                        <span>No instructions</span>
+                    }
+                     </td>
+                <td>@if(dwgLink != string.Empty)
+                    {
+                        <a href="@dwgLink"><img src="@pngLink"/></a>
+                    }
+                </td>
+
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+@section head
+{
+    <link href="/Content/product/main_style.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/Content/product/style.css" type="text/css" />
+
+    <style>
+        ._css3m {
+            display: none;
+        }
+        .product_details_image {
+            margin-right: 50px;
+        }
+    </style>
+}
+
+@section scripts2
+{
+    <script type="text/javascript">
+        $(function() {
+            $('.top_menu').hide();
+            $('#title').addClass('page_title');
+
+            $('.feedbacklink').click(function() {
+                var id = '#comments_' + $(this).attr('id');
+                $(id).toggle();
+
+            });
+        });
+    </script>
+}

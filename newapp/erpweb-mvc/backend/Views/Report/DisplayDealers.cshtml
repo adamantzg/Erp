@@ -1,0 +1,1120 @@
+﻿@using company.Common
+@using backend.Controllers
+@*@model MonthlyBrochureRequest*@
+@model GoogleMapArcadeModel
+@{
+    ViewBag.Title = "Arcade";
+
+    if (Model.RenderPdf)
+    {
+        Layout = null;
+    }
+}
+<!-- saved from url=(0014)about:internet -->
+@*<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">*@
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    @*<link href="~/Content/bootstrap.min.css" rel="stylesheet" />*@
+    <link href="~/Content/bootstrap/bootstrap.css" rel="stylesheet" />
+    <style>
+
+        body {
+            font-family: Calibri, Verdana;
+
+
+        }
+        .hidden{
+            display:none;
+        }
+        .body-black{
+            background-color:black;
+        }
+        .title-map-white{
+            color:white;
+        }
+
+        .body-white{
+            background-color:white;
+        }
+        .title-map-black{
+            color:black;
+
+        }
+        .title-map-container{
+            font-family:MinionPro-Regular;
+            width:500px;
+            position:absolute;
+            margin-top:50px;
+            z-index:99;
+        }
+        .font-style{
+            font-family:MinionPro-Regular;
+
+        }
+        .circle {
+            margin-left: auto;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            border-color: #888;
+            border-right-style: solid;
+            border-width: thin;
+        }
+
+        .circle td {
+            padding: 1px;
+        }
+
+
+
+        #googft-mapCanvas {
+            height: 100%;
+            /*margin: 0;
+            padding: 0;*/
+        }
+
+
+
+        .labels {
+            color: black;
+            background-color: whitesmoke;
+            font-family: "Lucida Grande", "Arial", sans-serif;
+            font-size: 8px;
+            text-align: center;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            line-height: 14px;
+            border-color: dimgray;
+            border-width: 1px;
+            border-style: solid;
+            /*white-space: nowrap;*/
+        }
+        .pdf-link {
+            margin-bottom: 10px;
+            width: 41px;
+            height: 39px;
+            display: block;
+            background-image: url('../../Images/pdf-black.png');
+        }
+        .pdf-link:hover{
+            background-image: url('../../Images/pdf-red.png');
+        }
+        .cell-new{
+            padding:2px;
+            border-color:#666666;
+        }
+        .drpbox select{
+            width: 200px;
+            height:35px;
+            font-family:MinionPro-Regular;
+            letter-spacing:1px;
+            font-size:16px;
+
+        }
+        .brand-image-hide{
+            display:none;
+        }
+        .brand-image-black-hide{
+            display:none;
+        }
+        html > body .navigation  td{
+            width:150px
+        }
+        .btn {
+              background: #e1e4e6;
+              background-image: -webkit-linear-gradient(top, #e1e4e6, #b3b3b3);
+              background-image: -moz-linear-gradient(top, #e1e4e6, #b3b3b3);
+              background-image: -ms-linear-gradient(top, #e1e4e6, #b3b3b3);
+              background-image: -o-linear-gradient(top, #e1e4e6, #b3b3b3);
+              background-image: linear-gradient(to bottom, #e1e4e6, #b3b3b3);
+              -webkit-border-radius: 0;
+              -moz-border-radius: 0;
+              border-radius: 2px;
+              text-shadow: 3px 0px 3px #757475;
+              font-family: Arial;
+              color: #474747;
+              font-size: 12px;
+              padding: 5px 7px 5px 7px;
+              border: solid #ccc 2px;
+              text-decoration: none;
+}
+
+        .btn:hover {
+              background: #b3b3b3;
+              background-image: -webkit-linear-gradient(top, #b3b3b3, #e1e4e6);
+              background-image: -moz-linear-gradient(top, #b3b3b3, #e1e4e6);
+              background-image: -ms-linear-gradient(top, #b3b3b3, #e1e4e6);
+              background-image: -o-linear-gradient(top, #b3b3b3, #e1e4e6);
+              background-image: linear-gradient(to bottom, #b3b3b3, #e1e4e6);
+              text-decoration: none;
+        }
+
+        .map-canvas{
+            margin-top:10px;
+            height:850px;
+            width:850px;
+        }
+        .map-canvas-wide{
+            /*margin-top:-50px;*/
+            position:relative;
+            height:850px;
+            width:1710px;
+
+            /*margin-left:-400px;*/
+            /*margin-bottom:50px*/
+        }
+        .map-frame{
+            background-color:white;
+            margin-top:30px;
+            margin-bottom:20px;
+        }
+        .map-frame-wide{
+            /*width:100%;*/
+            width:1735px;
+            height:900px;
+            border:solid 2px black;
+            margin-left:-320px;
+            /*box-shadow:10px 10px 5px #888888;*/
+            -webkit-box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5);
+            -moz-box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5);
+            box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5);
+            /*position:absolute;*/
+            position:relative;
+            padding:10px;
+            z-index:999;
+        }
+        .hide-map{
+            text-shadow: 2px 2px #888888;
+            font-size:18px;
+            color:darkred;
+            cursor:pointer;
+        }
+        .icon{
+            color:gray;
+            font-size:18px;
+            text-shadow: 2px 2px #ccc;
+            cursor:pointer;
+        }
+        .icon:hover{
+            font-size:22px;
+            color:#1E90FF;
+        }
+        .hide-map:hover{
+            font-size:22px;
+            color:red;
+        }
+        .map-menu-holder{
+            height:25px;
+        }
+    </style>
+    @*<script src="~/Scripts/jquery-ui-1.8.20.js"></script>*@
+    @if (Model.RenderPdf)
+    {
+        <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+
+    }
+    <script src="~/Scripts/js.cookie.js"></script>
+    <script src="https://maps.google.com/maps/api/js?v=3.exp&sensor=false"></script>
+    <script src="https://www.google.com/jsapi"></script>
+    <script src="~/Scripts/markerwithlabel.js" type="text/javascript"></script>
+    @*<script src="../../Scripts/markerwithlabel.js" type="text/javascript"></script>*@
+    <script type="text/javascript">
+
+    document.write('<script type="text/javascript" src="../../Scripts/markermanager' + (document.location.search.indexOf('packed') > -1 ? '_packed' : '') + '.js"><' + '/script>');
+    var mgr=null;
+    var gmarkers = [];
+    var map = null;
+
+    //true=black false=white
+    var styleMapBlack=false;
+
+    var styleWhite=[
+                { "featureType": "administrative", "elementType": "labels", "stylers": [{ "visibility": "off" }] },
+                {"featureType":"water","elementType":"all","stylers":[{"color": "#ffffff"}]},
+                { "featureType": "landscape", "stylers": [{ "visibility": "simplified" }, {"weight":0.1},{"color": "#666666" }] },
+                {"featureType":"poi","stylers":[{"visibility":"off"}]},
+                { "featureType": "road", "stylers": [{ "visibility": "off" }] },
+    ];
+    var styleWhiteRoad=[
+            { "featureType": "administrative", "elementType": "labels", "stylers": [{ "visibility": "on" }] },
+            {"featureType":"water","elementType":"all","stylers":[{"color": "#ffffff"}]},
+            { "featureType": "landscape", "stylers": [{ "visibility": "simplified" }, {"weight":0.1},{"color": "#a7a7a6" }] },
+            {"featureType":"poi","stylers":[{"visibility":"off"}]},
+            { "featureType": "road", "stylers": [{ "visibility": "on" }] },
+    ];
+    var styleBlack=[
+        { "featureType": "administrative", "elementType": "labels", "stylers": [{ "visibility": "off" }] },
+                {"featureType":"water","elementType":"all","stylers":[{"color":"#000000"}]},
+                { "featureType": "landscape", "stylers": [{ "visibility": "simplified" }, {"weight":0.1},{"color": "#666666" }] },
+                {"featureType":"poi","stylers":[{"visibility":"off"}]},
+                { "featureType": "road", "stylers": [{ "visibility": "off" }] },
+    ];
+    var styleBlackRoad=[
+   { "featureType": "administrative", "elementType": "labels", "stylers": [{ "visibility": "on" }] },
+           {"featureType":"water","elementType":"all","stylers":[{"color":"#000000"}]},
+           { "featureType": "landscape", "stylers": [{ "visibility": "simplified" }, {"weight":0.1},{"color": "#666666" }] },
+           {"featureType":"poi","stylers":[{"visibility":"off"}]},
+           { "featureType": "road", "stylers": [{ "visibility": "on" }] },
+    ]
+        var _country='@Html.Raw(Model.Country)';
+        var _continent='@Html.Raw(Model.Continent)';
+        var _id='@Html.Raw(Model.Id)';
+    $(document).ready(function(){
+        /* fix wide view and _Layout*/
+        $(".container").attr("style","overflow:visible");
+
+        $("#hideMap,#iconZoom,#iconRoad").hide();
+
+
+        $("#country").val("UK");
+        var colorpdf='@Html.Raw(ViewBag.Color)';
+        if(colorpdf != ''){
+            Cookies.set('cookieColor',colorpdf,{expires:7,domain:'',path:'/'})
+        }
+        //$("#hideMap").click(function(){
+        //    alert(_country +" "+_continent);
+        //    hideWideMap();
+        //    codeAddress();
+
+        //});
+        $("#id").val(@Html.Raw(Model.Brand.id));
+        $("#country").val('@Html.Raw(Model.Country)');
+        var nameCountry=  $("#country").val();
+        var selectedBrand= '@Html.Raw(Model.Brand.id)';
+
+        if (selectedBrand >0) {
+            $("#yearFilter").hide();
+        }
+        //alert(nameCountry);
+
+        if(nameCountry != 'UK'){
+            $("#brandsForm").hide();
+            $("#titleMapContainer").hide();
+            $("#hideBlock").hide();
+            $("#pdfLink").hide();
+            $("#yearFilter").hide();
+            $("#chooseColor").hide();
+        }else{
+            $("#selectCountry").hide();
+            $("#selectBox").hide();
+        }
+
+        //Samo za tablicu i kontejner za google maps njegovepostavke
+        if(styleMapBlack || Cookies.get('cookieColor')=='black'){
+            $('#colorBlack').attr('checked','checked');
+            colorizeBlack();
+
+        }else{
+            $('#colorWhite').attr('checked','checked');
+            colorizeWhite();
+        }
+
+    });
+    function colorizeBlack(){
+        $("#titleMapContainer,#table,#row").removeClass("title-map-black");
+        $("#titleMapContainer,#table,#row").addClass("title-map-white");
+        $("#wrapping, #hideBlock, #googft-hide-text,#table,#row").removeClass("body-white");
+        $("#wrapping, #hideBlock, #googft-hide-text,#table,#row").addClass("body-black");
+        $("#linkTitle").addClass("title-map-white");
+        $("#brandImageWhite").removeClass("brand-image-hide");
+        $("#brandImageBlack").addClass("brand-image-hide");
+    }
+    function colorizeWhite(){
+        $("#titleMapContainer,#table,#row").removeClass("title-map-white");
+        $("#title-map-container,#table,#row").addClass("title-map-black");
+        $("#wrapping, #hideBlock, #googft-hide-text,#table,#row").removeClass("body-black");
+        $("#wrapping, #hideBlock, #googft-hide-text,#table,#row").addClass("body-white");
+        $("#linkTitle").removeClass("title-map-white");
+        $("#brandImageBlack").removeClass("brand-image-hide");
+        $("#brandImageWhite").addClass("brand-image-hide");
+
+    }
+    function road(map){
+        var colorBlack=$('input[name=color]:checked').val();
+        if($('#showRoad').prop("checked")){
+            //alert("CHECKED");
+
+            //alert(colorBlack);
+            if(colorBlack=='true'){
+                map.setOptions({styles:styleBlackRoad});
+            }else{
+                map.setOptions({styles:styleWhiteRoad});
+            }
+
+        }else{
+            //alert("UNChecked");
+            if(colorBlack =='true'){
+                map.setOptions({styles:styleBlack});
+            }else{
+                map.setOptions({styles:styleWhite});
+            }
+            //map.setOptions({styles:styleWhite});
+        }
+    }
+    function roadIcon(map){
+        //alert(map.styles[4].stylers[0].visibility);
+        if(!(map.styles[4].stylers[0].visibility=="on")){
+            map.setOptions({styles:styleWhiteRoad})
+            $("#showRoad").attr("checked",true);
+        }else{
+            map.setOptions({styles:styleWhite});
+            $("#showRoad").attr("checked",false);
+        }
+    }
+
+    function colorize(map){
+        //var cookieValue=Cookies.get('cookieColor');
+        var colorMapBlack= $('input[name=color]:checked').val();
+
+        if(colorMapBlack =='true' ){
+            //window.alert("Boja je crna! ");
+            map.setOptions({styles:styleBlack});
+            colorizeBlack();
+            Cookies.set('cookieColor','black',{expires:7,domain:'',path:'/'})
+            //$("#cookie").html(Cookies.get('cookieColor'));
+        }else{
+            // window.alert("Boja je bijela! ");
+            styleMapBlack=false;
+            if(map){
+                map.setOptions({styles:styleWhite});
+                // $("body").removeClass("body-black");
+                //$("body").addClass("body-white");
+                Cookies.set('cookieColor','white',{expires:7,domain:'',path:'/'})
+                colorizeWhite();
+                //$("#cookie").html(Cookies.get('cookieColor'),{domain:'',path:'/'});
+            }
+        }
+
+    }
+    function zoomIcon(map){
+        //alert(map.zoomControl)
+        if(!map.zoomControl){
+            map.setOptions({zoomControl:true,scrollwheel:true,scrollwheel: true, disableDoubleClickZoom: false,zoomControlOptions:{position:google.maps.ControlPosition.LEFT_CENTER}});
+            $('#chkbox').attr("checked",true);
+        }else{
+            map.setOptions({zoomControl:false,scrollwheel:false,scrollwheel: false, disableDoubleClickZoom: true});
+            $('#chkbox').attr("checked",false);
+        }
+    }
+    function zoom(map){
+        //zoom=true;
+        if($('#chkbox').attr('checked')){
+            // window.alert("true");
+            if(map) {
+                map.setOptions({zoomControl:true,scrollwheel:true,scrollwheel: true, disableDoubleClickZoom: false,zoomControlOptions:{position:google.maps.ControlPosition.LEFT_CENTER}});
+            }
+        }else{
+            if(map) {
+                map.setOptions({zoomControl:false,scrollwheel:false,scrollwheel: false, disableDoubleClickZoom: true});
+                //window.alert("false");
+            }
+        }
+
+    }
+    //google.load('visualization', '1', { packages: ['corechart'] });
+
+    function printView(){
+        var idVal=$('#country').val();
+        var idBrand=$('#id').val();
+        var year=$('#yearFilter').val();
+        //$.get('DisplayDealers');
+
+        //$(this).load('displaydealers',new{'printView':true});
+
+        //window.location="DisplayDealers?id="+idBrand+"&country="+ idVal +"&printView=true"
+        window.open("DisplayDealers?id="+idBrand+"&country="+ idVal +"&year"+year+"&printView=true",'_blank');
+    }
+
+    function submitForm()
+    {
+
+        $("#brandsForm").submit();
+    }
+    function submitForm2(){
+        $("#countryForm").submit();
+    }
+
+    function yearView(){
+        var idBrand=$('#id').val()
+        var idVal=$('#country').val();
+        var year=$('#yearFilter').val();
+        window.open("DisplayDealers?id="+idBrand+"&country="+ idVal +"&year="+year+"&printView=true",'_blank');
+
+    }
+
+
+    var geocoder;
+    var query='Toledo';
+
+    function initialize() {
+
+        @*var myLatLng=new google.maps.LatLng(55.126155414883414, -5.8132108593199835);
+            google.maps.visualRefresh = true;
+            var setZoom=6;
+            var tempctry="@(Html.Raw(Model.Country))";
+            var country=@Html.Raw(Json.Encode(Model.Countries));
+            for( i =0; i<country.length; i++){
+
+                if(tempctry == country[i].ISO2){
+                    //alert("if" + tempctry);
+                    myLatLng=new google.maps.LatLng(country[i].latitude,country[i].longitude);
+                    if(country[i].ISO2 == 'DE' || country[i].ISO2 == 'FI' || country[i].ISO2 == 'MX'){
+                        setZoom=5;
+                    }
+                    break;
+                }
+            }*@
+
+
+        //geocoder.geocode({'address':country},function(results,status){
+        //    if(status==google.maps.GeocoderStatus.OK){
+        //        map.setCenter(results[0].geometry.location);
+        //    }
+        //});
+        //geocoder=new google.maps.Geocoder();
+
+        @*
+        var myLatLng=new google.maps.LatLng(55.126155414883414, -5.8132108593199835);
+        var deLatLng=new google.maps.LatLng(50.719069, 10.327148);
+        var itLatLng=new google.maps.LatLng(42.468045, 13.227539);
+        var esLatLng=new google.maps.LatLng(40.010787,-3.164063);
+        var temp="@(Html.Raw(Model.Country))";
+        if(temp == "DE"){
+            myLatLng=deLatLng;
+            setZoom=5;
+        }
+        if(temp == "IT"){
+            myLatLng=itLatLng;
+            setZoom=6;
+        }
+        if(temp == "ES"){
+            myLatLng=esLatLng;
+            setZoom=6;
+        }*@
+        var nameContinent='@Html.Raw(Model.Continent)';
+        geocoder=new google.maps.Geocoder();
+        var myOptions = {
+            //center: myLatLng,
+            // zoom: 1,
+            zoomControl:false,
+            scaleControl:false,
+            scrollwheel:false,
+            disableDoubleClickZoom:true,
+            mypTypeId: google.maps.MapTypeId.ROADMAP,
+            disableDefaultUI:true,
+            //#a0a3a3
+            styles: styleMapBlack || Cookies.get('cookieColor')=='black' ? styleBlack : styleWhite,
+
+
+        }
+        map = new google.maps.Map(document.getElementById('googft-mapCanvas'), myOptions);
+        map.setCenter(new google.maps.LatLng(54.776252,7.866211));
+        map.setZoom(5);
+        codeAddress();
+
+
+        setupMarkers();
+
+        if($('#selectCountry').prop("checked")){
+            layer=new google.maps.FusionTablesLayer();
+            updateLayerQuery(layer);
+            layer.setMap(map);
+        }else{
+            layer=new google.maps.FusionTablesLayer();
+            layer.setMap(null);
+        }
+        google.maps.event.addDomListener(document.getElementById('showRoad'),'change',function(){
+            road(map);
+        });
+        google.maps.event.addDomListener(document.getElementById('selectCountry'),'change',function(){
+            if($('#selectCountry').prop("checked")){
+                layer=new google.maps.FusionTablesLayer();
+                updateLayerQuery(layer);
+                layer.setMap(map);
+            }else{
+                layer=new google.maps.FusionTablesLayer();
+                layer.setMap(null);
+            }
+
+        });
+
+        google.maps.event.addDomListener(map,'idle',function(){
+            toggleMarkers();
+        })
+        google.maps.event.addDomListener(document.getElementById('chkDotsEmpty'),'change',function(){
+            toggleMarkers();
+        });
+
+        $("#chkbox").click(function(){
+            zoom(map);
+        });
+        $("#iconZoom").click(function(){
+           // alert(map.zoomControl)
+            zoomIcon(map);
+
+        })
+        $("#iconRoad").click(function(){
+            roadIcon(map);
+        })
+        $('input[name=color]:radio').change(function(){
+            //alert($('input[name=color]:checked').val());
+            $('#showRoad').attr('checked',false);
+
+            colorize(map);
+        });
+
+        google.maps.event.addDomListener(document.getElementById('hideMap'),'click',function(){
+            hideWideMap();
+            google.maps.event.trigger(map,'resize');
+            codeAddress();
+        })
+        google.maps.event.addDomListener(document.getElementById('chkWide'),'change',function(){
+            if ($("#chkWide").prop("checked")) {
+                //resize map
+                wideMap();
+                //reload map
+                google.maps.event.trigger(map,'resize');
+
+                if (_continent =="EU" ) {
+                    map.setCenter(new google.maps.LatLng(54.776252,7.866211));
+                    map.setZoom(5);
+                }
+                else if(_id==99){
+
+                    map.setCenter(new google.maps.LatLng(1.290270,103.851959));
+                    map.setZoom(5);
+                }
+                else{
+                    codeAddress();
+                }
+                //window.scrollTo(0,170);
+                $("html,body").animate({scrollTop:130},'800','swing');
+
+            }else{
+                wideMap();
+                google.maps.event.trigger(map,'resize');
+                codeAddress();
+                //map.setCenter(new google.maps.LatLng(47.776252, 7.866211));
+                //map.setZoom(4);
+                $("html,body").animate({scrollTop:0},'800','swing');
+
+            }
+
+        });
+
+    };
+
+        function wideMap(){
+            var nameCountry="@Html.Raw(Model.Country)";
+            var nameContinent="@Html.Raw(Model.Continent)";
+            if ($('#chkWide').prop("checked")) {
+                $("#googft-mapCanvas").removeAttr("style");
+                $("#googftMapContainer").removeAttr("style");
+                $("#googft-mapCanvas").removeClass("map-canvas");
+                $("#googft-hide-text").removeClass("body-white");
+                $("#googft-mapCanvas").addClass("map-canvas-wide");
+                $("#googftMapContainer").addClass("map-frame-wide");
+                $("#hideMap,#iconZoom,#iconRoad").show();
+                //sakrrij natpise brandova
+                $("#titleMapContainer,#brandImageBlack,#brandImageWhite").hide();
+
+            }else{
+
+                $("#googft-mapCanvas").removeClass("map-canvas-wide");
+                $("#googft-mapCanvas").addClass("map-canvas");
+                $("#googftMapContainer").removeClass("map-frame-wide");
+                $("#googft-mapCanvas").height(850).css({"position":"relative","margin-left":"140px"});
+
+                $("#googft-hide-text").addClass("body-white");
+
+                if (nameContinent != "EU" && nameCountry =="UK") {
+                    $("#titleMapContainer,#brandImageBlack,#brandImageWhite").show();
+                }
+
+            }
+
+        }
+        function hideWideMap(){
+            $("#googft-mapCanvas").removeClass("map-canvas-wide");
+            $("#googft-mapCanvas").addClass("map-canvas");
+            $("#googftMapContainer").removeClass("map-frame-wide");
+            $("#googft-mapCanvas").height(850).css({"position":"relative","margin-left":"140px"});
+            $("#hideMap,#iconZoom,#iconRoad").hide();
+            $('#chkWide').attr("checked",false);
+            $("#googft-hide-text").addClass("body-white");
+            $("html,body").animate({scrollTop:0},'800','swing');
+        }
+        function codeAddress(){
+
+        var nameCountry=  $("#country option:selected").text();
+        var address=nameCountry;
+        if(_id==99){
+            map.setCenter(new google.maps.LatLng(1.35208,103.81984));
+            map.setZoom(11);
+        }else{
+            geocoder.geocode({'address':address},function(results,status){
+                if(status==google.maps.GeocoderStatus.OK){
+                    map.setCenter(results[0].geometry.location);
+                    if(nameCountry=="United Kingdom"){
+                        map.setCenter(new google.maps.LatLng(55.126155414883414, -5.8132108593199835));
+                        map.setZoom(6);
+
+                    }
+                    else{
+
+                        map.fitBounds(results[0].geometry.viewport);
+                    }
+                    //var marker=new google.maps.Marker({
+                    //    map:map,
+                    //    position:results[0].geometry.location
+                    //});
+                }else{
+                    alert('Geocode was not successful for the following reason: ' + status);
+                }
+            });
+        }
+    }
+
+
+    function updateLayerQuery(layer,country){
+        var country="USA";
+        if("@Html.Raw(Model.Country)"!="UK"){
+
+            //country="ISO_2DIGIT IN ('@Html.Raw(Model.Country)')";
+            country="iso_a2 IN ('@Html.Raw(Model.Country)')";
+        }
+        layer.setOptions({
+            query: {
+                //select:'geometry',
+                select:'kml_4326',
+                from:'1XULuZoTOzBNiIguwxpKddIqt04SJGzSoeAdGucg',
+                where:country,
+                map:map,
+
+
+                //clickable:false,
+                delay:1,
+                tolerance:8
+            },styles:[
+                {polygonOptions:{
+                    strokeWeight:"2",
+                    strokeColor:"#FF6600",
+                    fillColor:'#FF9900',
+                    fillOpacity:0.3,
+                }}
+            ],
+            suppressInfoWindows: true,
+        });
+    };
+
+    function setupMarkers(){
+
+
+        var redI=@Html.Raw(Json.Encode(Model.Pin1));
+
+        var redII=@Html.Raw(Json.Encode(Model.Pin2));
+        var redIII=@Html.Raw(Json.Encode(Model.Pin3));
+        var redIV=@Html.Raw(Json.Encode(Model.Pin4));
+        var redV=@Html.Raw(Json.Encode(Model.Pin5));
+        var redVI=@Html.Raw(Json.Encode(Model.Pin6));
+        var red=[];
+        if(redI.length>499){
+            red=redI.concat(redII);
+        }else if(redII >499){
+            red=red.concat(redIII);
+        }else if(redIII >499){
+            red=red.concat(redIV);
+        }else if(redIV >499){
+            red=red.concat(redV);
+        }else if(redV > 499){
+            red = red.concat(VI);
+        }
+        else{
+            red=redI;
+        }
+
+        //initMarkers(red);
+        mgr=new MarkerManager(map);
+        google.maps.event.addListener(mgr,'loaded',function(){
+            mgr.addMarkers(initMarkers(red));
+        })
+        /**/
+        console.log(redI.length);
+        console.log(redII.length);
+        console.log(red.length);
+
+
+
+
+
+
+    }
+
+    function initMarkers(red){
+        for(var regM in red){
+            if(red[regM].latitude != null){
+                var loca= red[regM];
+                var myLatLng=new google.maps.LatLng(red[regM].latitude,red[regM].longitude);
+                //console.log(red[regM].latatitude+" "+ red[regM].longitude +" "+ red[regM].color);
+                //var marker=new google.maps.Marker({
+                var marker=new MarkerWithLabel({
+                    map:map,
+                    position:myLatLng,
+                    // icon:'../Images/markers/'+ red[regM].color +'.png',
+                    icon:{
+                        //url:'../Images/markers/'+ red[regM].color +'.png',
+                        path:google.maps.SymbolPath.CIRCLE ,
+
+                        //scale:4.5,
+                        //strokeWeight:0.5,
+                        //fillColor:'white',//+ red[regM].color +'',
+                        //fillOpacity:0.1
+                        // zIndexProcess:red[regM].index
+                    },
+                    title:red[regM].name,
+                    draggable: true,
+                    raiseOnDrag: true,
+                    labelContent: ""+red[regM].number,
+                    labelAnchor: new google.maps.Point(8, 7),
+                    labelClass: "labels", // the CSS class for the label
+                    //labelInBackground: true
+
+                });
+                marker.category="numbered";
+                gmarkers.push(marker);
+                marker=new MarkerWithLabel({
+                    map:map,
+                    position:myLatLng,
+                    // icon:'../Images/markers/'+ red[regM].color +'.png',
+                    icon:{
+                        //url:'../Images/markers/'+ red[regM].color +'.png',
+                        path:google.maps.SymbolPath.CIRCLE ,
+
+                        scale:3.5,
+                        strokeWeight:1,
+                        fillColor:'red',//+ red[regM].color +'',
+                        fillOpacity:0.9
+                        // zIndexProcess:red[regM].index
+                    },
+                    //animation: google.maps.Animation.DROP,
+                    title:red[regM].name,
+                    draggable: true,
+                    raiseOnDrag: true,
+                    labelContent: "",
+                    labelAnchor: new google.maps.Point(8, 7),
+                    //labelClass: "labels", // the CSS class for the label
+                    //labelInBackground: true
+
+                });
+
+                marker.category="empty";
+                gmarkers.push(marker);
+            }
+        }
+        return marker;
+    }
+
+    function toggleMarkers(){
+        if($("#chkDotsEmpty").prop("checked")){
+            //alert( gmarkers.length)
+            //setupMarkers(true);
+            //while(gmarkers.length){gmarkers.pop()}
+            for(var i=0;i < gmarkers.length;i++){
+                if (gmarkers[i].category == "empty" ){
+                    gmarkers[i].setVisible(false);
+                    //gmarkers[i].setMap(null);
+                }else{
+                    gmarkers[i].setVisible(true);
+                }
+            }
+        }else{
+            for(var i=0;i < gmarkers.length;i++){
+                if (gmarkers[i].category == "numbered" ){
+                    gmarkers[i].setVisible(false);
+                    //gmarkers[i].setMap(null);
+
+                }else{
+                    gmarkers[i].setVisible(true);
+                }
+            }
+        }
+    }
+    google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+
+    @{
+        var markerDesc = new Dictionary<string, string>{
+            {"Clearwater","yellow-dot.png"},
+            {"Burlington","blue-dot.png"},
+            {"Britton","green-dot.png"},
+            {"Arcade","red-dot.png"},
+            {"Cleargreen","yellow-dot.png"}
+        };
+    }
+</head>
+@* onload ="initialize()" *@
+
+<body @*style="@(Model.RenderPdf?@"background-color:black":"")"*@>
+
+    <br />
+    @*<h1>@Model.Country</h1>*@
+    <div style="margin-top:0px; background-color:white">
+        <div style="position:absolute;margin-left:990px;margin-top:110px">
+            <table>
+                <tr>
+                    <td>
+                        <input type="checkbox" name="n" value="false" id="chkWide" style="margin-top:5px" />
+                        <span for="checkbox" style="margin:1px 0 0 4px;position:absolute" >wide</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:70px" class="font-style">
+                        <input type="checkbox" name="ne" value="false" id="chkDotsEmpty" style="margin-top:5px"  />
+                        <span for="checkbox" style="margin:1px 0 0 4px;position:absolute">counted</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:50px" class="font-style">
+                        <input type="checkbox" name="name" value="false" id="chkbox" style="margin-top:5px" />
+                        <span for="checkbox" style="margin:1px 0 0 4px;position:absolute"> zoom</span>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td style="width:50px">
+                        <input type="checkbox" id="showRoad" name="road" value="false" />
+                        <span style="margin:1px 0 0 4px;position:absolute" class="font-style">
+                            city/road
+                        </span>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td id="chooseColor" style="width:80px">
+                        @* dali je styleMapBlack == true po defaultu je false *@
+                        <span style="padding:0px;margin:0px" class="font-style">
+                            <input type="radio" id="colorWhite"
+                                   style="padding:0px;margin:0px" name="color" value="false" />
+                            white
+                        </span>
+                        &nbsp;
+                        <br />
+                        <span style="padding:0px;margin:0px" class="font-style">
+                            <input type="radio" id="colorBlack"
+                                   style="padding:0px;margin:0px" name="color" value="true" />
+                            black
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <span id="selectBox" class="font-style">
+                            <input type="checkbox" id="selectCountry" name="road" value="true"  />mark the country
+                        </span>
+                    </td>
+
+                </tr>
+
+            </table>
+        </div>
+        <table class="navigation" style="width:1080px">
+            <tr>
+                <td style="padding-right:10px;width:30px">
+                    @* DUGME *@
+                    <div class="btn" onclick="printView()" title="Print preview">
+                        <img src="~/Images/printer.png" width="25" />
+
+                    </div>
+                    @*<div style="position:relative;width:50px;border:inset 1px black">
+                            <a href="#" onclick="printView()">
+                                Print view
+                            </a>
+                        </div>*@
+                </td>
+                <td style="width:150px">
+                    <form action="~/Report/DisplayDealers" id="countryForm" onchange="submitForm2()" method="get" style="margin-top:0px;width:70px">
+                        <fieldset>
+                            <div class="drpbox">
+                                @Html.DropDownListFor(m => m.Country, new SelectList(Model.Countries, "ISO2", "CountryName"), new { id = "country", name = "country" })
+                                @*@Html.ListBox("CountryName",Model.Countries as MultiSelectList)*@
+                                @*@foreach(var i in Model.Countries){
+                                        <br />
+                                        <span>@i.CountryName</span>
+                                    }*@
+                            </div>
+                        </fieldset>
+                    </form>
+                </td>
+                <td style="width:150px">
+                    <form action="~/Report/DisplayDealers" id="brandsForm" onchange="submitForm()"
+                          method="get" style="margin-top:0px;margin-right:50px;width:70px">
+                        <fieldset>
+                            @*Brand*@
+                            <div class="drpbox">
+                                <select name="id" id="id">
+                                    <option value="0">All</option>
+                                    <option value="1">Clearwater</option>
+                                    <option value="2">Burlington</option>
+                                    <option value="4">Britton</option>
+                                    <option selected="selected" value="11">Arcade</option>
+                                </select>
+                            </div>
+                        </fieldset>
+                    </form>
+
+                </td>
+                <td style="width:40px">
+                    <form action="~/Report/DisplayDealers" id="yearForm" onchange="yearView()"
+                          method="get" style="margin-top:0px;margin-right:50px;width:35px">
+                        <fieldset>
+                            @*Brand*@
+                            <div class="drpbox" style="width:75px;font-size:10px">
+                                <select name="yearFilter" id="yearFilter" style="width:95px">
+                                    <option selected="selected" value="0">Pick year</optionselected>
+                                    <option value="2011">2011</option>
+                                    <option value="2012">2012</option>
+                                    <option value="2013">2013</option>
+                                    <option value="2014">2014</option>
+                                    <option value="2015">2015</option>
+                                </select>
+                            </div>
+                        </fieldset>
+                    </form>
+                </td>
+
+
+                <td>&nbsp;</td>
+
+
+
+
+            </tr>
+        </table>
+        @*<a href="@Url.Action("TakeScreen", new { id=Model.Brand.id})" class="pdf-link" title="save as" style="float:right" id="pdfLink"></a>*@
+    </div>
+    @*<div style="position:relative; width:850px">
+            Cookie: <span id="cookie"></span>
+            </div>
+        &nbsp;*@
+    <div id="wrapping" style="margin-left:-28px;@(Model.RenderPdf?"":@"width:1155px;height:100%")">
+
+        <div id="googftMapContainer" class="map-frame"  style="margin-left:12%">
+            <div  style="position:absolute;margin-left:100%; margin-top:0px;width:40px;" >
+                <table>
+                    <tr height="40">
+                        <td class="map-menu-holder" >
+                            <span>&nbsp;</span><span id="hideMap" class="glyphicon glyphicon-remove hide-map" title="close wide view"></span>
+                        </td>
+                    </tr>
+                    <tr height="30">
+                        <td class="map-menu-holder">
+                            <span>&nbsp;</span><span id="iconZoom" class="glyphicon glyphicon-search icon" title="Enable-Disable Zoom"></span>
+                        </td>
+                    </tr>
+                    <tr height="30">
+                        <td class="map-menu-holder">
+                            <span>&nbsp;</span><span id="iconRoad" class="glyphicon glyphicon-road icon" title="Enable-Disable Road, City, Country"></span>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </div>
+            <div id="titleMapContainer" class="title-map-container title-map-black">
+                <span class="title-map" style="font-size:28px">
+                    @(Model.Brand.IfNotNull(c => c.name)) DISPLAY DEALERS
+                </span><br />
+                <span class="title-map" style="font-size:18px">UK & IRELAND</span>
+                @if (Model.Year > 0)
+                {
+                    <span> - Model.Year</span>
+                }
+            </div>
+            <div id="googft-mapCanvas" class="map-canvas" style="height:850px;"></div>
+
+            <div id="googft-hide-text" class="body-white" style="width:990px; height:30px;position:absolute;z-index:99;margin-top:-30px"></div>
+        </div>
+        <div id="hideBlock" style="position:relative;width:850px;margin-left:12%;margin-top:-10px;z-index:100">
+            <span id="linkTitle" style="position:relative;font-size:18px;margin-top:25px;font-family:'Times New Roman'">@(Model.Brand.id != 0 ? (Model.Brand.Url.Replace("www.", "")) : "")</span>
+            <div style="float:left;margin-left:10px;">
+            </div>
+            @{
+                if (Model.Brand.id != 0)
+                {
+                    var arrayName = Model.Brand.name.Split(' ');
+                    var nameBlack = arrayName.First() + "_narrow.jpg";
+                    var nameWhite = "";
+                    if (Model.Brand.brand_id == 11)
+                    {
+                        nameWhite = arrayName.First() + "_narrow_white.png";
+                    }
+                    else
+                    {
+                        nameWhite = arrayName.First() + "_narrow_white.jpg";
+                    }
+
+                    @* bijela pozadina karte crna slova bijela pozadina slike *@
+                    <img id="brandImageBlack" src="@(Settings.Default.BrandImages_folder+""+nameBlack)" width="250" style="float:right;margin-bottom:20px;margin-top:-10px" />
+
+                    @* crna pozadina karte crna pozadina bijela slova  *@
+                    <img id="brandImageWhite" class="brand-image-hide" src="@(Settings.Default.BrandImages_folder+""+nameWhite)" width="250" style="float:right;margin-bottom:20px;margin-top:-10px" />
+                }
+            }
+
+            @*<img src="~/Images/arcade_logo_white2.png" width="250" style="float:right;margin-bottom:20px;" />*@
+        </div>
+        @*@Html.DrawMap("600", "600", "6", Model.Blue)*@
+        @* ovdje sam stao moram dobiti sliu iz memorije moaram izmjestiti u novu metodu u controlleru da bi radila *@
+        @*<img src="@Url.Action("GetImageMap")"/>*@
+        @*<img src="@Html.Action("GetImageMap")" />*@
+        <table class="table title-map" style="border:none;width:850px;margin-left:12%">
+            <thead id="table" class="body-white title-map-black">
+<tr>        <th style="border-color:#666666">PIN</th>
+                @if (!(Model.Id==99)) {
+            <th style="border-color:#666666">DISTRIBUTOR</th>
+                }
+            <th style="border-color:#666666">SHOWROOM</th>
+            <th style="border-color:#666666">LOCATION</th>
+            <th style="border-color:#666666">POSTCODE</th>
+            </tr>
+            </thead>
+            <tbody style="font-size:10px">
+                @foreach (var item in Model.Pin.OrderBy(c => c.number))
+                {
+                    <tr id="row">
+                        <td style="padding:2px;border-color:#666666">@item.number</td>
+                        @if (!(Model.Id== 99)) {
+                        <td style="padding:2px;border-color:#666666">
+                            @if (item.Distributors != null)
+                            {
+                                var count = 1;
+                                foreach (var distributor in item.Distributors)
+                                {
+                                    <span>@(count > 1 ? "," : "") @distributor.customer_code </span>
+                                    count++;
+                                }
+                            }
+                        </td>
+                        }
+                        <td style="padding:2px; letter-spacing:1px;border-color:#666666">@item.name</td>
+                        <td style="width:225px;letter-spacing:1px;padding:2px;border-color:#666666">@item.location</td>
+                        <td style="padding:2px;border-color:#666666">@item.postcode</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div style="clear:both"></div>
+</body>
+
+
+
+@*</html>*@
+
+
+
+
+@*<img src="@Url.Action("Capture","report",new{ webAddress="report/MonthlyBrochureRequests"})" />*@
+@*//@Html.Action("Capture");*@
+

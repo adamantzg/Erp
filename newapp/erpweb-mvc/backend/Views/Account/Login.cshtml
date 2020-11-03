@@ -1,0 +1,96 @@
+﻿@model LoginModel
+
+@{
+    ViewBag.Title = "Log in";
+    Layout = null;
+}
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+
+    <title>Big Company</title>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/entry.css" rel="stylesheet" />
+
+</head>
+<body>
+    <nav class="navbar navbar-default navbar-static-top" >
+        
+
+        <div class="container">
+            <div class="col-sm-2 hidden-xs col-md-3">&nbsp;</div>
+            <div class="col-xs-12 col-sm-10 col-md-9" >
+                <img class="img-responsive" id="banner-fix"
+                     src="~/images/Logo.jpg" 
+                     alt="Alternate Text" />
+            </div>
+            
+        </div>
+       
+
+    </nav>
+    <div class="container" id="form-container">
+        <div class="col-sm-2 col-md-3 hidden-xs" >&nbsp;</div>
+        <section id="loginForm" class="col-sm-8 col-xs-12 col-md-6">
+            <div class="well well-sm">
+                @{Html.EnableClientValidation(true);}
+            @using (Html.BeginForm(new { ReturnUrl = ViewBag.ReturnUrl }))
+            {
+                @Html.AntiForgeryToken()
+               
+
+                <fieldset>
+                    <legend>
+                        Log in
+                       
+                    </legend>
+                    <div class="form">
+                        @Html.ValidationSummary(true)
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.UserName)
+                            @Html.TextBoxFor(m => m.UserName,null,new { @class="form-control", placeholder="Enter User Name"})
+                            @Html.ValidationMessageFor(m => m.UserName)
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Password)
+                            @Html.TextBoxFor(m => m.Password, null, new { @class = "form-control", placeholder = "Enter Password", @type ="password" })
+                            @Html.ValidationMessageFor(m => m.Password)
+                        </div>
+                        <div class="row ">
+                            
+                            <div class="col-sm-12"> <div class="pull-right"><input class="btn btn-primary btn-sm" type="submit" value="Log in" /></div></div>
+                        </div>
+                        
+                            
+                            
+                           
+                       
+                    </div>
+                </fieldset>
+                @* <p>
+                @Html.ActionLink("Register", "Register") if you don't have an account.
+            </p>*@
+            }
+        </div>
+        </section>
+       
+    </div>
+
+  
+        <div id="footer">
+            <span>&copy; @DateTime.Now.Year Big Company.  The text, images and layout of this website are protected by copyright and other intellectual property rights</span>
+        </div>
+    
+ </body>
+</html>
+
+
+
+@*<section class="social" id="socialLoginForm">
+    <h2>Use another service to log in.</h2>
+    @Html.Action("ExternalLoginsList", new { ReturnUrl = ViewBag.ReturnUrl })
+</section>*@
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

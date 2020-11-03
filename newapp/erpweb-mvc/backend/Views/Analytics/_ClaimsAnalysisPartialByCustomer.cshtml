@@ -1,0 +1,112 @@
+﻿ @using company.Common @model AnalyticsClaimsModel
+
+
+@*@if (Model.ReportType == ReportType.Brands)
+{
+    <div class="big_sub_title">Brand</div>
+}*@
+
+<table class="clienttable">
+    <tr class="clienttable_header">
+        <td style="width: 300px; vertical-align: middle" rowspan="2" >Distributor</td>
+        <td style="width: 90px; text-align: center" colspan="2">product claims</td>
+        <td style="width: 90px; text-align: center" colspan="2">refit claims</td>
+        <td style="width: 90px; text-align: center" colspan="2">TOTAL</td>
+    </tr>
+    <tr class="clienttable_header">
+        <td style="width: 60px; text-align: right">GBP</td>
+        <td style="width: 60px; text-align: right">% of sales</td>
+        <td style="width: 60px; text-align: right">GBP</td>
+        <td style="width: 60px; text-align: right" >% of sales</td>
+        <td style="width: 60px; text-align: right">GBP</td>
+        <td style="width: 60px; text-align: right" >% of sales</td>
+    </tr>
+    @{
+        var distributors_brands = Model.Distributors.Where(d => d.oem_flag == null || d.oem_flag == 0).Select(d => d.customer_code).OrderBy(s => s).ToList();
+        var distributors_oem = Model.Distributors.Where(d => d.oem_flag == 1).Select(d => d.customer_code).OrderBy(s => s).ToList();
+        var distributors =  Model.Distributors.Select(d => d.customer_code).OrderBy(s => s).ToList();
+        var currSales = Model.Sales.Where(s => distributors.Contains(s.code)).ToList();
+        var currReturns = Model.ReturnsSummary.Where(r => distributors.Contains(r.code)).ToList();
+        var PYSales = Model.PYSales.Where(s => distributors.Contains(s.code)).ToList();
+        var PYReturns = Model.PYReturnsSummary.Where(r => distributors.Contains(r.code)).ToList();
+    }
+                    
+    @for (int i = 0; i < distributors.Count; i++)
+    {
+        var dist_code = distributors[i];
+        var dist_product_claim_total = currReturns.Where(r => r.claim_type != Returns.ClaimType_Refit && r.code == dist_code).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var dist_refit_total = currReturns.Where(r => r.claim_type == Returns.ClaimType_Refit && r.code == dist_code).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var dist_sales_total = currSales.Where(s => s.code == dist_code).Sum(s => s.total);
+        if (dist_product_claim_total + dist_refit_total > 0)
+        {
+            <tr style="background-color: @(i%3 == 1 ? "#FFFFFF" : i%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+                <td>
+                    @(Model.Distributors.FirstOrDefault(d=>d.customer_code == dist_code).IfNotNull(d=>d.reporting_name))
+                </td>
+                <td style="text-align: right">@dist_product_claim_total.ToString("N0")</td>
+                <td style="text-align: right">@((dist_sales_total > 0 ? dist_product_claim_total/dist_sales_total : 0).ToString("P1"))</td>
+                <td style="text-align: right">@dist_refit_total.ToString("N0")</td>
+                <td style="text-align: right">@((dist_sales_total > 0 ? dist_refit_total/dist_sales_total : 0).ToString("P1"))</td>
+                <td style="text-align: right">@((dist_product_claim_total + dist_refit_total).ToString("N0"))</td>
+                <td style="text-align: right">@((dist_sales_total > 0 ? (dist_product_claim_total + dist_refit_total)/dist_sales_total : 0).ToString("P1"))</td>
+            </tr>
+        }
+    }
+                    
+    @{
+        var product_claim_total = currReturns.Where(r => r.claim_type != Returns.ClaimType_Refit).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var refit_total = currReturns.Where(r => r.claim_type == Returns.ClaimType_Refit).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var sales_total = currSales.Sum(s => s.total);
+
+        var product_claim_total_py = Model.PYReturnsSummary.Where(r => distributors.Contains(r.code) && r.claim_type != Returns.ClaimType_Refit).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var refit_total_py = Model.PYReturnsSummary.Where(r => distributors.Contains(r.code) && r.claim_type == Returns.ClaimType_Refit).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+        var sales_total_py = Model.PYSales.Sum(s => s.total);
+    }
+    <tr class="clienttable_header">
+        <td>TOTAL (LAST @Model.Months MONTHS)</td>
+        <td style="text-align: right">@product_claim_total.ToString("N0")</td>
+        <td style="text-align: right" class="percent">@((sales_total > 0 ? product_claim_total/sales_total : 0).ToString("P1"))</td>
+        <td style="text-align: right">@refit_total.ToString("N0")</td>
+        <td style="text-align: right" class="percent">@((sales_total > 0 ? refit_total/sales_total : 0).ToString("P1"))</td>
+        <td style="text-align: right">@((product_claim_total + refit_total).ToString("N0"))</td>
+        <td style="text-align: right" class="percent">@((sales_total > 0 ? (product_claim_total + refit_total)/sales_total : 0).ToString("P1"))</td>
+    </tr>
+    @if (Model.ExpandPreviousForClaimsAnalysis)
+    {
+        for (int i = 0; i < distributors.Count; i++)
+        {
+            var dist_code = distributors[i];
+            var dist_product_claim_total = PYReturns.Where(r => r.claim_type != Returns.ClaimType_Refit && r.code == dist_code).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+            var dist_refit_total = PYReturns.Where(r => r.claim_type == Returns.ClaimType_Refit && r.code == dist_code).Sum(r => r.TotalAccepted + r.TotalReplacementParts);
+            var dist_sales_total = PYSales.Where(s => s.code == dist_code).Sum(s => s.total);
+            if (dist_product_claim_total + dist_refit_total > 0)
+            {
+                <tr style="background-color: @(i%3 == 1 ? "#FFFFFF" : i%3 == 2 ? "#EEEEEE" : "#EEF6FF")">
+                    <td>
+                        @(Model.Distributors.FirstOrDefault(d => d.customer_code == dist_code).IfNotNull(d => d.reporting_name))
+                    </td>
+                    <td style="text-align: right">@dist_product_claim_total.ToString("N0")</td>
+                    <td style="text-align: right">@((dist_sales_total > 0 ? dist_product_claim_total / dist_sales_total : 0).ToString("P1"))</td>
+                    <td style="text-align: right">@dist_refit_total.ToString("N0")</td>
+                    <td style="text-align: right">@((dist_sales_total > 0 ? dist_refit_total / dist_sales_total : 0).ToString("P1"))</td>
+                    <td style="text-align: right">@((dist_product_claim_total + dist_refit_total).ToString("N0"))</td>
+                    <td style="text-align: right">@((dist_sales_total > 0 ? (dist_product_claim_total + dist_refit_total) / dist_sales_total : 0).ToString("P1"))</td>
+                </tr>
+            }
+        }
+    }
+    <tr class="clienttable_footer">
+        <td>TOTAL (PREVIOUS @Model.Months MONTHS)</td>
+        <td style="text-align: right">@product_claim_total_py.ToString("N0")</td>
+        <td style="text-align: right" class="percent">@((sales_total_py > 0 ? product_claim_total_py/sales_total_py : 0).ToString("P1"))</td>
+        <td style="text-align: right">@refit_total_py.ToString("N0")</td>
+        <td style="text-align: right" class="percent">@((sales_total_py > 0 ? refit_total_py/sales_total_py: 0).ToString("P1"))</td>
+        <td style="text-align: right">@((product_claim_total_py + refit_total_py).ToString("N0"))</td>
+        <td style="text-align: right" class="percent">@((sales_total_py > 0 ? (product_claim_total_py + refit_total_py)/sales_total_py : 0).ToString("P1"))</td>
+    </tr>
+</table>
+
+
+
+<br />
+

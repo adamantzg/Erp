@@ -1,0 +1,102 @@
+﻿@model SalesForecastAmendmentsModel
+
+@{
+    ViewBag.Title = "title";
+    Layout = null;
+}
+
+<html>
+    <head>
+        <style>
+            body {font-family: arial}
+             .row td {border: 1px solid #c0c0c0;padding: 4px}
+            .row_alt td {border: 1px solid #c0c0c0;background-color: #e6e6fa;padding: 4px}
+            .number {text-align: right}
+            .headerrow td {font-weight: bold;background-color: #c0c0c0;padding: 2px;border: 1px solid black}
+            h3 {font-size: 14px}
+        </style> 
+    </head>
+<body>
+    <h2>Changes in contract forecasts from @Model.From.ToString("d") to @Model.To.ToString("d") </h2>
+    
+    <h3>Clients: @string.Join(",",Model.Companies.Where(c=>c != null).Select(c=>c.reporting_name))</h3>
+    
+    <div style="font-size: 12px">This report identifies any significant changes made to contracts forecasts within the above period.</div>
+    <br/>
+
+<table style="border-collapse: collapse; font-size: 11px">
+    <tr class="headerrow">
+        <td rowspan="2" style="width: 80px">Product code</td>
+        <td rowspan="2" style="width: 200px">Description</td>
+        <td rowspan="2">Forecast month</td>
+        <td rowspan="2" class="number" style="width: 80px">Previous forecast qty</td>
+        <td rowspan="2" class="number" style="width: 80px">New forecast qty</td>
+        <td colspan="2" style="text-align: center">CHANGE IN FORECAST</td>
+        <td rowspan="2">Value of stock (GBP)</td>
+        <td rowspan="2">Call off by</td>
+    </tr>
+    <tr class="headerrow">
+        <td class="number" style="width: 150px">Units</td>
+        <td class="number" style="width: 200px">months of standard usage (excluding contracts)</td>
+    </tr>
+    @{
+        var counter = 0;
+    }
+    @foreach (var a in Model.Alerts)
+    {
+        var diff = a.new_data - a.old_data;
+        <tr class="row@(counter++%2 == 1 ? "_alt" : "")">
+            <td>@a.CustProduct.cprod_code1</td>
+            <td>@a.CustProduct.cprod_name</td>
+            <td>@a.period</td>
+            <td class="number">@a.old_data</td>
+            <td class="number">@a.new_data</td>
+            <td class="number">@diff</td>
+            <td class="number">@(a.average != null && a.average.Value != 0 ? Convert.ToInt32(Math.Ceiling(Math.Abs(diff.Value*1.0/a.average.Value))) : 0) </td>
+            <td class="number">@((diff*(a.MastProduct.price_dollar > 0 ? a.MastProduct.price_dollar/1.6 : a.MastProduct.price_pound*((1 + Model.Freight) + (1 + Model.QcCharge) + (1 + Model.Duty)))).ToString("N0"))</td>
+            <td class="number">@(a.DateModified != null ? a.DateModified.Value.AddMonths(a.CallOffMonthOffset).ToString("dd-MMM-yyyy") : "")</td>
+        </tr>
+    }
+</table>
+
+<h2>Forecast Addition / changes with insufficient notice.</h2>
+<div style="font-size: 12px">The below products have had new / updated contract forecast changes with less than 16 weeks notice.</div>
+<table style="border-collapse: collapse; font-size: 11px">
+    <tr class="headerrow">
+        <td rowspan="2" style="width: 80px">Product code</td>
+        <td rowspan="2" style="width: 200px">Description</td>
+        <td rowspan="2">Forecast month</td>
+        <td rowspan="2" class="number" style="width: 80px">Previous forecast qty</td>
+        <td rowspan="2" class="number" style="width: 80px">New forecast qty</td>
+        <td colspan="2" style="text-align: center">CHANGE IN FORECAST</td>
+        <td rowspan="2">Weeks notice given</td>
+        <td rowspan="2">Will there be a stocking issue?</td>
+    </tr>
+    <tr class="headerrow">
+        <td class="number" style="width: 150px">Units</td>
+        <td class="number" style="width: 200px">months of standard usage (excluding contracts)</td>
+    </tr>
+    @{
+        counter = 0;
+    }
+    @foreach (var a in Model.Alerts.Where(a => Model.NoticeThresholdDate > company.Common.Utilities.GetDateFromMonth21(a.Month21) 
+    && a.Month21 >= company.Common.Utilities.GetMonth21FromDate(Model.StartDateForStockIssues) && (!Model.ShowOnlyPositiveChangesForStockIssues || a.new_data > a.old_data) )) {
+        var diff = a.new_data - a.old_data;
+        var noticeDate = company.Common.Utilities.GetDateFromMonth21(a.Month21);
+        <tr class="row@(counter++%2 == 1 ? "_alt" : "")">
+            <td>@a.CustProduct.cprod_code1</td>
+            <td>@a.CustProduct.cprod_name</td>
+            <td>@a.period</td>
+            <td class="number">@a.old_data</td>
+            <td class="number">@a.new_data</td>
+            <td class="number">@diff</td>
+            <td class="number">@(a.average != null && a.average.Value != 0 ? Convert.ToInt32(Math.Ceiling(Math.Abs(diff.Value * 1.0 / a.average.Value))) : 0) </td>
+            <td style="text-align: center">@(Convert.ToInt32((noticeDate - Model.StartDateForStockIssues).TotalDays)/7)</td>
+            <td style="text-align: center">@(a.StockValueGBP < 0 ? "YES" : "NO")</td>
+        </tr>
+    }
+</table>
+
+
+</body>
+</html>

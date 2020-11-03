@@ -1,0 +1,245 @@
+﻿@model backend.Models.ProductPricingProjectReportModel
+
+@{
+    Layout = null;
+}
+
+
+@functions  {
+
+    public string GetCurrencySymbol(int? curr_code) {
+        var result = "";
+        switch(curr_code)
+        {
+            case Currencies.USD:
+                result = "$";
+                break;
+            case Currencies.GBP:
+                result = "&pound;";
+                break;
+            case Currencies.EUR:
+                result = "&euro;";
+                break;
+            default:
+                break;
+        }
+
+        return result;
+    }
+
+    
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>ProductPricingReport</title>
+    <style>
+        th {
+            background-color: #4cff00;
+        }
+        .summary {
+            background-color: yellow;
+        }
+        .altrow > td {
+            background-color: #D0D0D0;
+        }
+        table, th, td {
+            padding: 5px;
+            border: 1px solid black;
+        }
+        table {
+            border-collapse: collapse;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        body {
+            font-family: Arial,'Franklin Gothic Medium',  sans-serif;
+            font-size: 14px;
+        }
+        .total > td{
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    @{ 
+        var project = Model.Project;
+        var sageFreight = project.Settings.FirstOrDefault(s => s.id == (int?)ProductPricingSettingId.SageFreight)?.numValue;
+        var marketCurrencySymbol = Html.Raw(GetCurrencySymbol(Model.Market.currency_id));
+    }
+    <div> 
+        
+        <h1>Project: @project.name</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        Code
+                    </th>
+                    <th>Description</th>
+                    <th class="text-right">existing retail price Inc VAT at @(Model.Market.vat * 100) %</th>
+                    <th class="text-right">Discounted price (@project.PricingModel.name)</th>
+                    <th class="text-right">FOB price</th>
+                    <th class="text-right">FOB price (@Html.Raw(GetCurrencySymbol(Model.Market.currency_id)))</th>
+                    @if(Model.Calculation == ProductPricingCalculation.Sage)
+                    {
+                        <th class="text-right">
+                    Sage freight burden (@(( sageFreight* 100).ToString("N2") ) %)
+                        </th>
+                    }
+                    @if (Model.Calculation == ProductPricingCalculation.Gateway)
+                    {
+                        <th class="text-right">
+                            Freight cost 
+                        </th>
+                    }
+                    <th>
+                        QC Charge
+                    </th>
+                    @if (Model.Calculation == ProductPricingCalculation.Gateway)
+                    {
+                        <th>Cost of Fiscal agent to clear goods</th>
+                    }                    
+                    <th>EU Duty code</th>
+                    <th>Duty</th>
+                    @if (Model.Calculation == ProductPricingCalculation.Gateway) {
+                        <th>Internal cost</th>
+                    }
+                    <th>True landed cost exc commission</th>
+                    <th class="summary text-right">Gross Profit Margin on quoted price</th>
+                    <th>MOQ</th>
+                    <th>Tooling cost</th>
+                    <th>Tooling cost (@marketCurrencySymbol)</th>
+                    <th>Initial stock order</th>
+                    <th>Initial stock order value</th>
+                    <th>PA forecast</th>
+                    <th>Total Cost</th>
+                    <th>Total Sales Forecast</th>
+                    <th>Display Qty.</th>
+                    <th>Display total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{  var counter = 0;
+                    
+                    
+                }
+                @foreach (var r in Model.Rows)
+                {
+                    var p = r.Product;
+                    <tr class="@(Html.Raw(counter++ % 2 == 1 ? "altrow": ""))">
+                        <td>@p.cprod_code1</td>
+                        <td>@p.cprod_name</td>
+                        <td class="text-right">@((r.RetailPriceVAT).ToString("N2"))&nbsp;@marketCurrencySymbol</td>
+                        <td class="text-right">@((r.DiscountedRetailPrice).ToString("N2"))&nbsp;@marketCurrencySymbol</td>
+                        <td class="text-right">@{
+                            <span>@(r.FOBPrice.ToString("N2"))&nbsp;@Html.Raw(GetCurrencySymbol(r.CurrencyId))</span>                            
+                        }</td>
+                        <td class="text-right">
+                            @{ 
+                                @(Model.ToMarketCurrency(r.CurrencyId, r.FOBPrice).ToString("N2"))
+                            }
+                        </td>
+                        @if (Model.Calculation == ProductPricingCalculation.Sage) {
+                            <td class="text-right">
+                                @(Model.ToMarketCurrency(r.CurrencyId,r.FreighCostSage).ToString("N2"))&nbsp;@marketCurrencySymbol
+                                
+                            </td>
+                        }
+                        @if (Model.Calculation == ProductPricingCalculation.Gateway)
+                        {
+                            <td class="text-right">
+                                @(Model.ToMarketCurrency(r.CurrencyId, r.FreightCostPerUnit).ToString("N2"))&nbsp;@marketCurrencySymbol
+                            </td>
+                        }
+                        <td class="text-right">
+                            @(Model.ToMarketCurrency(r.CurrencyId, r.Commission).ToString("N2"))&nbsp;@marketCurrencySymbol
+                        </td>
+                        @if(Model.Calculation == ProductPricingCalculation.Gateway)
+                        {
+                            <td class="text-right">@(Model.ToMarketCurrency(r.CurrencyId, r.FiscalAgent).ToString("N2"))&nbsp;@marketCurrencySymbol
+                            </td>
+                        }                        
+                        
+                        <td>@(r.Tariff?.tariff_code)</td>
+                        <td class="text-right">@((r.DutyPercentage ?? 0).ToString("P2"))</td>
+                        @if(Model.Calculation == ProductPricingCalculation.Gateway)
+                        {
+                            <td class="text-right">
+                                @(Model.ToMarketCurrency(r.CurrencyId, r.InternalCostGateway).ToString("N2"))&nbsp;@marketCurrencySymbol
+                            </td>
+                        }
+                        <td class="text-right">
+                            
+                            @(Model.ToMarketCurrency(r.CurrencyId, r.LandedCost).ToString("N2"))&nbsp;@marketCurrencySymbol
+                            
+                        </td>
+                        <td class="text-right summary">
+                            @(((r.DiscountedRetailPrice -  Model.ToMarketCurrency(r.CurrencyId, r.LandedCost)) / r.DiscountedRetailPrice).ToString("P2"))
+                        </td>
+                        <td class="text-right">
+                            @(r.Product.MastProduct?.factory_moq)
+                        </td>
+                        <td class="text-right">
+                            @(r.Product.MastProduct?.ProductPricingData?.tooling_cost?.ToString("N2"))&nbsp;@Html.Raw(GetCurrencySymbol(r.CurrencyId))
+                        </td>
+                        <td class="text-right">
+                            @(Model.ToMarketCurrency(r.CurrencyId, r.Product.MastProduct?.ProductPricingData?.tooling_cost).ToString("N2"))&nbsp;@marketCurrencySymbol
+                        </td>
+                        <td class="text-right">
+                            @(r.Product.MastProduct?.ProductPricingData?.initial_stock)
+                        </td>
+                        <td class="text-right">
+                            @(Model.ToMarketCurrency(r.CurrencyId, r.Product.MastProduct?.ProductPricingData?.initial_stock * r.LandedCost).ToString("N2"))&nbsp;@marketCurrencySymbol
+                        </td>
+                        <td class="text-right">
+                            @(r.ForecastQty)
+                        </td>
+                        <td class="text-right">
+                            @(Model.ToMarketCurrency(r.CurrencyId, r.LandedCost * r.ForecastQty).ToString("N2"))&nbsp;@marketCurrencySymbol
+                        </td>
+                        <td class="text-right">
+                            @((r.DiscountedRetailPrice * r.ForecastQty).ToString("N2"))&nbsp;@marketCurrencySymbol
+                        </td>
+                        <td class="text-right">
+                            @(r.Product.MastProduct?.ProductPricingData?.display_qty)
+                        </td>
+                        <td class="text-right">
+                            @(Model.ToMarketCurrency(r.CurrencyId, r.Product.MastProduct?.ProductPricingData?.display_qty * r.LandedCost).ToString("N2"))&nbsp;@marketCurrencySymbol
+                        </td>
+                    </tr>
+                }
+                <tr class="total">
+                    <td colspan="@(Model.Calculation == ProductPricingCalculation.Sage ? 14: 16)">
+                        TOTALS
+                    </td>
+                    <td class="text-right">@(Model.Rows.Sum(r=> Model.ToMarketCurrency(r.CurrencyId, r.Product.MastProduct?.ProductPricingData?.tooling_cost)).ToString("N2"))&nbsp;@marketCurrencySymbol</td>
+                    <td class="text-right">@(Model.Rows.Sum(r=>r.Product.MastProduct?.ProductPricingData?.initial_stock))</td>
+                    <td class="text-right">@(Model.Rows.Sum(r=> Model.ToMarketCurrency(r.CurrencyId, r.Product.MastProduct?.ProductPricingData?.initial_stock * r.LandedCost)).ToString("N2"))&nbsp;@marketCurrencySymbol</td>
+                    <td class="text-right">@(Model.Rows.Sum(r=>r.ForecastQty))</td>
+                    <td class="text-right">
+                        @(Model.Rows.Sum(r => Model.ToMarketCurrency(r.CurrencyId, r.LandedCost * r.ForecastQty)).ToString("N2"))&nbsp;@marketCurrencySymbol
+                    </td>
+                    <td class="text-right">
+                        @(Model.Rows.Sum(r => (r.DiscountedRetailPrice * r.ForecastQty)).ToString("N2"))&nbsp;@marketCurrencySymbol
+                    </td>
+                    <td class="text-right">
+                        @(Model.Rows.Sum(r => r.Product.MastProduct?.ProductPricingData?.display_qty))
+                    </td>
+                    <td class="text-right">
+                        @(Model.Rows.Sum(r => Model.ToMarketCurrency(r.CurrencyId, r.Product.MastProduct?.ProductPricingData?.display_qty * r.LandedCost)).ToString("N2"))&nbsp;@marketCurrencySymbol
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        
+    </div>
+</body>
+</html>

@@ -1,0 +1,168 @@
+﻿@model GetBrandStockReportModel
+@{
+    Layout = null;
+}
+<!doctype html>
+<html class="no-js" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Get Brand Stock Report</title>
+        <link rel="stylesheet" href="~/Content/foundation/css/foundation.min.css" />
+        <style>
+            #content .sliderValue {
+                font-weight: bold;
+                font-size: 1rem;
+                margin-left: 10px;
+                display:inline-block;
+                width:40px;
+                text-align:center;
+            }
+            #content label {
+                display:inline-block;
+                margin-right:20px;
+                position: relative;
+                top: -2px;
+            }
+            #content .large-12 > label:first-child,#content .large-4 > label
+            {
+                font-weight:bold;
+            }
+            #content input[type="submit"] {
+                margin-bottom:0;
+            }
+            #content fieldset legend {
+                background:transparent;
+            }
+            #content .margins {
+                margin: 30px 0;
+            }
+            #productShowThreshold {
+                width: 60px;
+                text-align: center;
+                font-weight: bold;
+            }
+        </style>
+        <script src="~/Content/foundation/js/vendor/modernizr.js"></script>
+    </head>
+    <body>
+
+    <div class="row">
+        <div class="large-12 columns">
+            <h3>Get Brand Stock Report</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="large-12 columns">
+            <div class="panel" id="content">
+                <div class="row">
+                    <div class="large-12 column">
+                        <fieldset>
+                            <legend>Distributors</legend>
+                            @if (Model.CustomerCodes != null && Model.CustomerCodes.Count > 0)
+                            {
+                                <input type="radio" name="customercodes" id="radio-00" value="0" checked />
+                                <label for="radio-00">All</label>
+                                foreach (var cc in Model.CustomerCodes)
+                                {
+                                    <input type="radio" name="customercodes" id="radio-@cc" value="@cc" />
+                                    <label for="radio-@cc">@cc.ToUpper()</label>
+                                }
+                            }
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="large-12 columns">
+                        <fieldset>
+                            <legend>Brands</legend>
+                            @if (Model.Brands != null && Model.Brands.Count > 0)
+                            {
+                                <input type="radio" name="brands" id="radio-0" value="0" checked />
+                                <label for="radio-0">All</label>
+                                foreach (var brand in Model.Brands)
+                                {
+                                    <input type="radio" name="brands" id="radio-@brand.brand_id" value="@brand.brand_id"/>
+                                    <label for="radio-@brand.brand_id">@brand.brandname</label>
+                                }
+                            }
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="large-12 column margins">
+                        <label for="showRegularProducts">Show exceptions only?</label>
+                        <input type="checkbox" id="showRegularProducts" @(Model.ShowRegularProducts ? "checked" : "")>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="large-4 columns">
+                        <label for="lowerfactor">Below expectation factor <input type="text" id="lowerfactorOutput" class="sliderValue"/></label>
+                        <div class="range-slider" id="lowerfactor" data-slider data-options="start: 1; end: 5;step: 0.1;display_selector: #lowerfactorOutput;">
+                            <span class="range-slider-handle" role="slider" tabindex="0"></span>
+                            <span class="range-slider-active-segment"></span>
+                            <input type="hidden">
+                        </div>
+                    </div>
+                    <div class="large-4 columns">
+                        <label for="upperfactor">Above expectation factor <input type="text" id="upperfactorOutput" class="sliderValue"/></label>
+                        <div class="range-slider" id="upperfactor" data-slider data-options="start: 1; end: 5;step: 0.1;display_selector: #upperfactorOutput;">
+                            <span class="range-slider-handle" role="slider" tabindex="0"></span>
+                            <span class="range-slider-active-segment"></span>
+                            <input type="hidden">
+                        </div>
+                    </div>
+                    <div class="large-4 columns">
+                        <label for="productShowThreshold" style="margin-bottom: 10px;">Only show products which have shipped x units in the last 6 months</label>
+                        <select id="productShowThreshold">
+                            @for (var i = 10; i <= 100; i = i + 10)
+                            {
+                                <option value="@i" @(Model.ProductShowThreshold == i ? "selected" : "")>@i</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <input type="submit" class="button right" id="submit" value="Get Report" />
+                <div class="clearfix"></div>
+                <div class="row">
+                    <div class="large-12 column">
+                        <output id="outputUrl"></output>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="~/Content/foundation/js/vendor/jquery.js"></script>
+    <script src="~/Content/foundation/js/foundation.min.js"></script>
+    <script>
+        $(document).foundation();
+        
+        $('#lowerfactorOutput').on('change', function(){
+            var val = parseFloat($('#lowerfactorOutput').val()).toFixed(1);
+            $('#lowerfactor').foundation('slider', 'set_value', val);
+        });
+        $('#upperfactorOutput').on('change', function(){
+            var val = parseFloat($('#upperfactorOutput').val()).toFixed(1);
+            $('#upperfactor').foundation('slider', 'set_value', val);
+        });
+        $(document).ready(function() {
+            $('#lowerfactor').foundation('slider', 'set_value', @Model.LowerFactor);
+            $('#upperfactor').foundation('slider', 'set_value', @Model.UpperFactor);
+        });
+        $(document).on("click","#submit",function(){
+            var custCode = $("input:radio[name ='customercodes']:checked").val() != null && $("input:radio[name ='customercodes']:checked").val() != 0 ? "customerCode=" + $("input:radio[name ='customercodes']:checked").val() : "";
+            var brandid = $("input:radio[name ='brands']:checked").val() != null && $("input:radio[name ='brands']:checked").val() != 0 ? "&brand_id=" + $("input:radio[name ='brands']:checked").val() : "";
+            var showRegularProducts = "&showRegularProducts=" + !$("#showRegularProducts").is(":checked");
+            var lowerfactor = $("#lowerfactorOutput").val() != null ? "&lowerfactor=" + $("#lowerfactorOutput").val() : "";
+            var upperfactor = $("#upperfactorOutput").val() != null ? "&upperfactor=" +$("#upperfactorOutput").val() : "";
+            var productShowThreshold = $("#productShowThreshold option:selected").val() != null ? "&productShowThreshold=" + $("#productShowThreshold option:selected").val() : "";
+            var reportUrl = "@Url.Action("BrandStockReport")?" + custCode + brandid  + lowerfactor +  upperfactor +  productShowThreshold + showRegularProducts;
+            document.location.href = reportUrl.replace("?&","?");
+        })
+    </script>
+    </body>
+</html>
+

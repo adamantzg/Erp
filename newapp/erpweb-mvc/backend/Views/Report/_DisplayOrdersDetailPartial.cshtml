@@ -1,0 +1,63 @@
+﻿@model DisplayOrdersDetailModel
+
+<table style="width: 900px" class="salesdetailstable">
+ @foreach (var g in Model.DisplayOrderData.GroupBy(s => s.date_entered).OrderBy(g => g.Key)) {
+    <thead>
+        <tr>
+            <th colspan="7" style="border: 0;text-align: left">
+                @(g.Key.ToString("ddd d MMM"))
+            </th>
+        </tr>
+        <tr style="font-weight: bold">
+            
+            <th style="text-align: left">Dealer</th>
+            <th style="text-align: left">Brand</th>
+            <th style="text-align: left">code</th>
+            <th style="text-align: left">desc</th>
+            <th style="text-align: right">qty</th>
+            <th style="text-align: right">cost</th>            
+            <th style="text-align: right">Stock status</th>            
+        </tr>
+    </thead>
+    <tbody>
+        @{ 
+            string order_no = null;
+            var counter = 0;
+        }
+        @foreach (var s in g.OrderBy(s => s.alpha).ThenBy(s => s.order_no).ThenBy(s => s.cprod_code1)) {
+            var orderChanged = s.order_no != order_no;
+            order_no = s.order_no;
+            if (orderChanged) {
+                counter++;
+            }
+            <tr @(Html.Raw(orderChanged ? "style=\"border-top: 1px solid black\"" : ""))>
+                    
+                <td>@s.alpha</td>
+                <td>@WebUtilities.MapStockOrdersBrand(s.brand)</td>
+                <td>@s.cprod_code1</td>
+                <td>@s.cprod_name</td>
+                <td style="text-align: right">@s.order_qty</td>
+                <td style="text-align: right">@((s.order_qty * s.cost_of_sale).ToString("N2"))</td>                                        
+                <td style="text-align: right">
+                        @{
+                            var text = "Unsure";
+                            if (s.cprod_id != null && Model.ProductAvailabilityDates.ContainsKey(s.cprod_id)) {
+                                text = WebUtilities.GetStockStatusText(Model.ProductAvailabilityDates[s.cprod_id]);
+                            }
+                            else if (s.bundle_id != null && Model.BundleAvailabilityDates.ContainsKey(s.bundle_id.Value)) {
+                                text = WebUtilities.GetStockStatusText(Model.BundleAvailabilityDates[s.bundle_id.Value]);
+                            }
+                            @text
+
+
+                    }
+                </td>
+            </tr>
+        }
+        <tr>
+            <td colspan="6" style="height: 10px">&nbsp;</td>
+        </tr>
+    </tbody>   
+ }
+</table>
+

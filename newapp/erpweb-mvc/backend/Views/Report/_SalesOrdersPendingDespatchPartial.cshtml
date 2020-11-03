@@ -1,0 +1,56 @@
+﻿@model SalesOrdersDetailModel
+@{
+    Layout = null;
+}
+<table style="width: 900px" class="salesdetailstable">
+    <thead>            
+        <tr style="font-weight: bold">
+            
+            <th style="text-align: left">Order Date</th>
+            <th style="text-align: right">days since order</th>
+            <th style="text-align: left">Dealer</th>
+            <th style="text-align: left">order #</th>
+            <th style="text-align: left">Brand</th>
+            @*<th style="text-align: left">order no</th>*@
+            <th style="text-align: left">code</th>
+            <th style="text-align: left">desc</th>
+            <th style="text-align: right">qty</th>
+            <th style="text-align: right">despatched qty</th>
+            <th style="text-align: right">value</th>
+            <th style="text-align: right">stock status</th>
+                
+        </tr>
+    </thead>
+    <tbody>
+    @foreach(var s in Model.SalesOrderData.OrderByDescending(s=>s.date_entered).ThenBy(s=>s.order_no)) {
+        
+        <tr>
+            
+            <td>@s.date_entered.ToString("d")</td>
+            <td style="text-align: right">@((DateTime.Today - s.date_entered).Days())</td>
+            <td>@s.alpha</td>
+            <td>@s.order_no</td>
+            <td>@WebUtilities.MapStockOrdersWarehouse(s.warehouse)</td>
+            @*<td>@s.order_no</td>*@
+            <td>@s.cprod_code1</td>
+            <td>@s.cprod_name</td>
+            <td style="text-align: right">@s.order_qty</td>
+            <td style="text-align: right">@s.despatched_qty</td>
+            <td style="text-align: right">@s.value.ToString("N2")</td>                    
+            <td style="text-align: right">@{
+                var text = "Unsure";
+                if(s.cprod_id != null && Model.ProductAvailabilityDates.ContainsKey(s.cprod_id)) {
+                    var date = Model.ProductAvailabilityDates[s.cprod_id];
+                    if(date == DateTime.Today) {
+                        text = "In Stock";
+                    }
+                    else if(date != null) {
+                        text = $"Due {date.ToString("dd MMM")}";
+                    }
+                }
+                @text
+            }</td>
+        </tr>
+    }
+ </tbody>       
+</table>
